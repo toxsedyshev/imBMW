@@ -12,22 +12,22 @@ namespace imBMW
 {
     public class Program
     {
-        //static OutputPort iPod;
+        static OutputPort iPod;
         static OutputPort LED;
 
         public static void Main()
         {
             Debug.Print("Start");
 
-            LED = new OutputPort((Cpu.Pin)FEZ_Pin.Digital.LED, true);
-            //iPod = new OutputPort((Cpu.Pin)FEZ_Pin.Digital.Di3, true);
+            //LED = new OutputPort((Cpu.Pin)FEZ_Pin.Digital.LED, true);
+            //iPod = new OutputPort((Cpu.Pin)FEZ_Pin.Digital.Di3, false);
 
             iBus.Manager.Init(Serial.COM3, (Cpu.Pin)FEZ_Pin.Interrupt.Di4);
             iBus.Devices.iPodChanger.Init((Cpu.Pin)FEZ_Pin.Digital.Di3);
 
-            /*InterruptPort btn = new InterruptPort((Cpu.Pin)FEZ_Pin.Interrupt.LDR, true,
+            InterruptPort btn = new InterruptPort((Cpu.Pin)FEZ_Pin.Interrupt.LDR, true,
                 Port.ResistorMode.PullUp, Port.InterruptMode.InterruptEdgeBoth);
-            btn.OnInterrupt += new NativeEventHandler(btn_OnInterrupt);*/
+            btn.OnInterrupt += new NativeEventHandler(btn_OnInterrupt);
 
             /*InterruptPort sensta = new InterruptPort((Cpu.Pin)FEZ_Pin.Interrupt.Di4, true,
                 Port.ResistorMode.PullUp, Port.InterruptMode.InterruptEdgeBoth);
@@ -58,10 +58,24 @@ namespace imBMW
             LED.Write(!LED.Read());
         }
 
+        static DateTime pressed;
+
         static void btn_OnInterrupt(uint port, uint state, DateTime time)
         {
-            //iPod.Write(state == 0);
-            LED.Write(state == 0);
+            if (state == 0)
+            {
+                pressed = DateTime.Now;
+            }
+            else
+            {
+                //TimeSpan span =  (DateTime.Now - pressed);
+                //Debug.Print("Pressed for " + (span.Seconds * 1000 + span.Milliseconds) + " ms");
+                iBus.Devices.iPodChanger.VoiceOverMenu();
+                iBus.Devices.iPodChanger.VoiceOverCurrent();
+            }
+            /*Debug.Print("iPod out set: " + ((state == 0) ? "true" : "false") + " (state = " + state + ")");
+            iPod.Write(state == 0);
+            LED.Write(state == 0);*/
         }
 
     }

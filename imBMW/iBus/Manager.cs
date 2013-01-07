@@ -18,7 +18,7 @@ namespace imBMW.iBus
             iBus = new SerialInterruptPort(new SerialPortConfiguration(port, 9600, Parity.Even, 8, StopBits.One), busy, 0, 1);
             iBus.DataReceived += new SerialDataReceivedEventHandler(iBus_DataReceived);
 
-            messageQueueThread.Start();
+            messageQueue = new QueueThreadWorker(SendMessage);
         }
 
         #region Message reading and processing
@@ -97,33 +97,12 @@ namespace imBMW.iBus
 
         #region Message writing and queue
 
-        static Queue messageQueue = new Queue();
-        static Thread messageQueueThread = new Thread(messageQueueWorker);
+        static QueueThreadWorker messageQueue;
 
-        static void messageQueueWorker()
+        static void SendMessage(object m)
         {
-            byte[] m;
-            while (true)
-            {
-                lock (messageQueue)
-                {
-                    if (messageQueue.Count > 0)
-                    {
-                        m = (byte[])messageQueue.Dequeue();
-                    }
-                    else
-                    {
-                        m = null;
-                    }
-                }
-                if (m == null)
-                {
-                    Thread.CurrentThread.Suspend();
-                    continue;
-                }
-                iBus.Write(m);
-                Thread.Sleep(50);
-            }
+            iBus.Write((byte[])m);
+            Thread.Sleep(50); // Don't flood iBus
         }
 
         public static void EnqueueMessage(Message m)
@@ -133,16 +112,7 @@ namespace imBMW.iBus
 
         public static void EnqueueMessage(byte[] m)
         {
-            lock (messageQueue)
-            {
-                messageQueue.Enqueue(m);
-            }
-            // Warning! Queue thread will not be resumed in some cases and current message will be send only on next Enqueue()
-            // Tried AutoResetEvent instead of Suspend/Resume but no success because of strange slowness
-            if (messageQueueThread.ThreadState == ThreadState.Suspended || messageQueueThread.ThreadState == ThreadState.SuspendRequested)
-            {
-                messageQueueThread.Resume();
-            }
+            messageQueue.Enqueue(m);
         }
 
         #endregion

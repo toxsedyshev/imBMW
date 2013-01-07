@@ -49,6 +49,7 @@
     </Compile>
     <Compile Include="Tools\ArrayUtils.cs" />
     <Compile Include="Tools\ExtensionAttribute.cs" />
+    <Compile Include="Tools\QueueThreadWorker.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FEZMini_GHIElectronics.NETMF.FEZ, Version=4.1.8.0, Culture=neutral, processorArchitecture=MSIL" />
