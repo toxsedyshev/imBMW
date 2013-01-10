@@ -8,12 +8,15 @@ namespace imBMW.iBus.Devices
 {
     static class iPodChanger
     {
+        const int VoiceOverMenuTimeoutMinutes = 1;
+
         static OutputPort iPod;
         static Thread announceThread;
         static QueueThreadWorker iPodCommands;
 
         static bool isPlaying;
-        static bool isInVoiceOver;
+        static bool isInVoiceOverMenu;
+        static DateTime voiceOverMenuStarted;
 
         #region Messages
 
@@ -24,6 +27,12 @@ namespace imBMW.iBus.Devices
         static byte[] DataPollRequest = new byte[] { 0x01 };
         static byte[] DataCurrentDiskTrackRequest = new byte[] { 0x38, 0x00, 0x00 };
 
+        static byte[] DataNextPressed = new byte[] { 0x3B, 0x01 };
+        static byte[] DataPrevPressed = new byte[] { 0x3B, 0x08 }; 
+        static byte[] DataRTPressed   = new byte[] { 0x3B, 0x40 };
+        static byte[] DataDialPressed = new byte[] { 0x3B, 0x80 }; 
+        static byte[] DataDialLongPressed = new byte[] { 0x3B, 0x90 }; // A0 - released
+
         #endregion
 
         public static void Init(Cpu.Pin headsetControl)
@@ -32,7 +41,8 @@ namespace imBMW.iBus.Devices
 
             iPodCommands = new QueueThreadWorker(ExecuteIPodCommand);
 
-            Manager.AddMessageReceiverForDestinationDevice(DeviceAddress.CDChanger, processMessage);
+            Manager.AddMessageReceiverForSourceDevice(DeviceAddress.MultiFunctionSteeringWheel, ProcessMFLMessage);
+            Manager.AddMessageReceiverForDestinationDevice(DeviceAddress.CDChanger, ProcessCDCMessage);
 
             announceThread = new Thread(announce);
             announceThread.Start();
@@ -52,12 +62,36 @@ namespace imBMW.iBus.Devices
             VoiceOverSelect
         }
 
-        static void PressIPodButton(int milliseconds)
+        static void ProcessMFLMessage(Message m)
+        {
+            if (m.Data.Compare(DataNextPressed))
+            {
+                Next();
+            }
+            else if (m.Data.Compare(DataPrevPressed))
+            {
+                Prev();
+            }
+            else if (m.Data.Compare(DataRTPressed))
+            {
+                PlayPauseToggle();
+            }
+            else if (m.Data.Compare(DataDialPressed))
+            {
+                VoiceOverCurrent();
+            }
+            else if (m.Data.Compare(DataDialLongPressed))
+            {
+                VoiceOverMenu();
+            }
+        }
+
+        static void PressIPodButton(bool longPause = false, int milliseconds = 50)
         {
             iPod.Write(true);
             Thread.Sleep(milliseconds);
             iPod.Write(false);
-            Thread.Sleep(25); // Don't flood
+            Thread.Sleep(longPause ? 300 : 25); // Let iPod understand the command
         }
 
         static void ExecuteIPodCommand(object c)
@@ -66,7 +100,20 @@ namespace imBMW.iBus.Devices
             switch (command)
             {
                 case iPodCommand.PlayPauseToggle:
-                    IsPlaying = !IsPlaying;
+                    if (IsInVoiceOverMenu)
+                    {
+                        /**
+                         * Trying to prevent the next situation:
+                         * 1. VO menu started
+                         * 2. PlayPause pressed
+                         * 3. Playlist selected instead of PlayPause
+                         */
+                        IsInVoiceOverMenu = false;
+                    }
+                    else
+                    {
+                        IsPlaying = !IsPlaying;
+                    }
                     break;
 
                 case iPodCommand.Play:
@@ -78,35 +125,59 @@ namespace imBMW.iBus.Devices
                     break;
 
                 case iPodCommand.Next:
-                    PressIPodButton(50);
-                    PressIPodButton(50);
-                    Thread.Sleep(275); // Don't flood
+                    PressIPodButton();
+                    PressIPodButton(true);
                     break;
 
                 case iPodCommand.Prev:
-                    PressIPodButton(50);
-                    PressIPodButton(50);
-                    PressIPodButton(50);
-                    Thread.Sleep(275); // Don't flood
+                    PressIPodButton();
+                    PressIPodButton();
+                    PressIPodButton(true);
                     break;
 
                 case iPodCommand.VoiceOverCurrent:
-                    if (isInVoiceOver)
+                    if (IsInVoiceOverMenu)
                     {
-                        PressIPodButton(50);
-                        isInVoiceOver = false;
-                        isPlaying = true; // Playing starts on VO select when paused
+                        if (IsPlaying)
+                        {
+                            PressIPodButton(true); // Select currently saying playlist
+                            IsInVoiceOverMenu = false;
+                        }
+                        else
+                        {
+                            IsPlaying = true; // Playing starts on VO select when paused
+                        }
                     }
                     else
                     {
-                        PressIPodButton(550);
+                        PressIPodButton(false, 550); // Say current track
                     }
                     break;
 
                 case iPodCommand.VoiceOverMenu:
-                    PressIPodButton(5000);
-                    isInVoiceOver = true;
+                    IsInVoiceOverMenu = true;
                     break;
+            }
+        }
+
+        public static bool IsInVoiceOverMenu
+        {
+            get
+            {
+                if (isInVoiceOverMenu && (DateTime.Now - voiceOverMenuStarted).GetTotalMinutes() >= VoiceOverMenuTimeoutMinutes)
+                {
+                    IsInVoiceOverMenu = false;
+                }
+                return isInVoiceOverMenu;
+            }
+            private set
+            {
+                if (value)
+                {
+                    voiceOverMenuStarted = DateTime.Now;
+                    PressIPodButton(false, 5000);
+                }
+                isInVoiceOverMenu = value;
             }
         }
 
@@ -122,10 +193,9 @@ namespace imBMW.iBus.Devices
                 {
                     return;
                 }
-                PressIPodButton(50);
-                Thread.Sleep(275); // Don't flood
+                PressIPodButton(true);
                 isPlaying = value;
-                isInVoiceOver = false;
+                IsInVoiceOverMenu = false;
             }
         }
 
@@ -178,8 +248,9 @@ namespace imBMW.iBus.Devices
 
         #region CD-changer emulation
 
-        static void processMessage(Message m)
+        static void ProcessCDCMessage(Message m)
         {
+            // @todo Play and Pause on CDC on and off
             if (m.Data.Compare(MessageAnnounce.Data))
             {
                 if (announceThread.ThreadState == ThreadState.Suspended)

@@ -38,6 +38,7 @@
     <Compile Include="iBus\Devices\iPodChanger.cs" />
     <Compile Include="iBus\Manager.cs" />
     <Compile Include="iBus\Message.cs" />
+    <Compile Include="iBus\MessageRegistry.cs" />
     <Compile Include="IO\SerialInterruptPort.cs" />
     <Compile Include="IO\SerialPortConfiguration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -47,7 +48,8 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="Tools\ArrayUtils.cs" />
+    <Compile Include="Tools\ArrayHelpers.cs" />
+    <Compile Include="Tools\DateTimeHelpers.cs" />
     <Compile Include="Tools\ExtensionAttribute.cs" />
     <Compile Include="Tools\QueueThreadWorker.cs" />
   </ItemGroup>

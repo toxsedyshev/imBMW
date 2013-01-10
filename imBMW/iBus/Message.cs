@@ -141,7 +141,7 @@ namespace imBMW.iBus
             {
                 if (packetDump == null)
                 {
-                    packetDump = Packet.ToHex(" ");
+                    packetDump = Packet.ToHex(' ');
                 }
                 return packetDump;
             }
@@ -153,7 +153,7 @@ namespace imBMW.iBus
             {
                 if (dataDump == null)
                 {
-                    dataDump = data.ToHex(" ");
+                    dataDump = data.ToHex(' ');
                 }
                 return dataDump;
             }
@@ -163,7 +163,12 @@ namespace imBMW.iBus
         {
             get
             {
-                return SourceDevice.ToStringValue() + " > " + DestinationDevice.ToStringValue() + ": " + DataDump;
+                string description = this.Describe();
+                if (description == null)
+                {
+                    description = DataDump;
+                }
+                return SourceDevice.ToStringValue() + " > " + DestinationDevice.ToStringValue() + ": " + description;
             }
         }
 

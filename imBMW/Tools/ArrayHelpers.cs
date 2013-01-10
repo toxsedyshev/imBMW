@@ -3,7 +3,7 @@ using Microsoft.SPOT;
 
 namespace imBMW.Tools
 {
-    static class ArrayUtils
+    static class ArrayHelpers
     {
         const string hexChars = "0123456789ABCDEF";
 
@@ -64,6 +64,20 @@ namespace imBMW.Tools
         }
 
         public static String ToHex(this byte[] data, String spacer)
+        {
+            String s = "";
+            foreach (byte b in data)
+            {
+                if (s.Length > 0)
+                {
+                    s += spacer;
+                }
+                s += b.ToHex();
+            }
+            return s;
+        }
+
+        public static String ToHex(this byte[] data, Char spacer)
         {
             String s = "";
             foreach (byte b in data)
