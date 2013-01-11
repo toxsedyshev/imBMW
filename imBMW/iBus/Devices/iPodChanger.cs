@@ -29,7 +29,7 @@ namespace imBMW.iBus.Devices
 
         static byte[] DataNextPressed = new byte[] { 0x3B, 0x01 };
         static byte[] DataPrevPressed = new byte[] { 0x3B, 0x08 }; 
-        static byte[] DataRTPressed   = new byte[] { 0x3B, 0x40 };
+        static byte[] DataRTPressed   = new byte[] { 0x01 };
         static byte[] DataDialPressed = new byte[] { 0x3B, 0x80 }; 
         static byte[] DataDialLongPressed = new byte[] { 0x3B, 0x90 }; // A0 - released
 
@@ -84,6 +84,7 @@ namespace imBMW.iBus.Devices
             {
                 VoiceOverMenu();
             }
+            Debug.Print(m.PrettyDump);
         }
 
         static void PressIPodButton(bool longPause = false, int milliseconds = 50)

@@ -12,34 +12,35 @@ namespace imBMW
 {
     public class Program
     {
-        static OutputPort iPod;
-        static OutputPort LED;
-
         public static void Main()
         {
-            Debug.Print("Start");
-
-            //LED = new OutputPort((Cpu.Pin)FEZ_Pin.Digital.LED, true);
-            //iPod = new OutputPort((Cpu.Pin)FEZ_Pin.Digital.Di3, false);
+            Debug.Print("Starting..");
 
             iBus.Manager.Init(Serial.COM3, (Cpu.Pin)FEZ_Pin.Interrupt.Di4);
             iBus.Devices.iPodChanger.Init((Cpu.Pin)FEZ_Pin.Digital.Di3);
 
-            InterruptPort btn = new InterruptPort((Cpu.Pin)FEZ_Pin.Interrupt.LDR, true,
+            //LED = new OutputPort((Cpu.Pin)FEZ_Pin.Digital.LED, true);
+            //iPod = new OutputPort((Cpu.Pin)FEZ_Pin.Digital.Di3, false);
+
+            /*InterruptPort btn = new InterruptPort((Cpu.Pin)FEZ_Pin.Interrupt.LDR, true,
                 Port.ResistorMode.PullUp, Port.InterruptMode.InterruptEdgeBoth);
-            btn.OnInterrupt += new NativeEventHandler(btn_OnInterrupt);
+            btn.OnInterrupt += new NativeEventHandler(btn_OnInterrupt);*/
 
             /*InterruptPort sensta = new InterruptPort((Cpu.Pin)FEZ_Pin.Interrupt.Di4, true,
                 Port.ResistorMode.PullUp, Port.InterruptMode.InterruptEdgeBoth);
             sensta.OnInterrupt += new NativeEventHandler(sensta_OnInterrupt);*/
 
-            Debug.Print("OK");
+            /*Thread t = new Thread(test);
+            t.Start();*/
 
-            Thread t = new Thread(test);
-            t.Start();
+            Debug.Print("Started!");
 
             Thread.Sleep(Timeout.Infinite);
         }
+
+        /*
+        static OutputPort iPod;
+        static OutputPort LED;
 
         static void test()
         {
@@ -75,8 +76,8 @@ namespace imBMW
             }
             /*Debug.Print("iPod out set: " + ((state == 0) ? "true" : "false") + " (state = " + state + ")");
             iPod.Write(state == 0);
-            LED.Write(state == 0);*/
+            LED.Write(state == 0);* /
         }
-
+        */
     }
 }
