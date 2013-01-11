@@ -16,6 +16,7 @@ namespace imBMW.iBus.Devices
 
         static bool isPlaying;
         static bool isInVoiceOverMenu;
+        static bool wasDialLongPressed;
         static DateTime voiceOverMenuStarted;
 
         #region Messages
@@ -30,8 +31,9 @@ namespace imBMW.iBus.Devices
         static byte[] DataNextPressed = new byte[] { 0x3B, 0x01 };
         static byte[] DataPrevPressed = new byte[] { 0x3B, 0x08 }; 
         static byte[] DataRTPressed   = new byte[] { 0x01 };
-        static byte[] DataDialPressed = new byte[] { 0x3B, 0x80 }; 
-        static byte[] DataDialLongPressed = new byte[] { 0x3B, 0x90 }; // A0 - released
+        static byte[] DataDialPressed = new byte[] { 0x3B, 0x80 };
+        static byte[] DataDialLongPressed = new byte[] { 0x3B, 0x90 };
+        static byte[] DataDialReleased = new byte[] { 0x3B, 0xA0 };
 
         #endregion
 
@@ -78,11 +80,23 @@ namespace imBMW.iBus.Devices
             }
             else if (m.Data.Compare(DataDialPressed))
             {
-                VoiceOverCurrent();
+                wasDialLongPressed = false;
             }
             else if (m.Data.Compare(DataDialLongPressed))
             {
-                VoiceOverMenu();
+                wasDialLongPressed = true;
+            }
+            else if (m.Data.Compare(DataDialReleased))
+            {
+                if (wasDialLongPressed)
+                {
+                    VoiceOverMenu();
+                }
+                else
+                {
+                    VoiceOverCurrent();
+                }
+                wasDialLongPressed = false;
             }
             Debug.Print(m.PrettyDump);
         }
