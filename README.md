@@ -5,7 +5,8 @@
 [iBus]: http://web.archive.org/web/20041204074622/www.openbmw.org/bus/ "iBus"
 
 imBMW is .NET Micro Framework project. It was started to add custom features 
-to cars with [iBus] interface such as BMW and some models of Mini and Land Rover.
+to cars with [iBus] interface such as '91-'10 BMWs and some models of Mini, 
+Land Rover, Rover, MG and Rolls Royce.
 The imBMW device connects radio unit, iPod and other car modules and devices 
 to each other. The CD-changer emulator was implemented to connect radio with iPod.
 

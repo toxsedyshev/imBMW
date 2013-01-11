@@ -305,7 +305,7 @@ namespace imBMW.iBus.Devices
             {
                 Manager.EnqueueMessage(MessageAnnounce);
 
-                Thread.Sleep(50);
+                //Thread.Sleep(50);
                 Manager.EnqueueMessage(MessagePollResponse);
 
                 Thread.Sleep(30000);
