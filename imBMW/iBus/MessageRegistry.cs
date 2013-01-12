@@ -280,7 +280,7 @@ namespace imBMW.iBus
             {
                 return null;
             }
-            return messageTypeDescription[firstByte] + ' ' + message.Data.SkipAndTake(1, message.Data.Length - 1).ToHex(' ');
+            return message.DataDump + " (" + messageTypeDescription[firstByte] + ')';
         }
     }
 }

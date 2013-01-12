@@ -8,15 +8,18 @@ namespace imBMW.iBus.Devices
 {
     static class iPodChanger
     {
-        const int VoiceOverMenuTimeoutMinutes = 1;
+        const int VoiceOverMenuTimeoutSeconds = 60;
+        const int StopDelayMilliseconds = 1000;
 
         static OutputPort iPod;
         static Thread announceThread;
         static QueueThreadWorker iPodCommands;
+        static Timer stopDelay;
 
         static bool isPlaying;
         static bool isInVoiceOverMenu;
         static bool wasDialLongPressed;
+        static bool isCDCActive;
         static DateTime voiceOverMenuStarted;
 
         #region Messages
@@ -27,6 +30,8 @@ namespace imBMW.iBus.Devices
 
         static byte[] DataPollRequest = new byte[] { 0x01 };
         static byte[] DataCurrentDiskTrackRequest = new byte[] { 0x38, 0x00, 0x00 };
+        static byte[] DataStopPlaying  = new byte[] { 0x38, 0x01, 0x00 };
+        static byte[] DataStartPlaying = new byte[] { 0x38, 0x03, 0x00 };
 
         static byte[] DataNextPressed = new byte[] { 0x3B, 0x01 };
         static byte[] DataPrevPressed = new byte[] { 0x3B, 0x08 }; 
@@ -66,6 +71,10 @@ namespace imBMW.iBus.Devices
 
         static void ProcessMFLMessage(Message m)
         {
+            if (!isCDCActive)
+            {
+                return;
+            }
             if (m.Data.Compare(DataNextPressed))
             {
                 Next();
@@ -85,14 +94,11 @@ namespace imBMW.iBus.Devices
             else if (m.Data.Compare(DataDialLongPressed))
             {
                 wasDialLongPressed = true;
+                VoiceOverMenu();
             }
             else if (m.Data.Compare(DataDialReleased))
             {
-                if (wasDialLongPressed)
-                {
-                    VoiceOverMenu();
-                }
-                else
+                if (!wasDialLongPressed)
                 {
                     VoiceOverCurrent();
                 }
@@ -115,20 +121,7 @@ namespace imBMW.iBus.Devices
             switch (command)
             {
                 case iPodCommand.PlayPauseToggle:
-                    if (IsInVoiceOverMenu)
-                    {
-                        /**
-                         * Trying to prevent the next situation:
-                         * 1. VO menu started
-                         * 2. PlayPause pressed
-                         * 3. Playlist selected instead of PlayPause
-                         */
-                        IsInVoiceOverMenu = false;
-                    }
-                    else
-                    {
-                        IsPlaying = !IsPlaying;
-                    }
+                    IsPlaying = !IsPlaying;
                     break;
 
                 case iPodCommand.Play:
@@ -157,6 +150,7 @@ namespace imBMW.iBus.Devices
                         {
                             PressIPodButton(true); // Select currently saying playlist
                             IsInVoiceOverMenu = false;
+                            CarOutputDevices.WriteRadioText(((char)0xBC) + " VoiceOver", CarOutputDevices.TextAlign.Center);
                         }
                         else
                         {
@@ -165,6 +159,7 @@ namespace imBMW.iBus.Devices
                     }
                     else
                     {
+                        CarOutputDevices.WriteRadioText(((char)0xC9) + " VoiceOver", CarOutputDevices.TextAlign.Center);
                         PressIPodButton(false, 550); // Say current track
                     }
                     break;
@@ -173,13 +168,14 @@ namespace imBMW.iBus.Devices
                     IsInVoiceOverMenu = true;
                     break;
             }
+            Debug.Print("iPod command: " + command.ToString());
         }
 
         public static bool IsInVoiceOverMenu
         {
             get
             {
-                if (isInVoiceOverMenu && (DateTime.Now - voiceOverMenuStarted).GetTotalMinutes() >= VoiceOverMenuTimeoutMinutes)
+                if (isInVoiceOverMenu && (DateTime.Now - voiceOverMenuStarted).GetTotalSeconds() >= VoiceOverMenuTimeoutSeconds)
                 {
                     IsInVoiceOverMenu = false;
                 }
@@ -189,6 +185,7 @@ namespace imBMW.iBus.Devices
             {
                 if (value)
                 {
+                    CarOutputDevices.WriteRadioText(((char)0xC8) + " VoiceOver", CarOutputDevices.TextAlign.Center);
                     voiceOverMenuStarted = DateTime.Now;
                     PressIPodButton(false, 5000);
                 }
@@ -208,9 +205,22 @@ namespace imBMW.iBus.Devices
                 {
                     return;
                 }
+                if (IsInVoiceOverMenu)
+                {
+                    /**
+                     * Trying to prevent the next situation:
+                     * 1. VO menu started
+                     * 2. PlayPause pressed
+                     * 3. Playlist selected instead of PlayPause
+                     * 4. IsPlaying flag does't match the iPod playing status
+                     */
+                    IsInVoiceOverMenu = false;
+                    return;
+                }
                 PressIPodButton(true);
                 isPlaying = value;
                 IsInVoiceOverMenu = false;
+                CarOutputDevices.WriteRadioText(((char)(isPlaying ? 0xBC : 0xBE)) + " iPod  ", CarOutputDevices.TextAlign.Center);
             }
         }
 
@@ -221,16 +231,19 @@ namespace imBMW.iBus.Devices
 
         public static void Play()
         {
+            CancelStopDelay();
             EnqueueIPodCommand(iPodCommand.Play);
         }
 
         public static void Pause()
         {
+            CancelStopDelay();
             EnqueueIPodCommand(iPodCommand.Pause);
         }
 
         public static void PlayPauseToggle()
         {
+            CancelStopDelay();
             EnqueueIPodCommand(iPodCommand.PlayPauseToggle);
         }
 
@@ -263,10 +276,46 @@ namespace imBMW.iBus.Devices
 
         #region CD-changer emulation
 
+        static void CancelStopDelay()
+        {
+            if (stopDelay != null)
+            {
+                stopDelay.Dispose();
+                stopDelay = null;
+            }
+        }
+
+        public static bool IsCDCActive
+        {
+            get
+            {
+                return isCDCActive;
+            }
+            private set
+            {
+                if (isCDCActive == value)
+                {
+                    return;
+                }
+                isCDCActive = value;
+                if (isCDCActive)
+                {
+                    Play();
+                }
+                else
+                {
+                    if (stopDelay == null)
+                    {
+                        // Don't pause immediately - the radio can send "start play" command soon
+                        stopDelay = new Timer(delegate { Pause(); }, null, StopDelayMilliseconds, 0);
+                    }
+                }
+            }
+        }
+
         static void ProcessCDCMessage(Message m)
         {
-            // @todo Play and Pause on CDC on and off
-            if (m.Data.Compare(MessageAnnounce.Data))
+            /*if (m.Data.Compare(MessageAnnounce.Data))
             {
                 if (announceThread.ThreadState == ThreadState.Suspended)
                 {
@@ -274,12 +323,21 @@ namespace imBMW.iBus.Devices
                 }
                 Debug.Print("iBus activated");
             }
+            else */
+            if (m.Data.Compare(DataStartPlaying))
+            {
+                IsCDCActive = true;
+            }
+            else if (m.Data.Compare(DataStopPlaying))
+            {
+                IsCDCActive = false;
+            }
             else if (m.Data.Compare(DataPollRequest))
             {
-                /*if (announceThread.ThreadState != ThreadState.Suspended)
+                if (announceThread.ThreadState != ThreadState.Suspended)
                 {
                     announceThread.Suspend();
-                }*/
+                }
 
                 Manager.EnqueueMessage(MessagePollResponse);
 
@@ -288,12 +346,12 @@ namespace imBMW.iBus.Devices
 
                 Debug.Print("Radio polled");
             }
-            else if (m.Data.Compare(DataCurrentDiskTrackRequest))
+            /*else if (m.Data.Compare(DataCurrentDiskTrackRequest))
             {
                 Manager.EnqueueMessage(MessagePlayingDisk1Track1);
                 Debug.Print("Radio requested disk&track");
-            }
-            else if(m.SourceDevice == DeviceAddress.Radio)
+            }*/
+            else if (m.SourceDevice == DeviceAddress.Radio)
             {
                 Debug.Print(m.PrettyDump);
             }
@@ -306,7 +364,7 @@ namespace imBMW.iBus.Devices
                 Manager.EnqueueMessage(MessageAnnounce);
 
                 //Thread.Sleep(50);
-                Manager.EnqueueMessage(MessagePollResponse);
+                //Manager.EnqueueMessage(MessagePollResponse);
 
                 Thread.Sleep(30000);
             }
