@@ -36,6 +36,7 @@
     <Compile Include="iBus\DeviceAddress.cs" />
     <Compile Include="iBus\Devices\CarOutputDevices.cs" />
     <Compile Include="iBus\Devices\iPodChanger.cs" />
+    <Compile Include="iBus\EnumConverter.cs" />
     <Compile Include="iBus\Manager.cs" />
     <Compile Include="iBus\Message.cs" />
     <Compile Include="iBus\MessageRegistry.cs" />

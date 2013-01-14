@@ -20,25 +20,33 @@ namespace imBMW.iBus.Devices
         static bool isInVoiceOverMenu;
         static bool wasDialLongPressed;
         static bool isCDCActive;
+        static bool needSkipRT;
+        static bool isIgnitionOn;
         static DateTime voiceOverMenuStarted;
 
         #region Messages
 
         static Message MessagePollResponse = new Message(DeviceAddress.CDChanger, DeviceAddress.Broadcast, 0x02, 0x00);
         static Message MessageAnnounce = new Message(DeviceAddress.CDChanger, DeviceAddress.Broadcast, 0x02, 0x01);
+        static Message MessagePhoneResponse = new Message(DeviceAddress.Telephone, DeviceAddress.Broadcast, 0x02, 0x00);
         static Message MessagePlayingDisk1Track1 = new Message(DeviceAddress.CDChanger, DeviceAddress.Radio, 0x39, 0x00, 0x09, 0x00, 0x3F, 0x00, 0x01, 0x01);
 
         static byte[] DataPollRequest = new byte[] { 0x01 };
         static byte[] DataCurrentDiskTrackRequest = new byte[] { 0x38, 0x00, 0x00 };
         static byte[] DataStopPlaying  = new byte[] { 0x38, 0x01, 0x00 };
         static byte[] DataStartPlaying = new byte[] { 0x38, 0x03, 0x00 };
+        static byte[] DataRandomPlay   = new byte[] { 0x38, 0x08, 0x01 };
 
         static byte[] DataNextPressed = new byte[] { 0x3B, 0x01 };
-        static byte[] DataPrevPressed = new byte[] { 0x3B, 0x08 }; 
-        static byte[] DataRTPressed   = new byte[] { 0x01 };
+        static byte[] DataPrevPressed = new byte[] { 0x3B, 0x08 };
+        static byte[] DataRTPressedR  = new byte[] { 0x3B, 0x40 };
+        static byte[] DataRTPressedT  = new byte[] { 0x3B, 0x00 };
         static byte[] DataDialPressed = new byte[] { 0x3B, 0x80 };
         static byte[] DataDialLongPressed = new byte[] { 0x3B, 0x90 };
         static byte[] DataDialReleased = new byte[] { 0x3B, 0xA0 };
+
+        static byte[] DataIgnitionOff = new byte[] { 0x11, 0x00 };
+        static byte[] DataIgnitionOn  = new byte[] { 0x11, 0x01 };
 
         #endregion
 
@@ -49,6 +57,7 @@ namespace imBMW.iBus.Devices
             iPodCommands = new QueueThreadWorker(ExecuteIPodCommand);
 
             Manager.AddMessageReceiverForSourceDevice(DeviceAddress.MultiFunctionSteeringWheel, ProcessMFLMessage);
+            Manager.AddMessageReceiverForSourceDevice(DeviceAddress.InstrumentClusterElectronics, ProcessIKEMessage);
             Manager.AddMessageReceiverForDestinationDevice(DeviceAddress.CDChanger, ProcessCDCMessage);
 
             announceThread = new Thread(announce);
@@ -57,7 +66,7 @@ namespace imBMW.iBus.Devices
 
         #region iPod control
 
-        enum iPodCommand
+        public enum iPodCommand
         {
             Play,
             Pause,
@@ -65,8 +74,26 @@ namespace imBMW.iBus.Devices
             Next,
             Prev,
             VoiceOverCurrent,
-            VoiceOverMenu,
-            VoiceOverSelect
+            VoiceOverMenu
+        }
+
+        static void ProcessIKEMessage(Message m)
+        {
+            if (m.Data.Compare(DataIgnitionOn))
+            {
+                if (!isIgnitionOn)
+                {
+                    // MFL sends RT 00 signal on ignition 00 > 01
+                    needSkipRT = true;
+                }
+                isIgnitionOn = true;
+                Debug.Print("Ignition ON");
+            }
+            else if (m.Data.Compare(DataIgnitionOff))
+            {
+                isIgnitionOn = false;
+                Debug.Print("Ignition OFF");
+            }
         }
 
         static void ProcessMFLMessage(Message m)
@@ -75,7 +102,11 @@ namespace imBMW.iBus.Devices
             {
                 return;
             }
-            if (m.Data.Compare(DataNextPressed))
+            if (m.DestinationDevice == DeviceAddress.Telephone && m.Data.Compare(DataPollRequest))
+            {
+                Manager.EnqueueMessage(MessagePhoneResponse);
+            }
+            else if (m.Data.Compare(DataNextPressed))
             {
                 Next();
             }
@@ -83,9 +114,13 @@ namespace imBMW.iBus.Devices
             {
                 Prev();
             }
-            else if (m.Data.Compare(DataRTPressed))
+            else if (m.Data.Compare(DataRTPressedR) || m.Data.Compare(DataRTPressedT))
             {
-                PlayPauseToggle();
+                if (!needSkipRT || m.Data.Compare(DataRTPressedR))
+                {
+                    PlayPauseToggle();
+                }
+                needSkipRT = false;
             }
             else if (m.Data.Compare(DataDialPressed))
             {
@@ -133,11 +168,13 @@ namespace imBMW.iBus.Devices
                     break;
 
                 case iPodCommand.Next:
+                    CarOutputDevices.WriteRadioText(((char)0xBC) + "" + ((char)0xBC) + " iPod   ", CarOutputDevices.TextAlign.Center);
                     PressIPodButton();
                     PressIPodButton(true);
                     break;
 
                 case iPodCommand.Prev:
+                    CarOutputDevices.WriteRadioText(((char)0xBD) + "" + ((char)0xBD) + " iPod   ", CarOutputDevices.TextAlign.Center);
                     PressIPodButton();
                     PressIPodButton();
                     PressIPodButton(true);
@@ -168,7 +205,7 @@ namespace imBMW.iBus.Devices
                     IsInVoiceOverMenu = true;
                     break;
             }
-            Debug.Print("iPod command: " + command.ToString());
+            Debug.Print("iPod command: " + command.ToStringValue());
         }
 
         public static bool IsInVoiceOverMenu
@@ -220,7 +257,10 @@ namespace imBMW.iBus.Devices
                 PressIPodButton(true);
                 isPlaying = value;
                 IsInVoiceOverMenu = false;
-                CarOutputDevices.WriteRadioText(((char)(isPlaying ? 0xBC : 0xBE)) + " iPod  ", CarOutputDevices.TextAlign.Center);
+                if (IsCDCActive)
+                {
+                    CarOutputDevices.WriteRadioText(((char)(isPlaying ? 0xBC : 0xBE)) + " iPod  ", CarOutputDevices.TextAlign.Center);
+                }
             }
         }
 
@@ -267,11 +307,6 @@ namespace imBMW.iBus.Devices
             EnqueueIPodCommand(iPodCommand.VoiceOverMenu);
         }
 
-        public static void VoiceOverSelect()
-        {
-            EnqueueIPodCommand(iPodCommand.VoiceOverSelect);
-        }
-
         #endregion
 
         #region CD-changer emulation
@@ -301,13 +336,26 @@ namespace imBMW.iBus.Devices
                 if (isCDCActive)
                 {
                     Play();
+
+                    if (announceThread.ThreadState != ThreadState.Suspended)
+                    {
+                        announceThread.Suspend();
+                    }
                 }
                 else
                 {
                     if (stopDelay == null)
                     {
                         // Don't pause immediately - the radio can send "start play" command soon
-                        stopDelay = new Timer(delegate { Pause(); }, null, StopDelayMilliseconds, 0);
+                        stopDelay = new Timer(delegate
+                        {
+                            Pause();
+
+                            if (announceThread.ThreadState == ThreadState.Suspended)
+                            {
+                                announceThread.Resume();
+                            }
+                        }, null, StopDelayMilliseconds, 0);
                     }
                 }
             }
@@ -315,15 +363,6 @@ namespace imBMW.iBus.Devices
 
         static void ProcessCDCMessage(Message m)
         {
-            /*if (m.Data.Compare(MessageAnnounce.Data))
-            {
-                if (announceThread.ThreadState == ThreadState.Suspended)
-                {
-                    announceThread.Resume();
-                }
-                Debug.Print("iBus activated");
-            }
-            else */
             if (m.Data.Compare(DataStartPlaying))
             {
                 IsCDCActive = true;
@@ -334,23 +373,16 @@ namespace imBMW.iBus.Devices
             }
             else if (m.Data.Compare(DataPollRequest))
             {
-                if (announceThread.ThreadState != ThreadState.Suspended)
-                {
-                    announceThread.Suspend();
-                }
-
                 Manager.EnqueueMessage(MessagePollResponse);
-
-                //Thread.Sleep(50);
                 Manager.EnqueueMessage(MessagePlayingDisk1Track1);
-
                 Debug.Print("Radio polled");
             }
-            /*else if (m.Data.Compare(DataCurrentDiskTrackRequest))
+            else if (m.Data.Compare(DataRandomPlay))
             {
-                Manager.EnqueueMessage(MessagePlayingDisk1Track1);
-                Debug.Print("Radio requested disk&track");
-            }*/
+                // Fixing IsPlaying flag, when playing iPod was connected to paused CDC
+                isPlaying = !isPlaying;
+                Debug.Print("Random play pressed");
+            }
             else if (m.SourceDevice == DeviceAddress.Radio)
             {
                 Debug.Print(m.PrettyDump);
@@ -362,10 +394,7 @@ namespace imBMW.iBus.Devices
             while (true)
             {
                 Manager.EnqueueMessage(MessageAnnounce);
-
-                //Thread.Sleep(50);
-                //Manager.EnqueueMessage(MessagePollResponse);
-
+                Manager.EnqueueMessage(MessagePollResponse);
                 Thread.Sleep(30000);
             }
         }

@@ -276,7 +276,7 @@ namespace imBMW.iBus
                 return null;
             }
             byte firstByte = message.Data[0];
-            if (messageTypeDescription.Length >= firstByte || messageTypeDescription[firstByte] == "")
+            if (firstByte >= messageTypeDescription.Length || messageTypeDescription[firstByte] == "")
             {
                 return null;
             }
