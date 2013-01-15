@@ -34,7 +34,8 @@
   <Import Project="$(NetMfTargetsBaseDir)$(TargetFrameworkVersion)\CSharp.Targets" />
   <ItemGroup>
     <Compile Include="iBus\DeviceAddress.cs" />
-    <Compile Include="iBus\Devices\CarOutputDevices.cs" />
+    <Compile Include="iBus\Devices\Real\InstrumentClusterElectronics.cs" />
+    <Compile Include="iBus\Devices\Real\Radio.cs" />
     <Compile Include="iBus\Devices\iPodChanger.cs" />
     <Compile Include="iBus\EnumConverter.cs" />
     <Compile Include="iBus\Manager.cs" />

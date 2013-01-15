@@ -1,6 +1,7 @@
 using System;
 using Microsoft.SPOT;
 using imBMW.iBus.Devices;
+using imBMW.iBus.Devices.Real;
 
 namespace imBMW.iBus
 {
@@ -22,6 +23,16 @@ namespace imBMW.iBus
                 case iPodChanger.iPodCommand.PlayPauseToggle: return "PlayPauseToggle";
                 case iPodChanger.iPodCommand.VoiceOverCurrent: return "VoiceOverCurrent";
                 case iPodChanger.iPodCommand.VoiceOverMenu: return "VoiceOverMenu";
+            }
+            return "NotSpecified";
+        }
+
+        public static string ToStringValue(this IgnitionState e)
+        {
+            switch (e)
+            {
+                case IgnitionState.On: return "On";
+                case IgnitionState.Off: return "Off";
             }
             return "NotSpecified";
         }

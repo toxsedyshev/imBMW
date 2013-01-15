@@ -3,6 +3,7 @@ using Microsoft.SPOT;
 using Microsoft.SPOT.Hardware;
 using System.Threading;
 using imBMW.Tools;
+using imBMW.iBus.Devices.Real;
 
 namespace imBMW.iBus.Devices
 {
@@ -21,7 +22,6 @@ namespace imBMW.iBus.Devices
         static bool wasDialLongPressed;
         static bool isCDCActive;
         static bool needSkipRT;
-        static bool isIgnitionOn;
         static DateTime voiceOverMenuStarted;
 
         #region Messages
@@ -45,9 +45,6 @@ namespace imBMW.iBus.Devices
         static byte[] DataDialLongPressed = new byte[] { 0x3B, 0x90 };
         static byte[] DataDialReleased = new byte[] { 0x3B, 0xA0 };
 
-        static byte[] DataIgnitionOff = new byte[] { 0x11, 0x00 };
-        static byte[] DataIgnitionOn  = new byte[] { 0x11, 0x01 };
-
         #endregion
 
         public static void Init(Cpu.Pin headsetControl)
@@ -57,8 +54,8 @@ namespace imBMW.iBus.Devices
             iPodCommands = new QueueThreadWorker(ExecuteIPodCommand);
 
             Manager.AddMessageReceiverForSourceDevice(DeviceAddress.MultiFunctionSteeringWheel, ProcessMFLMessage);
-            Manager.AddMessageReceiverForSourceDevice(DeviceAddress.InstrumentClusterElectronics, ProcessIKEMessage);
             Manager.AddMessageReceiverForDestinationDevice(DeviceAddress.CDChanger, ProcessCDCMessage);
+            InstrumentClusterElectronics.IgnitionStateChanged += InstrumentClusterElectronics_IgnitionStateChanged;
 
             announceThread = new Thread(announce);
             announceThread.Start();
@@ -77,22 +74,12 @@ namespace imBMW.iBus.Devices
             VoiceOverMenu
         }
 
-        static void ProcessIKEMessage(Message m)
+        static void InstrumentClusterElectronics_IgnitionStateChanged(IgnitionEventArgs e)
         {
-            if (m.Data.Compare(DataIgnitionOn))
+            if (e.CurrentIgnitionState == IgnitionState.On && e.PreviousIgnitionState == IgnitionState.Off)
             {
-                if (!isIgnitionOn)
-                {
-                    // MFL sends RT 00 signal on ignition 00 > 01
-                    needSkipRT = true;
-                }
-                isIgnitionOn = true;
-                Debug.Print("Ignition ON");
-            }
-            else if (m.Data.Compare(DataIgnitionOff))
-            {
-                isIgnitionOn = false;
-                Debug.Print("Ignition OFF");
+                // MFL sends RT 00 signal on ignition OFF > ON
+                needSkipRT = true;
             }
         }
 
@@ -168,13 +155,13 @@ namespace imBMW.iBus.Devices
                     break;
 
                 case iPodCommand.Next:
-                    CarOutputDevices.WriteRadioText(((char)0xBC) + "" + ((char)0xBC) + " iPod   ", CarOutputDevices.TextAlign.Center);
+                    Radio.DisplayText(((char)0xBC) + "" + ((char)0xBC) + " iPod   ", TextAlign.Center);
                     PressIPodButton();
                     PressIPodButton(true);
                     break;
 
                 case iPodCommand.Prev:
-                    CarOutputDevices.WriteRadioText(((char)0xBD) + "" + ((char)0xBD) + " iPod   ", CarOutputDevices.TextAlign.Center);
+                    Radio.DisplayText(((char)0xBD) + "" + ((char)0xBD) + " iPod   ", TextAlign.Center);
                     PressIPodButton();
                     PressIPodButton();
                     PressIPodButton(true);
@@ -187,7 +174,7 @@ namespace imBMW.iBus.Devices
                         {
                             PressIPodButton(true); // Select currently saying playlist
                             IsInVoiceOverMenu = false;
-                            CarOutputDevices.WriteRadioText(((char)0xBC) + " VoiceOver", CarOutputDevices.TextAlign.Center);
+                            Radio.DisplayText(((char)0xBC) + " VoiceOver", TextAlign.Center);
                         }
                         else
                         {
@@ -196,7 +183,7 @@ namespace imBMW.iBus.Devices
                     }
                     else
                     {
-                        CarOutputDevices.WriteRadioText(((char)0xC9) + " VoiceOver", CarOutputDevices.TextAlign.Center);
+                        Radio.DisplayText(((char)0xC9) + " VoiceOver", TextAlign.Center);
                         PressIPodButton(false, 550); // Say current track
                     }
                     break;
@@ -222,7 +209,7 @@ namespace imBMW.iBus.Devices
             {
                 if (value)
                 {
-                    CarOutputDevices.WriteRadioText(((char)0xC8) + " VoiceOver", CarOutputDevices.TextAlign.Center);
+                    Radio.DisplayText(((char)0xC8) + " VoiceOver", TextAlign.Center);
                     voiceOverMenuStarted = DateTime.Now;
                     PressIPodButton(false, 5000);
                 }
@@ -259,7 +246,7 @@ namespace imBMW.iBus.Devices
                 IsInVoiceOverMenu = false;
                 if (IsCDCActive)
                 {
-                    CarOutputDevices.WriteRadioText(((char)(isPlaying ? 0xBC : 0xBE)) + " iPod  ", CarOutputDevices.TextAlign.Center);
+                    Radio.DisplayText(((char)(isPlaying ? 0xBC : 0xBE)) + " iPod  ", TextAlign.Center);
                 }
             }
         }

@@ -1,25 +1,25 @@
 using System;
 using Microsoft.SPOT;
 
-namespace imBMW.iBus.Devices
+namespace imBMW.iBus.Devices.Real
 {
-    static class CarOutputDevices
+    #region Enums
+
+    public enum TextAlign
+    {
+        Left,
+        Right,
+        Center
+    }
+
+    #endregion
+
+
+    static class Radio
     {
         const byte radioTextMaxlen = 11;
 
-        public enum TextAlign
-        {
-            Left,
-            Right,
-            Center
-        }
-
-        public static void WriteRadioText(string s)
-        {
-            WriteRadioText(s, TextAlign.Left);
-        }
-
-        public static void WriteRadioText(string s, TextAlign align)
+        public static void DisplayText(string s, TextAlign align = TextAlign.Left)
         {
             if (s.Length > radioTextMaxlen)
             {
