@@ -19,16 +19,13 @@ namespace imBMW.iBus.Devices
 
         static bool isPlaying;
         static bool isInVoiceOverMenu;
-        static bool wasDialLongPressed;
         static bool isCDCActive;
-        static bool needSkipRT;
         static DateTime voiceOverMenuStarted;
 
         #region Messages
 
         static Message MessagePollResponse = new Message(DeviceAddress.CDChanger, DeviceAddress.Broadcast, 0x02, 0x00);
         static Message MessageAnnounce = new Message(DeviceAddress.CDChanger, DeviceAddress.Broadcast, 0x02, 0x01);
-        static Message MessagePhoneResponse = new Message(DeviceAddress.Telephone, DeviceAddress.Broadcast, 0x02, 0x00);
         static Message MessagePlayingDisk1Track1 = new Message(DeviceAddress.CDChanger, DeviceAddress.Radio, 0x39, 0x00, 0x09, 0x00, 0x3F, 0x00, 0x01, 0x01);
 
         static byte[] DataPollRequest = new byte[] { 0x01 };
@@ -36,14 +33,6 @@ namespace imBMW.iBus.Devices
         static byte[] DataStopPlaying  = new byte[] { 0x38, 0x01, 0x00 };
         static byte[] DataStartPlaying = new byte[] { 0x38, 0x03, 0x00 };
         static byte[] DataRandomPlay   = new byte[] { 0x38, 0x08, 0x01 };
-
-        static byte[] DataNextPressed = new byte[] { 0x3B, 0x01 };
-        static byte[] DataPrevPressed = new byte[] { 0x3B, 0x08 };
-        static byte[] DataRTPressedR  = new byte[] { 0x3B, 0x40 };
-        static byte[] DataRTPressedT  = new byte[] { 0x3B, 0x00 };
-        static byte[] DataDialPressed = new byte[] { 0x3B, 0x80 };
-        static byte[] DataDialLongPressed = new byte[] { 0x3B, 0x90 };
-        static byte[] DataDialReleased = new byte[] { 0x3B, 0xA0 };
 
         #endregion
 
@@ -53,9 +42,8 @@ namespace imBMW.iBus.Devices
 
             iPodCommands = new QueueThreadWorker(ExecuteIPodCommand);
 
-            Manager.AddMessageReceiverForSourceDevice(DeviceAddress.MultiFunctionSteeringWheel, ProcessMFLMessage);
             Manager.AddMessageReceiverForDestinationDevice(DeviceAddress.CDChanger, ProcessCDCMessage);
-            InstrumentClusterElectronics.IgnitionStateChanged += InstrumentClusterElectronics_IgnitionStateChanged;
+            MultiFunctionSteeringWheel.ButtonPressed += MultiFunctionSteeringWheel_ButtonPressed;
 
             announceThread = new Thread(announce);
             announceThread.Start();
@@ -74,59 +62,30 @@ namespace imBMW.iBus.Devices
             VoiceOverMenu
         }
 
-        static void InstrumentClusterElectronics_IgnitionStateChanged(IgnitionEventArgs e)
-        {
-            if (e.CurrentIgnitionState == IgnitionState.On && e.PreviousIgnitionState == IgnitionState.Off)
-            {
-                // MFL sends RT 00 signal on ignition OFF > ON
-                needSkipRT = true;
-            }
-        }
-
-        static void ProcessMFLMessage(Message m)
+        static void MultiFunctionSteeringWheel_ButtonPressed(MFLButton button)
         {
             if (!isCDCActive)
             {
                 return;
             }
-            if (m.DestinationDevice == DeviceAddress.Telephone && m.Data.Compare(DataPollRequest))
+            switch (button)
             {
-                Manager.EnqueueMessage(MessagePhoneResponse);
-            }
-            else if (m.Data.Compare(DataNextPressed))
-            {
-                Next();
-            }
-            else if (m.Data.Compare(DataPrevPressed))
-            {
-                Prev();
-            }
-            else if (m.Data.Compare(DataRTPressedR) || m.Data.Compare(DataRTPressedT))
-            {
-                if (!needSkipRT || m.Data.Compare(DataRTPressedR))
-                {
+                case MFLButton.Next:
+                    Next();
+                    break;
+                case MFLButton.Prev:
+                    Prev();
+                    break;
+                case MFLButton.RT:
                     PlayPauseToggle();
-                }
-                needSkipRT = false;
-            }
-            else if (m.Data.Compare(DataDialPressed))
-            {
-                wasDialLongPressed = false;
-            }
-            else if (m.Data.Compare(DataDialLongPressed))
-            {
-                wasDialLongPressed = true;
-                VoiceOverMenu();
-            }
-            else if (m.Data.Compare(DataDialReleased))
-            {
-                if (!wasDialLongPressed)
-                {
+                    break;
+                case MFLButton.Dial:
                     VoiceOverCurrent();
-                }
-                wasDialLongPressed = false;
+                    break;
+                case MFLButton.DialLong:
+                    VoiceOverMenu();
+                    break;
             }
-            Debug.Print(m.PrettyDump);
         }
 
         static void PressIPodButton(bool longPause = false, int milliseconds = 50)

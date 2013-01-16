@@ -27,6 +27,19 @@ namespace imBMW.iBus
             return "NotSpecified";
         }
 
+        public static string ToStringValue(this MFLButton e)
+        {
+            switch (e)
+            {
+                case MFLButton.Next: return "Next";
+                case MFLButton.Prev: return "Prev";
+                case MFLButton.RT: return "RT";
+                case MFLButton.Dial: return "Dial";
+                case MFLButton.DialLong: return "DialLong";
+            }
+            return "NotSpecified";
+        }
+
         public static string ToStringValue(this IgnitionState e)
         {
             switch (e)
