@@ -11,6 +11,7 @@ namespace imBMW.Tools
 
         Thread queueThread;
         ProcessItem processItem;
+        ManualResetEvent wait = new ManualResetEvent(true);
         object lockObj = new object();
 
         public QueueThreadWorker(ProcessItem processItem)
@@ -29,6 +30,8 @@ namespace imBMW.Tools
             object m;
             while (true)
             {
+                wait.WaitOne();
+
                 lock (lockObj)
                 {
                     if (Count > 0)
@@ -42,10 +45,12 @@ namespace imBMW.Tools
                 }
                 if (m == null)
                 {
-                    Thread.CurrentThread.Suspend();
-                    continue;
+                    wait.Reset();
                 }
-                processItem(m);
+                else
+                {
+                    processItem(m);
+                }
             }
         }
 
@@ -58,14 +63,7 @@ namespace imBMW.Tools
             lock (lockObj)
             {
                 base.Enqueue(item);
-                /**
-                 * Warning! Current item may be added to suspended queue and will be processed only on next Enqueue().
-                 * Tried AutoResetEvent instead of Suspend/Resume but no success because of strange slowness.
-                 */
-                if (queueThread.ThreadState == ThreadState.Suspended || queueThread.ThreadState == ThreadState.SuspendRequested)
-                {
-                    queueThread.Resume();
-                }
+                wait.Set();
             }
         }
     }
