@@ -7,6 +7,7 @@ using Microsoft.SPOT.Hardware;
 using GHIElectronics.NETMF.FEZ;
 using System.IO.Ports;
 using System.Text;
+using imBMW.iBus.Devices;
 
 namespace imBMW
 {
@@ -24,7 +25,7 @@ namespace imBMW
 
             /*InterruptPort btn = new InterruptPort((Cpu.Pin)FEZ_Pin.Interrupt.LDR, true,
                 Port.ResistorMode.PullUp, Port.InterruptMode.InterruptEdgeBoth);
-            btn.OnInterrupt += new NativeEventHandler(btn_OnInterrupt);*/
+            btn.OnInterrupt += new NativeEventHandler(btn_OnInterrupt);
 
             /*InterruptPort sensta = new InterruptPort((Cpu.Pin)FEZ_Pin.Interrupt.Di4, true,
                 Port.ResistorMode.PullUp, Port.InterruptMode.InterruptEdgeBoth);
@@ -60,10 +61,14 @@ namespace imBMW
         }
 
         static DateTime pressed;
-
+        * /
         static void btn_OnInterrupt(uint port, uint state, DateTime time)
         {
             if (state == 0)
+            {
+                iPodChanger.Prev();
+            }
+            /*if (state == 0)
             {
                 pressed = DateTime.Now;
             }
@@ -78,6 +83,6 @@ namespace imBMW
             iPod.Write(state == 0);
             LED.Write(state == 0);* /
         }
-        */
+        //*/
     }
 }

@@ -328,6 +328,7 @@ namespace imBMW.iBus.Devices
                 // Fixing IsPlaying flag, when playing iPod was connected to paused CDC
                 isPlaying = !isPlaying;
                 Debug.Print("Random play pressed");
+                Radio.DisplayText(((char)(isPlaying ? 0xBC : 0xBE)) + " iPod  ", TextAlign.Center);
             }
             else if (m.SourceDevice == DeviceAddress.Radio)
             {
