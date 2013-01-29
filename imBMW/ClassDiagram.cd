@@ -1,0 +1,238 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="imBMW.iBus.Manager">
+    <Position X="1.25" Y="1.75" Width="3.75" />
+    <Members>
+      <Field Name="iBus" Hidden="true" />
+      <Method Name="iBus_DataReceived" Hidden="true" />
+      <Field Name="messageBuffer" Hidden="true" />
+      <Field Name="messageBufferLength" Hidden="true" />
+      <Field Name="messageQueue" Hidden="true" />
+      <Field Name="messageReceiverList" Hidden="true" />
+      <Method Name="ProcessMessage" Hidden="true" />
+      <Method Name="SendMessage" Hidden="true" />
+    </Members>
+    <NestedTypes>
+      <Delegate Name="imBMW.iBus.Manager.MessageReceiver" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>iBus\Manager.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Delegate>
+      <Class Name="imBMW.iBus.Manager.MessageReceiverRegistration" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>iBus\Manager.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Class>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>AQAAAAAAAAAAMAIgACAAQAAAIEAEAAAMAAAGAAAAAAA=</HashCode>
+      <FileName>iBus\Manager.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="imBMW.iBus.Message">
+    <Position X="5.25" Y="1.75" Width="2" />
+    <Members>
+      <Field Name="check" Hidden="true" />
+      <Field Name="data" Hidden="true" />
+      <Field Name="dataDump" Hidden="true" />
+      <Field Name="destination" Hidden="true" />
+      <Field Name="destinationDevice" Hidden="true" />
+      <Method Name="init" Hidden="true" />
+      <Field Name="packet" Hidden="true" />
+      <Field Name="packetDump" Hidden="true" />
+      <Field Name="packetLenght" Hidden="true" />
+      <Field Name="PacketLengthMax" Hidden="true" />
+      <Field Name="PacketLengthMin" Hidden="true" />
+      <Field Name="source" Hidden="true" />
+      <Field Name="sourceDevice" Hidden="true" />
+    </Members>
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>AAAAAACAFAAIABIAAAgAAAggACAAATIACIAUJAgAACA=</HashCode>
+      <FileName>iBus\Message.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="imBMW.Tools.QueueThreadWorker">
+    <Position X="1.25" Y="4.5" Width="1.75" />
+    <Members>
+      <Field Name="lockObj" Hidden="true" />
+      <Field Name="processItem" Hidden="true" />
+      <Field Name="queueThread" Hidden="true" />
+      <Method Name="queueWorker" Hidden="true" />
+      <Field Name="wait" Hidden="true" />
+    </Members>
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+    </Compartments>
+    <NestedTypes>
+      <Delegate Name="imBMW.Tools.QueueThreadWorker.ProcessItem" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Tools\QueueThreadWorker.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Delegate>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>AABAAAAAAAAAAAAAAAAEAAAAAAAAABAEAAIAAAIAAAA=</HashCode>
+      <FileName>Tools\QueueThreadWorker.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="System.IO.Ports.SerialInterruptPort">
+    <Position X="3.25" Y="4.5" Width="1.75" />
+    <Members>
+      <Field Name="_bufferSync" Hidden="true" />
+      <Field Name="_busy" Hidden="true" />
+      <Field Name="_continueReading" Hidden="true" />
+      <Field Name="_dataReceivedHandlers" Hidden="true" />
+      <Field Name="_incomingBuffer" Hidden="true" />
+      <Field Name="_incomingBufferPosition" Hidden="true" />
+      <Field Name="_incomingBufferValidLength" Hidden="true" />
+      <Field Name="_port" Hidden="true" />
+      <Field Name="_readBufferSize" Hidden="true" />
+      <Field Name="_readThread" Hidden="true" />
+      <Field Name="_readToEvent" Hidden="true" />
+      <Field Name="_writeBufferSize" Hidden="true" />
+      <Field Name="_writeThread" Hidden="true" />
+      <Method Name="AdvancePosition" Hidden="true" />
+      <Method Name="BufferIndexOf" Hidden="true" />
+      <Field Name="BusyValue" Hidden="true" />
+      <Field Name="Encoding" Hidden="true" />
+      <Method Name="GetBufferedData" Hidden="true" />
+      <Field Name="NewLine" Hidden="true" />
+      <Method Name="OnBusyChanged" Hidden="true" />
+      <Method Name="OnDataReceived" Hidden="true" />
+      <Method Name="ReadLoop" Hidden="true" />
+      <Field Name="ReadTimeout" Hidden="true" />
+      <Method Name="ReadTo" Hidden="true" />
+      <Method Name="StartReading" Hidden="true" />
+      <Method Name="StopReading" Hidden="true" />
+      <Field Name="WriteTimeout" Hidden="true" />
+    </Members>
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>AALAAAAAACAAQggIACIABBQggAE4ADAASIgCgCUKAQA=</HashCode>
+      <FileName>IO\SerialInterruptPort.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="imBMW.iBus.Devices.iPodChanger">
+    <Position X="8.5" Y="1.75" Width="1.75" />
+    <Members>
+      <Method Name="announce" Hidden="true" />
+      <Field Name="announceThread" Hidden="true" />
+      <Method Name="CancelStopDelay" Hidden="true" />
+      <Field Name="DataCurrentDiskTrackRequest" Hidden="true" />
+      <Field Name="DataPollRequest" Hidden="true" />
+      <Field Name="DataRandomPlay" Hidden="true" />
+      <Field Name="DataStartPlaying" Hidden="true" />
+      <Field Name="DataStopPlaying" Hidden="true" />
+      <Method Name="EnqueueIPodCommand" Hidden="true" />
+      <Method Name="ExecuteIPodCommand" Hidden="true" />
+      <Field Name="iPod" Hidden="true" />
+      <Field Name="iPodCommands" Hidden="true" />
+      <Field Name="isCDCActive" Hidden="true" />
+      <Field Name="isInVoiceOverMenu" Hidden="true" />
+      <Field Name="isPlaying" Hidden="true" />
+      <Field Name="MessageAnnounce" Hidden="true" />
+      <Field Name="MessagePlayingDisk1Track1" Hidden="true" />
+      <Field Name="MessagePollResponse" Hidden="true" />
+      <Method Name="MultiFunctionSteeringWheel_ButtonPressed" Hidden="true" />
+      <Method Name="PressIPodButton" Hidden="true" />
+      <Method Name="ProcessCDCMessage" Hidden="true" />
+      <Field Name="stopDelay" Hidden="true" />
+      <Field Name="StopDelayMilliseconds" Hidden="true" />
+      <Field Name="voiceOverMenuStarted" Hidden="true" />
+      <Field Name="VoiceOverMenuTimeoutSeconds" Hidden="true" />
+    </Members>
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+    </Compartments>
+    <NestedTypes>
+      <Enum Name="imBMW.iBus.Devices.iPodChanger.iPodCommand" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>iBus\Devices\iPodChanger.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Enum>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>IgAiIAAAgAiAwAACAMAiAgDCAAQCAEEEwAIWQAAAABA=</HashCode>
+      <FileName>iBus\Devices\iPodChanger.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="imBMW.iBus.Devices.Real.MultiFunctionSteeringWheel">
+    <Position X="10.5" Y="1.75" Width="2" />
+    <Members>
+      <Field Name="DataDialLongPressed" Hidden="true" />
+      <Field Name="DataDialPressed" Hidden="true" />
+      <Field Name="DataDialReleased" Hidden="true" />
+      <Field Name="DataNextPressed" Hidden="true" />
+      <Field Name="DataPollRequest" Hidden="true" />
+      <Field Name="DataPrevPressed" Hidden="true" />
+      <Field Name="DataRTPressedR" Hidden="true" />
+      <Field Name="DataRTPressedT" Hidden="true" />
+      <Method Name="InstrumentClusterElectronics_IgnitionStateChanged" Hidden="true" />
+      <Field Name="MessagePhoneResponse" Hidden="true" />
+      <Method Name="MultiFunctionSteeringWheel" Hidden="true" />
+      <Field Name="needSkipRT" Hidden="true" />
+      <Method Name="OnButtonPressed" Hidden="true" />
+      <Method Name="ProcessMFLMessage" Hidden="true" />
+      <Field Name="wasDialLongPressed" Hidden="true" />
+    </Members>
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>AQBAAECEARAAAAAAAEAAAAAACAABAQACAMAAAAAAAoA=</HashCode>
+      <FileName>iBus\Devices\Real\MultiFunctionSteeringWheel.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="imBMW.iBus.Devices.Real.IgnitionEventArgs">
+    <Position X="10.5" Y="5.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAACAAA=</HashCode>
+      <FileName>iBus\Devices\Real\InstrumentClusterElectronics.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="imBMW.iBus.Devices.Real.InstrumentClusterElectronics">
+    <Position X="8" Y="5.75" Width="2.25" />
+    <Members>
+      <Field Name="currentIgnitionState" Hidden="true" />
+      <Field Name="DataIgnitionOff" Hidden="true" />
+      <Field Name="DataIgnitionOn" Hidden="true" />
+      <Method Name="InstrumentClusterElectronics" Hidden="true" />
+      <Method Name="ProcessIKEMessage" Hidden="true" />
+    </Members>
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+      <Compartment Name="Methods" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAgAAAAACAAAAAAAAAIAAAAAQgAACAAA=</HashCode>
+      <FileName>iBus\Devices\Real\InstrumentClusterElectronics.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="imBMW.iBus.Devices.Real.Radio">
+    <Position X="12.5" Y="5.75" Width="1.5" />
+    <Members>
+      <Field Name="radioTextMaxlen" Hidden="true" />
+    </Members>
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>AAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAA=</HashCode>
+      <FileName>iBus\Devices\Real\Radio.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Enum Name="imBMW.iBus.Devices.Real.MFLButton">
+    <Position X="10.5" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AgAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAACEAQ=</HashCode>
+      <FileName>iBus\Devices\Real\MultiFunctionSteeringWheel.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>
