@@ -64,7 +64,7 @@ namespace imBMW.iBus.Devices
 
         static void MultiFunctionSteeringWheel_ButtonPressed(MFLButton button)
         {
-            if (!isCDCActive)
+            if (!IsCDCActive)
             {
                 return;
             }

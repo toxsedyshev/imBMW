@@ -51,7 +51,7 @@ namespace imBMW.iBus
             }
         }
 
-        static void ProcessMessage(Message m)
+        public static void ProcessMessage(Message m)
         {
             foreach (MessageReceiverRegistration receiver in messageReceiverList)
             {
