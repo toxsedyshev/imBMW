@@ -159,19 +159,6 @@ namespace imBMW.iBus
             }
         }
 
-        public String PrettyDump
-        {
-            get
-            {
-                string description = this.Describe();
-                if (description == null)
-                {
-                    description = DataDump;
-                }
-                return SourceDevice.ToStringValue() + " > " + DestinationDevice.ToStringValue() + ": " + description;
-            }
-        }
-
         public DeviceAddress SourceDevice {
             get
             {

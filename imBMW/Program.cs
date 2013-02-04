@@ -1,4 +1,5 @@
 using GHIElectronics.NETMF.FEZ;
+using imBMW.Tools;
 using Microsoft.SPOT;
 using Microsoft.SPOT.Hardware;
 using System;
@@ -10,16 +11,36 @@ namespace imBMW
 {
     public class Program
     {
+        static void Init()
+        {
+            iBus.Manager.Init(Serial.COM3, (Cpu.Pin)FEZ_Pin.Interrupt.Di4);
+            iBus.Devices.iPodChanger.Init((Cpu.Pin)FEZ_Pin.Digital.Di3);
+        }
+
         public static void Main()
         {
             Debug.Print("Starting..");
 
-            iBus.Manager.Init(Serial.COM3, (Cpu.Pin)FEZ_Pin.Interrupt.Di4);
-            iBus.Devices.iPodChanger.Init((Cpu.Pin)FEZ_Pin.Digital.Di3);
-            
-            Debug.Print("Started!");
+            #if DEBUG
+            Logger.Logged += Logger_Logged;
+            Logger.Info("Logger inited");
+            #endif
 
-            Thread.Sleep(Timeout.Infinite);
+            try
+            {
+                Init();
+                Logger.Info("Started!");
+                Thread.Sleep(Timeout.Infinite);
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(ex, "while modules initialization");
+            }
+        }
+
+        static void Logger_Logged(LoggerArgs args)
+        {
+            Debug.Print(args.LogString);
         }
     }
 }

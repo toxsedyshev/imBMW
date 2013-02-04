@@ -332,7 +332,7 @@ namespace imBMW.iBus.Devices
             }
             else if (m.SourceDevice == DeviceAddress.Radio)
             {
-                Debug.Print(m.PrettyDump);
+                Logger.Info(m);
             }
         }
 

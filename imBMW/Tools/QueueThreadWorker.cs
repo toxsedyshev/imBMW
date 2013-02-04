@@ -46,7 +46,14 @@ namespace imBMW.Tools
                     Thread.CurrentThread.Suspend();
                     continue;
                 }
-                processItem(m);
+                try
+                {
+                    processItem(m);
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error(ex, "while processing QueueThreadWorker item '" + m.ToString() + "'");
+                }
             }
         }
 

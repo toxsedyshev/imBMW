@@ -269,6 +269,16 @@ namespace imBMW.iBus
 
         #endregion
 
+        public static string ToPrettyString(this Message message)
+        {
+            string description = message.Describe();
+            if (description == null)
+            {
+                description = message.DataDump;
+            }
+            return message.SourceDevice.ToStringValue() + " > " + message.DestinationDevice.ToStringValue() + ": " + description;
+        }
+
         public static string Describe(this Message message)
         {
             if (message.Data.Length == 0)
