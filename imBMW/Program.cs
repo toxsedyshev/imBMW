@@ -29,6 +29,7 @@ namespace imBMW
             try
             {
                 Init();
+                Debug.EnableGCMessages(false);
                 Logger.Info("Started!");
                 Thread.Sleep(Timeout.Infinite);
             }
