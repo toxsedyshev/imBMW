@@ -15,7 +15,7 @@ namespace imBMW.iBus
         byte check;
 
         byte[] packet;
-        byte packetLenght;
+        byte packetLength;
         string packetDump;
         string dataDump;
         DeviceAddress sourceDevice = DeviceAddress.Unset;
@@ -44,11 +44,11 @@ namespace imBMW.iBus
             this.source = source;
             this.destination = destination;
             this.data = data;
-            packetLenght = (byte)(data.Length + 4); // + source + destination + len + chksum
+            packetLength = (byte)(data.Length + 4); // + source + destination + len + chksum
 
             byte check = 0x00;
             check ^= source;
-            check ^= (byte)(packetLenght - 2);
+            check ^= (byte)(packetLength - 2);
             check ^= destination;
             foreach (byte b in data)
             {
@@ -62,9 +62,9 @@ namespace imBMW.iBus
             return TryCreate(packet, (byte)packet.Length);
         }
 
-        public static Message TryCreate(byte[] packet, byte lenght)
+        public static Message TryCreate(byte[] packet, byte length)
         {
-            if (!IsValid(packet, lenght))
+            if (!IsValid(packet, length))
             {
                 return null;
             }
@@ -77,15 +77,15 @@ namespace imBMW.iBus
             return IsValid(packet, (byte)packet.Length);
         }
 
-        public static bool IsValid(byte[] packet, byte lenght)
+        public static bool IsValid(byte[] packet, byte length)
         {
-            if (lenght < PacketLengthMin)
+            if (length < PacketLengthMin)
             {
                 return false;
             }
 
             byte packetLength = (byte)(packet[1] + 2);
-            if (lenght < packetLength)
+            if (length < packetLength)
             {
                 return false;
             }
@@ -98,11 +98,33 @@ namespace imBMW.iBus
             return check == packet[packetLength - 1];
         }
 
-        public byte PacketLenght
+        public static bool CanStartWith(byte[] packet, byte length)
+        {
+            if (length < PacketLengthMin)
+            {
+                return true;
+            }
+
+            byte packetLength = (byte)(packet[1] + 2);
+            if (packetLength < PacketLengthMin
+                || packetLength > PacketLengthMax)
+            {
+                return false;
+            }
+
+            if (length >= packetLength && !IsValid(packet, length))
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        public byte PacketLength
         {
             get
             {
-                return packetLenght;
+                return packetLength;
             }
         }
 
@@ -115,12 +137,12 @@ namespace imBMW.iBus
                     return this.packet;
                 }
 
-                byte[] packet = new byte[PacketLenght];
+                byte[] packet = new byte[PacketLength];
                 packet[0] = source;
-                packet[1] = (byte)(PacketLenght - 2);
+                packet[1] = (byte)(PacketLength - 2);
                 packet[2] = destination;
                 data.CopyTo(packet, 3);
-                packet[PacketLenght - 1] = check;
+                packet[PacketLength - 1] = check;
 
                 this.packet = packet;
                 return packet;
@@ -195,6 +217,11 @@ namespace imBMW.iBus
                 }
                 return destinationDevice;
             }
+        }
+
+        public override string ToString()
+        {
+            return this.ToPrettyString();
         }
     }
 }

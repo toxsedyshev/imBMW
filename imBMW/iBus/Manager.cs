@@ -31,8 +31,7 @@ namespace imBMW.iBus
             byte b = iBus.ReadAvailable()[0];
             if (messageBufferLength >= Message.PacketLengthMax)
             {
-                messageBufferLength--;
-                Array.Copy(messageBuffer, 1, messageBuffer, 0, messageBufferLength);
+                SkipBuffer(1);
             }
             messageBuffer[messageBufferLength++] = b;
             while (messageBufferLength >= Message.PacketLengthMin)
@@ -40,14 +39,24 @@ namespace imBMW.iBus
                 Message m = Message.TryCreate(messageBuffer, messageBufferLength);
                 if (m == null)
                 {
+                    if (!Message.CanStartWith(messageBuffer, messageBufferLength))
+                    {
+                        SkipBuffer(1);
+                        continue;
+                    }
                     return;
                 }
                 ProcessMessage(m);
-                messageBufferLength -= m.PacketLenght;
-                if (messageBufferLength > 0)
-                {
-                    Array.Copy(messageBuffer, m.PacketLenght, messageBuffer, 0, messageBufferLength);
-                }
+                SkipBuffer(m.PacketLength);
+            }
+        }
+
+        static void SkipBuffer(byte count)
+        {
+            messageBufferLength -= count;
+            if (messageBufferLength > 0)
+            {
+                Array.Copy(messageBuffer, count, messageBuffer, 0, messageBufferLength);
             }
         }
 
@@ -55,40 +64,47 @@ namespace imBMW.iBus
         {
             foreach (MessageReceiverRegistration receiver in messageReceiverList)
             {
-                switch (receiver.Match)
+                try
                 {
-                    case MessageReceiverRegistration.MatchType.Source:
-                        if (receiver.Source == m.SourceDevice)
-                        {
-                            receiver.Callback(m);
-                        }
-                        break;
-                    case MessageReceiverRegistration.MatchType.Destination:
-                        if (receiver.Destination == m.DestinationDevice
-                            || m.DestinationDevice == DeviceAddress.Broadcast
-                            || m.DestinationDevice == DeviceAddress.GlobalBroadcastAddress)
-                        {
-                            receiver.Callback(m);
-                        }
-                        break;
-                    case MessageReceiverRegistration.MatchType.SourceAndDestination:
-                        if (receiver.Source == m.SourceDevice 
-                            && (receiver.Destination == m.DestinationDevice
+                    switch (receiver.Match)
+                    {
+                        case MessageReceiverRegistration.MatchType.Source:
+                            if (receiver.Source == m.SourceDevice)
+                            {
+                                receiver.Callback(m);
+                            }
+                            break;
+                        case MessageReceiverRegistration.MatchType.Destination:
+                            if (receiver.Destination == m.DestinationDevice
                                 || m.DestinationDevice == DeviceAddress.Broadcast
-                                || m.DestinationDevice == DeviceAddress.GlobalBroadcastAddress))
-                        {
-                            receiver.Callback(m);
-                        }
-                        break;
-                    case MessageReceiverRegistration.MatchType.SourceOrDestination:
-                        if (receiver.Source == m.SourceDevice 
-                            || receiver.Destination == m.DestinationDevice
-                            || m.DestinationDevice == DeviceAddress.Broadcast
-                            || m.DestinationDevice == DeviceAddress.GlobalBroadcastAddress)
-                        {
-                            receiver.Callback(m);
-                        }
-                        break;
+                                || m.DestinationDevice == DeviceAddress.GlobalBroadcastAddress)
+                            {
+                                receiver.Callback(m);
+                            }
+                            break;
+                        case MessageReceiverRegistration.MatchType.SourceAndDestination:
+                            if (receiver.Source == m.SourceDevice
+                                && (receiver.Destination == m.DestinationDevice
+                                    || m.DestinationDevice == DeviceAddress.Broadcast
+                                    || m.DestinationDevice == DeviceAddress.GlobalBroadcastAddress))
+                            {
+                                receiver.Callback(m);
+                            }
+                            break;
+                        case MessageReceiverRegistration.MatchType.SourceOrDestination:
+                            if (receiver.Source == m.SourceDevice
+                                || receiver.Destination == m.DestinationDevice
+                                || m.DestinationDevice == DeviceAddress.Broadcast
+                                || m.DestinationDevice == DeviceAddress.GlobalBroadcastAddress)
+                            {
+                                receiver.Callback(m);
+                            }
+                            break;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error(ex, "while processing message: " + m.ToPrettyString());
                 }
             }
         }

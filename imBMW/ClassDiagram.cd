@@ -40,7 +40,7 @@
       <Method Name="init" Hidden="true" />
       <Field Name="packet" Hidden="true" />
       <Field Name="packetDump" Hidden="true" />
-      <Field Name="packetLenght" Hidden="true" />
+      <Field Name="packetLength" Hidden="true" />
       <Field Name="PacketLengthMax" Hidden="true" />
       <Field Name="PacketLengthMin" Hidden="true" />
       <Field Name="source" Hidden="true" />
