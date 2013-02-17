@@ -1,9 +1,8 @@
-using System;
-using Microsoft.SPOT;
-using imBMW.iBus.Devices;
+using imBMW.iBus;
 using imBMW.iBus.Devices.Real;
+using imBMW.Multimedia;
 
-namespace imBMW.iBus
+namespace imBMW.Tools
 {
     static class EnumConverter
 {
@@ -12,19 +11,21 @@ namespace imBMW.iBus
         * so there is no pretty way to print enums
         */
 
-        public static string ToStringValue(this iPodChanger.iPodCommand e)
+        public static string ToStringValue(this iPodViaHeadset.iPodCommand e)
         {
             switch (e)
             {
-                case iPodChanger.iPodCommand.Next: return "Next";
-                case iPodChanger.iPodCommand.Prev: return "Prev";
-                case iPodChanger.iPodCommand.Play: return "Play";
-                case iPodChanger.iPodCommand.Pause: return "Pause";
-                case iPodChanger.iPodCommand.PlayPauseToggle: return "PlayPauseToggle";
-                case iPodChanger.iPodCommand.VoiceOverCurrent: return "VoiceOverCurrent";
-                case iPodChanger.iPodCommand.VoiceOverMenu: return "VoiceOverMenu";
+                case iPodViaHeadset.iPodCommand.Next: return "Next";
+                case iPodViaHeadset.iPodCommand.Prev: return "Prev";
+                case iPodViaHeadset.iPodCommand.Play: return "Play";
+                case iPodViaHeadset.iPodCommand.Pause: return "Pause";
+                case iPodViaHeadset.iPodCommand.PlayPauseToggle: return "PlayPauseToggle";
+                case iPodViaHeadset.iPodCommand.VoiceOverCurrent: return "VoiceOverCurrent";
+                case iPodViaHeadset.iPodCommand.VoiceOverMenu: return "VoiceOverMenu";
+                case iPodViaHeadset.iPodCommand.VolumeUp: return "VolumeUp";
+                case iPodViaHeadset.iPodCommand.VolumeDown: return "VolumeDown";
             }
-            return "NotSpecified";
+            return "NotSpecified(" + e.ToString() + ")";
         }
 
         public static string ToStringValue(this MFLButton e)
@@ -37,7 +38,7 @@ namespace imBMW.iBus
                 case MFLButton.Dial: return "Dial";
                 case MFLButton.DialLong: return "DialLong";
             }
-            return "NotSpecified";
+            return "NotSpecified(" + e.ToString() + ")";
         }
 
         public static string ToStringValue(this IgnitionState e)
@@ -47,7 +48,7 @@ namespace imBMW.iBus
                 case IgnitionState.On: return "On";
                 case IgnitionState.Off: return "Off";
             }
-            return "NotSpecified";
+            return "NotSpecified(" + e.ToString() + ")";
         }
 
         public static string ToStringValue(this DeviceAddress e)
@@ -97,7 +98,7 @@ namespace imBMW.iBus
                 case DeviceAddress.Unset: return "Unset";
                 case DeviceAddress.Unknown: return "Unknown";
             }
-            return "NotSpecified";
+            return "NotSpecified(" + e.ToString() + ")";
         }
     }
 }

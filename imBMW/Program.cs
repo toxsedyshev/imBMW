@@ -1,4 +1,5 @@
 using GHIElectronics.NETMF.FEZ;
+using imBMW.Multimedia;
 using imBMW.Tools;
 using Microsoft.SPOT;
 using Microsoft.SPOT.Hardware;
@@ -14,7 +15,7 @@ namespace imBMW
         static void Init()
         {
             iBus.Manager.Init(Serial.COM3, (Cpu.Pin)FEZ_Pin.Interrupt.Di4);
-            iBus.Devices.iPodChanger.Init((Cpu.Pin)FEZ_Pin.Digital.Di3);
+            iBus.Devices.CDChanger.Init(new iPodViaHeadset((Cpu.Pin)FEZ_Pin.Digital.Di3));
         }
 
         public static void Main()
