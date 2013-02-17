@@ -207,6 +207,10 @@ namespace imBMW.iBus.Devices
                 {
                     Radio.DisplayText(((char)(isPlaying ? 0xBC : 0xBE)) + " iPod  ", TextAlign.Center);
                 }
+                else
+                {
+                    Radio.DisplayText("");
+                }
             }
         }
 
