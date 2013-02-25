@@ -149,7 +149,7 @@ namespace imBMW.Multimedia
                     Thread.Sleep(25);
                     break;
             }
-            Debug.Print("iPod command: " + command.ToStringValue());
+            Logger.Info("iPod command: " + command.ToStringValue());
         }
 
         void EnqueueIPodCommand(iPodCommand command)

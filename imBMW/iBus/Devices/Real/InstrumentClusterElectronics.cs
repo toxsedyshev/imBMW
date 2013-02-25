@@ -72,7 +72,7 @@ namespace imBMW.iBus.Devices.Real
                 {
                     e(new IgnitionEventArgs(currentIgnitionState, previous));
                 }
-                Debug.Print("Ignition " + currentIgnitionState.ToStringValue());
+                Logger.Info("Ignition " + currentIgnitionState.ToStringValue());
             }
         }
 

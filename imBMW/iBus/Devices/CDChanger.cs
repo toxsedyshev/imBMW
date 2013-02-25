@@ -27,6 +27,7 @@ namespace imBMW.iBus.Devices
         static byte[] DataPollRequest = new byte[] { 0x01 };
         static byte[] DataCurrentDiskTrackRequest = new byte[] { 0x38, 0x00, 0x00 };
         static byte[] DataStopPlaying  = new byte[] { 0x38, 0x01, 0x00 };
+        static byte[] DataTurnOff      = new byte[] { 0x38, 0x02, 0x00 };
         static byte[] DataStartPlaying = new byte[] { 0x38, 0x03, 0x00 };
         static byte[] DataRandomPlay   = new byte[] { 0x38, 0x08, 0x01 };
 
@@ -186,7 +187,6 @@ namespace imBMW.iBus.Devices
                         stopDelay = new Timer(delegate
                         {
                             Pause();
-                            Radio.DisplayText("");
 
                             if (announceThread.ThreadState == ThreadState.Suspended)
                             {
@@ -212,17 +212,21 @@ namespace imBMW.iBus.Devices
             {
                 Manager.EnqueueMessage(MessagePollResponse);
                 Manager.EnqueueMessage(MessagePlayingDisk1Track1);
-                Debug.Print("Radio polled");
+                Logger.Info("Radio polled");
             }
             else if (m.Data.Compare(DataRandomPlay))
             {
-                Debug.Print("Random play pressed");
+                Logger.Info("Random play pressed");
                 RandomToggle();
             }
-            else if (m.SourceDevice == DeviceAddress.Radio)
+            else if (m.Data.Compare(DataTurnOff))
+            {
+                Radio.DisplayText("");
+            }
+            /*else if (m.SourceDevice == DeviceAddress.Radio)
             {
                 Logger.Info(m);
-            }
+            }*/
         }
 
         static void announce()

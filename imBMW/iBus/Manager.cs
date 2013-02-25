@@ -31,6 +31,7 @@ namespace imBMW.iBus
             byte b = iBus.ReadAvailable()[0];
             if (messageBufferLength >= Message.PacketLengthMax)
             {
+                Logger.Warning("Buffer overflow. We can't reach it, yeah?");
                 SkipBuffer(1);
             }
             messageBuffer[messageBufferLength++] = b;
@@ -41,6 +42,7 @@ namespace imBMW.iBus
                 {
                     if (!Message.CanStartWith(messageBuffer, messageBufferLength))
                     {
+                        Logger.Warning("Buffer overflow. Non-iBus data detected.");
                         SkipBuffer(1);
                         continue;
                     }
