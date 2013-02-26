@@ -7,7 +7,7 @@ using System.Threading;
 
 namespace imBMW.Multimedia
 {
-    class iPodViaHeadset : IAudioPlayer, IDisposable
+    public class iPodViaHeadset : IAudioPlayer, IDisposable
     {
         public enum iPodCommand
         {

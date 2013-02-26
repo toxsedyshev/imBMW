@@ -8,7 +8,7 @@ using imBMW.Multimedia;
 
 namespace imBMW.iBus.Devices
 {
-    static class CDChanger
+    public static class CDChanger
     {
         const int StopDelayMilliseconds = 1000;
 

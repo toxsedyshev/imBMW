@@ -29,7 +29,7 @@ namespace imBMW.iBus.Devices.Real
     #endregion
 
 
-    static class InstrumentClusterElectronics
+    public static class InstrumentClusterElectronics
     {
         static byte[] DataIgnitionOff = new byte[] { 0x11, 0x00 };
         static byte[] DataIgnitionOn = new byte[] { 0x11, 0x01 };

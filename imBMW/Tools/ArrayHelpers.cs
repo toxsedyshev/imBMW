@@ -3,7 +3,7 @@ using Microsoft.SPOT;
 
 namespace imBMW.Tools
 {
-    static class ArrayHelpers
+    public static class ArrayHelpers
     {
         const string hexChars = "0123456789ABCDEF";
 

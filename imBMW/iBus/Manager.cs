@@ -4,12 +4,11 @@ using System.Collections;
 using Microsoft.SPOT.Hardware;
 using System.IO.Ports;
 using System.Threading;
-using GHIElectronics.NETMF.FEZ;
 using imBMW.Tools;
 
 namespace imBMW.iBus
 {
-    static class Manager
+    public static class Manager
     {
         static SerialInterruptPort iBus;
 

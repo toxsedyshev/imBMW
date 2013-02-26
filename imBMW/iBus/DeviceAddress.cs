@@ -3,7 +3,7 @@ using System.Reflection;
 
 namespace imBMW.iBus
 {
-    enum DeviceAddress : short
+    public enum DeviceAddress : short
     {
         BodyModule = 0x00,
         SunroofControl = 0x08,

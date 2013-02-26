@@ -1,14 +1,12 @@
-using GHIElectronics.NETMF.FEZ;
-using imBMW.Multimedia;
-using imBMW.Tools;
+﻿using System;
 using Microsoft.SPOT;
+using GHIElectronics.NETMF.FEZ;
 using Microsoft.SPOT.Hardware;
-using System;
+using imBMW.Tools;
 using System.IO.Ports;
-using System.Text;
 using System.Threading;
 
-namespace imBMW
+namespace imBMW.Devices.V1
 {
     public class Program
     {
@@ -22,7 +20,7 @@ namespace imBMW
             });
 
             iBus.Manager.Init(Serial.COM3, (Cpu.Pin)FEZ_Pin.Interrupt.Di4);
-            iBus.Devices.CDChanger.Init(new iPodViaHeadset((Cpu.Pin)FEZ_Pin.Digital.Di3));
+            iBus.Devices.CDChanger.Init(new Multimedia.iPodViaHeadset((Cpu.Pin)FEZ_Pin.Digital.Di3));
 
             iBus.Manager.AddMessageReceiverForDestinationDevice(iBus.DeviceAddress.CDChanger, (m) =>
             {

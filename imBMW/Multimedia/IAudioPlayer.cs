@@ -3,7 +3,7 @@ using Microsoft.SPOT;
 
 namespace imBMW.Multimedia
 {
-    interface IAudioPlayer
+    public interface IAudioPlayer
     {
         void Next();
 

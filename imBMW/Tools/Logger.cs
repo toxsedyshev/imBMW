@@ -6,14 +6,14 @@ namespace imBMW.Tools
 {
     #region Enums, delegates and event args
 
-    enum LogPriority
+    public enum LogPriority
     {
         Info = 3,
         Warning = 2,
         Error = 1
     }
 
-    class LoggerArgs 
+    public class LoggerArgs 
     {
         public readonly DateTime Timestamp;
         public readonly String Message;
@@ -43,11 +43,11 @@ namespace imBMW.Tools
         }
     }
 
-    delegate void LoggerEventHangler(LoggerArgs args);
+    public delegate void LoggerEventHangler(LoggerArgs args);
 
     #endregion
 
-    static class Logger
+    public static class Logger
     {
         public static event LoggerEventHangler Logged;
 

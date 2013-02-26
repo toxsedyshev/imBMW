@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace imBMW
+namespace imBMW.Devices.V1
 {
     
     internal partial class Resources
@@ -20,7 +20,7 @@ namespace imBMW
             {
                 if ((Resources.manager == null))
                 {
-                    Resources.manager = new System.Resources.ResourceManager("imBMW.Resources", typeof(Resources).Assembly);
+                    Resources.manager = new System.Resources.ResourceManager("imBMW.Devices.V1.Resources", typeof(Resources).Assembly);
                 }
                 return Resources.manager;
             }

@@ -4,7 +4,7 @@ using imBMW.Tools;
 
 namespace imBMW.iBus
 {
-    class Message
+    public class Message
     {
         public const int PacketLengthMin = 5;
         public const int PacketLengthMax = 32;

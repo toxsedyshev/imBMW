@@ -1,15 +1,16 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <AssemblyName>imBMW</AssemblyName>
-    <OutputType>Library</OutputType>
-    <RootNamespace>imBMW</RootNamespace>
+    <AssemblyName>imBMW.Devices.V1</AssemblyName>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>imBMW.Devices.V1</RootNamespace>
     <ProjectTypeGuids>{b69e3092-b931-443c-abe7-7e7b65f2a37f};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{1809C7F6-0A9F-412B-A45E-E667996E86A3}</ProjectGuid>
+    <ProjectGuid>{CAD4D90C-D38E-4EF5-974A-16691839D6BE}</ProjectGuid>
     <TargetFrameworkVersion>v4.1</TargetFrameworkVersion>
     <NetMfTargetsBaseDir Condition="'$(NetMfTargetsBaseDir)'==''">$(MSBuildExtensionsPath32)\Microsoft\.NET Micro Framework\</NetMfTargetsBaseDir>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -29,43 +30,24 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject />
+    <StartupObject>imBMW.Devices.V1.Program</StartupObject>
   </PropertyGroup>
   <Import Project="$(NetMfTargetsBaseDir)$(TargetFrameworkVersion)\CSharp.Targets" />
   <ItemGroup>
-    <Compile Include="iBus\DeviceAddress.cs" />
-    <Compile Include="iBus\Devices\Real\Doors.cs" />
-    <Compile Include="iBus\Devices\Real\InstrumentClusterElectronics.cs" />
-    <Compile Include="iBus\Devices\Real\MultiFunctionSteeringWheel.cs" />
-    <Compile Include="iBus\Devices\Real\Radio.cs" />
-    <Compile Include="iBus\Devices\CDChanger.cs" />
-    <Compile Include="Tools\EnumConverter.cs" />
-    <Compile Include="iBus\Manager.cs" />
-    <Compile Include="iBus\Message.cs" />
-    <Compile Include="iBus\MessageRegistry.cs" />
-    <Compile Include="IO\SerialInterruptPort.cs" />
-    <Compile Include="IO\SerialPortConfiguration.cs" />
-    <Compile Include="Multimedia\IAudioPlayer.cs" />
-    <Compile Include="Multimedia\iPodViaHeadset.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Program.cs" />
     <Compile Include="Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="Tools\ArrayHelpers.cs" />
-    <Compile Include="Tools\DateTimeHelpers.cs" />
-    <Compile Include="Tools\ExtensionAttribute.cs" />
-    <Compile Include="Tools\Logger.cs" />
-    <Compile Include="Tools\QueueThreadWorker.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="FEZMini_GHIElectronics.NETMF.FEZ, Version=4.1.8.0, Culture=neutral, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.SPOT.Graphics" />
     <Reference Include="Microsoft.SPOT.Hardware" />
-    <Reference Include="Microsoft.SPOT.Hardware.SerialPort" />
     <Reference Include="Microsoft.SPOT.Native">
     </Reference>
-    <Reference Include="System.IO" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources.resx">
@@ -75,6 +57,9 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <None Include="ClassDiagram.cd" />
+    <ProjectReference Include="..\..\imBMW\imBMW.csproj">
+      <Project>{1809C7F6-0A9F-412B-A45E-E667996E86A3}</Project>
+      <Name>imBMW</Name>
+    </ProjectReference>
   </ItemGroup>
 </Project>
