@@ -1,4 +1,4 @@
-﻿imBMW · iBus interactive interface for BMW
+﻿imBMW · BMW iBus integration SDK and hardware
 =========================
 
 [imBMW]: http://imBMW.net "imBMW"
