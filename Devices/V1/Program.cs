@@ -37,7 +37,7 @@ namespace imBMW.Devices.V1
                     && InstrumentClusterElectronics.CurrentSpeed == 0
                     && InstrumentClusterElectronics.CurrentIgnitionState != IgnitionState.Off)
                 {
-                    Doors.OpenTrunk();
+                    BodyModule.OpenTrunk();
                     Radio.DisplayTextWithDelay("Trunk open", TextAlign.Center);
                 }
                 else if (m.Data.Compare(DataDisk5))
@@ -65,7 +65,7 @@ namespace imBMW.Devices.V1
             {
                 if (!doorsLocked && e.Speed > doorsLockSpeed)
                 {
-                    Doors.LockDoors();
+                    BodyModule.LockDoors();
                     doorsLocked = true;
                 }
                 if (showSpeedRpm)
@@ -77,8 +77,16 @@ namespace imBMW.Devices.V1
             {
                 if (doorsLocked && e.CurrentIgnitionState == IgnitionState.Off)
                 {
-                    Doors.UnlockDoors();
+                    BodyModule.UnlockDoors();
                     doorsLocked = false;
+                }
+            };
+            BodyModule.RemoteKeyButtonPressed += (e) =>
+            {
+                if (e.Button == RemoteKeyButton.Lock)
+                {
+                    BodyModule.CloseWindows();
+                    BodyModule.CloseSunroof();
                 }
             };
         }
