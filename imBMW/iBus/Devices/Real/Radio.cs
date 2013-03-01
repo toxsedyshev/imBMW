@@ -1,5 +1,7 @@
 using System;
 using Microsoft.SPOT;
+using imBMW.Tools;
+using System.Threading;
 
 namespace imBMW.iBus.Devices.Real
 {
@@ -15,24 +17,33 @@ namespace imBMW.iBus.Devices.Real
     #endregion
 
 
-    static class Radio
+    public static class Radio
     {
-        const byte radioTextMaxlen = 11;
+        const byte displayTextMaxlen = 11;
+        const int displayTextDelay = 100;
+
+        public static void DisplayTextWithDelay(string s, TextAlign align = TextAlign.Left)
+        {
+            new Timer(delegate
+            {
+                DisplayText(s, align);
+            }, null, displayTextDelay, 0);
+        }
 
         public static void DisplayText(string s, TextAlign align = TextAlign.Left)
         {
-            if (s.Length > radioTextMaxlen)
+            if (s.Length > displayTextMaxlen)
             {
-                s = s.Substring(0, radioTextMaxlen);
+                s = s.Substring(0, displayTextMaxlen);
             }
             byte offset = 0, len = (byte)s.Length;
             if (align == TextAlign.Center)
             {
-                offset = (byte)((radioTextMaxlen - len) / 2);
+                offset = (byte)((displayTextMaxlen - len) / 2);
             }
             else if (align == TextAlign.Right)
             {
-                offset = (byte)(radioTextMaxlen - len);
+                offset = (byte)(displayTextMaxlen - len);
             }
             byte[] data = new byte[] { 0x23, 0x42, 0x30, 0x19, 0x19, 0x19, 0x19, 0x19, 0x19, 0x19, 0x19, 0x19, 0x19, 0x19 };
             char[] chars = s.ToCharArray();
@@ -47,6 +58,7 @@ namespace imBMW.iBus.Devices.Real
                 data[i + offset + 3] = c;
             }
             Manager.EnqueueMessage(new Message(DeviceAddress.Telephone, DeviceAddress.InstrumentClusterElectronics, data));
+            Logger.Info("Display on the radio \"" + s + "\"");
         }
     }
 }

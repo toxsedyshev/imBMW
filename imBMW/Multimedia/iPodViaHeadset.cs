@@ -205,7 +205,7 @@ namespace imBMW.Multimedia
         {
             // Fixing IsPlaying flag, when playing iPod was connected to paused CDC
             isPlaying = !isPlaying;
-            Radio.DisplayText(((char)(isPlaying ? 0xBC : 0xBE)) + " iPod  ", TextAlign.Center);
+            ShowCurrentStatus();
             return false; // Real status of iPod's shuffle-mode is unknown
         }
 
@@ -254,7 +254,7 @@ namespace imBMW.Multimedia
                 IsInVoiceOverMenu = false;
                 if (IsCDCActive)
                 {
-                    Radio.DisplayText(((char)(isPlaying ? 0xBC : 0xBE)) + " iPod  ", TextAlign.Center);
+                    ShowCurrentStatus();
                 }
             }
         }
@@ -268,6 +268,10 @@ namespace imBMW.Multimedia
             set
             {
                 isCDCActive = value;
+                if (isCDCActive && IsPlaying)
+                {
+                    ShowCurrentStatus(true);
+                }
             }
         }
 
@@ -288,6 +292,19 @@ namespace imBMW.Multimedia
         }
 
         #endregion
+
+        void ShowCurrentStatus(bool delay = false)
+        {
+            string s = ((char)(isPlaying ? 0xBC : 0xBE)) + " iPod  ";
+            if (delay)
+            {
+                Radio.DisplayTextWithDelay(s, TextAlign.Center);
+            }
+            else
+            {
+                Radio.DisplayText(s, TextAlign.Center);
+            }
+        }
 
         public bool IsInVoiceOverMenu
         {

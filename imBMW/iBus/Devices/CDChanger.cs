@@ -202,6 +202,7 @@ namespace imBMW.iBus.Devices
         {
             if (m.Data.Compare(DataStartPlaying))
             {
+                Manager.EnqueueMessage(MessagePlayingDisk1Track1);
                 IsCDCActive = true;
             }
             else if (m.Data.Compare(DataStopPlaying))
@@ -221,7 +222,7 @@ namespace imBMW.iBus.Devices
             }
             else if (m.Data.Compare(DataTurnOff))
             {
-                Radio.DisplayText("");
+                Radio.DisplayText("imBMW", TextAlign.Center);
             }
             /*else if (m.SourceDevice == DeviceAddress.Radio)
             {

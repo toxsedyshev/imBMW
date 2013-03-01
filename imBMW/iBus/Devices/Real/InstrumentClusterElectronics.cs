@@ -48,7 +48,7 @@ namespace imBMW.iBus.Devices.Real
     {
         static byte[] DataIgnitionOff = new byte[] { 0x11, 0x00 };
         static byte[] DataIgnitionAcc = new byte[] { 0x11, 0x01 };
-        static byte[] DataIgnitionIgn = new byte[] { 0x11, 0x02 };
+        static byte[] DataIgnitionIgn = new byte[] { 0x11, 0x04 }; // what is 0x02 ?
 
         static IgnitionState currentIgnitionState = IgnitionState.Off;
 
@@ -120,7 +120,7 @@ namespace imBMW.iBus.Devices.Real
         public static event IgnitionEventHandler IgnitionStateChanged;
 
         /// <summary>
-        /// IKE sends speed&RPM every 2 sec
+        /// IKE sends speed and RPM every 2 sec
         /// </summary>
         public static event SpeedRPMEventHandler SpeedRPMChanged;
     }
