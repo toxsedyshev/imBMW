@@ -51,9 +51,9 @@ namespace imBMW.iBus.Devices.Real
 
         static void InstrumentClusterElectronics_IgnitionStateChanged(IgnitionEventArgs e)
         {
-            if (e.CurrentIgnitionState == IgnitionState.On && e.PreviousIgnitionState == IgnitionState.Off)
+            if (e.CurrentIgnitionState != IgnitionState.Off && e.PreviousIgnitionState == IgnitionState.Off)
             {
-                // MFL sends RT 00 signal on ignition OFF > ON
+                // MFL sends RT 00 signal on ignition OFF -> ACC
                 needSkipRT = true;
             }
         }

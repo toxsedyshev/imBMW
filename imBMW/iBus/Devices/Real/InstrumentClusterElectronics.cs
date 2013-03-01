@@ -9,7 +9,8 @@ namespace imBMW.iBus.Devices.Real
     public enum IgnitionState
     {
         Off,
-        On
+        Acc,
+        Ign
     }
 
     public class IgnitionEventArgs : EventArgs
@@ -24,7 +25,21 @@ namespace imBMW.iBus.Devices.Real
         }
     }
 
+    public class SpeedRPMArgs : EventArgs
+    {
+        public uint Speed { get; private set; }
+        public uint RPM { get; private set; }
+
+        public SpeedRPMArgs(uint speed, uint rpm)
+        {
+            Speed = speed;
+            RPM = rpm;
+        }
+    }
+
     public delegate void IgnitionEventHandler(IgnitionEventArgs e);
+
+    public delegate void SpeedRPMEventHandler(SpeedRPMArgs e);
 
     #endregion
 
@@ -32,9 +47,13 @@ namespace imBMW.iBus.Devices.Real
     public static class InstrumentClusterElectronics
     {
         static byte[] DataIgnitionOff = new byte[] { 0x11, 0x00 };
-        static byte[] DataIgnitionOn = new byte[] { 0x11, 0x01 };
+        static byte[] DataIgnitionAcc = new byte[] { 0x11, 0x01 };
+        static byte[] DataIgnitionIgn = new byte[] { 0x11, 0x02 };
 
         static IgnitionState currentIgnitionState = IgnitionState.Off;
+
+        public static uint CurrentRPM { get; private set; }
+        public static uint CurrentSpeed { get; private set; }
 
         static InstrumentClusterElectronics()
         {
@@ -43,13 +62,21 @@ namespace imBMW.iBus.Devices.Real
 
         static void ProcessIKEMessage(Message m)
         {
-            if (m.Data.Compare(DataIgnitionOn))
+            if (m.Data.Compare(DataIgnitionAcc))
             {
-                CurrentIgnitionState = IgnitionState.On;
+                CurrentIgnitionState = IgnitionState.Acc;
+            }
+            else if (m.Data.Compare(DataIgnitionIgn))
+            {
+                CurrentIgnitionState = IgnitionState.Ign;
             }
             else if (m.Data.Compare(DataIgnitionOff))
             {
                 CurrentIgnitionState = IgnitionState.Off;
+            }
+            else if (m.Data.Length >= 3 && m.Data[0] == 0x18)
+            {
+                SpeedRPMData = m.Data;
             }
         }
 
@@ -76,6 +103,25 @@ namespace imBMW.iBus.Devices.Real
             }
         }
 
+        public static byte[] SpeedRPMData
+        {
+            set
+            {
+                CurrentSpeed = ((uint)value[1]) * 2;
+                CurrentRPM = ((uint)value[2]) * 100;
+                var e = SpeedRPMChanged;
+                if (e != null)
+                {
+                    e(new SpeedRPMArgs(CurrentSpeed, CurrentRPM));
+                }
+            }
+        }
+
         public static event IgnitionEventHandler IgnitionStateChanged;
+
+        /// <summary>
+        /// IKE sends speed&RPM every 2 sec
+        /// </summary>
+        public static event SpeedRPMEventHandler SpeedRPMChanged;
     }
 }
