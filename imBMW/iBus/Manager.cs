@@ -41,7 +41,7 @@ namespace imBMW.iBus
                 {
                     if (!Message.CanStartWith(messageBuffer, messageBufferLength))
                     {
-                        Logger.Warning("Buffer overflow. Non-iBus data detected.");
+                        Logger.Warning("Buffer skip: non-iBus data detected.");
                         SkipBuffer(1);
                         continue;
                     }

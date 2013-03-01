@@ -25,12 +25,12 @@ namespace imBMW.iBus.Devices.Real
         }
     }
 
-    public class SpeedRPMArgs : EventArgs
+    public class SpeedRPMEventArgs : EventArgs
     {
         public uint Speed { get; private set; }
         public uint RPM { get; private set; }
 
-        public SpeedRPMArgs(uint speed, uint rpm)
+        public SpeedRPMEventArgs(uint speed, uint rpm)
         {
             Speed = speed;
             RPM = rpm;
@@ -39,17 +39,13 @@ namespace imBMW.iBus.Devices.Real
 
     public delegate void IgnitionEventHandler(IgnitionEventArgs e);
 
-    public delegate void SpeedRPMEventHandler(SpeedRPMArgs e);
+    public delegate void SpeedRPMEventHandler(SpeedRPMEventArgs e);
 
     #endregion
 
 
     public static class InstrumentClusterElectronics
     {
-        static byte[] DataIgnitionOff = new byte[] { 0x11, 0x00 };
-        static byte[] DataIgnitionAcc = new byte[] { 0x11, 0x01 };
-        static byte[] DataIgnitionIgn = new byte[] { 0x11, 0x04 }; // what is 0x02 ?
-
         static IgnitionState currentIgnitionState = IgnitionState.Off;
 
         public static uint CurrentRPM { get; private set; }
@@ -62,21 +58,24 @@ namespace imBMW.iBus.Devices.Real
 
         static void ProcessIKEMessage(Message m)
         {
-            if (m.Data.Compare(DataIgnitionAcc))
-            {
-                CurrentIgnitionState = IgnitionState.Acc;
-            }
-            else if (m.Data.Compare(DataIgnitionIgn))
-            {
-                CurrentIgnitionState = IgnitionState.Ign;
-            }
-            else if (m.Data.Compare(DataIgnitionOff))
-            {
-                CurrentIgnitionState = IgnitionState.Off;
-            }
-            else if (m.Data.Length >= 3 && m.Data[0] == 0x18)
+            if (m.Data.Length == 3 && m.Data[0] == 0x18)
             {
                 SpeedRPMData = m.Data;
+            }
+            else if (m.Data.Length == 2 && m.Data[0] == 0x11)
+            {
+                switch (m.Data[1])
+                {
+                    case 0x00:
+                        CurrentIgnitionState = IgnitionState.Off;
+                        break;
+                    case 0x01:
+                        CurrentIgnitionState = IgnitionState.Acc;
+                        break;
+                    case 0x03: // TODO check bits?
+                        CurrentIgnitionState = IgnitionState.Ign;
+                        break;
+                }
             }
         }
 
@@ -112,7 +111,7 @@ namespace imBMW.iBus.Devices.Real
                 var e = SpeedRPMChanged;
                 if (e != null)
                 {
-                    e(new SpeedRPMArgs(CurrentSpeed, CurrentRPM));
+                    e(new SpeedRPMEventArgs(CurrentSpeed, CurrentRPM));
                 }
             }
         }
