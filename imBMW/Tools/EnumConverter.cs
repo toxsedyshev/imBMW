@@ -52,6 +52,17 @@ namespace imBMW.Tools
             return "NotSpecified(" + e.ToString() + ")";
         }
 
+        public static string ToStringValue(this RemoteKeyButton e)
+        {
+            switch (e)
+            {
+                case RemoteKeyButton.Lock: return "Lock";
+                case RemoteKeyButton.Trunk: return "Trunk";
+                case RemoteKeyButton.Unlock: return "Unlock";
+            }
+            return "NotSpecified(" + e.ToString() + ")";
+        }
+
         public static string ToStringValue(this DeviceAddress e)
         {
             switch (e)

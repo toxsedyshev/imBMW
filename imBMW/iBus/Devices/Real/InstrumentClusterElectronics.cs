@@ -64,17 +64,23 @@ namespace imBMW.iBus.Devices.Real
             }
             else if (m.Data.Length == 2 && m.Data[0] == 0x11)
             {
-                switch (m.Data[1])
+                byte ign = m.Data[1];
+                if ((ign & 0x02) != 0)
                 {
-                    case 0x00:
-                        CurrentIgnitionState = IgnitionState.Off;
-                        break;
-                    case 0x01:
-                        CurrentIgnitionState = IgnitionState.Acc;
-                        break;
-                    case 0x03: // TODO check bits?
-                        CurrentIgnitionState = IgnitionState.Ign;
-                        break;
+                    CurrentIgnitionState = IgnitionState.Ign;
+                }
+                else if ((ign & 0x01) != 0)
+                {
+                    CurrentIgnitionState = IgnitionState.Acc;
+                }
+                else if (ign == 0x00)
+                {
+                    CurrentIgnitionState = IgnitionState.Off;
+                } 
+                else
+                {
+                    // TODO delete
+                    Logger.Warning("Unknown ignition state " + ign.ToHex());
                 }
             }
         }

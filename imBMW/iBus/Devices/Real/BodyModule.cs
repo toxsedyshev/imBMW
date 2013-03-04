@@ -1,5 +1,6 @@
 using System;
 using Microsoft.SPOT;
+using imBMW.Tools;
 
 namespace imBMW.iBus.Devices.Real
 {
@@ -36,6 +37,8 @@ namespace imBMW.iBus.Devices.Real
         static Message MessageLockDoors = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, 0x0C, 0x97, 0x01);
         static Message MessageUnlockDoors = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, 0x0C, 0x03, 0x01);
 
+        static Message MessageOpenWindows = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, 0x0C, 0x00, 0x65);
+        
         static Message MessageOpenWindowDriverFront = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, 0x0C, 0x52, 0x01);
         static Message MessageOpenWindowDriverRear = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, 0x0C, 0x41, 0x01);
         static Message MessageOpenWindowPassengerFront = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, 0x0C, 0x54, 0x01);
@@ -48,6 +51,14 @@ namespace imBMW.iBus.Devices.Real
 
         static Message MessageOpenSunroof = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, 0x0C, 0x7E, 0x01);
         static Message MessageCloseSunroof = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, 0x0C, 0x7F, 0x01);
+
+        static Message MessageFoldDriverMirrorE39 = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, 0x0C, 0x01, 0x31, 0x01);
+        static Message MessageFoldPassengerMirrorE39 = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, 0x0C, 0x02, 0x31, 0x01);
+        static Message MessageUnfoldDriverMirrorE39 = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, 0x0C, 0x01, 0x30, 0x01);
+        static Message MessageUnfoldPassengerMirrorE39 = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, 0x0C, 0x02, 0x30, 0x01);
+
+        static Message MessageFoldMirrorsE46 = new Message(DeviceAddress.MirrorMemorySecond, DeviceAddress.MirrorMemory, 0x6D, 0x90);
+        static Message MessageUnfoldMirrorsE46 = new Message(DeviceAddress.MirrorMemorySecond, DeviceAddress.MirrorMemory, 0x6D, 0xA0);
 
         #endregion
 
@@ -82,6 +93,7 @@ namespace imBMW.iBus.Devices.Real
             {
                 e(new RemoteKeyEventArgs(button));
             }
+            Logger.Info("Remote key press " + button.ToStringValue() + " button");
         }
 
         public static void OpenTrunk()
@@ -101,10 +113,13 @@ namespace imBMW.iBus.Devices.Real
 
         public static void OpenWindows()
         {
+            Manager.EnqueueMessage(MessageOpenWindows);
+            /*
             Manager.EnqueueMessage(MessageOpenWindowDriverFront);
             Manager.EnqueueMessage(MessageOpenWindowPassengerFront);
             Manager.EnqueueMessage(MessageOpenWindowPassengerRear);
             Manager.EnqueueMessage(MessageOpenWindowDriverRear);
+             */
         }
 
         public static void CloseWindows()
@@ -123,6 +138,26 @@ namespace imBMW.iBus.Devices.Real
         public static void CloseSunroof()
         {
             Manager.EnqueueMessage(MessageCloseSunroof);
+        }
+
+        /// <summary>
+        /// Now only E39 mirrors are supported, E46 not tested
+        /// </summary>
+        public static void FoldMirrors()
+        {
+            Manager.EnqueueMessage(MessageFoldMirrorsE46);
+            Manager.EnqueueMessage(MessageFoldPassengerMirrorE39);
+            Manager.EnqueueMessage(MessageFoldDriverMirrorE39);
+        }
+
+        /// <summary>
+        /// Now only E39 mirrors are supported, E46 not tested
+        /// </summary>
+        public static void UnfoldMirrors()
+        {
+            Manager.EnqueueMessage(MessageUnfoldMirrorsE46);
+            Manager.EnqueueMessage(MessageUnfoldPassengerMirrorE39);
+            Manager.EnqueueMessage(MessageUnfoldDriverMirrorE39);
         }
 
         public static event RemoteKeyButtonEventHandler RemoteKeyButtonPressed;
