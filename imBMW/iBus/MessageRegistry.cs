@@ -4,7 +4,7 @@ using imBMW.Tools;
 
 namespace imBMW.iBus
 {
-    static class MessageRegistry
+    public static class MessageRegistry
     {
         #region Registries
 
@@ -271,7 +271,11 @@ namespace imBMW.iBus
 
         public static string ToPrettyString(this Message message)
         {
-            string description = message.Describe();
+            string description = message.ReceiverDescription;
+            if (description == null)
+            {
+                description = message.Describe();
+            }
             if (description == null)
             {
                 description = message.DataDump;

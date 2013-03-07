@@ -46,7 +46,8 @@ namespace imBMW.iBus.Devices.Real
                     {
                         e(new KeyEventArgs(LastKeyInserted));
                     }
-                    Logger.Info("Key " + LastKeyInserted + " inserted");
+                    m.ReceiverDescription = "Key " + LastKeyInserted + " inserted";
+                    Logger.Info(m.ReceiverDescription);
                 }
                 else if (m.Data[1] == 0x00)
                 {
@@ -56,7 +57,8 @@ namespace imBMW.iBus.Devices.Real
                     {
                         e(new KeyEventArgs(LastKeyInserted));
                     }
-                    Logger.Info("Key " + LastKeyInserted + " removed");
+                    m.ReceiverDescription = "Key " + LastKeyInserted + " removed";
+                    Logger.Info(m.ReceiverDescription);
                 }
             }
         }

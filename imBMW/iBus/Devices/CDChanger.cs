@@ -20,9 +20,9 @@ namespace imBMW.iBus.Devices
 
         #region Messages
 
-        static Message MessagePollResponse = new Message(DeviceAddress.CDChanger, DeviceAddress.Broadcast, 0x02, 0x00);
-        static Message MessageAnnounce = new Message(DeviceAddress.CDChanger, DeviceAddress.Broadcast, 0x02, 0x01);
-        static Message MessagePlayingDisk1Track1 = new Message(DeviceAddress.CDChanger, DeviceAddress.Radio, 0x39, 0x00, 0x09, 0x00, 0x3F, 0x00, 0x01, 0x01);
+        static Message MessagePollResponse = new Message(DeviceAddress.CDChanger, DeviceAddress.Broadcast, "CDC response", 0x02, 0x00);
+        static Message MessageAnnounce = new Message(DeviceAddress.CDChanger, DeviceAddress.Broadcast, "CDC announce", 0x02, 0x01);
+        static Message MessagePlayingDisk1Track1 = new Message(DeviceAddress.CDChanger, DeviceAddress.Radio, "Playing D1 T1", 0x39, 0x00, 0x09, 0x00, 0x3F, 0x00, 0x01, 0x01);
 
         static byte[] DataPollRequest = new byte[] { 0x01 };
         static byte[] DataCurrentDiskTrackRequest = new byte[] { 0x38, 0x00, 0x00 };
@@ -204,25 +204,28 @@ namespace imBMW.iBus.Devices
             {
                 Manager.EnqueueMessage(MessagePlayingDisk1Track1);
                 IsCDCActive = true;
+                m.ReceiverDescription = "Start playing";
             }
             else if (m.Data.Compare(DataStopPlaying))
             {
                 IsCDCActive = false;
+                m.ReceiverDescription = "Stop playing";
             }
             else if (m.Data.Compare(DataPollRequest))
             {
                 Manager.EnqueueMessage(MessagePollResponse);
                 Manager.EnqueueMessage(MessagePlayingDisk1Track1);
-                Logger.Info("Radio polled");
+                m.ReceiverDescription = "Poll " + m.DestinationDevice.ToStringValue();
             }
             else if (m.Data.Compare(DataRandomPlay))
             {
-                Logger.Info("Random play pressed");
                 RandomToggle();
+                m.ReceiverDescription = "Random toggle";
             }
             else if (m.Data.Compare(DataTurnOff))
             {
                 Radio.DisplayText("imBMW", TextAlign.Center);
+                m.ReceiverDescription = "Turn off";
             }
             /*else if (m.SourceDevice == DeviceAddress.Radio)
             {

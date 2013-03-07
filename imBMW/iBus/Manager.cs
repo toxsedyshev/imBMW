@@ -8,6 +8,25 @@ using imBMW.Tools;
 
 namespace imBMW.iBus
 {
+    #region Enums, delegales and event args
+
+    public class MessageEventArgs : EventArgs
+    {
+        public Message Message { get; private set; }
+
+        public bool Cancel { get; set; }
+
+        public MessageEventArgs(Message message)
+        {
+            Message = message;
+        }
+    }
+
+    public delegate void MessageEventHandler(MessageEventArgs e);
+
+    #endregion
+
+
     public static class Manager
     {
         static SerialInterruptPort iBus;
@@ -17,10 +36,13 @@ namespace imBMW.iBus
             iBus = new SerialInterruptPort(new SerialPortConfiguration(port, 9600, Parity.Even, 8, StopBits.One), busy, 0, 1);
             iBus.DataReceived += new SerialDataReceivedEventHandler(iBus_DataReceived);
 
-            messageQueue = new QueueThreadWorker(SendMessage);
+            messageWriteQueue = new QueueThreadWorker(SendMessage);
+            //messageReadQueue = new QueueThreadWorker(ProcessMessage);
         }
 
         #region Message reading and processing
+
+        static QueueThreadWorker messageReadQueue;
 
         static byte[] messageBuffer = new byte[Message.PacketLengthMax];
         static byte messageBufferLength = 0;
@@ -48,6 +70,7 @@ namespace imBMW.iBus
                     return;
                 }
                 ProcessMessage(m);
+                //messageReadQueue.Enqueue(m);
                 SkipBuffer(m.PacketLength);
             }
         }
@@ -61,8 +84,30 @@ namespace imBMW.iBus
             }
         }
 
-        public static void ProcessMessage(Message m)
+        public static void ProcessMessage(object o)
         {
+            var m = (Message)o;
+
+            MessageEventArgs args = null;
+            try
+            {
+                var e = BeforeMessageReceived;
+                if (e != null)
+                {
+                    args = new MessageEventArgs(m);
+                    e(args);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(ex, "on before message received " + m.ToPrettyString());
+            }
+
+            if (args != null && args.Cancel)
+            {
+                return;
+            }
+
             foreach (MessageReceiverRegistration receiver in messageReceiverList)
             {
                 try
@@ -108,33 +153,90 @@ namespace imBMW.iBus
                     Logger.Error(ex, "while processing message: " + m.ToPrettyString());
                 }
             }
+
+            try
+            {
+                var e = AfterMessageReceived;
+                if (e != null)
+                {
+                    if (args == null)
+                    {
+                        args = new MessageEventArgs(m);
+                    }
+                    e(args);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(ex, "on after message received " + m.ToPrettyString());
+            }
         }
 
         #endregion
 
         #region Message writing and queue
 
-        static QueueThreadWorker messageQueue;
+        static QueueThreadWorker messageWriteQueue;
 
         static void SendMessage(object m)
         {
-            iBus.Write((byte[])m);
+            iBus.Write(((Message)m).Packet);
+
+            var e = AfterMessageSent;
+            if (e != null)
+            {
+                e(new MessageEventArgs((Message)m));
+            }
+
             Thread.Sleep(50); // Don't flood iBus
         }
 
         public static void EnqueueMessage(Message m)
         {
-            EnqueueMessage(m.Packet);
+            MessageEventArgs args = null;
+            var e = BeforeMessageSent;
+            if (e != null)
+            {
+                args = new MessageEventArgs(m);
+                e(args);
+            }
+            if (args == null || !args.Cancel)
+            {
+                // TODO benchmark sending in ms
+                EnqueueMessage(m);
+            }
         }
 
-        public static void EnqueueMessage(byte[] m)
+        /*public static void EnqueueMessage(byte[] m)
         {
             messageQueue.Enqueue(m);
-        }
+        }*/
 
         #endregion
 
         #region Message receiver registration
+
+        /// <summary>
+        /// Fired before processing the message by registered receivers.
+        /// Message processing could be cancelled in this event
+        /// </summary>
+        public static event MessageEventHandler BeforeMessageReceived;
+
+        /// <summary>
+        /// Fired after processing the message by registered receivers
+        /// </summary>
+        public static event MessageEventHandler AfterMessageReceived;
+
+        /// <summary>
+        /// Fired before sending the message.
+        /// Message processing could be cancelled in this event
+        /// </summary>
+        public static event MessageEventHandler BeforeMessageSent;
+
+        /// <summary>
+        /// Fired after sending the message
+        /// </summary>
+        public static event MessageEventHandler AfterMessageSent;
 
         public delegate void MessageReceiver(Message message);
 

@@ -26,6 +26,7 @@ namespace imBMW.iBus.Devices.Real
         static bool needSkipRT;
 
         static byte[] DataPollRequest = new byte[] { 0x01 };
+        // TODO change to switch()
         static byte[] DataNextPressed = new byte[] { 0x3B, 0x01 };
         static byte[] DataPrevPressed = new byte[] { 0x3B, 0x08 };
         static byte[] DataRTPressedR = new byte[] { 0x3B, 0x40 };
@@ -34,7 +35,7 @@ namespace imBMW.iBus.Devices.Real
         static byte[] DataDialLongPressed = new byte[] { 0x3B, 0x90 };
         static byte[] DataDialReleased = new byte[] { 0x3B, 0xA0 };
 
-        static Message MessagePhoneResponse = new Message(DeviceAddress.Telephone, DeviceAddress.Broadcast, 0x02, 0x00);
+        static Message MessagePhoneResponse = new Message(DeviceAddress.Telephone, DeviceAddress.Broadcast, "Phone response", 0x02, 0x00);
 
         /**
          * For right RT button commands
@@ -60,26 +61,27 @@ namespace imBMW.iBus.Devices.Real
 
         static void ProcessMFLMessage(Message m)
         {
-            if (m.DestinationDevice == DeviceAddress.Telephone && m.Data.Compare(DataPollRequest))
+            if (m.Data.Compare(DataPollRequest))
             {
                 if (EmulatePhone)
                 {
                     Manager.EnqueueMessage(MessagePhoneResponse);
                 }
+                m.ReceiverDescription = "Poll " + m.DestinationDevice.ToStringValue();
             }
             else if (m.Data.Compare(DataNextPressed))
             {
-                OnButtonPressed(MFLButton.Next);
+                OnButtonPressed(m, MFLButton.Next);
             }
             else if (m.Data.Compare(DataPrevPressed))
             {
-                OnButtonPressed(MFLButton.Prev);
+                OnButtonPressed(m, MFLButton.Prev);
             }
             else if (m.Data.Compare(DataRTPressedR) || m.Data.Compare(DataRTPressedT))
             {
                 if (!needSkipRT || m.Data.Compare(DataRTPressedR))
                 {
-                    OnButtonPressed(MFLButton.RT);
+                    OnButtonPressed(m, MFLButton.RT);
                 }
                 needSkipRT = false;
             }
@@ -90,25 +92,26 @@ namespace imBMW.iBus.Devices.Real
             else if (m.Data.Compare(DataDialLongPressed))
             {
                 wasDialLongPressed = true;
-                OnButtonPressed(MFLButton.DialLong);
+                OnButtonPressed(m, MFLButton.DialLong);
             }
             else if (m.Data.Compare(DataDialReleased))
             {
                 if (!wasDialLongPressed)
                 {
-                    OnButtonPressed(MFLButton.Dial);
+                    OnButtonPressed(m, MFLButton.Dial);
                 }
                 wasDialLongPressed = false;
             }
         }
 
-        static void OnButtonPressed(MFLButton button)
+        static void OnButtonPressed(Message m, MFLButton button)
         {
             var e = ButtonPressed;
             if (e != null)
             {
                 e(button);
             }
+            m.ReceiverDescription = "Button " + button.ToStringValue();
         }
 
         public static event MFLEventHandler ButtonPressed;

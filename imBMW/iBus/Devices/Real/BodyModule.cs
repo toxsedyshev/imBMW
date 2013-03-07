@@ -32,33 +32,33 @@ namespace imBMW.iBus.Devices.Real
     {
         #region Messages
 
-        static Message MessageOpenTrunk = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, 0x0C, 0x95, 0x01);
+        static Message MessageOpenTrunk = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Open trunk", 0x0C, 0x95, 0x01);
 
-        static Message MessageLockDoors = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, 0x0C, 0x97, 0x01);
-        static Message MessageUnlockDoors = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, 0x0C, 0x03, 0x01);
+        static Message MessageLockDoors = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Lock doors", 0x0C, 0x97, 0x01);
+        static Message MessageUnlockDoors = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Unlock doors", 0x0C, 0x03, 0x01);
 
-        static Message MessageOpenWindows = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, 0x0C, 0x00, 0x65);
+        //static Message MessageOpenWindows = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, 0x0C, 0x00, 0x65);
         
-        static Message MessageOpenWindowDriverFront = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, 0x0C, 0x52, 0x01);
-        static Message MessageOpenWindowDriverRear = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, 0x0C, 0x41, 0x01);
-        static Message MessageOpenWindowPassengerFront = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, 0x0C, 0x54, 0x01);
-        static Message MessageOpenWindowPassengerRear = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, 0x0C, 0x44, 0x01);
+        static Message MessageOpenWindowDriverFront = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Open driver front window", 0x0C, 0x52, 0x01);
+        static Message MessageOpenWindowDriverRear = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Open driver rear window", 0x0C, 0x41, 0x01);
+        static Message MessageOpenWindowPassengerFront = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Open passenger front window", 0x0C, 0x54, 0x01);
+        static Message MessageOpenWindowPassengerRear = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Open passenger rear window", 0x0C, 0x44, 0x01);
 
-        static Message MessageCloseWindowDriverFront = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, 0x0C, 0x53, 0x01);
-        static Message MessageCloseWindowDriverRear = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, 0x0C, 0x42, 0x01);
-        static Message MessageCloseWindowPassengerFront = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, 0x0C, 0x55, 0x01);
-        static Message MessageCloseWindowPassengerRear = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, 0x0C, 0x43, 0x01);
+        static Message MessageCloseWindowDriverFront = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Close driver front window", 0x0C, 0x53, 0x01);
+        static Message MessageCloseWindowDriverRear = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Close driver rear window", 0x0C, 0x42, 0x01);
+        static Message MessageCloseWindowPassengerFront = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Close passenger front window", 0x0C, 0x55, 0x01);
+        static Message MessageCloseWindowPassengerRear = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Close passenger rear window", 0x0C, 0x43, 0x01);
 
-        static Message MessageOpenSunroof = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, 0x0C, 0x7E, 0x01);
-        static Message MessageCloseSunroof = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, 0x0C, 0x7F, 0x01);
+        static Message MessageOpenSunroof = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Open sunroof", 0x0C, 0x7E, 0x01);
+        static Message MessageCloseSunroof = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Close sunroof", 0x0C, 0x7F, 0x01);
 
-        static Message MessageFoldDriverMirrorE39 = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, 0x0C, 0x01, 0x31, 0x01);
-        static Message MessageFoldPassengerMirrorE39 = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, 0x0C, 0x02, 0x31, 0x01);
-        static Message MessageUnfoldDriverMirrorE39 = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, 0x0C, 0x01, 0x30, 0x01);
-        static Message MessageUnfoldPassengerMirrorE39 = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, 0x0C, 0x02, 0x30, 0x01);
+        static Message MessageFoldDriverMirrorE39 = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Fold driver mirror", 0x0C, 0x01, 0x31, 0x01);
+        static Message MessageFoldPassengerMirrorE39 = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Fold passenger mirror", 0x0C, 0x02, 0x31, 0x01);
+        static Message MessageUnfoldDriverMirrorE39 = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Unfold driver mirror", 0x0C, 0x01, 0x30, 0x01);
+        static Message MessageUnfoldPassengerMirrorE39 = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Unfold passenger mirror", 0x0C, 0x02, 0x30, 0x01);
 
-        static Message MessageFoldMirrorsE46 = new Message(DeviceAddress.MirrorMemorySecond, DeviceAddress.MirrorMemory, 0x6D, 0x90);
-        static Message MessageUnfoldMirrorsE46 = new Message(DeviceAddress.MirrorMemorySecond, DeviceAddress.MirrorMemory, 0x6D, 0xA0);
+        static Message MessageFoldMirrorsE46 = new Message(DeviceAddress.MirrorMemorySecond, DeviceAddress.MirrorMemory, "Fold mirrors", 0x6D, 0x90);
+        static Message MessageUnfoldMirrorsE46 = new Message(DeviceAddress.MirrorMemorySecond, DeviceAddress.MirrorMemory, "Unfold mirrors", 0x6D, 0xA0);
 
         #endregion
 
@@ -74,26 +74,27 @@ namespace imBMW.iBus.Devices.Real
                 switch (m.Data[1])
                 {
                     case 0x12:
-                        OnRemoteKeyButton(RemoteKeyButton.Lock);
+                        OnRemoteKeyButton(m, RemoteKeyButton.Lock);
                         break;
                     case 0x22:
-                        OnRemoteKeyButton(RemoteKeyButton.Unlock);
+                        OnRemoteKeyButton(m, RemoteKeyButton.Unlock);
                         break;
                     case 0x42:
-                        OnRemoteKeyButton(RemoteKeyButton.Trunk);
+                        OnRemoteKeyButton(m, RemoteKeyButton.Trunk);
                         break;
                 }
             }
         }
 
-        static void OnRemoteKeyButton(RemoteKeyButton button)
+        static void OnRemoteKeyButton(Message m, RemoteKeyButton button)
         {
             var e = RemoteKeyButtonPressed;
             if (e != null)
             {
                 e(new RemoteKeyEventArgs(button));
             }
-            Logger.Info("Remote key press " + button.ToStringValue() + " button");
+            m.ReceiverDescription = "Remote key press " + button.ToStringValue() + " button";
+            Logger.Info(m.ReceiverDescription);
         }
 
         public static void OpenTrunk()
@@ -113,13 +114,12 @@ namespace imBMW.iBus.Devices.Real
 
         public static void OpenWindows()
         {
-            Manager.EnqueueMessage(MessageOpenWindows);
-            /*
+            //Manager.EnqueueMessage(MessageOpenWindows);
+            
             Manager.EnqueueMessage(MessageOpenWindowDriverFront);
             Manager.EnqueueMessage(MessageOpenWindowPassengerFront);
             Manager.EnqueueMessage(MessageOpenWindowPassengerRear);
             Manager.EnqueueMessage(MessageOpenWindowDriverRear);
-             */
         }
 
         public static void CloseWindows()

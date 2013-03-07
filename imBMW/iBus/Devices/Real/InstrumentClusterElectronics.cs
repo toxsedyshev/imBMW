@@ -61,6 +61,7 @@ namespace imBMW.iBus.Devices.Real
             if (m.Data.Length == 3 && m.Data[0] == 0x18)
             {
                 SpeedRPMData = m.Data;
+                m.ReceiverDescription = "Speed " + CurrentSpeed + "km/h " + CurrentRPM + "RPM";
             }
             else if (m.Data.Length == 2 && m.Data[0] == 0x11)
             {
@@ -81,7 +82,9 @@ namespace imBMW.iBus.Devices.Real
                 {
                     // TODO delete
                     Logger.Warning("Unknown ignition state " + ign.ToHex());
+                    return;
                 }
+                m.ReceiverDescription = "Ignition " + CurrentIgnitionState.ToStringValue();
             }
         }
 

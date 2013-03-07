@@ -57,7 +57,7 @@ namespace imBMW.iBus.Devices.Real
                 }
                 data[i + offset + 3] = c;
             }
-            Manager.EnqueueMessage(new Message(DeviceAddress.Telephone, DeviceAddress.InstrumentClusterElectronics, data));
+            Manager.EnqueueMessage(new Message(DeviceAddress.Telephone, DeviceAddress.InstrumentClusterElectronics, "Show text on radio \"" + s + "\"", data));
             Logger.Info("Display on the radio \"" + s + "\"");
         }
     }

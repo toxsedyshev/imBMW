@@ -17,28 +17,44 @@ namespace imBMW.Devices.V1
         {
             // Enable iBus Manager to work with Melexis TH3122
             iBus.Manager.Init(Serial.COM3, (Cpu.Pin)FEZ_Pin.Interrupt.Di4);
+            Logger.Info("iBus manager inited");
 
             // Set iPod via headset as CD-Changer emulator
             iBus.Devices.CDChanger.Init(new Multimedia.iPodViaHeadset((Cpu.Pin)FEZ_Pin.Digital.Di3));
+            Logger.Info("CD-Changer inited");
 
             // Enable all comfort features
-            Features.Comfort.AllFeaturesEnabled = true;
-
+            //Features.Comfort.AllFeaturesEnabled = true;
+            Features.Comfort.AutoLockDoors = true;
+            Features.Comfort.AutoUnlockDoors = true;
+            Logger.Info("Comfort features inited");
+            
             // Example features:
             iBus.Manager.AddMessageReceiverForDestinationDevice(iBus.DeviceAddress.CDChanger, (m) =>
             {
                 // "Change CD" message from radio to CDC: 38 06 XX
                 if (m.Data.Length == 3 && m.Data[0] == 0x38 && m.Data[1] == 0x06)
                 {
-                    switch (m.Data[2])
+                    byte cdNumber = m.Data[2];
+                    switch (cdNumber)
                     {
                         case 0x06:
                             // CD6 button: Open trunk when ignition isn't off and not driving
-                            if (InstrumentClusterElectronics.CurrentSpeed == 0
-                                && InstrumentClusterElectronics.CurrentIgnitionState != IgnitionState.Off)
+                            if (InstrumentClusterElectronics.CurrentIgnitionState != IgnitionState.Off)
                             {
-                                BodyModule.OpenTrunk();
-                                Radio.DisplayTextWithDelay("Trunk open", TextAlign.Center);
+                                if (InstrumentClusterElectronics.CurrentSpeed == 0)
+                                {
+                                    BodyModule.OpenTrunk();
+                                    Radio.DisplayTextWithDelay("Trunk open", TextAlign.Center);
+                                }
+                                else
+                                {
+                                    Radio.DisplayTextWithDelay("Stop car", TextAlign.Center);
+                                }
+                            }
+                            else
+                            {
+                                Radio.DisplayTextWithDelay("Turn on ign", TextAlign.Center);
                             }
                             break;
                         case 0x05:
@@ -53,9 +69,18 @@ namespace imBMW.Devices.V1
                                 Radio.DisplayTextWithDelay("Speed off", TextAlign.Center);
                             }
                             break;
+                        case 0x04:
+                            BodyModule.CloseWindows();
+                            break;
+                        case 0x03:
+                            BodyModule.OpenWindows();
+                            break;
                     }
+                    m.ReceiverDescription = "Change CD" + cdNumber;
                 }
             });
+            Logger.Info("Custom features inited");
+
             InstrumentClusterElectronics.SpeedRPMChanged += (e) =>
             {
                 if (showSpeedRpm)
@@ -63,6 +88,16 @@ namespace imBMW.Devices.V1
                     ShowSpeedRPM(e.Speed, e.RPM);
                 }
             };
+            iBus.Manager.AfterMessageReceived += (e) =>
+            {
+                //if (e.Message.ReceiverDescription == null) { return; }
+                Logger.Info(e.Message);
+            };
+            iBus.Manager.AfterMessageSent += (e) =>
+            {
+                Logger.Info("Sent: " + e.Message.ToString());
+            };
+            Logger.Info("Events subscribed");
         }
 
         static void ShowSpeedRPM(uint speed, uint rpm)

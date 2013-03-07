@@ -22,6 +22,11 @@ namespace imBMW.iBus
         DeviceAddress destinationDevice = DeviceAddress.Unset;
 
         public Message(DeviceAddress source, DeviceAddress destination, params byte[] data)
+            : this(source, destination, null, data)
+        {
+        }
+
+        public Message(DeviceAddress source, DeviceAddress destination, string description, params byte[] data)
         {
             if (source == DeviceAddress.Unset || source == DeviceAddress.Unknown)
             {
@@ -31,19 +36,27 @@ namespace imBMW.iBus
             {
                 throw new ArgumentException("Wrong destination device");
             }
-            init((byte)source, (byte)destination, data);
+            init((byte)source, (byte)destination, data, description);
+            sourceDevice = source;
+            destinationDevice = destination;
         }
 
-        public Message(byte source, byte destination, byte[] data)
+        public Message(byte source, byte destination, params byte[] data)
+            : this(source, destination, null, data)
         {
-            init(source, destination, data);
         }
 
-        void init(byte source, byte destination, byte[] data) 
+        public Message(byte source, byte destination, string description, params byte[] data)
+        {
+            init(source, destination, data, description);
+        }
+
+        void init(byte source, byte destination, byte[] data, string description = null) 
         {
             this.source = source;
             this.destination = destination;
             this.data = data;
+            this.ReceiverDescription = description;
             packetLength = (byte)(data.Length + 4); // + source + destination + len + chksum
 
             byte check = 0x00;
@@ -218,6 +231,8 @@ namespace imBMW.iBus
                 return destinationDevice;
             }
         }
+
+        public string ReceiverDescription { get; set; }
 
         public override string ToString()
         {
