@@ -37,7 +37,7 @@ namespace imBMW.iBus
             iBus.DataReceived += new SerialDataReceivedEventHandler(iBus_DataReceived);
 
             messageWriteQueue = new QueueThreadWorker(SendMessage);
-            //messageReadQueue = new QueueThreadWorker(ProcessMessage);
+            messageReadQueue = new QueueThreadWorker(ProcessMessage);
         }
 
         #region Message reading and processing
@@ -69,8 +69,8 @@ namespace imBMW.iBus
                     }
                     return;
                 }
-                ProcessMessage(m);
-                //messageReadQueue.Enqueue(m);
+                //ProcessMessage(m);
+                messageReadQueue.Enqueue(m);
                 SkipBuffer(m.PacketLength);
             }
         }
@@ -188,7 +188,7 @@ namespace imBMW.iBus
                 e(new MessageEventArgs((Message)m));
             }
 
-            Thread.Sleep(50); // Don't flood iBus
+            Thread.Sleep(20); // Don't flood iBus
         }
 
         public static void EnqueueMessage(Message m)
@@ -203,7 +203,7 @@ namespace imBMW.iBus
             if (args == null || !args.Cancel)
             {
                 // TODO benchmark sending in ms
-                EnqueueMessage(m);
+                messageWriteQueue.Enqueue(m);
             }
         }
 

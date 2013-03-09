@@ -19,11 +19,23 @@ namespace imBMW.Devices.V1
             iBus.Manager.Init(Serial.COM3, (Cpu.Pin)FEZ_Pin.Interrupt.Di4);
             Logger.Info("iBus manager inited");
 
+            iBus.Manager.AfterMessageReceived += (e) =>
+            {
+                // Show only processed events
+                //if (e.Message.ReceiverDescription == null) { return; }
+                Logger.Info(e.Message);
+            };
+            iBus.Manager.AfterMessageSent += (e) =>
+            {
+                Logger.Info("Sent: " + e.Message.ToString());
+            };
+            Logger.Info("iBus manager logger events subscribed");
+
             // Set iPod via headset as CD-Changer emulator
             iBus.Devices.CDChanger.Init(new Multimedia.iPodViaHeadset((Cpu.Pin)FEZ_Pin.Digital.Di3));
             Logger.Info("CD-Changer inited");
 
-            // Enable all comfort features
+            // Enable comfort features
             //Features.Comfort.AllFeaturesEnabled = true;
             Features.Comfort.AutoLockDoors = true;
             Features.Comfort.AutoUnlockDoors = true;
@@ -87,15 +99,6 @@ namespace imBMW.Devices.V1
                 {
                     ShowSpeedRPM(e.Speed, e.RPM);
                 }
-            };
-            iBus.Manager.AfterMessageReceived += (e) =>
-            {
-                //if (e.Message.ReceiverDescription == null) { return; }
-                Logger.Info(e.Message);
-            };
-            iBus.Manager.AfterMessageSent += (e) =>
-            {
-                Logger.Info("Sent: " + e.Message.ToString());
             };
             Logger.Info("Events subscribed");
         }

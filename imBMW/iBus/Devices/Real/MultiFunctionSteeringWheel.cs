@@ -35,7 +35,7 @@ namespace imBMW.iBus.Devices.Real
         static byte[] DataDialLongPressed = new byte[] { 0x3B, 0x90 };
         static byte[] DataDialReleased = new byte[] { 0x3B, 0xA0 };
 
-        static Message MessagePhoneResponse = new Message(DeviceAddress.Telephone, DeviceAddress.Broadcast, "Phone response", 0x02, 0x00);
+        static Message MessagePhoneResponse = new Message(DeviceAddress.Telephone, DeviceAddress.Broadcast, 0x02, 0x00);
 
         /**
          * For right RT button commands

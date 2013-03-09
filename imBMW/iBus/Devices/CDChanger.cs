@@ -20,8 +20,8 @@ namespace imBMW.iBus.Devices
 
         #region Messages
 
-        static Message MessagePollResponse = new Message(DeviceAddress.CDChanger, DeviceAddress.Broadcast, "CDC response", 0x02, 0x00);
-        static Message MessageAnnounce = new Message(DeviceAddress.CDChanger, DeviceAddress.Broadcast, "CDC announce", 0x02, 0x01);
+        static Message MessagePollResponse = new Message(DeviceAddress.CDChanger, DeviceAddress.Broadcast, 0x02, 0x00);
+        static Message MessageAnnounce = new Message(DeviceAddress.CDChanger, DeviceAddress.Broadcast, 0x02, 0x01);
         static Message MessagePlayingDisk1Track1 = new Message(DeviceAddress.CDChanger, DeviceAddress.Radio, "Playing D1 T1", 0x39, 0x00, 0x09, 0x00, 0x3F, 0x00, 0x01, 0x01);
 
         static byte[] DataPollRequest = new byte[] { 0x01 };

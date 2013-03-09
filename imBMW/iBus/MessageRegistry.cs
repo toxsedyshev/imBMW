@@ -1,6 +1,7 @@
 using System;
 using Microsoft.SPOT;
 using imBMW.Tools;
+using System.Collections;
 
 namespace imBMW.iBus
 {
@@ -8,7 +9,7 @@ namespace imBMW.iBus
     {
         #region Registries
 
-        static string[] messageTypeDescription = {
+        static string[] messageTypeDescriptions = {
             "", // "0x00",
             "Device status request",
             "Device status ready",
@@ -267,6 +268,15 @@ namespace imBMW.iBus
             "", // "0xFF"
         };
 
+        static Hashtable messageDescriptions;
+
+        static MessageRegistry()
+        {
+            messageDescriptions = new Hashtable();
+            messageDescriptions.Add("02 00", "Poll response");
+            messageDescriptions.Add("02 01", "Announce");
+        }
+
         #endregion
 
         public static string ToPrettyString(this Message message)
@@ -289,12 +299,18 @@ namespace imBMW.iBus
             {
                 return null;
             }
+
+            if (messageDescriptions.Contains(message.DataDump))
+            {
+                return (string)messageDescriptions[message.DataDump];
+            }
+
             byte firstByte = message.Data[0];
-            if (firstByte >= messageTypeDescription.Length || messageTypeDescription[firstByte] == "")
+            if (firstByte >= messageTypeDescriptions.Length || messageTypeDescriptions[firstByte] == "")
             {
                 return null;
             }
-            return message.DataDump + " (" + messageTypeDescription[firstByte] + ')';
+            return message.DataDump + " (" + messageTypeDescriptions[firstByte] + ')';
         }
     }
 }
