@@ -28,12 +28,12 @@ iBus-compatible cars are listed below:
 * BMW Z8 E52
 * MINI Cooper R50, Cooper S R53
 * Land Rover Range Rover L30
-* Land Rover Rover 75 R40
+* Rover 75 R40
 * Saab 9-3 2003+
 
 Notes:
 * E31 uses different device IDs.
-* Last 2 production years of E36 and E34 had iBus-controlled CD-changers.
+* Last 2 production years of E36 and E34 had iBus-controlled CD43 radio and CD-changers.
 * E60 ver. USA had iBus-controlled seat occupation sensor.
 
 imBMW license
