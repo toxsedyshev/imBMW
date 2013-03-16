@@ -29,11 +29,11 @@ namespace imBMW.iBus
 
     public static class Manager
     {
-        static SerialInterruptPort iBus;
+        static ISerialPort iBus;
 
-        public static void Init(String port, Cpu.Pin busy)
+        public static void Init(ISerialPort port)
         {
-            iBus = new SerialInterruptPort(new SerialPortConfiguration(port, 9600, Parity.Even, 8, StopBits.One), busy, 0, 1);
+            iBus = port;
             iBus.DataReceived += new SerialDataReceivedEventHandler(iBus_DataReceived);
 
             messageWriteQueue = new QueueThreadWorker(SendMessage);
@@ -42,14 +42,14 @@ namespace imBMW.iBus
 
         #region Message reading and processing
 
-        static QueueThreadWorker messageReadQueue;
+        //static QueueThreadWorker messageReadQueue;
 
         static byte[] messageBuffer = new byte[Message.PacketLengthMax];
         static byte messageBufferLength = 0;
 
         static void iBus_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
-            byte b = iBus.ReadAvailable()[0];
+            byte b = ((ISerialPort)sender).ReadAvailable()[0];
             if (messageBufferLength >= Message.PacketLengthMax)
             {
                 Logger.Warning("Buffer overflow. We can't reach it, yeah?");

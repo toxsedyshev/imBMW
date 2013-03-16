@@ -80,8 +80,6 @@ namespace imBMW.iBus.Devices.Real
                 } 
                 else
                 {
-                    // TODO delete
-                    Logger.Warning("Unknown ignition state " + ign.ToHex());
                     return;
                 }
                 m.ReceiverDescription = "Ignition " + CurrentIgnitionState.ToStringValue();

@@ -1,4 +1,5 @@
 ﻿using GHIElectronics.NETMF.FEZ;
+using GHIElectronics.NETMF.USBClient;
 using imBMW.iBus.Devices.Real;
 using imBMW.Tools;
 using Microsoft.SPOT;
@@ -15,10 +16,23 @@ namespace imBMW.Devices.V1
 
         static void Init()
         {
-            // Enable iBus Manager to work with Melexis TH3122
-            iBus.Manager.Init(Serial.COM3, (Cpu.Pin)FEZ_Pin.Interrupt.Di4);
-            Logger.Info("iBus manager inited");
+            // Create serial port to work with Melexis TH3122
+            ISerialPort iBusPort = new SerialPortTH3122(Serial.COM3, (Cpu.Pin)FEZ_Pin.Interrupt.Di4);
 
+            InputPort jumper = new InputPort((Cpu.Pin)FEZ_Pin.Digital.An7, false, Port.ResistorMode.PullUp);
+            if (!jumper.Read())
+            {
+                Logger.Info("Jumper installed. Starting virtual COM port.");
+
+                // Init hub between iBus port and virtual USB COM port
+                USBC_CDC cdc = USBClientController.StandardDevices.StartCDC_WithDebugging();
+                iBusPort = new SerialPortHub(iBusPort, new SerialPortCDC(cdc));
+            }
+
+            // Enable iBus Manager
+            iBus.Manager.Init(iBusPort);
+            Logger.Info("iBus manager inited");
+            
             iBus.Manager.AfterMessageReceived += (e) =>
             {
                 // Show only processed events
