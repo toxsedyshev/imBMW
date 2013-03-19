@@ -35,6 +35,7 @@ namespace System.IO.Ports
         USBC_CDC port;
 
         public SerialPortCDC(USBC_CDC port, int writeBufferSize, int readBufferSize)
+            : base(writeBufferSize, readBufferSize)
         {
             // TODO Check somewhere USBClientController.GetState() == USBClientController.State.Running
 
@@ -42,9 +43,6 @@ namespace System.IO.Ports
 
             WriteTimeout = 33;
             ReadTimeout = Timeout.Infinite;
-
-            _writeBufferSize = writeBufferSize;
-            _readBufferSize = readBufferSize;
         }
 
         public SerialPortCDC(USBC_CDC port) : this(port, 0, 1) { }

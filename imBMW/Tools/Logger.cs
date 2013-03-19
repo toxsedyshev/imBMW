@@ -21,25 +21,31 @@ namespace imBMW.Tools
         public readonly LogPriority Priority;
         public readonly Exception Exception;
         public readonly iBus.Message iBusMessage;
+        public readonly String PriorityTitle;
 
-        public LoggerArgs(LogPriority priority, string message)
+        public LoggerArgs(LogPriority priority, string message, string priorityTitle = null)
         {
             Timestamp = DateTime.Now;
             Priority = priority;
             Message = message;
-            switch (priority)
+            if (priorityTitle != null)
             {
-                case LogPriority.Error:
-                    LogString = Timestamp + " [ERROR] ";
-                    break;
-                case LogPriority.Warning:
-                    LogString = Timestamp + " [warn] ";
-                    break;
-                case LogPriority.Info:
-                    LogString = Timestamp + " [i] ";
-                    break;
+                PriorityTitle = priorityTitle;
+            } else {
+                switch (priority)
+                {
+                    case LogPriority.Error:
+                        PriorityTitle ="ERROR";
+                        break;
+                    case LogPriority.Warning:
+                        PriorityTitle = "warn";
+                        break;
+                    case LogPriority.Info:
+                        PriorityTitle = "i";
+                        break;
+                }
             }
-            LogString += message;
+            LogString = Timestamp.ToString("yy-MM-dd HH:mm:ss.fff") + " [" + PriorityTitle + "] " + message;
         }
     }
 
@@ -51,58 +57,58 @@ namespace imBMW.Tools
     {
         public static event LoggerEventHangler Logged;
 
-        public static void Log(LogPriority priority, string message)
+        public static void Log(LogPriority priority, string message, string priorityTitle = null)
         {
             var e = Logged;
             if (e != null)
             {
-                e(new LoggerArgs(priority, message));
+                e(new LoggerArgs(priority, message, priorityTitle));
             }
         }
 
-        public static void Log(LogPriority priority, Exception exception, string message = null)
+        public static void Log(LogPriority priority, Exception exception, string message = null, string priorityTitle = null)
         {
             if (Logged == null)
             {
                 return;
             }
             message = exception.Message + (message != null ? " (" + message + ")" : String.Empty) + ". Stack trace: \n" + exception.StackTrace;
-            Log(priority, message);
+            Log(priority, message, priorityTitle);
         }
 
-        public static void Info(string message)
+        public static void Info(string message, string priorityTitle = null)
         {
-            Log(LogPriority.Info, message);
+            Log(LogPriority.Info, message, priorityTitle);
         }
 
-        public static void Info(iBus.Message message)
+        public static void Info(iBus.Message message, string priorityTitle = null)
         {
-            Log(LogPriority.Info, message.ToPrettyString());
+            Log(LogPriority.Info, message.ToPrettyString(), priorityTitle);
         }
 
-        public static void Warning(string message)
+        public static void Warning(string message, string priorityTitle = null)
         {
-            Log(LogPriority.Warning, message);
+            Log(LogPriority.Warning, message, priorityTitle);
         }
 
-        public static void Warning(iBus.Message message)
+        public static void Warning(iBus.Message message, string priorityTitle = null)
         {
-            Log(LogPriority.Warning, message.ToPrettyString());
+            Log(LogPriority.Warning, message.ToPrettyString(), priorityTitle);
         }
 
-        public static void Warning(Exception exception, string message = null)
+        public static void Warning(Exception exception, string message = null, string priorityTitle = null)
         {
-            Log(LogPriority.Warning, exception, message);
+            Log(LogPriority.Warning, exception, message, priorityTitle);
         }
 
-        public static void Error(string message)
+        public static void Error(string message, string priorityTitle = null)
         {
-            Log(LogPriority.Error, message);
+            Log(LogPriority.Error, message, priorityTitle);
         }
 
-        public static void Error(Exception exception, string message = null)
+        public static void Error(Exception exception, string message = null, string priorityTitle = null)
         {
-            Log(LogPriority.Error, exception, message);
+            Log(LogPriority.Error, exception, message, priorityTitle);
         }
     }
 }

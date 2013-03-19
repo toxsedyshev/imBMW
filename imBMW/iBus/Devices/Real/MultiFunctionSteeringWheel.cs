@@ -67,7 +67,6 @@ namespace imBMW.iBus.Devices.Real
                 {
                     Manager.EnqueueMessage(MessagePhoneResponse);
                 }
-                m.ReceiverDescription = "Poll " + m.DestinationDevice.ToStringValue();
             }
             else if (m.Data.Compare(DataNextPressed))
             {

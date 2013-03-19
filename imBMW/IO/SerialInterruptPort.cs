@@ -28,18 +28,13 @@ namespace System.IO.Ports
         /// <param name="writeBufferSize">The size of output buffer in bytes. Data output is paused for <see cref="WriteTimeout"/> milliseconds every time this amount of data is sent. Can be zero to disable pausing.</param>
         /// <param name="readBufferSize">The size of input buffer in bytes. DataReceived event will fire only after this amount of data is received. Default is 1.</param>
         public SerialInterruptPort(SerialPortConfiguration config, Cpu.Pin busySignal, int writeBufferSize, int readBufferSize)
+            : base(writeBufferSize, readBufferSize)
         {
-            // some initial parameter checks.
-            if (writeBufferSize < 0) throw new ArgumentOutOfRangeException("writeBufferSize");
-            if (readBufferSize < 1) throw new ArgumentOutOfRangeException("readBuferSize");
-
             WriteTimeout = 33;
             ReadTimeout = Timeout.Infinite;
 
             _port = new SerialPort(config.PortName, config.BaudRate, config.Parity, config.DataBits, config.StopBits); // creating the serial port
             _port.Open();
-            _writeBufferSize = writeBufferSize;
-            _readBufferSize = readBufferSize;
 
             if (busySignal == Cpu.Pin.GPIO_NONE)        // user does not want to use the output hardware flow control
                 _busy = null;
@@ -68,7 +63,6 @@ namespace System.IO.Ports
         // This is event handler for changes on the hardware flow pin.
         private void OnBusyChanged(uint port, uint state, DateTime time)
         {
-            //Debug.Print((state == 1 ? "busy 1" : "busy 0") + (_busy.Read() ? "true" : "false"));
             // currently not writing
             if (_writeThread == null) return;
 

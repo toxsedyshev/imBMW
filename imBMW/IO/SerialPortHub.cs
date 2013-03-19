@@ -42,6 +42,7 @@ namespace System.IO.Ports
             {
                 if (except == port || i == count)
                 {
+                    // TODO test it!
                     continue;
                 }
                 threads[i] = new Thread(() =>
@@ -56,6 +57,14 @@ namespace System.IO.Ports
                 thread.Join();
             }
             // TODO benchmark in ms
+        }
+
+        public override int AvailableBytes
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
         }
 
         public override byte[] ReadAvailable(int maxCount)

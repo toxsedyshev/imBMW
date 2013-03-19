@@ -20,11 +20,19 @@ namespace imBMW.iBus.Devices.Real
     public static class Radio
     {
         const byte displayTextMaxlen = 11;
-        const int displayTextDelay = 100;
+        const int displayTextDelay = 150;
+
+        static Timer displayTextDelayTimer;
 
         public static void DisplayTextWithDelay(string s, TextAlign align = TextAlign.Left)
         {
-            new Timer(delegate
+            if (displayTextDelayTimer != null)
+            {
+                displayTextDelayTimer.Dispose();
+                displayTextDelayTimer = null;
+            }
+
+            displayTextDelayTimer = new Timer(delegate
             {
                 DisplayText(s, align);
             }, null, displayTextDelay, 0);
@@ -32,6 +40,12 @@ namespace imBMW.iBus.Devices.Real
 
         public static void DisplayText(string s, TextAlign align = TextAlign.Left)
         {
+            if (displayTextDelayTimer != null)
+            {
+                displayTextDelayTimer.Dispose();
+                displayTextDelayTimer = null;
+            }
+
             if (s.Length > displayTextMaxlen)
             {
                 s = s.Substring(0, displayTextMaxlen);
@@ -58,7 +72,6 @@ namespace imBMW.iBus.Devices.Real
                 data[i + offset + 3] = c;
             }
             Manager.EnqueueMessage(new Message(DeviceAddress.Telephone, DeviceAddress.InstrumentClusterElectronics, "Show text on radio \"" + s + "\"", data));
-            Logger.Info("Display on the radio \"" + s + "\"");
         }
     }
 }

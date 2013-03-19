@@ -14,6 +14,8 @@ namespace System.IO.Ports
 
         void WriteLine(string text);
 
+        int AvailableBytes { get; }
+
         byte[] ReadAvailable();
 
         byte[] ReadAvailable(int maxCount);

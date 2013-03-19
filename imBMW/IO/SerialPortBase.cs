@@ -3,6 +3,7 @@ using Microsoft.SPOT;
 using System.Text;
 using System.Threading;
 using System.Runtime.CompilerServices;
+using Microsoft.SPOT.Hardware;
 
 namespace System.IO.Ports
 {
@@ -40,8 +41,17 @@ namespace System.IO.Ports
 
         protected AutoResetEvent _readToEvent;        // Handles the thread synchronization when both DataReceived event is being requested and user calls ReadTo().
 
-        public SerialPortBase()
+        public SerialPortBase() : this(0, 1) { }
+
+        public SerialPortBase(int writeBufferSize, int readBufferSize)
         {
+            // some initial parameter checks.
+            if (writeBufferSize < 0) throw new ArgumentOutOfRangeException("writeBufferSize");
+            if (readBufferSize < 1) throw new ArgumentOutOfRangeException("readBuferSize");
+
+            _writeBufferSize = writeBufferSize;
+            _readBufferSize = readBufferSize;
+
             _bufferSync = new object();                 // initializing the sync root object
             _incomingBuffer = new byte[_readBufferSize]; // allocating memory for incoming data
         }
@@ -64,7 +74,7 @@ namespace System.IO.Ports
         public virtual void Write(byte[] data, int offset, int length)
         {
             _writeThread = Thread.CurrentThread;                                // grab the current thread so that we can pause the writing
-            if (CanWrite) _writeThread.Suspend();                               // do not continue if _busy is already set (eg. the signal was changed when we weren't writing)
+            if (!CanWrite) _writeThread.Suspend();                              // do not continue if _busy is already set (eg. the signal was changed when we weren't writing)
 
             if (_writeBufferSize < 1)                                           // If user does not want to split data into chunks,
             {
@@ -130,7 +140,7 @@ namespace System.IO.Ports
         /// <summary>
         /// Gets number of bytes available in buffer for reading.
         /// </summary>
-        public int AvailableBytes { get { return _incomingBufferValidLength; } }
+        public virtual int AvailableBytes { get { return _incomingBufferValidLength; } }
 
         /// <summary>
         /// Reads all available bytes and removes them from the reading buffer.

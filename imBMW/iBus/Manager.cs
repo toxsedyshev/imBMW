@@ -49,7 +49,17 @@ namespace imBMW.iBus
 
         static void iBus_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
-            byte b = ((ISerialPort)sender).ReadAvailable()[0];
+            ISerialPort port = (ISerialPort)sender;
+            if (port.AvailableBytes == 0)
+            {
+                Logger.Warning("Available bytes lost! " + port.ToString());
+                return;
+            }
+            if (port.AvailableBytes != 1)
+            {
+                Logger.Warning("Available bytes > 1 !!! " + port.ToString());
+            }
+            byte b = port.ReadAvailable(1)[0];
             if (messageBufferLength >= Message.PacketLengthMax)
             {
                 Logger.Warning("Buffer overflow. We can't reach it, yeah?");
@@ -63,7 +73,7 @@ namespace imBMW.iBus
                 {
                     if (!Message.CanStartWith(messageBuffer, messageBufferLength))
                     {
-                        Logger.Warning("Buffer skip: non-iBus data detected.");
+                        Logger.Warning("Buffer skip: non-iBus data detected: " + messageBuffer[0].ToHex());
                         SkipBuffer(1);
                         continue;
                     }

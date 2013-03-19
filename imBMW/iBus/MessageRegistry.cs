@@ -273,6 +273,7 @@ namespace imBMW.iBus
         static MessageRegistry()
         {
             messageDescriptions = new Hashtable();
+            messageDescriptions.Add("01", "Poll request");
             messageDescriptions.Add("02 00", "Poll response");
             messageDescriptions.Add("02 01", "Announce");
         }
@@ -281,11 +282,7 @@ namespace imBMW.iBus
 
         public static string ToPrettyString(this Message message)
         {
-            string description = message.ReceiverDescription;
-            if (description == null)
-            {
-                description = message.Describe();
-            }
+            string description = message.Describe();
             if (description == null)
             {
                 description = message.DataDump;
@@ -297,7 +294,12 @@ namespace imBMW.iBus
         {
             if (message.Data.Length == 0)
             {
-                return null;
+                return "";
+            }
+
+            if (message.ReceiverDescription != null)
+            {
+                return message.ReceiverDescription;
             }
 
             if (messageDescriptions.Contains(message.DataDump))

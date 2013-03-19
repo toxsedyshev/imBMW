@@ -215,7 +215,6 @@ namespace imBMW.iBus.Devices
             {
                 Manager.EnqueueMessage(MessagePollResponse);
                 Manager.EnqueueMessage(MessagePlayingDisk1Track1);
-                m.ReceiverDescription = "Poll " + m.DestinationDevice.ToStringValue();
             }
             else if (m.Data.Compare(DataRandomPlay))
             {
