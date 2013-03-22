@@ -40,8 +40,7 @@ namespace System.IO.Ports
                 _busy = null;
             else
             {                                           // start monitoring the flow control pin for both edges
-                _busy = new InterruptPort(busySignal, true, Port.ResistorMode.PullDown, Port.InterruptMode.InterruptEdgeBoth);
-//                Debug.Print(_busy.Read()?"busy true":"busy false");
+                _busy = new InterruptPort(busySignal, false, Port.ResistorMode.PullDown, Port.InterruptMode.InterruptEdgeBoth);
                 _busy.OnInterrupt += new NativeEventHandler(OnBusyChanged);
             }
         }

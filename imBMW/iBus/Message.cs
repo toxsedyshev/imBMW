@@ -295,6 +295,7 @@ namespace imBMW.iBus
                     TimeSpan span = TimeStartedProcessing - TimeEnqueued;
                     s += "In queue: " + span.GetTotalSeconds() + "." + span.GetTotalMilliseconds();
                 }
+                return s;
             }
             return String.Empty;
         }

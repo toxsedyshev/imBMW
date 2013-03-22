@@ -33,11 +33,11 @@ namespace imBMW.iBus
 
         public static void Init(ISerialPort port)
         {
-            iBus = port;
-            iBus.DataReceived += new SerialDataReceivedEventHandler(iBus_DataReceived);
-
             messageWriteQueue = new QueueThreadWorker(SendMessage);
             //messageReadQueue = new QueueThreadWorker(ProcessMessage);
+
+            iBus = port;
+            iBus.DataReceived += new SerialDataReceivedEventHandler(iBus_DataReceived);
         }
 
         #region Message reading and processing
@@ -80,7 +80,9 @@ namespace imBMW.iBus
                     return;
                 }
                 ProcessMessage(m);
+                //#if DEBUG
                 //m.PerformanceInfo.TimeEnqueued = DateTime.Now;
+                //#endif
                 //messageReadQueue.Enqueue(m);
                 SkipBuffer(m.PacketLength);
             }
