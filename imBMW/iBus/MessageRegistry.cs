@@ -280,14 +280,19 @@ namespace imBMW.iBus
 
         #endregion
 
-        public static string ToPrettyString(this Message message)
+        public static string ToPrettyString(this Message message, bool withPerformanceInfo = false)
         {
             string description = message.Describe();
             if (description == null)
             {
                 description = message.DataDump;
             }
-            return message.SourceDevice.ToStringValue() + " > " + message.DestinationDevice.ToStringValue() + ": " + description;
+            description = message.SourceDevice.ToStringValue() + " > " + message.DestinationDevice.ToStringValue() + ": " + description;
+            if (withPerformanceInfo)
+            {
+                description += " (" + message.PerformanceInfo.ToString() + ")";
+            }
+            return description;
         }
 
         public static string Describe(this Message message)

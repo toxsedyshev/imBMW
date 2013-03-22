@@ -83,7 +83,7 @@ namespace imBMW.Tools
 
         public static void Info(iBus.Message message, string priorityTitle = null)
         {
-            Log(LogPriority.Info, message.ToPrettyString(), priorityTitle);
+            Log(LogPriority.Info, message.ToPrettyString(true), priorityTitle);
         }
 
         public static void Warning(string message, string priorityTitle = null)
@@ -93,7 +93,7 @@ namespace imBMW.Tools
 
         public static void Warning(iBus.Message message, string priorityTitle = null)
         {
-            Log(LogPriority.Warning, message.ToPrettyString(), priorityTitle);
+            Log(LogPriority.Warning, message.ToPrettyString(true), priorityTitle);
         }
 
         public static void Warning(Exception exception, string message = null, string priorityTitle = null)

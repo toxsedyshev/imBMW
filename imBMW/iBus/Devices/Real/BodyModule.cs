@@ -114,20 +114,18 @@ namespace imBMW.iBus.Devices.Real
 
         public static void OpenWindows()
         {
-            //Manager.EnqueueMessage(MessageOpenWindows);
-            
-            Manager.EnqueueMessage(MessageOpenWindowDriverFront);
-            Manager.EnqueueMessage(MessageOpenWindowPassengerFront);
-            Manager.EnqueueMessage(MessageOpenWindowPassengerRear);
-            Manager.EnqueueMessage(MessageOpenWindowDriverRear);
+            Manager.EnqueueMessage(MessageOpenWindowDriverFront, 
+                MessageOpenWindowPassengerFront, 
+                MessageOpenWindowPassengerRear,
+                MessageOpenWindowDriverRear);
         }
 
         public static void CloseWindows()
         {
-            Manager.EnqueueMessage(MessageCloseWindowDriverFront);
-            Manager.EnqueueMessage(MessageCloseWindowPassengerFront);
-            Manager.EnqueueMessage(MessageCloseWindowPassengerRear);
-            Manager.EnqueueMessage(MessageCloseWindowDriverRear);
+            Manager.EnqueueMessage(MessageCloseWindowDriverFront,
+                MessageCloseWindowPassengerFront,
+                MessageCloseWindowPassengerRear,
+                MessageCloseWindowDriverRear);
         }
 
         public static void OpenSunroof()
@@ -145,9 +143,9 @@ namespace imBMW.iBus.Devices.Real
         /// </summary>
         public static void FoldMirrors()
         {
-            Manager.EnqueueMessage(MessageFoldMirrorsE46);
-            Manager.EnqueueMessage(MessageFoldPassengerMirrorE39);
-            Manager.EnqueueMessage(MessageFoldDriverMirrorE39);
+            Manager.EnqueueMessage(MessageFoldMirrorsE46,
+                MessageFoldPassengerMirrorE39,
+                MessageFoldDriverMirrorE39);
         }
 
         /// <summary>
@@ -155,9 +153,9 @@ namespace imBMW.iBus.Devices.Real
         /// </summary>
         public static void UnfoldMirrors()
         {
-            Manager.EnqueueMessage(MessageUnfoldMirrorsE46);
-            Manager.EnqueueMessage(MessageUnfoldPassengerMirrorE39);
-            Manager.EnqueueMessage(MessageUnfoldDriverMirrorE39);
+            Manager.EnqueueMessage(MessageUnfoldMirrorsE46,
+                MessageUnfoldPassengerMirrorE39,
+                MessageUnfoldDriverMirrorE39);
         }
 
         public static event RemoteKeyButtonEventHandler RemoteKeyButtonPressed;

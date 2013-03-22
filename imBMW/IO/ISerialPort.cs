@@ -1,9 +1,12 @@
 using System;
 using Microsoft.SPOT;
 using System.IO.Ports;
+using Microsoft.SPOT.Hardware;
 
 namespace System.IO.Ports
 {
+    public delegate void BusyChangedEventHandler(bool busy);
+
     public interface ISerialPort
     {
         void Write(params byte[] data);
@@ -27,5 +30,7 @@ namespace System.IO.Ports
         void Flush();
 
         event SerialDataReceivedEventHandler DataReceived;
+
+        event BusyChangedEventHandler BusyChanged; 
     }
 }

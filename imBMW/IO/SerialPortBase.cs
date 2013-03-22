@@ -64,6 +64,17 @@ namespace System.IO.Ports
 
         protected abstract int WriteDirect(byte[] data, int offset, int length);
 
+        public virtual event BusyChangedEventHandler BusyChanged;
+
+        protected void OnBusyChanged(bool busy)
+        {
+            var e = BusyChanged;
+            if (e != null)
+            {
+                e(busy);
+            }
+        }
+
         /// <summary>
         /// Writes data to a serial port.
         /// </summary>

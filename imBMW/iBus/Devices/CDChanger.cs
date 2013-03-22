@@ -213,8 +213,7 @@ namespace imBMW.iBus.Devices
             }
             else if (m.Data.Compare(DataPollRequest))
             {
-                Manager.EnqueueMessage(MessagePollResponse);
-                Manager.EnqueueMessage(MessagePlayingDisk1Track1);
+                Manager.EnqueueMessage(MessagePollResponse, MessagePlayingDisk1Track1);
             }
             else if (m.Data.Compare(DataRandomPlay))
             {
@@ -236,8 +235,7 @@ namespace imBMW.iBus.Devices
         {
             while (true)
             {
-                Manager.EnqueueMessage(MessageAnnounce);
-                Manager.EnqueueMessage(MessagePollResponse);
+                Manager.EnqueueMessage(MessageAnnounce, MessagePollResponse);
                 Thread.Sleep(30000);
             }
         }

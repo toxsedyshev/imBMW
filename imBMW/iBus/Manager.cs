@@ -80,6 +80,7 @@ namespace imBMW.iBus
                     return;
                 }
                 ProcessMessage(m);
+                //m.PerformanceInfo.TimeEnqueued = DateTime.Now;
                 //messageReadQueue.Enqueue(m);
                 SkipBuffer(m.PacketLength);
             }
@@ -97,6 +98,10 @@ namespace imBMW.iBus
         public static void ProcessMessage(object o)
         {
             var m = (Message)o;
+
+            #if DEBUG
+            m.PerformanceInfo.TimeStartedProcessing = DateTime.Now;
+            #endif
 
             MessageEventArgs args = null;
             try
@@ -164,6 +169,10 @@ namespace imBMW.iBus
                 }
             }
 
+            #if DEBUG
+            m.PerformanceInfo.TimeEndedProcessing = DateTime.Now;
+            #endif
+
             try
             {
                 var e = AfterMessageReceived;
@@ -188,14 +197,40 @@ namespace imBMW.iBus
 
         static QueueThreadWorker messageWriteQueue;
 
-        static void SendMessage(object m)
+        static void SendMessage(object o)
         {
-            iBus.Write(((Message)m).Packet);
+            Message m = (Message)o;
 
-            var e = AfterMessageSent;
+            #if DEBUG
+            m.PerformanceInfo.TimeStartedProcessing = DateTime.Now;
+            #endif
+
+            MessageEventArgs args = null;
+            var e = BeforeMessageSent;
             if (e != null)
             {
-                e(new MessageEventArgs((Message)m));
+                args = new MessageEventArgs(m);
+                e(args);
+                if (args.Cancel)
+                {
+                    return;
+                }
+            }
+
+            iBus.Write(m.Packet);
+
+            #if DEBUG
+            m.PerformanceInfo.TimeEndedProcessing = DateTime.Now;
+            #endif
+
+            e = AfterMessageSent;
+            if (e != null)
+            {
+                if (args == null)
+                {
+                    args = new MessageEventArgs(m);
+                }
+                e(args);
             }
 
             Thread.Sleep(5); // Don't flood iBus
@@ -203,18 +238,22 @@ namespace imBMW.iBus
 
         public static void EnqueueMessage(Message m)
         {
-            MessageEventArgs args = null;
-            var e = BeforeMessageSent;
-            if (e != null)
+            #if DEBUG
+            m.PerformanceInfo.TimeEnqueued = DateTime.Now;
+            #endif
+            messageWriteQueue.Enqueue(m);
+        }
+
+        public static void EnqueueMessage(params Message[] messages)
+        {
+            #if DEBUG
+            var now = DateTime.Now;
+            foreach (Message m in messages)
             {
-                args = new MessageEventArgs(m);
-                e(args);
+                m.PerformanceInfo.TimeEnqueued = now;
             }
-            if (args == null || !args.Cancel)
-            {
-                // TODO benchmark sending in ms
-                messageWriteQueue.Enqueue(m);
-            }
+            #endif
+            messageWriteQueue.EnqueueArray(messages);
         }
 
         #endregion

@@ -66,14 +66,40 @@ namespace imBMW.Tools
             lock (lockObj)
             {
                 base.Enqueue(item);
-                /**
-                 * Warning! Current item may be added to suspended queue and will be processed only on next Enqueue().
-                 * Tried AutoResetEvent instead of Suspend/Resume but no success because of strange slowness.
-                 */
-                if (queueThread.ThreadState == ThreadState.Suspended || queueThread.ThreadState == ThreadState.SuspendRequested)
+                CheckRunning();
+            }
+        }
+
+        public void EnqueueArray(params object[] items)
+        {
+            if (items == null)
+            {
+                throw new ArgumentException("items is null");
+            }
+            lock (lockObj)
+            {
+                foreach (object item in items)
                 {
-                    queueThread.Resume();
+                    if (item == null)
+                    {
+                        continue;
+                    }
+                    base.Enqueue(item);
                 }
+                CheckRunning();
+            }
+        }
+
+        public void CheckRunning()
+        {
+            /**
+             * Warning! Current item may be added to suspended queue and will be processed only on next Enqueue().
+             * Tried AutoResetEvent instead of Suspend/Resume but no success because of strange slowness.
+             */
+            // TODO Check ResetEvent on LDR and LED
+            if (queueThread.ThreadState == ThreadState.Suspended || queueThread.ThreadState == ThreadState.SuspendRequested)
+            {
+                queueThread.Resume();
             }
         }
     }

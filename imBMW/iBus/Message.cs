@@ -20,6 +20,7 @@ namespace imBMW.iBus
         string dataDump;
         DeviceAddress sourceDevice = DeviceAddress.Unset;
         DeviceAddress destinationDevice = DeviceAddress.Unset;
+        PerformanceInfo performanceInfo;
 
         public Message(DeviceAddress source, DeviceAddress destination, params byte[] data)
             : this(source, destination, null, data)
@@ -232,11 +233,71 @@ namespace imBMW.iBus
             }
         }
 
+        /// <summary>
+        /// Description of the message set by a receiver or by MessageRegistry
+        /// </summary>
         public string ReceiverDescription { get; set; }
+
+        public PerformanceInfo PerformanceInfo
+        {
+            get
+            {
+                if (performanceInfo == null)
+                {
+                    performanceInfo = new PerformanceInfo();
+                }
+                return performanceInfo;
+            }
+        }
 
         public override string ToString()
         {
             return this.ToPrettyString();
         }
+    }
+
+    public class PerformanceInfo 
+    {
+        /// <summary>
+        /// Time when the message was enqueued.
+        /// Available only when debugging
+        /// </summary>
+        public DateTime TimeEnqueued { get; set; }
+
+        /// <summary>
+        /// Time when the message was started processing.
+        /// Available only when debugging
+        /// </summary>
+        public DateTime TimeStartedProcessing { get; set; }
+
+        /// <summary>
+        /// Time when the message was ended processing.
+        /// Available only when debugging
+        /// </summary>
+        public DateTime TimeEndedProcessing { get; set; }
+
+        public override string ToString()
+        {
+            if (TimeStartedProcessing != default(DateTime))
+            {
+                string s = "";
+                if (TimeEndedProcessing != default(DateTime))
+                {
+                    TimeSpan span = TimeEndedProcessing - TimeStartedProcessing;
+                    s = "Processed: " + span.GetTotalSeconds() + "." + span.GetTotalMilliseconds();
+                }
+                if (TimeEnqueued != default(DateTime))
+                {
+                    if (s != "")
+                    {
+                        s += " + ";
+                    }
+                    TimeSpan span = TimeStartedProcessing - TimeEnqueued;
+                    s += "In queue: " + span.GetTotalSeconds() + "." + span.GetTotalMilliseconds();
+                }
+            }
+            return String.Empty;
+        }
+
     }
 }

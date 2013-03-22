@@ -63,10 +63,12 @@ namespace System.IO.Ports
         // This is event handler for changes on the hardware flow pin.
         private void OnBusyChanged(uint port, uint state, DateTime time)
         {
+            OnBusyChanged((state == 1) == BusyValue);
+
             // currently not writing
             if (_writeThread == null) return;
 
-            if ((state == 1 ? true : false) == BusyValue) _writeThread.Suspend(); // if _busy was set, pause sending the data
+            if ((state == 1) == BusyValue) _writeThread.Suspend(); // if _busy was set, pause sending the data
             else _writeThread.Resume();                     // if it was cleared, resume sending the data
         }
 

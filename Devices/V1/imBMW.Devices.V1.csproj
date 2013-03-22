@@ -37,6 +37,7 @@
     <Compile Include="IO\SerialPortCDC.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Program.cs" />
+    <Compile Include="SampleFeatures.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FEZMini_GHIElectronics.NETMF.FEZ, Version=4.1.8.0, Culture=neutral, processorArchitecture=MSIL" />

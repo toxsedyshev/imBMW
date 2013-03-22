@@ -45,6 +45,8 @@ namespace imBMW.Features
                 {
                     if (AutoCloseWindows)
                     {
+                        // TODO Fix windows closing: current commands close them just a half
+                        BodyModule.CloseWindows();
                         BodyModule.CloseWindows();
                     }
                     if (AutoCloseSunroof)
