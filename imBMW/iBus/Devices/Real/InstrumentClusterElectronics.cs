@@ -60,7 +60,7 @@ namespace imBMW.iBus.Devices.Real
         {
             if (m.Data.Length == 3 && m.Data[0] == 0x18)
             {
-                SpeedRPMData = m.Data;
+                OnSpeedRPMChanged(((uint)m.Data[1]) * 2, ((uint)m.Data[2]) * 100);
                 m.ReceiverDescription = "Speed " + CurrentSpeed + "km/h " + CurrentRPM + "RPM";
             }
             else if (m.Data.Length == 2 && m.Data[0] == 0x11)
@@ -80,6 +80,7 @@ namespace imBMW.iBus.Devices.Real
                 } 
                 else
                 {
+                    m.ReceiverDescription = "Ignition unknown " + ign.ToHex();
                     return;
                 }
                 m.ReceiverDescription = "Ignition " + CurrentIgnitionState.ToStringValue();
@@ -105,21 +106,22 @@ namespace imBMW.iBus.Devices.Real
                 {
                     e(new IgnitionEventArgs(currentIgnitionState, previous));
                 }
+                if (currentIgnitionState == IgnitionState.Off)
+                {
+                    OnSpeedRPMChanged(CurrentSpeed, 0);
+                }
                 Logger.Info("Ignition " + currentIgnitionState.ToStringValue());
             }
         }
 
-        public static byte[] SpeedRPMData
+        private static void OnSpeedRPMChanged(uint speed, uint rpm)
         {
-            set
+            CurrentSpeed = speed;
+            CurrentRPM = rpm;
+            var e = SpeedRPMChanged;
+            if (e != null)
             {
-                CurrentSpeed = ((uint)value[1]) * 2;
-                CurrentRPM = ((uint)value[2]) * 100;
-                var e = SpeedRPMChanged;
-                if (e != null)
-                {
-                    e(new SpeedRPMEventArgs(CurrentSpeed, CurrentRPM));
-                }
+                e(new SpeedRPMEventArgs(CurrentSpeed, CurrentRPM));
             }
         }
 

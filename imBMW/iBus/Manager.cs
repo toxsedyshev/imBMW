@@ -57,7 +57,7 @@ namespace imBMW.iBus
             }
             if (port.AvailableBytes != 1)
             {
-                Logger.Warning("Available bytes > 1 !!! " + port.ToString());
+                Logger.Warning("Available bytes = " + port.AvailableBytes + " !!! " + port.ToString());
             }
             byte b = port.ReadAvailable(1)[0];
             if (messageBufferLength >= Message.PacketLengthMax)

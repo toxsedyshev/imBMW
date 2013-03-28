@@ -278,6 +278,7 @@ namespace imBMW.iBus
 
         public override string ToString()
         {
+            // TODO Change to Cpu.SystemClock
             if (TimeStartedProcessing != default(DateTime))
             {
                 string s = "";

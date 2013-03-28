@@ -7,31 +7,6 @@ namespace System.IO.Ports
 {
     public class SerialPortCDC : SerialPortBase, ISerialPort
     {
-        /// <summary>
-        /// Number of milliseconds to pause the writing thread after sending the write buffer.
-        /// </summary>
-        public override int WriteTimeout
-        {
-            get { return port.WriteTimeout; }
-            set { port.WriteTimeout = value; }
-        }
-
-        /// <summary>
-        /// Number of milliseconds to wait for data in read methods. Default is <see cref="Timeout.Infinite"/>. Pass zero to make the read methods return immediately when no data are buffered.
-        /// </summary>
-        public override int ReadTimeout
-        {
-            get { return port.ReadTimeout; }
-            set
-            {
-                if (IsReading)
-                {
-                    return;
-                }
-                port.ReadTimeout = value;
-            }
-        }
-
         USBC_CDC port;
 
         public SerialPortCDC(USBC_CDC port, int writeBufferSize, int readBufferSize)
@@ -41,18 +16,13 @@ namespace System.IO.Ports
 
             this.port = port;
 
+            port.ReadTimeout = -1; // Blocking reading
+            
             WriteTimeout = 33;
             ReadTimeout = Timeout.Infinite;
         }
 
         public SerialPortCDC(USBC_CDC port) : this(port, 0, 1) { }
-
-        protected override void StartReading()
-        {
-            ReadTimeout = -1;
-
-            base.StartReading();
-        }
 
         protected override int WriteDirect(byte[] data, int offset, int length)
         {

@@ -24,7 +24,6 @@ namespace imBMW.iBus.Devices
         static Message MessageAnnounce = new Message(DeviceAddress.CDChanger, DeviceAddress.Broadcast, 0x02, 0x01);
         static Message MessagePlayingDisk1Track1 = new Message(DeviceAddress.CDChanger, DeviceAddress.Radio, "Playing D1 T1", 0x39, 0x00, 0x09, 0x00, 0x3F, 0x00, 0x01, 0x01);
 
-        static byte[] DataPollRequest = new byte[] { 0x01 };
         static byte[] DataCurrentDiskTrackRequest = new byte[] { 0x38, 0x00, 0x00 };
         static byte[] DataStopPlaying  = new byte[] { 0x38, 0x01, 0x00 };
         static byte[] DataTurnOff      = new byte[] { 0x38, 0x02, 0x00 };
@@ -211,7 +210,7 @@ namespace imBMW.iBus.Devices
                 IsCDCActive = false;
                 m.ReceiverDescription = "Stop playing";
             }
-            else if (m.Data.Compare(DataPollRequest))
+            else if (m.Data.Compare(MessageRegistry.DataPollRequest))
             {
                 Manager.EnqueueMessage(MessagePollResponse, MessagePlayingDisk1Track1);
             }
@@ -225,10 +224,6 @@ namespace imBMW.iBus.Devices
                 Radio.DisplayText("imBMW", TextAlign.Center);
                 m.ReceiverDescription = "Turn off";
             }
-            /*else if (m.SourceDevice == DeviceAddress.Radio)
-            {
-                Logger.Info(m);
-            }*/
         }
 
         static void announce()

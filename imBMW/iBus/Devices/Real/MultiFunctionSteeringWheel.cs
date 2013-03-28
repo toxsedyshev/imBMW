@@ -25,16 +25,6 @@ namespace imBMW.iBus.Devices.Real
         static bool wasDialLongPressed;
         static bool needSkipRT;
 
-        static byte[] DataPollRequest = new byte[] { 0x01 };
-        // TODO change to switch()
-        static byte[] DataNextPressed = new byte[] { 0x3B, 0x01 };
-        static byte[] DataPrevPressed = new byte[] { 0x3B, 0x08 };
-        static byte[] DataRTPressedR = new byte[] { 0x3B, 0x40 };
-        static byte[] DataRTPressedT = new byte[] { 0x3B, 0x00 };
-        static byte[] DataDialPressed = new byte[] { 0x3B, 0x80 };
-        static byte[] DataDialLongPressed = new byte[] { 0x3B, 0x90 };
-        static byte[] DataDialReleased = new byte[] { 0x3B, 0xA0 };
-
         static Message MessagePhoneResponse = new Message(DeviceAddress.Telephone, DeviceAddress.Broadcast, 0x02, 0x00);
 
         /**
@@ -61,45 +51,56 @@ namespace imBMW.iBus.Devices.Real
 
         static void ProcessMFLMessage(Message m)
         {
-            if (m.Data.Compare(DataPollRequest))
+            if (m.Data.Compare(MessageRegistry.DataPollRequest))
             {
                 if (EmulatePhone)
                 {
                     Manager.EnqueueMessage(MessagePhoneResponse);
                 }
             }
-            else if (m.Data.Compare(DataNextPressed))
+            else if (m.Data.Length == 2 && m.Data[0] == 0x3B)
             {
-                OnButtonPressed(m, MFLButton.Next);
-            }
-            else if (m.Data.Compare(DataPrevPressed))
-            {
-                OnButtonPressed(m, MFLButton.Prev);
-            }
-            else if (m.Data.Compare(DataRTPressedR) || m.Data.Compare(DataRTPressedT))
-            {
-                if (!needSkipRT || m.Data.Compare(DataRTPressedR))
+                var btn = m.Data[1];
+                switch (btn)
                 {
-                    OnButtonPressed(m, MFLButton.RT);
+                    case 0x01:
+                        OnButtonPressed(m, MFLButton.Next);
+                        break;
+
+                    case 0x08:
+                        OnButtonPressed(m, MFLButton.Prev);
+                        break;
+
+                    case 0x40:
+                    case 0x00:
+                        if (!needSkipRT || btn == 0x40)
+                        {
+                            OnButtonPressed(m, MFLButton.RT);
+                        }
+                        needSkipRT = false;
+                        break;
+
+                    case 0x80:
+                        wasDialLongPressed = false;
+                        break;
+
+                    case 0x90:
+                        wasDialLongPressed = true;
+                        OnButtonPressed(m, MFLButton.DialLong);
+                        break;
+
+                    case 0xA0:
+                        if (!wasDialLongPressed)
+                        {
+                            OnButtonPressed(m, MFLButton.Dial);
+                        }
+                        wasDialLongPressed = false;
+                        break;
+
+                    default:
+                        m.ReceiverDescription = "Button unknown " + btn.ToHex();
+                        break;
                 }
-                needSkipRT = false;
-            }
-            else if (m.Data.Compare(DataDialPressed))
-            {
-                wasDialLongPressed = false;
-            }
-            else if (m.Data.Compare(DataDialLongPressed))
-            {
-                wasDialLongPressed = true;
-                OnButtonPressed(m, MFLButton.DialLong);
-            }
-            else if (m.Data.Compare(DataDialReleased))
-            {
-                if (!wasDialLongPressed)
-                {
-                    OnButtonPressed(m, MFLButton.Dial);
-                }
-                wasDialLongPressed = false;
             }
         }
 

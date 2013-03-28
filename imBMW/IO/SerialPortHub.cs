@@ -20,6 +20,7 @@ namespace System.IO.Ports
                 {
                     byte[] data = port.ReadAvailable();
                     Write(data, 0, data.Length, port);
+                    OnDataReceived(data, data.Length);
                 };
             }
         }
@@ -40,41 +41,22 @@ namespace System.IO.Ports
             int i = 0;
             foreach (ISerialPort port in ports)
             {
-                if (except == port || i == count)
+                if (except == port)
                 {
                     // TODO test it!
                     continue;
                 }
-                threads[i] = new Thread(() =>
-                {
-                    port.Write(data, offset, length);
-                });
+                threads[i] = new Thread(() => port.Write(data, offset, length));
                 threads[i].Start();
-                i++;
+                if (i < count - 1)
+                {
+                    i++;
+                }
             }
             foreach (Thread thread in threads)
             {
                 thread.Join();
             }
-            // TODO benchmark in ms
-        }
-
-        public override int AvailableBytes
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        public override byte[] ReadAvailable(int maxCount)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override int Read(byte[] buffer, int offset, int count)
-        {
-            throw new NotImplementedException();
         }
 
         public override void Flush()
@@ -85,33 +67,40 @@ namespace System.IO.Ports
             }
         }
 
-        public override event SerialDataReceivedEventHandler DataReceived
+        public override int Read(byte[] buffer, int offset, int count)
         {
-            add
-            {
-                foreach (ISerialPort port in ports)
-                {
-                    port.DataReceived += value;
-                }
-            }
-            remove
-            {
-                foreach (ISerialPort port in ports)
-                {
-                    port.DataReceived -= value;
-                }
-            }
+            throw new NotImplementedException();
         }
 
-        protected override bool CanWrite { get { return true; } }
+        protected override byte[] ReadTo(params byte[] mark)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override void StartReading()
+        {
+            // We are reading always
+        }
+
+        protected override void StopReading()
+        {
+            // We are reading always
+        }
+
+        protected override bool CanWrite 
+        { 
+            get { return true; } 
+        }
 
         protected override int WriteDirect(byte[] data, int offset, int length)
         {
+            // This method will not be called
             throw new NotImplementedException();
         }
 
         protected override int ReadDirect(byte[] data, int offset, int length)
         {
+            // This method will not be called
             throw new NotImplementedException();
         }
     }

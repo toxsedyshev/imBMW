@@ -71,7 +71,8 @@ namespace imBMW.iBus.Devices.Real
         {
             if (m.Data.Length == 2 && m.Data[0] == 0x72)
             {
-                switch (m.Data[1])
+                var btn = m.Data[1];
+                switch (btn)
                 {
                     case 0x12:
                         OnRemoteKeyButton(m, RemoteKeyButton.Lock);
@@ -81,6 +82,9 @@ namespace imBMW.iBus.Devices.Real
                         break;
                     case 0x42:
                         OnRemoteKeyButton(m, RemoteKeyButton.Trunk);
+                        break;
+                    default:
+                        m.ReceiverDescription = "Remote key unknown button " + btn + " press";
                         break;
                 }
             }
@@ -112,6 +116,9 @@ namespace imBMW.iBus.Devices.Real
             Manager.EnqueueMessage(MessageUnlockDoors);
         }
 
+        /// <summary>
+        /// Warning! Opens windows just by half!
+        /// </summary>
         public static void OpenWindows()
         {
             Manager.EnqueueMessage(MessageOpenWindowDriverFront, 
@@ -120,6 +127,9 @@ namespace imBMW.iBus.Devices.Real
                 MessageOpenWindowDriverRear);
         }
 
+        /// <summary>
+        /// Warning! Closes windows just by half!
+        /// </summary>
         public static void CloseWindows()
         {
             Manager.EnqueueMessage(MessageCloseWindowDriverFront,

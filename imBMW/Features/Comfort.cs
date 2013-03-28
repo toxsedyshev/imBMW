@@ -1,6 +1,7 @@
 using System;
 using Microsoft.SPOT;
 using imBMW.iBus.Devices.Real;
+using System.Threading;
 
 namespace imBMW.Features
 {
@@ -45,9 +46,10 @@ namespace imBMW.Features
                 {
                     if (AutoCloseWindows)
                     {
-                        // TODO Fix windows closing: current commands close them just a half
+                        // TODO Fix windows closing: current commands close them just by half
                         BodyModule.CloseWindows();
-                        BodyModule.CloseWindows();
+                        // TODO Fix timer
+                        Timer closeWind = new Timer(delegate { BodyModule.CloseWindows(); }, null, 4000, 0);
                     }
                     if (AutoCloseSunroof)
                     {

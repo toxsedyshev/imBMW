@@ -24,7 +24,7 @@ namespace imBMW.Devices.V1
             };
             Logger.Info("TH3122 serial port inited");
 
-            InputPort jumper = new InputPort((Cpu.Pin)FEZ_Pin.Interrupt.LDR, false, Port.ResistorMode.PullUp);
+            InputPort jumper = new InputPort((Cpu.Pin)FEZ_Pin.Digital.LDR, false, Port.ResistorMode.PullUp);
             if (!jumper.Read())
             {
                 Logger.Info("Jumper installed. Starting virtual COM port");
@@ -68,6 +68,11 @@ namespace imBMW.Devices.V1
 
             SampleFeatures.Init();
             Logger.Info("Sample features inited");
+
+            LED.Write(true);
+            Thread.Sleep(50);
+            LED.Write(false);
+            Logger.Info("LED blinked - inited");
         }
 
         public static void Main()

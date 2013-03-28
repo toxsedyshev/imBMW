@@ -42,7 +42,7 @@ namespace imBMW.Devices.V1
                             showSpeedRpm = !showSpeedRpm;
                             if (showSpeedRpm)
                             {
-                                ShowSpeedRPM(InstrumentClusterElectronics.CurrentSpeed, InstrumentClusterElectronics.CurrentRPM);
+                                ShowSpeedRPM(InstrumentClusterElectronics.CurrentSpeed, InstrumentClusterElectronics.CurrentRPM, true);
                             }
                             else
                             {
@@ -56,6 +56,12 @@ namespace imBMW.Devices.V1
                         case 0x03:
                             BodyModule.OpenWindows();
                             Radio.DisplayText("Open winds");
+                            break;
+                        case 0x02:
+                            Radio.DisplayTextWithDelay(DateTime.Now.ToString("dd HH:mm:ss"));
+                            break;
+                        case 0x01:
+                            Radio.DisplayTextWithDelay(":)", TextAlign.Center);
                             break;
                     }
                     m.ReceiverDescription = "Change CD" + cdNumber;
@@ -71,14 +77,22 @@ namespace imBMW.Devices.V1
             };
         }
 
-        static void ShowSpeedRPM(uint speed, uint rpm)
+        static void ShowSpeedRPM(uint speed, uint rpm, bool delay = false)
         {
             string s = speed.ToString();
             while (s.Length < 3)
             {
                 s = (char)0x19 + s;
             }
-            Radio.DisplayTextWithDelay(s + "kmh " + rpm);
+            s += "kmh " + rpm;
+            if (delay)
+            {
+                Radio.DisplayTextWithDelay(s);
+            }
+            else
+            {
+                Radio.DisplayText(s);
+            }
         }
     }
 }

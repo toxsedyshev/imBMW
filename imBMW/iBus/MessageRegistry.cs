@@ -268,14 +268,18 @@ namespace imBMW.iBus
             "", // "0xFF"
         };
 
+        public static byte[] DataPollRequest = new byte[] { 0x01 };
+        public static byte[] DataPollResponse = new byte[] { 0x02, 0x00 };
+        public static byte[] DataAnnounce = new byte[] { 0x02, 0x01 };
+
         static Hashtable messageDescriptions;
 
         static MessageRegistry()
         {
             messageDescriptions = new Hashtable();
-            messageDescriptions.Add("01", "Poll request");
-            messageDescriptions.Add("02 00", "Poll response");
-            messageDescriptions.Add("02 01", "Announce");
+            messageDescriptions.Add(DataPollRequest.ToHex(" "), "Poll request");
+            messageDescriptions.Add(DataPollResponse.ToHex(" "), "Poll response");
+            messageDescriptions.Add(DataAnnounce.ToHex(" "), "Announce");
         }
 
         #endregion
