@@ -19,9 +19,10 @@ namespace System.IO.Ports
 
             for (int i = 0; i < ports.Length; i++)
             {
-                ISerialPort port = ports[i];
+                int index = i;
+                ISerialPort port = ports[index];
 
-                queues[i] = new QueueThreadWorker((o) =>
+                queues[index] = new QueueThreadWorker((o) =>
                 {
                     byte[] data = (byte[])o;
                     port.Write(data, 0, data.Length);
@@ -31,7 +32,7 @@ namespace System.IO.Ports
                 port.DataReceived += (s, e) =>
                 {
                     byte[] data = port.ReadAvailable();
-                    Write(data, 0, data.Length, i);
+                    Write(data, 0, data.Length, index);
                     OnDataReceived(data, data.Length);
                 };
             }
