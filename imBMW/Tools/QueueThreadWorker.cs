@@ -21,7 +21,7 @@ namespace imBMW.Tools
             }
             this.processItem = processItem;
             queueThread = new Thread(queueWorker);
-            //queueThread.Priority = ThreadPriority.AboveNormal;
+            queueThread.Priority = ThreadPriority.AboveNormal;
             queueThread.Start();
         }
 

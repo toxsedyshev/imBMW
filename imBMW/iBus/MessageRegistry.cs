@@ -277,9 +277,9 @@ namespace imBMW.iBus
         static MessageRegistry()
         {
             messageDescriptions = new Hashtable();
-            messageDescriptions.Add(DataPollRequest.ToHex(" "), "Poll request");
-            messageDescriptions.Add(DataPollResponse.ToHex(" "), "Poll response");
-            messageDescriptions.Add(DataAnnounce.ToHex(" "), "Announce");
+            messageDescriptions.Add(DataPollRequest.ToHex(' '), "Poll request");
+            messageDescriptions.Add(DataPollResponse.ToHex(' '), "Poll response");
+            messageDescriptions.Add(DataAnnounce.ToHex(' '), "Announce");
         }
 
         #endregion

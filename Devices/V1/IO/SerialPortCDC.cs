@@ -16,10 +16,8 @@ namespace System.IO.Ports
 
             this.port = port;
 
-            port.ReadTimeout = -1; // Blocking reading
-            
-            WriteTimeout = 33;
-            ReadTimeout = Timeout.Infinite;
+            ReadTimeout = 33;
+            WriteTimeout = 0;
         }
 
         public SerialPortCDC(USBC_CDC port) : this(port, 0, 1) { }
@@ -32,6 +30,19 @@ namespace System.IO.Ports
         protected override int ReadDirect(byte[] data, int offset, int length)
         {
             return port.Read(data, offset, length);
+        }
+
+        public override int ReadTimeout
+        {
+            get
+            {
+                return base.ReadTimeout;
+            }
+            set
+            {
+                port.ReadTimeout = value;
+                base.ReadTimeout = value;
+            }
         }
 
         protected override bool CanWrite { get { return true; } }

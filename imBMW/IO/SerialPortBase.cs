@@ -99,13 +99,13 @@ namespace System.IO.Ports
             for (int i = offset; i < offset + length; i += _writeBufferSize)    // and this cycle would not execute.)
             {
                 WriteDirect(data, i, _writeBufferSize);                         // send it out
-                Thread.Sleep(WriteTimeout);                                     // and include pause after chunk
+                if (WriteTimeout > 0) Thread.Sleep(WriteTimeout);               // and include pause after chunk
             }
 
             if (modulus > 0)                                                    // If any data left which do not fill whole _writeBuferSize chunk,
             {
                 WriteDirect(data, offset + length, modulus);                    // send it out as well
-                Thread.Sleep(WriteTimeout);                                     // and pause for case consecutive calls to any write method.
+                if (WriteTimeout > 0) Thread.Sleep(WriteTimeout);               // and pause for case consecutive calls to any write method.
             }
 
             _writeThread = null;                                                // release current thread so that the _busy signal does not affect external code execution
@@ -391,13 +391,18 @@ namespace System.IO.Ports
         {
             // See GetBufferedData(byte[], int, int) for the illustration of circular buffer.
 
+            if (validLength == 0)
+            {
+                return;
+            }
+
             lock (_bufferSync)
             {
                 if (_incomingBufferPosition == 0)
                 {
                     if (_incomingBufferValidLength + validLength > _incomingBuffer.Length)
                     {
-                        _incomingBuffer = GetBufferedData(_incomingBuffer.Length * 2);
+                        _incomingBuffer = GetBufferedData(Math.Max(validLength, _incomingBuffer.Length * 2));
                     }
                     Array.Copy(data, 0, _incomingBuffer, _incomingBufferValidLength, validLength);
                     _incomingBufferValidLength += validLength;
@@ -406,7 +411,7 @@ namespace System.IO.Ports
                 {
                     if (_incomingBufferValidLength + validLength > _incomingBuffer.Length)      // If the received data would not fit in the internal buffer,
                     {
-                        _incomingBuffer = GetBufferedData(_incomingBuffer.Length * 2);          // make it bigger and align the current data at the buffer beginning.
+                        _incomingBuffer = GetBufferedData(Math.Max(validLength, _incomingBuffer.Length * 2));          // make it bigger and align the current data at the buffer beginning.
                         _incomingBufferPosition = 0;
                     }
 

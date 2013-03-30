@@ -24,13 +24,13 @@ namespace imBMW.Devices.V1
             };
             Logger.Info("TH3122 serial port inited");
 
-            InputPort jumper = new InputPort((Cpu.Pin)FEZ_Pin.Digital.LDR, false, Port.ResistorMode.PullUp);
+            InputPort jumper = new InputPort((Cpu.Pin)FEZ_Pin.Digital.An7, false, Port.ResistorMode.PullUp);
             if (!jumper.Read())
             {
                 Logger.Info("Jumper installed. Starting virtual COM port");
 
                 // Init hub between iBus port and virtual USB COM port
-                ISerialPort cdc = new SerialPortCDC(USBClientController.StandardDevices.StartCDC_WithDebugging());
+                ISerialPort cdc = new SerialPortCDC(USBClientController.StandardDevices.StartCDC_WithDebugging(), 0, iBus.Message.PacketLengthMax);
                 iBusPort = new SerialPortHub(iBusPort, cdc);
                 Logger.Info("Serial port hub started");
             }

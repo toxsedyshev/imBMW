@@ -77,11 +77,16 @@ namespace imBMW.iBus.Devices.Real
                         {
                             OnButtonPressed(m, MFLButton.RT);
                         }
+                        else
+                        {
+                            m.ReceiverDescription = "RT (skipped)";
+                        }
                         needSkipRT = false;
                         break;
 
                     case 0x80:
                         wasDialLongPressed = false;
+                        m.ReceiverDescription = "Dial pressed";
                         break;
 
                     case 0x90:
@@ -93,6 +98,10 @@ namespace imBMW.iBus.Devices.Real
                         if (!wasDialLongPressed)
                         {
                             OnButtonPressed(m, MFLButton.Dial);
+                        }
+                        else
+                        {
+                            m.ReceiverDescription = "Dial released";
                         }
                         wasDialLongPressed = false;
                         break;

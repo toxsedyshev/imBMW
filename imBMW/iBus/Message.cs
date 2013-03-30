@@ -76,7 +76,7 @@ namespace imBMW.iBus
             return TryCreate(packet, (byte)packet.Length);
         }
 
-        public static Message TryCreate(byte[] packet, byte length)
+        public static Message TryCreate(byte[] packet, int length)
         {
             if (!IsValid(packet, length))
             {
@@ -91,7 +91,7 @@ namespace imBMW.iBus
             return IsValid(packet, (byte)packet.Length);
         }
 
-        public static bool IsValid(byte[] packet, byte length)
+        public static bool IsValid(byte[] packet, int length)
         {
             if (length < PacketLengthMin)
             {
@@ -112,7 +112,7 @@ namespace imBMW.iBus
             return check == packet[packetLength - 1];
         }
 
-        public static bool CanStartWith(byte[] packet, byte length)
+        public static bool CanStartWith(byte[] packet, int length)
         {
             if (length < PacketLengthMin)
             {

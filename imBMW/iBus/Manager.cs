@@ -45,7 +45,8 @@ namespace imBMW.iBus
         //static QueueThreadWorker messageReadQueue;
 
         static byte[] messageBuffer = new byte[Message.PacketLengthMax];
-        static byte messageBufferLength = 0;
+        static int messageBufferLength = 0;
+        static object bufferSync = new object();
 
         static void iBus_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
@@ -55,36 +56,45 @@ namespace imBMW.iBus
                 Logger.Warning("Available bytes lost! " + port.ToString());
                 return;
             }
-            if (port.AvailableBytes != 1)
+            lock (bufferSync)
             {
-                Logger.Warning("Available bytes = " + port.AvailableBytes + " !!! " + port.ToString());
-            }
-            byte b = port.ReadAvailable(1)[0];
-            if (messageBufferLength >= Message.PacketLengthMax)
-            {
-                Logger.Warning("Buffer overflow. We can't reach it, yeah?");
-                SkipBuffer(1);
-            }
-            messageBuffer[messageBufferLength++] = b;
-            while (messageBufferLength >= Message.PacketLengthMin)
-            {
-                Message m = Message.TryCreate(messageBuffer, messageBufferLength);
-                if (m == null)
+                byte[] data = port.ReadAvailable();
+                if (messageBufferLength + data.Length > messageBuffer.Length)
                 {
-                    if (!Message.CanStartWith(messageBuffer, messageBufferLength))
-                    {
-                        Logger.Warning("Buffer skip: non-iBus data detected: " + messageBuffer[0].ToHex());
-                        SkipBuffer(1);
-                        continue;
-                    }
-                    return;
+                    Logger.Info("Buffer overflow. Extending it. " + port.ToString());
+                    byte[] newBuffer = new byte[messageBuffer.Length * 2];
+                    Array.Copy(messageBuffer, newBuffer, messageBufferLength);
+                    messageBuffer = newBuffer;
                 }
-                ProcessMessage(m);
-                //#if DEBUG
-                //m.PerformanceInfo.TimeEnqueued = DateTime.Now;
-                //#endif
-                //messageReadQueue.Enqueue(m);
-                SkipBuffer(m.PacketLength);
+                if (data.Length == 1)
+                {
+                    messageBuffer[messageBufferLength++] = data[0];
+                }
+                else
+                {
+                    Array.Copy(data, 0, messageBuffer, messageBufferLength, data.Length);
+                    messageBufferLength += data.Length;
+                }
+                while (messageBufferLength >= Message.PacketLengthMin)
+                {
+                    Message m = Message.TryCreate(messageBuffer, messageBufferLength);
+                    if (m == null)
+                    {
+                        if (!Message.CanStartWith(messageBuffer, messageBufferLength))
+                        {
+                            Logger.Warning("Buffer skip: non-iBus data detected: " + messageBuffer[0].ToHex());
+                            SkipBuffer(1);
+                            continue;
+                        }
+                        return;
+                    }
+                    ProcessMessage(m);
+                    //#if DEBUG
+                    //m.PerformanceInfo.TimeEnqueued = DateTime.Now;
+                    //#endif
+                    //messageReadQueue.Enqueue(m);
+                    SkipBuffer(m.PacketLength);
+                }
             }
         }
 
@@ -235,11 +245,16 @@ namespace imBMW.iBus
                 e(args);
             }
 
-            Thread.Sleep(5); // Don't flood iBus
+            //Thread.Sleep(5); // Don't flood iBus
         }
 
         public static void EnqueueMessage(Message m)
         {
+            if (iBus is SerialPortHub)
+            {
+                SendMessage(m);
+                return;
+            }
             #if DEBUG
             m.PerformanceInfo.TimeEnqueued = DateTime.Now;
             #endif
@@ -248,6 +263,14 @@ namespace imBMW.iBus
 
         public static void EnqueueMessage(params Message[] messages)
         {
+            if (iBus is SerialPortHub)
+            {
+                foreach (Message m in messages)
+                {
+                    SendMessage(m);
+                }
+                return;
+            }
             #if DEBUG
             var now = DateTime.Now;
             foreach (Message m in messages)
