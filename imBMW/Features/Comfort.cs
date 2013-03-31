@@ -2,16 +2,29 @@ using System;
 using Microsoft.SPOT;
 using imBMW.iBus.Devices.Real;
 using System.Threading;
+using imBMW.Tools;
 
 namespace imBMW.Features
 {
     public static class Comfort
     {
+        #region Enums
+        enum Command
+        {
+            FullCloseWindows,
+            FullOpenWindows
+        }
+        #endregion
+
+        static QueueThreadWorker commands;
+
         static bool needLockDoors = true;
         static bool needUnlockDoors = false;
 
         static Comfort()
         {
+            commands = new QueueThreadWorker(ProcessCommand);
+
             InstrumentClusterElectronics.SpeedRPMChanged += (e) =>
             {
                 if (needLockDoors && e.Speed > DoorsLockSpeed)
@@ -46,10 +59,7 @@ namespace imBMW.Features
                 {
                     if (AutoCloseWindows)
                     {
-                        // TODO Fix windows closing: current commands close them just by half
-                        BodyModule.CloseWindows();
-                        // TODO Fix timer
-                        Timer closeWind = new Timer(delegate { BodyModule.CloseWindows(); }, null, 4000, 0);
+                        commands.Enqueue(Command.FullCloseWindows);
                     }
                     if (AutoCloseSunroof)
                     {
@@ -68,6 +78,29 @@ namespace imBMW.Features
                     }
                 }
             };
+        }
+
+        private static void ProcessCommand(object o)
+        {
+            var c = (Command)o;
+            switch (c)
+            {
+                // TODO Fix windows closing: current commands close them just by half
+                case Command.FullCloseWindows:
+                    BodyModule.CloseWindows();
+                    Thread.Sleep(3000);
+                    BodyModule.CloseWindows();
+                    Thread.Sleep(3000);
+                    BodyModule.CloseWindows();
+                    break;
+                case Command.FullOpenWindows:
+                    BodyModule.OpenWindows();
+                    Thread.Sleep(3000);
+                    BodyModule.OpenWindows();
+                    Thread.Sleep(3000);
+                    BodyModule.OpenWindows();
+                    break;
+            }
         }
 
         /// <summary>

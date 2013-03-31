@@ -18,10 +18,6 @@ namespace imBMW.Devices.V1
 
             // Create serial port to work with Melexis TH3122
             ISerialPort iBusPort = new SerialPortTH3122(Serial.COM3, (Cpu.Pin)FEZ_Pin.Interrupt.Di4);
-            iBusPort.BusyChanged += (busy) =>
-            {
-                LED.Write(busy);
-            };
             Logger.Info("TH3122 serial port inited");
 
             InputPort jumper = new InputPort((Cpu.Pin)FEZ_Pin.Digital.An7, false, Port.ResistorMode.PullUp);
@@ -39,21 +35,33 @@ namespace imBMW.Devices.V1
             iBus.Manager.Init(iBusPort);
             Logger.Info("iBus manager inited");
 
-            #if DEBUG
+            iBus.Manager.BeforeMessageReceived += (e) =>
+            {
+                LED.Write(true);
+            };
             iBus.Manager.AfterMessageReceived += (e) =>
             {
+                LED.Write(false);
+                #if DEBUG
                 // Show only messages which are described
                 //if (e.Message.Describe() == null) { return; }
                 // Filter CDC emulator messages echoed by iBus
                 //if (e.Message.SourceDevice == iBus.DeviceAddress.CDChanger) { return; }
                 Logger.Info(e.Message, "<<");
+                #endif
+            };
+            iBus.Manager.BeforeMessageSent += (e) =>
+            {
+                LED.Write(true);
             };
             iBus.Manager.AfterMessageSent += (e) =>
             {
+                LED.Write(false);
+                #if DEBUG
                 Logger.Info(e.Message, ">>");
+                #endif
             };
-            Logger.Info("iBus manager logger events subscribed");
-            #endif
+            Logger.Info("iBus manager events subscribed");
             
             // Set iPod via headset as CD-Changer emulator
             iBus.Devices.CDChanger.Init(new Multimedia.iPodViaHeadset((Cpu.Pin)FEZ_Pin.Digital.Di3));
