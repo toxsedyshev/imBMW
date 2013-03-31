@@ -59,6 +59,7 @@
     <Compile Include="Tools\ExtensionAttribute.cs" />
     <Compile Include="Tools\Logger.cs" />
     <Compile Include="Tools\QueueThreadWorker.cs" />
+    <Compile Include="Tools\StringHelpers.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Microsoft.SPOT.Hardware" />

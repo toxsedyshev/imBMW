@@ -285,7 +285,7 @@ namespace imBMW.iBus
                 if (TimeEndedProcessing != default(DateTime))
                 {
                     TimeSpan span = TimeEndedProcessing - TimeStartedProcessing;
-                    s = "Processed: " + span.GetTotalSeconds() + "." + span.GetTotalMilliseconds();
+                    s = "Processed: " + span.GetTotalSeconds() + "." + span.Milliseconds.ToString().PrependToLength('0', 3);
                 }
                 if (TimeEnqueued != default(DateTime))
                 {
@@ -294,7 +294,7 @@ namespace imBMW.iBus
                         s += " + ";
                     }
                     TimeSpan span = TimeStartedProcessing - TimeEnqueued;
-                    s += "In queue: " + span.GetTotalSeconds() + "." + span.GetTotalMilliseconds();
+                    s += "In queue: " + span.GetTotalSeconds() + "." + span.Milliseconds.ToString().PrependToLength('0', 3);
                 }
                 return s;
             }

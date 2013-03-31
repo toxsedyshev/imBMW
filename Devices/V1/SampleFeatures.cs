@@ -1,6 +1,7 @@
 using System;
 using Microsoft.SPOT;
 using imBMW.iBus.Devices.Real;
+using imBMW.Tools;
 
 namespace imBMW.Devices.V1
 {
@@ -79,12 +80,7 @@ namespace imBMW.Devices.V1
 
         static void ShowSpeedRPM(uint speed, uint rpm, bool delay = false)
         {
-            string s = speed.ToString();
-            while (s.Length < 3)
-            {
-                s = (char)0x19 + s;
-            }
-            s += "kmh " + rpm;
+            string s = speed.ToString().PrependToLength((char)0x19, 3) + "kmh " + rpm;
             if (delay)
             {
                 Radio.DisplayTextWithDelay(s);

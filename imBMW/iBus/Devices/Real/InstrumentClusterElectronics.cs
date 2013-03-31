@@ -106,7 +106,7 @@ namespace imBMW.iBus.Devices.Real
                 {
                     e(new IgnitionEventArgs(currentIgnitionState, previous));
                 }
-                if (currentIgnitionState == IgnitionState.Off)
+                if (currentIgnitionState != IgnitionState.Ign)
                 {
                     OnSpeedRPMChanged(CurrentSpeed, 0);
                 }
