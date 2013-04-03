@@ -22,7 +22,7 @@ namespace System.IO.Ports
         /// <summary>
         /// Number of milliseconds to pause the writing thread after sending the write buffer.
         /// </summary>
-        public virtual int WriteTimeout { get; set; }
+        public virtual int AfterWriteDelay { get; set; }
 
         /// <summary>
         /// Number of milliseconds to wait for data in read methods. Default is <see cref="Timeout.Infinite"/>. Pass zero to make the read methods return immediately when no data are buffered.
@@ -99,13 +99,13 @@ namespace System.IO.Ports
             for (int i = offset; i < offset + length; i += _writeBufferSize)    // and this cycle would not execute.)
             {
                 WriteDirect(data, i, _writeBufferSize);                         // send it out
-                if (WriteTimeout > 0) Thread.Sleep(WriteTimeout);               // and include pause after chunk
+                if (AfterWriteDelay > 0) Thread.Sleep(AfterWriteDelay);               // and include pause after chunk
             }
 
             if (modulus > 0)                                                    // If any data left which do not fill whole _writeBuferSize chunk,
             {
                 WriteDirect(data, offset + length, modulus);                    // send it out as well
-                if (WriteTimeout > 0) Thread.Sleep(WriteTimeout);               // and pause for case consecutive calls to any write method.
+                if (AfterWriteDelay > 0) Thread.Sleep(AfterWriteDelay);               // and pause for case consecutive calls to any write method.
             }
 
             _writeThread = null;                                                // release current thread so that the _busy signal does not affect external code execution

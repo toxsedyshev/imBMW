@@ -17,7 +17,7 @@ namespace System.IO.Ports
             this.port = port;
 
             ReadTimeout = 33;
-            WriteTimeout = 0;
+            AfterWriteDelay = 0;
         }
 
         public SerialPortCDC(USBC_CDC port) : this(port, 0, 1) { }

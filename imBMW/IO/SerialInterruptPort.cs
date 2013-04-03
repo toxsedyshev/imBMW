@@ -25,7 +25,7 @@ namespace System.IO.Ports
         /// </summary>
         /// <param name="config">An object that contains the configuration information for the serial port.</param>
         /// <param name="busySignal">A <see cref="Cpu.Pin"/> to use as a output hardware flow control. Can be <see cref="Cpu.Pin.GPIO_NONE"/> if none used.</param>
-        /// <param name="writeBufferSize">The size of output buffer in bytes. Data output is paused for <see cref="WriteTimeout"/> milliseconds every time this amount of data is sent. Can be zero to disable pausing.</param>
+        /// <param name="writeBufferSize">The size of output buffer in bytes. Data output is paused for <see cref="AfterWriteDelay"/> milliseconds every time this amount of data is sent. Can be zero to disable pausing.</param>
         /// <param name="readBufferSize">The size of input buffer in bytes. DataReceived event will fire only after this amount of data is received. Default is 1.</param>
         /// <param name="readTimeout">Timeout of port reading.</param>
         public SerialInterruptPort(SerialPortConfiguration config, Cpu.Pin busySignal, int writeBufferSize, int readBufferSize, int readTimeout = Timeout.Infinite)
@@ -33,7 +33,7 @@ namespace System.IO.Ports
         {
             _port = new SerialPort(config.PortName, config.BaudRate, config.Parity, config.DataBits, config.StopBits); // creating the serial port
             
-            WriteTimeout = 33;
+            AfterWriteDelay = 33;
             ReadTimeout = readTimeout;
             
             _port.Open();
