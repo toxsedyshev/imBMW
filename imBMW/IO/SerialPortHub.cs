@@ -27,6 +27,12 @@ namespace System.IO.Ports
                     byte[] data = (byte[])o;
                     port.Write(data, 0, data.Length);
                 });
+            }
+
+            for (int i = 0; i < ports.Length; i++)
+            {
+                int index = i;
+                ISerialPort port = ports[index];
 
                 // Read each port and forward data to other ports
                 port.DataReceived += (s, e) =>

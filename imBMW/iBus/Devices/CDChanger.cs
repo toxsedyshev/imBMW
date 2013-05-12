@@ -23,6 +23,7 @@ namespace imBMW.iBus.Devices
         static Message MessagePollResponse = new Message(DeviceAddress.CDChanger, DeviceAddress.Broadcast, 0x02, 0x00);
         static Message MessageAnnounce = new Message(DeviceAddress.CDChanger, DeviceAddress.Broadcast, 0x02, 0x01);
         static Message MessagePlayingDisk1Track1 = new Message(DeviceAddress.CDChanger, DeviceAddress.Radio, "Playing D1 T1", 0x39, 0x00, 0x09, 0x00, 0x3F, 0x00, 0x01, 0x01);
+        static Message MessageStoppedDisk1Track1 = new Message(DeviceAddress.CDChanger, DeviceAddress.Radio, "Stopped D1 T1", 0x39, 0x00, 0x02, 0x00, 0x3F, 0x00, 0x01, 0x01);
 
         static byte[] DataCurrentDiskTrackRequest = new byte[] { 0x38, 0x00, 0x00 };
         static byte[] DataStopPlaying  = new byte[] { 0x38, 0x01, 0x00 };
@@ -212,7 +213,15 @@ namespace imBMW.iBus.Devices
             }
             else if (m.Data.Compare(MessageRegistry.DataPollRequest))
             {
-                Manager.EnqueueMessage(MessagePollResponse, MessagePlayingDisk1Track1);
+                Manager.EnqueueMessage(MessagePollResponse);
+                if (Player.IsPlaying)
+                {
+                    Manager.EnqueueMessage(MessagePlayingDisk1Track1);
+                }
+                else
+                {
+                    Manager.EnqueueMessage(MessageStoppedDisk1Track1);
+                }
             }
             else if (m.Data.Compare(DataRandomPlay))
             {

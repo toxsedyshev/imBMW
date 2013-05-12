@@ -20,7 +20,7 @@ namespace imBMW.iBus.Devices.Real
     public static class Radio
     {
         const byte displayTextMaxlen = 11;
-        const int displayTextDelay = 130;
+        const int displayTextDelay = 150;
 
         static Timer displayTextDelayTimer;
 

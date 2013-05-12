@@ -34,10 +34,12 @@
   <Import Project="$(NetMfTargetsBaseDir)$(TargetFrameworkVersion)\CSharp.Targets" />
   <ItemGroup>
     <Compile Include="Features\Comfort.cs" />
+    <Compile Include="Features\Light.cs" />
     <Compile Include="iBus\DeviceAddress.cs" />
     <Compile Include="iBus\Devices\Real\BodyModule.cs" />
     <Compile Include="iBus\Devices\Real\Immobiliser.cs" />
     <Compile Include="iBus\Devices\Real\InstrumentClusterElectronics.cs" />
+    <Compile Include="iBus\Devices\Real\LightControlModule.cs" />
     <Compile Include="iBus\Devices\Real\MultiFunctionSteeringWheel.cs" />
     <Compile Include="iBus\Devices\Real\Radio.cs" />
     <Compile Include="iBus\Devices\CDChanger.cs" />
@@ -45,6 +47,7 @@
     <Compile Include="IO\SerialPortBase.cs" />
     <Compile Include="IO\SerialPortHub.cs" />
     <Compile Include="IO\SerialPortTH3122.cs" />
+    <Compile Include="Tools\NumHelpers.cs" />
     <Compile Include="Tools\EnumConverter.cs" />
     <Compile Include="iBus\Manager.cs" />
     <Compile Include="iBus\Message.cs" />

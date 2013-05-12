@@ -5,8 +5,6 @@ namespace imBMW.Tools
 {
     public static class ArrayHelpers
     {
-        const string hexChars = "0123456789ABCDEF";
-
         public static byte[] SkipAndTake(this byte[] array, int skip, int take)
         {
             byte[] result = new byte[take];
@@ -46,11 +44,6 @@ namespace imBMW.Tools
                 }
             }
             return true;
-        }
-
-        public static String ToHex(this byte b)
-        {
-            return hexChars[b >> 4].ToString() + hexChars[b & 0x0F].ToString();
         }
 
         public static String ToHex(this byte[] data)
