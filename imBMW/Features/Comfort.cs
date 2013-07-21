@@ -20,6 +20,7 @@ namespace imBMW.Features
 
         static bool needLockDoors = true;
         static bool needUnlockDoors = false;
+        static bool needComfortClose = true;
 
         static Comfort()
         {
@@ -43,6 +44,12 @@ namespace imBMW.Features
             };
             InstrumentClusterElectronics.IgnitionStateChanged += (e) =>
             {
+                if (!needComfortClose 
+                    && e.CurrentIgnitionState != IgnitionState.Off 
+                    && e.PreviousIgnitionState == IgnitionState.Off)
+                {
+                    needComfortClose = true;
+                }
                 if (needUnlockDoors && e.CurrentIgnitionState == IgnitionState.Off)
                 {
                     if (AutoUnlockDoors)
@@ -55,8 +62,9 @@ namespace imBMW.Features
             };
             BodyModule.RemoteKeyButtonPressed += (e) =>
             {
-                if (e.Button == RemoteKeyButton.Lock)
+                if (e.Button == RemoteKeyButton.Lock && needComfortClose)
                 {
+                    needComfortClose = false;
                     if (AutoCloseWindows)
                     {
                         commands.Enqueue(Command.FullCloseWindows);
@@ -139,7 +147,23 @@ namespace imBMW.Features
         public static bool AutoUnfoldMirrors = false;
 
         /// <summary>
-        /// Are all comfort features (auto open/close doors, windows, sunroof, mirrors) enabled?
+        /// Is comfort close enabled till next ignition on.
+        /// If disabled, it will be enabled on ignition on.
+        /// </summary>
+        public static bool NextComfortCloseEnabled
+        {
+            get
+            {
+                return needComfortClose;
+            }
+            set
+            {
+                needComfortClose = value;
+            }
+        }
+
+        /// <summary>
+        /// Set is all comfort features (auto open/close doors, windows, sunroof, mirrors) enabled
         /// </summary>
         public static bool AllFeaturesEnabled
         {

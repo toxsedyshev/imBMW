@@ -181,19 +181,17 @@ namespace imBMW.iBus.Devices
                 }
                 else
                 {
-                    if (stopDelay == null)
+                    CancelStopDelay();
+                    // Don't pause immediately - the radio can send "start play" command soon
+                    stopDelay = new Timer(delegate
                     {
-                        // Don't pause immediately - the radio can send "start play" command soon
-                        stopDelay = new Timer(delegate
-                        {
-                            Pause();
+                        Pause();
 
-                            if (announceThread.ThreadState == ThreadState.Suspended)
-                            {
-                                announceThread.Resume();
-                            }
-                        }, null, StopDelayMilliseconds, 0);
-                    }
+                        if (announceThread.ThreadState == ThreadState.Suspended)
+                        {
+                            announceThread.Resume();
+                        }
+                    }, null, StopDelayMilliseconds, 0);
                 }
             }
         }

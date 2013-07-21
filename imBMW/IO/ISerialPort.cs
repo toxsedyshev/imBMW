@@ -19,6 +19,10 @@ namespace System.IO.Ports
 
         int AvailableBytes { get; }
 
+        int AfterWriteDelay { get; set; }
+
+        int ReadTimeout { get; set; }
+
         byte[] ReadAvailable();
 
         byte[] ReadAvailable(int maxCount);

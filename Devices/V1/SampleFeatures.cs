@@ -8,6 +8,8 @@ namespace imBMW.Devices.V1
     static class SampleFeatures
     {
         static bool showSpeedRpm = false;
+        static DateTime lastMessage = DateTime.Now;
+        static TimeSpan maxMessagesSpan = TimeSpan.Zero;
 
         public static void Init()
         {
@@ -51,15 +53,15 @@ namespace imBMW.Devices.V1
                             }
                             break;
                         case 0x04:
+                            Radio.DisplayTextWithDelay("Close winds");
                             BodyModule.CloseWindows();
-                            Radio.DisplayText("Close winds");
                             break;
                         case 0x03:
-                            BodyModule.OpenWindows();
-                            Radio.DisplayText("Open winds");
+                            Features.Comfort.NextComfortCloseEnabled = !Features.Comfort.NextComfortCloseEnabled;
+                            Radio.DisplayTextWithDelay("[" + (Features.Comfort.NextComfortCloseEnabled ? "X" : " ") + "]Comf cls");
                             break;
                         case 0x02:
-                            Radio.DisplayTextWithDelay(DateTime.Now.ToString("dd HH:mm:ss"));
+                            Radio.DisplayTextWithDelay(DateTime.Now.ToString("ddHH") + " " + maxMessagesSpan.GetTotalMinutes() + "\"" + maxMessagesSpan.Seconds); // dd HH:mm:ss
                             break;
                         case 0x01:
                             Radio.DisplayTextWithDelay(":)", TextAlign.Center);
@@ -76,6 +78,25 @@ namespace imBMW.Devices.V1
                     ShowSpeedRPM(e.Speed, e.RPM);
                 }
             };
+
+            iBus.Manager.AfterMessageReceived += (m) =>
+            {
+                var now = DateTime.Now;
+                var span = now - lastMessage;
+                lastMessage = now;
+                if (span > maxMessagesSpan)
+                {
+                    maxMessagesSpan = span;
+                }
+            };
+
+            /*InstrumentClusterElectronics.IgnitionStateChanged += (e) =>
+            {
+                if (e.CurrentIgnitionState != IgnitionState.Off && e.PreviousIgnitionState == IgnitionState.Off)
+                {
+                    iBus.Manager.EnqueueMessage(new iBus.Message(iBus.DeviceAddress.Diagnostic, iBus.DeviceAddress.GlobalBroadcastAddress, 0x0c, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00, 0x06));
+                }
+            };*/
         }
 
         static void ShowSpeedRPM(uint speed, uint rpm, bool delay = false)

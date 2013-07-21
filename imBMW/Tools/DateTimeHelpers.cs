@@ -3,7 +3,7 @@ using Microsoft.SPOT;
 
 namespace imBMW.Tools
 {
-    static class DateTimeHelpers
+    public static class DateTimeHelpers
     {
         public static int GetTotalHours(this TimeSpan timespan)
         {

@@ -59,6 +59,9 @@ namespace imBMW.iBus
             lock (bufferSync)
             {
                 byte[] data = port.ReadAvailable();
+                #if DEBUG
+                //Logger.Info(data.ToHex(' '), "<!");
+                #endif
                 if (messageBufferLength + data.Length > messageBuffer.Length)
                 {
                     Logger.Info("Buffer overflow. Extending it. " + port.ToString());
@@ -245,7 +248,7 @@ namespace imBMW.iBus
                 e(args);
             }
 
-            //Thread.Sleep(5); // Don't flood iBus
+            Thread.Sleep(iBus.AfterWriteDelay); // Don't flood iBus
         }
 
         public static void EnqueueMessage(Message m)
