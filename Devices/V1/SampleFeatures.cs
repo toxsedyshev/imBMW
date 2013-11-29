@@ -3,7 +3,7 @@ using Microsoft.SPOT;
 using imBMW.iBus.Devices.Real;
 using imBMW.Tools;
 
-namespace imBMW.Devices.V1
+namespace imBMW
 {
     static class SampleFeatures
     {
