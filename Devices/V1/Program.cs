@@ -12,12 +12,22 @@ namespace imBMW.Devices.V1
 {
     public class Program
     {
+        /**
+         *
+         * WARNING!
+         *
+         * Change Target framework version of imBMW project to 4.1
+         * to use it with original imBMW V1 device based on FEZ Mini
+         *
+         */
+    
         static void Init()
         {
             OutputPort LED = new OutputPort((Cpu.Pin)FEZ_Pin.Digital.LED, false);
 
             // Create serial port to work with Melexis TH3122
             ISerialPort iBusPort = new SerialPortTH3122(Serial.COM3, (Cpu.Pin)FEZ_Pin.Interrupt.Di4);
+            //ISerialPort iBusPort = new SerialPortOptoPair(Serial.COM3);
             Logger.Info("TH3122 serial port inited");
 
             InputPort jumper = new InputPort((Cpu.Pin)FEZ_Pin.Digital.An7, false, Port.ResistorMode.PullUp);
@@ -35,13 +45,18 @@ namespace imBMW.Devices.V1
             iBus.Manager.Init(iBusPort);
             Logger.Info("iBus manager inited");
 
+            /*iBusPort.BusyChanged += (busy) =>
+            {
+                LED.Write(Busy(busy, 0x01));
+                Logger.Info(busy ? "BUSY" : "free", "!!");
+            };*/
             iBus.Manager.BeforeMessageReceived += (e) =>
             {
-                LED.Write(true);
+                LED.Write(Busy(true, 0x02));
             };
             iBus.Manager.AfterMessageReceived += (e) =>
             {
-                LED.Write(false);
+                LED.Write(Busy(false, 0x02));
                 #if DEBUG
                 // Show only messages which are described
                 //if (e.Message.Describe() == null) { return; }
@@ -52,11 +67,11 @@ namespace imBMW.Devices.V1
             };
             iBus.Manager.BeforeMessageSent += (e) =>
             {
-                LED.Write(true);
+                LED.Write(Busy(true, 0x04));
             };
             iBus.Manager.AfterMessageSent += (e) =>
             {
-                LED.Write(false);
+                LED.Write(Busy(false, 0x04));
                 #if DEBUG
                 Logger.Info(e.Message, ">>");
                 #endif
@@ -81,6 +96,21 @@ namespace imBMW.Devices.V1
             Thread.Sleep(50);
             LED.Write(false);
             Logger.Info("LED blinked - inited");
+        }
+
+        static byte busy = 0;
+
+        static bool Busy(bool busy, byte type)
+        {
+            if (busy)
+            {
+                Program.busy |= type;
+            }
+            else
+            {
+                Program.busy &= type.Invert();
+            }
+            return Program.busy > 0;
         }
 
         public static void Main()

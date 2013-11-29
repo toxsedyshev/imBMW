@@ -6,12 +6,12 @@ namespace System.IO.Ports
     public class SerialPortConfiguration
     {
         string portName;
-        int baudRate;
+        BaudRate baudRate;
         Parity parity;
         int dataBits;
         StopBits stopBits;
 
-        public SerialPortConfiguration(string portName, int baudRate, Parity parity, int dataBits, StopBits stopBits)
+        public SerialPortConfiguration(string portName, BaudRate baudRate, Parity parity, int dataBits, StopBits stopBits)
         {
             this.portName = portName;
             this.baudRate = baudRate;
@@ -20,11 +20,11 @@ namespace System.IO.Ports
             this.stopBits = stopBits;
         }
 
-        public SerialPortConfiguration(string portName, int baudRate, Parity parity, int dataBits) : this(portName, baudRate, parity, dataBits, StopBits.One) { }
+        public SerialPortConfiguration(string portName, BaudRate baudRate, Parity parity, int dataBits) : this(portName, baudRate, parity, dataBits, StopBits.One) { }
 
-        public SerialPortConfiguration(string portName, int baudRate, Parity parity) : this(portName, baudRate, parity, 8) { }
+        public SerialPortConfiguration(string portName, BaudRate baudRate, Parity parity) : this(portName, baudRate, parity, 8) { }
 
-        public SerialPortConfiguration(string portName, int baudRate) : this(portName, baudRate, Parity.None) { }
+        public SerialPortConfiguration(string portName, BaudRate baudRate) : this(portName, baudRate, Parity.None) { }
 
         public StopBits StopBits
         {
@@ -44,7 +44,7 @@ namespace System.IO.Ports
             set { parity = value; }
         }
 
-        public int BaudRate
+        public BaudRate BaudRate
         {
             get { return baudRate; }
             set { baudRate = value; }

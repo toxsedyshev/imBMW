@@ -66,7 +66,7 @@ namespace System.IO.Ports
 
         public virtual event BusyChangedEventHandler BusyChanged;
 
-        protected void OnBusyChanged(bool busy)
+        protected virtual void OnBusyChanged(bool busy)
         {
             var e = BusyChanged;
             if (e != null)
@@ -90,6 +90,7 @@ namespace System.IO.Ports
             if (_writeBufferSize < 1)                                           // If user does not want to split data into chunks,
             {
                 WriteDirect(data, 0, data.Length);                              // pass it to the SerialPort output without change.
+                _writeThread = null;                                            // release current thread so that the _busy signal does not affect external code execution
                 return;
             }
 
@@ -99,13 +100,13 @@ namespace System.IO.Ports
             for (int i = offset; i < offset + length; i += _writeBufferSize)    // and this cycle would not execute.)
             {
                 WriteDirect(data, i, _writeBufferSize);                         // send it out
-                if (AfterWriteDelay > 0) Thread.Sleep(AfterWriteDelay);               // and include pause after chunk
+                if (AfterWriteDelay > 0) Thread.Sleep(AfterWriteDelay);         // and include pause after chunk
             }
 
             if (modulus > 0)                                                    // If any data left which do not fill whole _writeBuferSize chunk,
             {
                 WriteDirect(data, offset + length, modulus);                    // send it out as well
-                if (AfterWriteDelay > 0) Thread.Sleep(AfterWriteDelay);               // and pause for case consecutive calls to any write method.
+                if (AfterWriteDelay > 0) Thread.Sleep(AfterWriteDelay);         // and pause for case consecutive calls to any write method.
             }
 
             _writeThread = null;                                                // release current thread so that the _busy signal does not affect external code execution
@@ -553,7 +554,7 @@ namespace System.IO.Ports
         {
             _continueReading = false; // If the ReadLoop is not in the _port.Read() method, the soft way will work.
 
-            if (_writeThread != null && _readThread.ThreadState == ThreadState.WaitSleepJoin) // otherwise,
+            if (_readThread != null && _readThread.ThreadState == ThreadState.WaitSleepJoin) // otherwise,
                 _readThread.Abort();                                                          // take a hammer (we need to end the thread, otherwise it would steal the next data coming)
 
             if (_readToEvent != null)                                                         // if ReadTo() method is being called,

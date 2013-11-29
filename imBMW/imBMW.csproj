@@ -8,8 +8,9 @@
     <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{1809C7F6-0A9F-412B-A45E-E667996E86A3}</ProjectGuid>
-    <TargetFrameworkVersion>v4.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.2</TargetFrameworkVersion>
     <NetMfTargetsBaseDir Condition="'$(NetMfTargetsBaseDir)'==''">$(MSBuildExtensionsPath32)\Microsoft\.NET Micro Framework\</NetMfTargetsBaseDir>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -43,10 +44,15 @@
     <Compile Include="iBus\Devices\Real\MultiFunctionSteeringWheel.cs" />
     <Compile Include="iBus\Devices\Real\Radio.cs" />
     <Compile Include="iBus\Devices\CDChanger.cs" />
+    <Compile Include="iBus\Diagnostics\DBusConverter.cs" />
+    <Compile Include="iBus\Diagnostics\DBusMessage.cs" />
     <Compile Include="IO\ISerialPort.cs" />
+    <Compile Include="IO\SerialInterruptPortBase.cs" />
     <Compile Include="IO\SerialPortBase.cs" />
     <Compile Include="IO\SerialPortHub.cs" />
+    <Compile Include="IO\SerialPortOptoPair.cs" />
     <Compile Include="IO\SerialPortTH3122.cs" />
+    <Compile Include="IO\SerialTimerInterruptPort.cs" />
     <Compile Include="Tools\NumHelpers.cs" />
     <Compile Include="Tools\EnumConverter.cs" />
     <Compile Include="iBus\Manager.cs" />

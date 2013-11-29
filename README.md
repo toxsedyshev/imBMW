@@ -14,7 +14,7 @@ CD-changer emulator was implemented to connect radio with iPod/iPhone/iPad and o
 Also imBMW allows to communicate with instrument cluster, immobilizer, GM, ZKE, navigation
 and other modules to receive notifications and control doors, windows, lights, etc.
 
-Photos, videos and creation process of imBMW V1 device are located on [e46club.ru forum](http://e46club.ru/forumvb/viewtopic.php?f=32&t=92399) (for now, only in Russian).
+Photos, videos and creation process of imBMW V1 device are located on [e46club.ru forum](http://bmwfanatics.ru/forumvb/viewtopic.php?f=32&t=92399) (for now, only in Russian).
 
 imBMW compatability
 ------------------

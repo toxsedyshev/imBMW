@@ -6,6 +6,7 @@ using Microsoft.SPOT.Hardware;
 using System;
 using System.IO.Ports;
 using System.Threading;
+using GHI.Hardware.FEZCerb;
 
 namespace imBMW.Devices.V2
 {
@@ -13,10 +14,10 @@ namespace imBMW.Devices.V2
     {
         static void Init()
         {
-            OutputPort LED = new OutputPort(FEZCerberus.Pin.PC0, false);
+            OutputPort LED = new OutputPort(Pin.PC0, false);
 
             // Create serial port to work with Melexis TH3122
-            ISerialPort iBusPort = new SerialPortTH3122(Serial.COM1, FEZCerberus.Pin.PC1);
+            ISerialPort iBusPort = new SerialPortTH3122(Serial.COM1, Pin.PC1);
             Logger.Info("TH3122 serial port inited");
 
             /*InputPort jumper = new InputPort((Cpu.Pin)FEZ_Pin.Digital.An7, false, Port.ResistorMode.PullUp);
@@ -63,7 +64,7 @@ namespace imBMW.Devices.V2
             Logger.Info("iBus manager events subscribed");
 
             // Set iPod via headset as CD-Changer emulator
-            iBus.Devices.CDChanger.Init(new Multimedia.iPodViaHeadset(FEZCerberus.Pin.PC2));
+            iBus.Devices.CDChanger.Init(new Multimedia.iPodViaHeadset(Pin.PC2));
             Logger.Info("CD-Changer inited");
 
             // Enable comfort features
