@@ -61,10 +61,10 @@ namespace imBMW.iBus.Devices
                 }
                 if (player != null)
                 {
-                    player.IsCurrentCDCPlayer = false;
+                    player.IsCurrentPlayer = false;
                 }
                 player = value;
-                player.IsCurrentCDCPlayer = true;
+                player.IsCurrentPlayer = true;
             }
         }
 
@@ -169,7 +169,7 @@ namespace imBMW.iBus.Devices
                     return;
                 }
                 isCDCActive = value;
-                player.IsCDCActive = isCDCActive;
+                player.IsPlayerHostActive = isCDCActive;
                 if (isCDCActive)
                 {
                     Play();

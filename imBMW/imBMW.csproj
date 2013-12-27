@@ -53,6 +53,9 @@
     <Compile Include="IO\SerialPortOptoPair.cs" />
     <Compile Include="IO\SerialPortTH3122.cs" />
     <Compile Include="IO\SerialTimerInterruptPort.cs" />
+    <Compile Include="Multimedia\AudioPlayerBase.cs" />
+    <Compile Include="Multimedia\BluetoothOVC3860.cs" />
+    <Compile Include="Multimedia\MultiplexorTDA7313.cs" />
     <Compile Include="Tools\NumHelpers.cs" />
     <Compile Include="Tools\EnumConverter.cs" />
     <Compile Include="iBus\Manager.cs" />

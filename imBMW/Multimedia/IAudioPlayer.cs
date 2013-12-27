@@ -29,8 +29,10 @@ namespace imBMW.Multimedia
 
         bool IsPlaying { get; }
 
-        bool IsCurrentCDCPlayer { get; set; }
+        bool IsCurrentPlayer { get; set; }
 
-        bool IsCDCActive { get; set; }
+        bool IsPlayerHostActive { get; set; }
+
+        string ShortName { get; }
     }
 }

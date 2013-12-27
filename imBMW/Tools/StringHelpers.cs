@@ -1,5 +1,6 @@
 using System;
 using Microsoft.SPOT;
+using System.Text;
 
 namespace imBMW.Tools
 {
@@ -19,6 +20,11 @@ namespace imBMW.Tools
                 s = prepend + s;
             }
             return s;
+        }
+
+        public static string GetString(this Encoding encoding, params byte[] bytes)
+        {
+            return new string(encoding.GetChars(bytes));
         }
     }
 }

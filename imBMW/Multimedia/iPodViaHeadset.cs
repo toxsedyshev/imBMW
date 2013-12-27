@@ -7,7 +7,7 @@ using System.Threading;
 
 namespace imBMW.Multimedia
 {
-    public class iPodViaHeadset : IAudioPlayer, IDisposable
+    public class iPodViaHeadset : AudioPlayerBase, IDisposable
     {
         public enum iPodCommand
         {
@@ -30,14 +30,12 @@ namespace imBMW.Multimedia
         QueueThreadWorker iPodCommands;
 
         bool canControlVolume;
-        bool isCurrentCDCPlayer;
-        bool isCDCActive;
-        bool isPlaying;
         bool isInVoiceOverMenu;
         DateTime voiceOverMenuStarted;
 
         public iPodViaHeadset(Cpu.Pin headsetControl, Cpu.Pin volumeUp = Cpu.Pin.GPIO_NONE, Cpu.Pin volumeDown = Cpu.Pin.GPIO_NONE)
         {
+            ShortName = "iPod";
             iPod = new OutputPort(headsetControl, false);
             canControlVolume = volumeUp != Cpu.Pin.GPIO_NONE && volumeDown != Cpu.Pin.GPIO_NONE;
             if (canControlVolume)
@@ -161,47 +159,47 @@ namespace imBMW.Multimedia
 
         #region IAudioPlayer members
 
-        public void Play()
+        public override void Play()
         {
             EnqueueIPodCommand(iPodCommand.Play);
         }
 
-        public void Pause()
+        public override void Pause()
         {
             EnqueueIPodCommand(iPodCommand.Pause);
         }
 
-        public void PlayPauseToggle()
+        public override void PlayPauseToggle()
         {
             EnqueueIPodCommand(iPodCommand.PlayPauseToggle);
         }
 
-        public void Next()
+        public override void Next()
         {
             EnqueueIPodCommand(iPodCommand.Next);
         }
 
-        public void Prev()
+        public override void Prev()
         {
             EnqueueIPodCommand(iPodCommand.Prev);
         }
 
-        public void MFLRT()
+        public override void MFLRT()
         {
             PlayPauseToggle();
         }
 
-        public void MFLDial()
+        public override void MFLDial()
         {
             VoiceOverCurrent();
         }
 
-        public void MFLDialLong()
+        public override void MFLDialLong()
         {
             VoiceOverMenu();
         }
 
-        public bool RandomToggle()
+        public override bool RandomToggle()
         {
             // Fixing IsPlaying flag, when playing iPod was connected to paused CDC
             isPlaying = !isPlaying;
@@ -209,7 +207,7 @@ namespace imBMW.Multimedia
             return false; // Real status of iPod's shuffle-mode is unknown
         }
 
-        public void VolumeUp()
+        public override void VolumeUp()
         {
             if (canControlVolume)
             {
@@ -217,7 +215,7 @@ namespace imBMW.Multimedia
             }
         }
 
-        public void VolumeDown()
+        public override void VolumeDown()
         {
             if (canControlVolume)
             {
@@ -225,13 +223,13 @@ namespace imBMW.Multimedia
             }
         }
 
-        public bool IsPlaying
+        public override bool IsPlaying
         {
             get
             {
                 return isPlaying;
             }
-            private set
+            protected set
             {
                 if (isPlaying == value)
                 {
@@ -252,59 +250,14 @@ namespace imBMW.Multimedia
                 PressIPodButton(true);
                 isPlaying = value;
                 IsInVoiceOverMenu = false;
-                if (IsCDCActive)
+                if (IsPlayerHostActive)
                 {
                     ShowCurrentStatus();
                 }
             }
         }
 
-        public bool IsCDCActive
-        {
-            get
-            {
-                return isCDCActive;
-            }
-            set
-            {
-                isCDCActive = value;
-                if (isCDCActive && IsPlaying)
-                {
-                    ShowCurrentStatus(true);
-                }
-            }
-        }
-
-        public bool IsCurrentCDCPlayer
-        {
-            get
-            {
-                return isCurrentCDCPlayer;
-            }
-            set
-            {
-                isCurrentCDCPlayer = value;
-                if (!isCurrentCDCPlayer)
-                {
-                    Pause();
-                }
-            }
-        }
-
         #endregion
-
-        void ShowCurrentStatus(bool delay = false)
-        {
-            string s = ((char)(isPlaying ? 0xBC : 0xBE)) + " iPod  ";
-            if (delay)
-            {
-                Radio.DisplayTextWithDelay(s, TextAlign.Center);
-            }
-            else
-            {
-                Radio.DisplayText(s, TextAlign.Center);
-            }
-        }
 
         public bool IsInVoiceOverMenu
         {
