@@ -26,5 +26,10 @@ namespace imBMW.Tools
         {
             return new string(encoding.GetChars(bytes));
         }
+
+        public static bool IsNullOrEmpty(string str)
+        {
+            return str == null || str.Length == 0;
+        }
     }
 }

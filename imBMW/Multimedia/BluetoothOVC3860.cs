@@ -3,50 +3,92 @@ using Microsoft.SPOT;
 using System.IO.Ports;
 using Microsoft.SPOT.Hardware;
 using imBMW.Tools;
+using System.Threading;
 
 namespace imBMW.Multimedia
 {
     public class BluetoothOVC3860 : AudioPlayerBase
     {
         SerialPortBase port;
+        QueueThreadWorker queue;
 
         public BluetoothOVC3860(string port)
         {
             ShortName = "BlueTooth";
+            
             this.port = new SerialInterruptPort(new SerialPortConfiguration(port, BaudRate.Baudrate115200), Cpu.Pin.GPIO_NONE, 0, 16, 10);
             this.port.DataReceived += port_DataReceived;
+
+            queue = new QueueThreadWorker(ProcessSendCommand);
         }
+
+        #region Private methods
+
+        void SendPlayPause(bool value)
+        {
+            if (IsCurrentPlayer)
+            {
+                if (value != IsPlaying)
+                {
+                    SendCommand(CmdPlayPause);
+                }
+            }
+            else
+            {
+                SendCommand(CmdStop);
+            }
+        }
+
+        #endregion
 
         #region IAudioPlayer members
 
+        public override void Play()
+        {
+            SendPlayPause(true);
+        }
+
+        public override void Pause()
+        {
+            SendPlayPause(false);
+        }
+
+        public override void PlayPauseToggle()
+        {
+            SendPlayPause(!IsPlaying);
+        }
+
         public override void Next()
         {
+            SendPlayPause(true);
             SendCommand(CmdNext);
         }
 
         public override void Prev()
         {
+            SendPlayPause(true);
             SendCommand(CmdPrev);
         }
 
         public override void MFLRT()
         {
-            throw new NotImplementedException();
+            PlayPauseToggle();
         }
 
         public override void MFLDial()
         {
-            throw new NotImplementedException();
+            SendCommand(CmdAnswer);
         }
 
         public override void MFLDialLong()
         {
-            throw new NotImplementedException();
+            SendCommand(CmdVoiceCall);
         }
 
         public override bool RandomToggle()
         {
-            throw new NotImplementedException();
+            SendCommand(CmdEnterPairing);
+            return false;
         }
 
         public override void VolumeUp()
@@ -72,16 +114,8 @@ namespace imBMW.Multimedia
                     return;
                 }
                 isPlaying = value;
-                // TODO Change this flag only on BT event
-
-                if (IsCurrentPlayer)
-                {
-                    SendCommand(CmdPlayPause);
-                }
-                else
-                {
-                    SendCommand(CmdStop);
-                }
+                // TODO Fire event
+                Logger.Info(value ? "Playing" : "Paused", "BT");
             }
         }
 
@@ -95,6 +129,9 @@ namespace imBMW.Multimedia
         const string CmdPrev = "ME";
         const string CmdVolumeUp = "VU";
         const string CmdVolumeDown = "VD";
+        const string CmdVoiceCall = "CI";
+        const string CmdEnterPairing = "CA";
+        const string CmdAnswer = "CE";
 
         void SendCommand(string command, string param = null)
         {
@@ -103,39 +140,70 @@ namespace imBMW.Multimedia
             {
                 command += param;
             }
-            port.WriteLine(command);
-            Logger.Info(command, "BT>");
+            queue.Enqueue(command);
+        }
+
+        void ProcessSendCommand(object o)
+        {
+            var s = (string)o;
+            port.WriteLine(s);
+            Logger.Info(s, "BT>");
         }
 
         void port_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
-            return;
-            var port = (SerialPortBase)sender;
             if (port.AvailableBytes == 0)
             {
                 return;
             }
-            // TODO Use ReadLine()
             var data = port.ReadAvailable();
-            /*while (port.AvailableBytes > 0)
+            var s = port.Encoding.GetString(data);
+            var t = "";
+            foreach (var c in s)
             {
-                var data = port.ReadLine();
-                if (data == null || data.Length == 0)
+                if (c == '\r' || c == '\n')
                 {
-                    continue;
-                }*/
-                // TODO Use port.Encoding
-                var chars = new char[data.Length];
-                for (int i = 0; i < data.Length; i++)
-                {
-                    chars[i] = (char)data[i];
-                    if (chars[i] == '\r' || chars[i] == '\n')
+                    if (t != "")
                     {
-                        chars[i] = ' ';
+                        ProcessBTNotification(t);
                     }
+                    t = "";
                 }
-                Logger.Info(new string(chars), "BT<");
-            //}
+                else
+                {
+                    t += c;
+                }
+            }
+        }
+
+        void ProcessBTNotification(string s)
+        {
+            Logger.Info(s, "BT<");
+            switch (s)
+            {
+                case "MR":
+                    IsPlaying = true;
+                    break;
+                case "MP":
+                    IsPlaying = false;
+                    break;
+                case "MX":
+                    Logger.Info("Next", "BT");
+                    break;
+                case "MS":
+                    Logger.Info("Prev", "BT");
+                    break;
+                case "IV":
+                    Logger.Info("Connected", "BT");
+                    break;
+                case "II":
+                case "IA":
+                    Logger.Info("Disconnected", "BT");
+                    break;
+                case "IJ2":
+                    Logger.Info("Connecting", "BT");
+                    break;
+            }
         }
 
         #endregion
