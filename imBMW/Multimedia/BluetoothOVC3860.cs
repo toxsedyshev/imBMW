@@ -14,7 +14,7 @@ namespace imBMW.Multimedia
 
         public BluetoothOVC3860(string port)
         {
-            ShortName = "BlueTooth";
+            Name = "Bluetooth";
             
             this.port = new SerialInterruptPort(new SerialPortConfiguration(port, BaudRate.Baudrate115200), Cpu.Pin.GPIO_NONE, 0, 16, 10);
             this.port.DataReceived += port_DataReceived;
@@ -24,7 +24,7 @@ namespace imBMW.Multimedia
 
         #region Private methods
 
-        void SendPlayPause(bool value)
+        protected override void SetPlaying(bool value)
         {
             if (IsCurrentPlayer)
             {
@@ -43,31 +43,18 @@ namespace imBMW.Multimedia
 
         #region IAudioPlayer members
 
-        public override void Play()
-        {
-            SendPlayPause(true);
-        }
-
-        public override void Pause()
-        {
-            SendPlayPause(false);
-        }
-
-        public override void PlayPauseToggle()
-        {
-            SendPlayPause(!IsPlaying);
-        }
-
         public override void Next()
         {
-            SendPlayPause(true);
+            SetPlaying(true);
             SendCommand(CmdNext);
+            OnStatusChanged(((char)0xBC) + "" + ((char)0xBC) + "Bluetooth");
         }
 
         public override void Prev()
         {
-            SendPlayPause(true);
+            SetPlaying(true);
             SendCommand(CmdPrev);
+            OnStatusChanged(((char)0xBD) + "" + ((char)0xBD) + "Bluetooth");
         }
 
         public override void MFLRT()
@@ -78,16 +65,19 @@ namespace imBMW.Multimedia
         public override void MFLDial()
         {
             SendCommand(CmdAnswer);
+            OnStatusChanged(((char)0xC8) + "AnswerCall");
         }
 
         public override void MFLDialLong()
         {
             SendCommand(CmdVoiceCall);
+            OnStatusChanged(((char)0xC8) + " VoiceCall");
         }
 
         public override bool RandomToggle()
         {
             SendCommand(CmdEnterPairing);
+            OnStatusChanged(((char)0xC9) + "Disconnect");
             return false;
         }
 
@@ -114,7 +104,7 @@ namespace imBMW.Multimedia
                     return;
                 }
                 isPlaying = value;
-                // TODO Fire event
+                OnIsPlayingChanged(value);
                 Logger.Info(value ? "Playing" : "Paused", "BT");
             }
         }
@@ -150,6 +140,8 @@ namespace imBMW.Multimedia
             Logger.Info(s, "BT>");
         }
 
+        string btBuffer = "";
+
         void port_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
             if (port.AvailableBytes == 0)
@@ -158,27 +150,25 @@ namespace imBMW.Multimedia
             }
             var data = port.ReadAvailable();
             var s = port.Encoding.GetString(data);
-            var t = "";
             foreach (var c in s)
             {
                 if (c == '\r' || c == '\n')
                 {
-                    if (t != "")
+                    if (btBuffer != "")
                     {
-                        ProcessBTNotification(t);
+                        ProcessBTNotification(btBuffer);
                     }
-                    t = "";
+                    btBuffer = "";
                 }
                 else
                 {
-                    t += c;
+                    btBuffer += c;
                 }
             }
         }
 
         void ProcessBTNotification(string s)
         {
-            Logger.Info(s, "BT<");
             switch (s)
             {
                 case "MR":
@@ -195,13 +185,33 @@ namespace imBMW.Multimedia
                     break;
                 case "IV":
                     Logger.Info("Connected", "BT");
+                    OnStatusChanged(((char)0xC9) + " Bluetooth");
                     break;
                 case "II":
+                    IsPlaying = false;
+                    Logger.Info("Waiting", "BT");
+                    OnStatusChanged(((char)0xC9) + "BT Waiting");
+                    break;
                 case "IA":
+                    IsPlaying = false;
                     Logger.Info("Disconnected", "BT");
+                    OnStatusChanged(((char)0xC9) + "Disconnect");
                     break;
                 case "IJ2":
-                    Logger.Info("Connecting", "BT");
+                    IsPlaying = false;
+                    Logger.Info("Cancel pairing", "BT");
+                    OnStatusChanged(((char)0xC9) + " No BT");
+                    break;
+                default:
+                    if (s.IsNumeric())
+                    {
+                        Logger.Info("Phone call: " + s, "BT");
+                        OnStatusChanged(((char)0xC8) + s);
+                    }
+                    else
+                    {
+                        Logger.Info(s, "BT<");
+                    }
                     break;
             }
         }

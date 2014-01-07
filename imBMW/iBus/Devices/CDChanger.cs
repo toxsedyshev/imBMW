@@ -46,7 +46,6 @@ namespace imBMW.iBus.Devices
 
         #region Player control
 
-
         internal static IAudioPlayer Player
         {
             get
@@ -61,11 +60,50 @@ namespace imBMW.iBus.Devices
                 }
                 if (player != null)
                 {
-                    player.IsCurrentPlayer = false;
+                    UnsetPlayer(player);
                 }
                 player = value;
-                player.IsCurrentPlayer = true;
+                SetupPlayer(value);
             }
+        }
+
+        static void SetupPlayer(IAudioPlayer player)
+        {
+            player.IsCurrentPlayer = true;
+            player.IsPlayingChanged += ShowPlayerStatus;
+            player.StatusChanged += ShowPlayerStatus;
+        }
+
+        static void UnsetPlayer(IAudioPlayer player)
+        {
+            player.IsCurrentPlayer = false;
+            player.IsPlayingChanged -= ShowPlayerStatus;
+            player.StatusChanged -= ShowPlayerStatus;
+        }
+
+        static bool delayRadioText = false;
+
+        static void ShowPlayerStatus(IAudioPlayer player, bool isPlaying)
+        {
+            string s = ((char)(isPlaying ? 0xBC : 0xBE)) + " " + player.Name + "  ";
+            ShowPlayerStatus(player, s);
+        }
+
+        static void ShowPlayerStatus(IAudioPlayer player, string status)
+        {
+            if (!IsCDCActive)
+            {
+                return;
+            }
+            if (delayRadioText)
+            {
+                Radio.DisplayTextWithDelay(status, TextAlign.Center);
+            }
+            else
+            {
+                Radio.DisplayText(status, TextAlign.Center);
+            }
+            delayRadioText = false;
         }
 
         static void MultiFunctionSteeringWheel_ButtonPressed(MFLButton button)
@@ -169,10 +207,19 @@ namespace imBMW.iBus.Devices
                     return;
                 }
                 isCDCActive = value;
+                delayRadioText = true;
                 player.IsPlayerHostActive = isCDCActive;
                 if (isCDCActive)
                 {
-                    Play();
+                    if (player.IsPlaying)
+                    {
+                        // Already playing - CDC turning off cancelled
+                        ShowPlayerStatus(player, player.IsPlaying);
+                    }
+                    else
+                    {
+                        Play();
+                    }
 
                     if (announceThread.ThreadState != ThreadState.Suspended)
                     {

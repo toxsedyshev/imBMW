@@ -35,7 +35,7 @@ namespace imBMW.Multimedia
 
         public iPodViaHeadset(Cpu.Pin headsetControl, Cpu.Pin volumeUp = Cpu.Pin.GPIO_NONE, Cpu.Pin volumeDown = Cpu.Pin.GPIO_NONE)
         {
-            ShortName = "iPod";
+            Name = "iPod";
             iPod = new OutputPort(headsetControl, false);
             canControlVolume = volumeUp != Cpu.Pin.GPIO_NONE && volumeDown != Cpu.Pin.GPIO_NONE;
             if (canControlVolume)
@@ -96,13 +96,13 @@ namespace imBMW.Multimedia
                     break;
 
                 case iPodCommand.Next:
-                    Radio.DisplayText(((char)0xBC) + "" + ((char)0xBC) + " iPod   ", TextAlign.Center);
+                    OnStatusChanged(((char)0xBC) + "" + ((char)0xBC) + " iPod   ");
                     PressIPodButton();
                     PressIPodButton(true);
                     break;
 
                 case iPodCommand.Prev:
-                    Radio.DisplayText(((char)0xBD) + "" + ((char)0xBD) + " iPod   ", TextAlign.Center);
+                    OnStatusChanged(((char)0xBD) + "" + ((char)0xBD) + " iPod   ");
                     PressIPodButton();
                     PressIPodButton();
                     PressIPodButton(true);
@@ -115,7 +115,7 @@ namespace imBMW.Multimedia
                         {
                             PressIPodButton(true); // Select currently saying playlist
                             IsInVoiceOverMenu = false;
-                            Radio.DisplayText(((char)0xBC) + " VoiceOver", TextAlign.Center);
+                            OnStatusChanged(((char)0xBC) + " VoiceOver");
                         }
                         else
                         {
@@ -124,7 +124,7 @@ namespace imBMW.Multimedia
                     }
                     else
                     {
-                        Radio.DisplayText(((char)0xC9) + " VoiceOver", TextAlign.Center);
+                        OnStatusChanged(((char)0xC9) + " VoiceOver");
                         PressIPodButton(false, 550); // Say current track
                     }
                     break;
@@ -203,7 +203,7 @@ namespace imBMW.Multimedia
         {
             // Fixing IsPlaying flag, when playing iPod was connected to paused CDC
             isPlaying = !isPlaying;
-            ShowCurrentStatus();
+            OnIsPlayingChanged(IsPlaying);
             return false; // Real status of iPod's shuffle-mode is unknown
         }
 
@@ -250,10 +250,7 @@ namespace imBMW.Multimedia
                 PressIPodButton(true);
                 isPlaying = value;
                 IsInVoiceOverMenu = false;
-                if (IsPlayerHostActive)
-                {
-                    ShowCurrentStatus();
-                }
+                OnIsPlayingChanged(value);
             }
         }
 
@@ -273,7 +270,7 @@ namespace imBMW.Multimedia
             {
                 if (value)
                 {
-                    Radio.DisplayText(((char)0xC8) + " VoiceOver", TextAlign.Center);
+                    OnStatusChanged(((char)0xC8) + " VoiceOver");
                     voiceOverMenuStarted = DateTime.Now;
                     PressIPodButton(false, 5000);
                 }

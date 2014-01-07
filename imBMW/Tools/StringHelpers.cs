@@ -31,5 +31,29 @@ namespace imBMW.Tools
         {
             return str == null || str.Length == 0;
         }
+
+        public static bool IsNumeric(this string str, bool positive = true, bool integer = true)
+        {
+            if (IsNullOrEmpty(str))
+            {
+                return false;
+            }
+            foreach (var c in str)
+            {
+                if (c < '0' || c > '9')
+                {
+                    if (c == '.' && !integer)
+                    {
+                        continue;
+                    }
+                    if (c == '-' && !positive)
+                    {
+                        continue;
+                    }
+                    return false;
+                }
+            }
+            return true;
+        }
     }
 }

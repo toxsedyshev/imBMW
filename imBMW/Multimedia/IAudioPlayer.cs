@@ -3,6 +3,10 @@ using Microsoft.SPOT;
 
 namespace imBMW.Multimedia
 {
+    public delegate void IsPlayingHandler(IAudioPlayer sender, bool isPlaying);
+
+    public delegate void PlayerStatusHandler(IAudioPlayer sender, string status);
+
     public interface IAudioPlayer
     {
         void Next();
@@ -33,6 +37,10 @@ namespace imBMW.Multimedia
 
         bool IsPlayerHostActive { get; set; }
 
-        string ShortName { get; }
+        string Name { get; }
+
+        event IsPlayingHandler IsPlayingChanged;
+
+        event PlayerStatusHandler StatusChanged;
     }
 }

@@ -12,17 +12,22 @@ namespace imBMW.Multimedia
 
         public virtual void Play()
         {
-            IsPlaying = true;
+            SetPlaying(true);
         }
 
         public virtual void Pause()
         {
-            IsPlaying = false;
+            SetPlaying(false);
         }
 
         public virtual void PlayPauseToggle()
         {
-            IsPlaying = !IsPlaying;
+            SetPlaying(!IsPlaying);
+        }
+
+        protected virtual void SetPlaying(bool value)
+        {
+            IsPlaying = value;
         }
 
         public abstract void Next();
@@ -41,7 +46,7 @@ namespace imBMW.Multimedia
 
         public abstract void VolumeDown();
 
-        public string ShortName { get; protected set; }
+        public string Name { get; protected set; }
 
         public abstract bool IsPlaying
         {
@@ -58,10 +63,6 @@ namespace imBMW.Multimedia
             set
             {
                 isPlayerHostActive = value;
-                if (isPlayerHostActive && IsPlaying)
-                {
-                    ShowCurrentStatus(true);
-                }
             }
         }
 
@@ -78,19 +79,32 @@ namespace imBMW.Multimedia
                 {
                     Pause();
                 }
+                else if (IsPlayerHostActive)
+                {
+                    Play();
+                }
             }
         }
 
-        protected virtual void ShowCurrentStatus(bool delay = false)
+        public event IsPlayingHandler IsPlayingChanged;
+
+        public event PlayerStatusHandler StatusChanged;
+
+        protected virtual void OnIsPlayingChanged(bool isPlaying)
         {
-            string s = ((char)(isPlaying ? 0xBC : 0xBE)) + " " + ShortName + "  ";
-            if (delay)
+            var e = IsPlayingChanged;
+            if (e != null)
             {
-                Radio.DisplayTextWithDelay(s, TextAlign.Center);
+                e.Invoke(this, isPlaying);
             }
-            else
+        }
+
+        protected virtual void OnStatusChanged(string status)
+        {
+            var e = StatusChanged;
+            if (e != null)
             {
-                Radio.DisplayText(s, TextAlign.Center);
+                e.Invoke(this, status);
             }
         }
     }
