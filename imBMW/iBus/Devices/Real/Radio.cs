@@ -5,21 +5,10 @@ using System.Threading;
 
 namespace imBMW.iBus.Devices.Real
 {
-    #region Enums
-
-    public enum TextAlign
-    {
-        Left,
-        Right,
-        Center
-    }
-
-    #endregion
-
-
     public static class Radio
     {
-        const byte displayTextMaxlen = 11;
+        public const byte DisplayTextMaxLen = 11;
+
         const int displayTextDelay = 150;
 
         static Timer displayTextDelayTimer;
@@ -46,31 +35,9 @@ namespace imBMW.iBus.Devices.Real
                 displayTextDelayTimer = null;
             }
 
-            if (s.Length > displayTextMaxlen)
-            {
-                s = s.Substring(0, displayTextMaxlen);
-            }
-            byte offset = 0, len = (byte)s.Length;
-            if (align == TextAlign.Center)
-            {
-                offset = (byte)((displayTextMaxlen - len) / 2);
-            }
-            else if (align == TextAlign.Right)
-            {
-                offset = (byte)(displayTextMaxlen - len);
-            }
-            byte[] data = new byte[] { 0x23, 0x42, 0x30, 0x19, 0x19, 0x19, 0x19, 0x19, 0x19, 0x19, 0x19, 0x19, 0x19, 0x19 };
-            char[] chars = s.ToCharArray();
-            byte c;
-            for (byte i = 0; i < len; i++)
-            {
-                if (chars[i] > 0xff) {
-                    c = 0x19;
-                } else {
-                    c = (byte)chars[i];
-                }
-                data[i + offset + 3] = c;
-            }
+            byte[] data = new byte[] { 0x23, 0x42, 0x30 };
+            data = data.PadRight(0x19, DisplayTextMaxLen);
+            data.PasteASCII(s, 3, DisplayTextMaxLen, align);
             Manager.EnqueueMessage(new Message(DeviceAddress.Telephone, DeviceAddress.InstrumentClusterElectronics, "Show text \"" + s + "\" on the radio", data));
         }
     }

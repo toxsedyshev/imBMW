@@ -51,16 +51,16 @@ namespace imBMW.iBus.Devices.Real
             }
             else
             {
-                if ((on & 0x01) != 0)
+                if (on.HasBit(0))
                 {
                     args.ParkingLightsOn = true;
-                    on &= ((byte)0x01).Invert();
+                    on = on.RemoveBit(0);
                     description += "Park ";
                 }
-                if ((on & 0x02) != 0)
+                if (on.HasBit(1))
                 {
                     args.LowBeamOn = true;
-                    on &= ((byte)0x02).Invert();
+                    on = on.RemoveBit(1);
                     description += "LowBeam ";
                 }
                 if (on != 0)
@@ -91,16 +91,16 @@ namespace imBMW.iBus.Devices.Real
             }
             else
             {
-                if ((errorReason & 0x10) != 0)
+                if (errorReason.HasBit(4))
                 {
                     args.ErrorFrontRightsLights = true;
-                    errorReason &= ((byte)0x10).Invert();
+                    errorReason = errorReason.RemoveBit(4);
                     description += "FrontRight ";
                 }
-                if ((errorReason & 0x20) != 0)
+                if (errorReason.HasBit(5))
                 {
                     args.ErrorFrontLeftLights = true;
-                    errorReason &= ((byte)0x20).Invert();
+                    errorReason = errorReason.RemoveBit(5);
                     description += "FrontLeft ";
                 }
                 if (errorReason != 0)

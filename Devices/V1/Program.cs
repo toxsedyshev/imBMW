@@ -47,16 +47,16 @@ namespace imBMW.Devices.V1
 
             /*iBusPort.BusyChanged += (busy) =>
             {
-                LED.Write(Busy(busy, 0x01));
+                LED.Write(Busy(busy, 0));
                 Logger.Info(busy ? "BUSY" : "free", "!!");
             };*/
             iBus.Manager.BeforeMessageReceived += (e) =>
             {
-                LED.Write(Busy(true, 0x02));
+                LED.Write(Busy(true, 1));
             };
             iBus.Manager.AfterMessageReceived += (e) =>
             {
-                LED.Write(Busy(false, 0x02));
+                LED.Write(Busy(false, 1));
                 #if DEBUG
                 // Show only messages which are described
                 //if (e.Message.Describe() == null) { return; }
@@ -67,11 +67,11 @@ namespace imBMW.Devices.V1
             };
             iBus.Manager.BeforeMessageSent += (e) =>
             {
-                LED.Write(Busy(true, 0x04));
+                LED.Write(Busy(true, 2));
             };
             iBus.Manager.AfterMessageSent += (e) =>
             {
-                LED.Write(Busy(false, 0x04));
+                LED.Write(Busy(false, 2));
                 #if DEBUG
                 Logger.Info(e.Message, ">>");
                 #endif
@@ -104,11 +104,11 @@ namespace imBMW.Devices.V1
         {
             if (busy)
             {
-                Program.busy |= type;
+                Program.busy = Program.busy.AddBit(type);
             }
             else
             {
-                Program.busy &= type.Invert();
+                Program.busy = Program.busy.RemoveBit(type);
             }
             return Program.busy > 0;
         }

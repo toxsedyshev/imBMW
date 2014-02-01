@@ -105,7 +105,7 @@ namespace imBMW.Tools
                 case DeviceAddress.FrontDisplay: return "FrontDisplay";
                 case DeviceAddress.RainLightSensor: return "RainLightSensor";
                 case DeviceAddress.Television: return "Television";
-                case DeviceAddress.OnBoardMonitorOperatingPart: return "OnBoardMonitorOperatingPart";
+                case DeviceAddress.OnBoardMonitor: return "OnBoardMonitor";
                 case DeviceAddress.Broadcast: return "Broadcast";
                 case DeviceAddress.Unset: return "Unset";
                 case DeviceAddress.Unknown: return "Unknown";

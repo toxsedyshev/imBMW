@@ -6,7 +6,7 @@ using imBMW.Tools;
 using imBMW.iBus.Devices.Real;
 using imBMW.Multimedia;
 
-namespace imBMW.iBus.Devices
+namespace imBMW.iBus.Devices.Emulators
 {
     public static class CDChanger
     {
@@ -85,7 +85,7 @@ namespace imBMW.iBus.Devices
 
         static void ShowPlayerStatus(IAudioPlayer player, bool isPlaying)
         {
-            string s = ((char)(isPlaying ? 0xBC : 0xBE)) + " " + player.Name + "  ";
+            string s = (isPlaying ? CharIcons.Play : CharIcons.Pause) + " " + player.Name + "  ";
             ShowPlayerStatus(player, s);
         }
 
@@ -94,6 +94,10 @@ namespace imBMW.iBus.Devices
             if (!IsCDCActive)
             {
                 return;
+            }
+            if (status.Length > Radio.DisplayTextMaxLen)
+            {
+                status = status.Substring(status.Length - Radio.DisplayTextMaxLen);
             }
             if (delayRadioText)
             {

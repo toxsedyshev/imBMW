@@ -36,6 +36,7 @@ namespace imBMW.iBus.Devices.Real
         {
             EmulatePhone = true;
 
+            // TODO receive BM volume commands
             Manager.AddMessageReceiverForSourceDevice(DeviceAddress.MultiFunctionSteeringWheel, ProcessMFLMessage);
             InstrumentClusterElectronics.IgnitionStateChanged += InstrumentClusterElectronics_IgnitionStateChanged;
         }

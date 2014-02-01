@@ -96,13 +96,13 @@ namespace imBMW.Multimedia
                     break;
 
                 case iPodCommand.Next:
-                    OnStatusChanged(((char)0xBC) + "" + ((char)0xBC) + " iPod   ");
+                    OnStatusChanged(CharIcons.Next + " iPod   ");
                     PressIPodButton();
                     PressIPodButton(true);
                     break;
 
                 case iPodCommand.Prev:
-                    OnStatusChanged(((char)0xBD) + "" + ((char)0xBD) + " iPod   ");
+                    OnStatusChanged(CharIcons.Prev + " iPod   ");
                     PressIPodButton();
                     PressIPodButton();
                     PressIPodButton(true);

@@ -99,7 +99,7 @@ namespace imBMW.iBus
             }
 
             byte packetLength = (byte)(packet[1] + 2);
-            if (length < packetLength)
+            if (length < packetLength || packetLength < PacketLengthMin)
             {
                 return false;
             }

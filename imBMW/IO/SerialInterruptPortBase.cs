@@ -43,10 +43,11 @@ namespace System.IO.Ports
         protected override void OnBusyChanged(bool busy)
         {
             // currently not writing
-            if (_writeThread == null) return;
-
-            if (busy) _writeThread.Suspend(); // if busy was set, pause sending the data
-            else _writeThread.Resume();       // if it was cleared, resume sending the data
+            if (_writeThread != null)
+            {
+                if (busy) _writeThread.Suspend(); // if busy was set, pause sending the data
+                else _writeThread.Resume();       // if it was cleared, resume sending the data
+            }
 
             base.OnBusyChanged(busy);
         }

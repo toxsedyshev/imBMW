@@ -7,11 +7,18 @@ using System.Threading;
 
 namespace imBMW.Multimedia
 {
+    /// <summary>
+    /// Bluetooth module Bolutek BLK-MD-SPK-B based on OmniVision OVC3860 that supports A2DP and AVRCP profiles
+    /// Communicates via COM port
+    /// </summary>
     public class BluetoothOVC3860 : AudioPlayerBase
     {
         SerialPortBase port;
         QueueThreadWorker queue;
 
+        /// <summary>
+        /// </summary>
+        /// <param name="port">COM port name</param>
         public BluetoothOVC3860(string port)
         {
             Name = "Bluetooth";
@@ -47,14 +54,14 @@ namespace imBMW.Multimedia
         {
             SetPlaying(true);
             SendCommand(CmdNext);
-            OnStatusChanged(((char)0xBC) + "" + ((char)0xBC) + "Bluetooth");
+            OnStatusChanged(CharIcons.Next + "Bluetooth");
         }
 
         public override void Prev()
         {
             SetPlaying(true);
             SendCommand(CmdPrev);
-            OnStatusChanged(((char)0xBD) + "" + ((char)0xBD) + "Bluetooth");
+            OnStatusChanged(CharIcons.Prev + "Bluetooth");
         }
 
         public override void MFLRT()
@@ -186,6 +193,10 @@ namespace imBMW.Multimedia
                 case "IV":
                     Logger.Info("Connected", "BT");
                     OnStatusChanged(((char)0xC9) + " Bluetooth");
+                    if (IsPlayerHostActive && IsCurrentPlayer)
+                    {
+                        Play();
+                    }
                     break;
                 case "II":
                     IsPlaying = false;

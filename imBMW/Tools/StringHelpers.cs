@@ -4,6 +4,14 @@ using System.Text;
 
 namespace imBMW.Tools
 {
+    public static class CharIcons
+    {
+        public const char Play = '\xBC';
+        public const char Pause = '\xBE';
+        public const string Next = ">>";//"\xBC\xBC";
+        public const string Prev = "<<";//"\xBD\xBD";
+    }
+
     public static class StringHelpers
     {
         /// <summary>
@@ -22,8 +30,31 @@ namespace imBMW.Tools
             return s;
         }
 
+        public static string UTF8ToASCII(this string s)
+        {
+            //   C0 = À, F0 = ß, F1 = à, FF = ÿ - ASCII
+            // 0410 = À,               044F = ÿ - UTF8
+            // TODO 1025 ¨ 1105 ¸
+            var res = new byte[s.Length];
+            char c;
+            for (var i = 0; i < s.Length; i++)
+            {
+                c = s[i];
+                if (c >= 0x0410 && c <= 0x044F)
+                {
+                    c = (char)(c - 0x0350);
+                }
+                res[i] = (byte)c;
+            }
+            return ASCIIEncoding.GetString(res);
+        }
+
         public static string GetString(this Encoding encoding, params byte[] bytes)
         {
+            if (bytes.Length == 0 || bytes.Length == 1 && bytes[0] == 0)
+            {
+                return "";
+            }
             return new string(encoding.GetChars(bytes));
         }
 

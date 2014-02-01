@@ -43,7 +43,7 @@ namespace imBMW.iBus
         FrontDisplay = 0xE7,
         RainLightSensor = 0xE8,
         Television = 0xED,
-        OnBoardMonitorOperatingPart = 0xF0,
+        OnBoardMonitor = 0xF0,
         Broadcast = 0xFF,
         Unset = 0x100,
         Unknown = 0x101
