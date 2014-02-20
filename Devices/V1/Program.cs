@@ -79,7 +79,7 @@ namespace imBMW.Devices.V1
             Logger.Info("iBus manager events subscribed");
             
             // Set iPod via headset as CD-Changer emulator
-            iBus.Devices.CDChanger.Init(new Multimedia.iPodViaHeadset((Cpu.Pin)FEZ_Pin.Digital.Di3));
+            iBus.Devices.Emulators.CDChanger.Init(new Multimedia.iPodViaHeadset((Cpu.Pin)FEZ_Pin.Digital.Di3));
             Logger.Info("CD-Changer inited");
 
             // Enable comfort features
