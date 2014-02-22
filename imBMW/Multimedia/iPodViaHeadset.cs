@@ -96,13 +96,13 @@ namespace imBMW.Multimedia
                     break;
 
                 case iPodCommand.Next:
-                    OnStatusChanged(CharIcons.Next + " iPod   ");
+                    OnStatusChanged(PlayerEvent.Next);
                     PressIPodButton();
                     PressIPodButton(true);
                     break;
 
                 case iPodCommand.Prev:
-                    OnStatusChanged(CharIcons.Prev + " iPod   ");
+                    OnStatusChanged(PlayerEvent.Prev);
                     PressIPodButton();
                     PressIPodButton();
                     PressIPodButton(true);
@@ -115,7 +115,7 @@ namespace imBMW.Multimedia
                         {
                             PressIPodButton(true); // Select currently saying playlist
                             IsInVoiceOverMenu = false;
-                            OnStatusChanged(((char)0xBC) + " VoiceOver");
+                            OnStatusChanged("VoiceOver", PlayerEvent.Playing);
                         }
                         else
                         {
@@ -124,7 +124,7 @@ namespace imBMW.Multimedia
                     }
                     else
                     {
-                        OnStatusChanged(((char)0xC9) + " VoiceOver");
+                        OnStatusChanged("VoiceOver", PlayerEvent.Voice);
                         PressIPodButton(false, 550); // Say current track
                     }
                     break;
@@ -270,7 +270,7 @@ namespace imBMW.Multimedia
             {
                 if (value)
                 {
-                    OnStatusChanged(((char)0xC8) + " VoiceOver");
+                    OnStatusChanged("VoiceOver", PlayerEvent.Current);
                     voiceOverMenuStarted = DateTime.Now;
                     PressIPodButton(false, 5000);
                 }

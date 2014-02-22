@@ -40,18 +40,23 @@ namespace imBMW.Tools
 
         public static bool Compare(this byte[] array1, params byte[] array2)
         {
-            int len1 = array1.Length;
-            if (len1 != array2.Length)
+            return array1.Compare(false, array2);
+        }
+
+        public static bool Compare(this byte[] array1, bool startsWith, params byte[] array2)
+        {
+            int len2 = array2.Length;
+            if (len2 > array1.Length || (!startsWith && len2 != array1.Length))
             {
                 return false;
             }
-            if (len1 == 0)
+            if (len2 == 0)
             {
                 return true;
             }
-            if (len1 > 256)
+            if (len2 > 256)
             {
-                for (int i = 0; i < len1; i++)
+                for (int i = 0; i < len2; i++)
                 {
                     if (array1[i] != array2[i])
                     {
@@ -61,7 +66,7 @@ namespace imBMW.Tools
             }
             else
             {
-                for (byte i = 0; i < len1; i++)
+                for (byte i = 0; i < len2; i++)
                 {
                     if (array1[i] != array2[i])
                     {

@@ -6,10 +6,12 @@ namespace imBMW.Tools
 {
     public static class CharIcons
     {
-        public const char Play = '\xBC';
-        public const char Pause = '\xBE';
-        public const string Next = ">>";//"\xBC\xBC";
-        public const string Prev = "<<";//"\xBD\xBD";
+        public const string Play = "\xBC";
+        public const string Pause = "\xBE";
+        public const string Next = "\xBC\xBC";
+        public const string Prev = "\xBD\xBD";
+        public const string Voice = "\xC9";
+        public const string SelectedArrow = "\xC8";
     }
 
     public static class StringHelpers
