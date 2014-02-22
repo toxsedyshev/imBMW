@@ -25,7 +25,7 @@ namespace imBMW
                             // CD6 button: Open trunk when ignition isn't off and not driving
                             if (InstrumentClusterElectronics.CurrentIgnitionState != IgnitionState.Off)
                             {
-                                if (InstrumentClusterElectronics.CurrentSpeed == 0)
+                                if (InstrumentClusterElectronics.Speed == 0)
                                 {
                                     BodyModule.OpenTrunk();
                                     Radio.DisplayTextWithDelay("Trunk open", TextAlign.Center);
@@ -45,7 +45,7 @@ namespace imBMW
                             showSpeedRpm = !showSpeedRpm;
                             if (showSpeedRpm)
                             {
-                                ShowSpeedRPM(InstrumentClusterElectronics.CurrentSpeed, InstrumentClusterElectronics.CurrentRPM, true);
+                                ShowSpeedRPM(InstrumentClusterElectronics.Speed, InstrumentClusterElectronics.RPM, true);
                             }
                             else
                             {
@@ -71,7 +71,7 @@ namespace imBMW
                 }
             });
 
-            InstrumentClusterElectronics.SpeedRPMChanged += (e) =>
+            InstrumentClusterElectronics.CarDataChanged += e =>
             {
                 if (showSpeedRpm)
                 {
@@ -79,7 +79,7 @@ namespace imBMW
                 }
             };
 
-            iBus.Manager.AfterMessageReceived += (m) =>
+            iBus.Manager.AfterMessageReceived += m =>
             {
                 var now = DateTime.Now;
                 var span = now - lastMessage;
@@ -99,7 +99,7 @@ namespace imBMW
             };*/
         }
 
-        static void ShowSpeedRPM(uint speed, uint rpm, bool delay = false)
+		static void ShowSpeedRPM(short speed, short rpm, bool delay = false)
         {
             string s = speed.ToString().PrependToLength((char)0x19, 3) + "kmh " + rpm;
             if (delay)
