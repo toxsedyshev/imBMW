@@ -1,7 +1,6 @@
 using System;
 using Microsoft.SPOT;
 using System.Collections;
-using Microsoft.SPOT.Hardware;
 using System.IO.Ports;
 using System.Threading;
 using imBMW.Tools;

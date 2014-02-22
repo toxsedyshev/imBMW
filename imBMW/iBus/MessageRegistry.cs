@@ -54,18 +54,18 @@ namespace imBMW.iBus
             "", // "0x29",
             "On-Board Computer State Update",
             "Telephone indicators",
-            "", // "0x2C",
+            "Telephone status",
             "", // "0x2D",
             "", // "0x2E",
             "", // "0x2F",
             "", // "0x30",
-            "", // "0x31",
+            "RAD buttons",
             "MFL buttons",
             "", // "0x33",
             "DSP Equalizer Button",
             "", // "0x35",
             "", // "0x36",
-            "", // "0x37",
+            "RAD buttons", // "0x37",
             "CD status request",
             "CD status",
             "", // "0x3A",
@@ -78,8 +78,8 @@ namespace imBMW.iBus
             "On-Board Computer Data Request",
             "", // "0x42",
             "", // "0x43",
-            "", // "0x44",
-            "", // "0x45",
+            "E46 IKE text",
+            "Radio status request",
             "LCD Clear",
             "BMBT buttons",
             "BMBT buttons",
@@ -88,22 +88,22 @@ namespace imBMW.iBus
             "Cassette status",
             "", // "0x4C",
             "", // "0x4D",
-            "", // "0x4E",
+            "Audio source selection", // "0x4E",
             "RGB Control",
             "", // "0x50",
             "", // "0x51",
             "", // "0x52",
             "Vehicle data request",
             "Vehicle data status",
-            "", // "0x55",
+            "Service Interval Display",
             "", // "0x56",
             "", // "0x57",
-            "", // "0x58",
-            "", // "0x59",
+            "Headlight wipe interval",
+            "Light control status",
             "Lamp status request",
             "Lamp status",
             "Instrument cluster lighting status",
-            "", // "0x5D",
+            "Light dimmer status request",
             "", // "0x5E",
             "", // "0x5F",
             "", // "0x60",
@@ -122,26 +122,26 @@ namespace imBMW.iBus
             "", // "0x6D",
             "", // "0x6E",
             "", // "0x6F",
-            "", // "0x70",
+            "Remote control central locking status",
             "Rain sensor status request",
             "Remote Key buttons",
-            "", // "0x73",
+            "EWS status request",
             "EWS key status",
-            "", // "0x75",
-            "", // "0x76",
-            "", // "0x77",
-            "", // "0x78",
+            "Wiper status request",
+            "Crash Alarm",
+            "Wiper status",
+            "Seat Memory",
             "Doors/windows status request",
             "Doors/windows status",
             "", // "0x7B",
             "SHD status",
-            "", // "0x7D",
+            "SHD control",
             "", // "0x7E",
             "", // "0x7F",
             "", // "0x80",
             "", // "0x81",
             "", // "0x82",
-            "", // "0x83",
+            "Air conditioning compressor status",
             "", // "0x84",
             "", // "0x85",
             "", // "0x86",
@@ -176,12 +176,12 @@ namespace imBMW.iBus
             "", // "0xA3",
             "Current location",
             "Screen text",
-            "", // "0xA6",
+            "Special indicators",
             "TMC status request",
-            "", // "0xA8",
-            "", // "0xA9",
+            "TMC data",
+            "Telephone data",
             "Navigation Control",
-            "", // "0xAB",
+            "Remote control status",
             "", // "0xAC",
             "", // "0xAD",
             "", // "0xAE",
@@ -265,7 +265,7 @@ namespace imBMW.iBus
             "", // "0xFC",
             "", // "0xFD",
             "", // "0xFE",
-            "", // "0xFF"
+            "" // "0xFF"
         };
 
         public static byte[] DataPollRequest = new byte[] { 0x01 };
@@ -284,17 +284,15 @@ namespace imBMW.iBus
 
         #endregion
 
+        #region Public static methods
+        
         public static string ToPrettyString(this Message message, bool withPerformanceInfo = false)
         {
-            string description = message.Describe();
-            if (description == null)
-            {
-                description = message.DataDump;
-            }
+            string description = message.Describe() ?? message.DataDump;
             description = message.SourceDevice.ToStringValue() + " > " + message.DestinationDevice.ToStringValue() + ": " + description;
             if (withPerformanceInfo)
             {
-                description += " (" + message.PerformanceInfo.ToString() + ")";
+                description += " (" + message.PerformanceInfo + ")";
             }
             return description;
         }
@@ -323,5 +321,7 @@ namespace imBMW.iBus
             }
             return message.DataDump + " (" + messageTypeDescriptions[firstByte] + ')';
         }
+
+        #endregion
     }
 }

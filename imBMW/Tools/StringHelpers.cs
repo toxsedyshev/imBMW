@@ -86,5 +86,28 @@ namespace imBMW.Tools
             }
             return true;
         }
+
+		public static ulong ToUlong(this string hex)
+		{
+			if (IsNullOrEmpty(hex)) throw new ArgumentException("hex");
+
+			int i = hex.Length > 1 && hex[0] == '0' && (hex[1] == 'x' || hex[1] == 'X') ? 2 : 0;
+			ulong value = 0;
+
+			while (i < hex.Length)
+			{
+				uint x = hex[i++];
+
+				if (x >= '0' && x <= '9') x = x - '0';
+				else if (x >= 'A' && x <= 'F') x = (x - 'A') + 10;
+				else if (x >= 'a' && x <= 'f') x = (x - 'a') + 10;
+				else throw new ArgumentOutOfRangeException("hex");
+
+				value = 16 * value + x;
+
+			}
+
+			return value;
+		}
     }
 }
