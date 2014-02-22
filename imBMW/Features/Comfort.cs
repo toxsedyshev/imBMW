@@ -9,65 +9,156 @@ namespace imBMW.Features
     public static class Comfort
     {
         #region Enums
-        enum Command
+
+        private enum Command
         {
             FullCloseWindows,
             FullOpenWindows
         }
+
         #endregion
 
-        static QueueThreadWorker commands;
+        #region Private static fields
+        
+        static readonly QueueThreadWorker Commands;
 
-        static bool needLockDoors = true;
-        static bool needUnlockDoors = false;
-        static bool needComfortClose = true;
+        static bool _needLockDoors = true;
+        static bool _needUnlockDoors;
+
+        #endregion
+
+        #region Public static properties
+
+        /// <summary>
+        /// Lock doors on specified speed (km/h)
+        /// </summary>
+        public static uint DoorsLockSpeed { get; set; }
+
+        /// <summary>
+        /// Lock doors on <see cref="DoorsLockSpeed"/> speed reached
+        /// </summary>
+        public static bool AutoLockDoors { get; set; }
+
+        /// <summary>
+        /// Unlock doors on ignition off
+        /// </summary>
+        public static bool AutoUnlockDoors { get; set; }
+
+        /// <summary>
+        /// Close windows on remote key "lock" button
+        /// </summary>
+        public static bool AutoCloseWindows { get; set; }
+
+        /// <summary>
+        /// Close sunroof on remote key "lock" button
+        /// </summary>
+        public static bool AutoCloseSunroof { get; set; }
+
+        /// <summary>
+        /// Fold mirrors on remote key "lock" button
+        /// </summary>
+        public static bool AutoFoldMirrors { get; set; }
+
+        /// <summary>
+        /// Unfold mirrors on remote key "unlock" button
+        /// </summary>
+        public static bool AutoUnfoldMirrors { get; set; }
+
+        /// <summary>
+        /// Send seat memory position auto when appropriate key is inserted
+        /// </summary>
+        public static bool AutoApplySeatMemory { get; set; }
+
+        /// <summary>
+        /// Is comfort close enabled till next ignition on.
+        /// If disabled, it will be enabled on ignition on.
+        /// </summary>
+        public static bool NextComfortCloseEnabled { get; set; }
+
+        public static bool AllFeaturesEnabled
+        {
+            set
+            {
+                AutoLockDoors = value;
+                AutoUnlockDoors = value;
+                AutoCloseWindows = value;
+                AutoCloseSunroof = value;
+                AutoFoldMirrors = value;
+                AutoUnfoldMirrors = value;
+                AutoApplySeatMemory = value;
+            }
+        }
+
+        #endregion
+
+        #region Static constructor
 
         static Comfort()
         {
-            commands = new QueueThreadWorker(ProcessCommand);
+            DoorsLockSpeed = 5;
+            NextComfortCloseEnabled = true;
+            Commands = new QueueThreadWorker(ProcessCommand);
 
-            InstrumentClusterElectronics.SpeedRPMChanged += (e) =>
+            Immobiliser.KeyInserted += args =>
+                {
+                    if (AutoApplySeatMemory)
+                    {
+                        switch (args.KeyNumber)
+                        {
+                            case 1:
+                                SeatMemory.SeatPosition = SeatMemoryPosition.Position1;
+                                break;
+                            case 2:
+                                SeatMemory.SeatPosition = SeatMemoryPosition.Position2;
+                                break;
+                            case 3:
+                                SeatMemory.SeatPosition = SeatMemoryPosition.Position3;
+                                break;
+                        }
+                    }
+                };
+            InstrumentClusterElectronics.CarDataChanged += e =>
             {
-                if (needLockDoors && e.Speed > DoorsLockSpeed)
+                if (_needLockDoors && e.Speed > DoorsLockSpeed)
                 {
                     if (AutoLockDoors)
                     {
                         BodyModule.LockDoors();
                     }
-                    needLockDoors = false;
-                    needUnlockDoors = true;
+                    _needLockDoors = false;
+                    _needUnlockDoors = true;
                 }
                 if (e.Speed == 0)
                 {
-                    needLockDoors = true;
+                    _needLockDoors = true;
                 }
             };
-            InstrumentClusterElectronics.IgnitionStateChanged += (e) =>
+            InstrumentClusterElectronics.IgnitionStateChanged += e =>
             {
-                if (!needComfortClose 
-                    && e.CurrentIgnitionState != IgnitionState.Off 
+                if (!NextComfortCloseEnabled
+                    && e.CurrentIgnitionState != IgnitionState.Off
                     && e.PreviousIgnitionState == IgnitionState.Off)
                 {
-                    needComfortClose = true;
+                    NextComfortCloseEnabled = true;
                 }
-                if (needUnlockDoors && e.CurrentIgnitionState == IgnitionState.Off)
+                if (_needUnlockDoors && e.CurrentIgnitionState == IgnitionState.Off)
                 {
                     if (AutoUnlockDoors)
                     {
                         BodyModule.UnlockDoors();
                     }
-                    needUnlockDoors = false;
-                    needLockDoors = true;
+                    _needUnlockDoors = false;
+                    _needLockDoors = true;
                 }
             };
-            BodyModule.RemoteKeyButtonPressed += (e) =>
+            BodyModule.RemoteKeyButtonPressed += e =>
             {
-                if (e.Button == RemoteKeyButton.Lock && needComfortClose)
+                if (e.Button == RemoteKeyButton.Lock && NextComfortCloseEnabled)
                 {
-                    needComfortClose = false;
+                    NextComfortCloseEnabled = false;
                     if (AutoCloseWindows)
                     {
-                        commands.Enqueue(Command.FullCloseWindows);
+                        Commands.Enqueue(Command.FullCloseWindows);
                     }
                     if (AutoCloseSunroof)
                     {
@@ -88,6 +179,10 @@ namespace imBMW.Features
             };
         }
 
+        #endregion
+
+        #region Private static methods
+        
         private static void ProcessCommand(object o)
         {
             var c = (Command)o;
@@ -111,71 +206,6 @@ namespace imBMW.Features
             }
         }
 
-        /// <summary>
-        /// Lock doors on specified speed (km/h)
-        /// </summary>
-        public static uint DoorsLockSpeed = 5;
-
-        /// <summary>
-        /// Lock doors on <see cref="DoorsLockSpeed"/> speed reached
-        /// </summary>
-        public static bool AutoLockDoors = false;
-
-        /// <summary>
-        /// Unlock doors on ignition off
-        /// </summary>
-        public static bool AutoUnlockDoors = false;
-
-        /// <summary>
-        /// Close windows on remote key "lock" button
-        /// </summary>
-        public static bool AutoCloseWindows = false;
-
-        /// <summary>
-        /// Close sunroof on remote key "lock" button
-        /// </summary>
-        public static bool AutoCloseSunroof = false;
-
-        /// <summary>
-        /// Fold mirrors on remote key "lock" button
-        /// </summary>
-        public static bool AutoFoldMirrors = false;
-
-        /// <summary>
-        /// Unfold mirrors on remote key "unlock" button
-        /// </summary>
-        public static bool AutoUnfoldMirrors = false;
-
-        /// <summary>
-        /// Is comfort close enabled till next ignition on.
-        /// If disabled, it will be enabled on ignition on.
-        /// </summary>
-        public static bool NextComfortCloseEnabled
-        {
-            get
-            {
-                return needComfortClose;
-            }
-            set
-            {
-                needComfortClose = value;
-            }
-        }
-
-        /// <summary>
-        /// Set is all comfort features (auto open/close doors, windows, sunroof, mirrors) enabled
-        /// </summary>
-        public static bool AllFeaturesEnabled
-        {
-            set
-            {
-                Features.Comfort.AutoLockDoors = value;
-                Features.Comfort.AutoUnlockDoors = value;
-                Features.Comfort.AutoCloseWindows = value;
-                Features.Comfort.AutoCloseSunroof = value;
-                Features.Comfort.AutoFoldMirrors = value;
-                Features.Comfort.AutoUnfoldMirrors = value;
-            }
-        }
+        #endregion
     }
 }

@@ -93,7 +93,7 @@ namespace imBMW.Tools
                 case DeviceAddress.MirrorMemoryThird: return "MirrorMemoryThird";
                 case DeviceAddress.RearMultiInfoDisplay: return "RearMultiInfoDisplay";
                 case DeviceAddress.AirBagModule: return "AirBagModule";
-                case DeviceAddress.SpeedRecognitionSystem: return "SpeedRecognitionSystem";
+				case DeviceAddress.SpeechRecognitionSystem: return "SpeechRecognitionSystem";
                 case DeviceAddress.NavigationJapan: return "NavigationJapan";
                 case DeviceAddress.GlobalBroadcastAddress: return "GlobalBroadcastAddress";
                 case DeviceAddress.MultiInfoDisplay: return "MultiInfoDisplay";
