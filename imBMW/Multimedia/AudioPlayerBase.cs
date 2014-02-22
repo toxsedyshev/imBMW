@@ -54,6 +54,14 @@ namespace imBMW.Multimedia
             protected set;
         }
 
+        public bool IsEnabled
+        {
+            get
+            {
+                return IsPlayerHostActive && IsCurrentPlayer;
+            }
+        }
+
         public bool IsPlayerHostActive
         {
             get
@@ -99,12 +107,17 @@ namespace imBMW.Multimedia
             }
         }
 
-        protected virtual void OnStatusChanged(string status)
+        protected virtual void OnStatusChanged(PlayerEvent playerEvent)
+        {
+            OnStatusChanged(String.Empty, playerEvent);
+        }
+
+        protected virtual void OnStatusChanged(string status, PlayerEvent playerEvent)
         {
             var e = StatusChanged;
             if (e != null)
             {
-                e.Invoke(this, status);
+                e.Invoke(this, status, playerEvent);
             }
         }
     }

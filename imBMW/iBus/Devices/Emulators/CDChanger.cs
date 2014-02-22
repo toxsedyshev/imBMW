@@ -85,8 +85,51 @@ namespace imBMW.iBus.Devices.Emulators
 
         static void ShowPlayerStatus(IAudioPlayer player, bool isPlaying)
         {
-            string s = (isPlaying ? CharIcons.Play : CharIcons.Pause) + " " + player.Name + "  ";
+            string s = TextWithIcon(isPlaying ? CharIcons.Play : CharIcons.Pause);
             ShowPlayerStatus(player, s);
+        }
+
+        static void ShowPlayerStatus(IAudioPlayer player, string status, PlayerEvent playerEvent)
+        {
+            if (!IsCDCActive)
+            {
+                return;
+            }
+            switch (playerEvent)
+            {
+                case PlayerEvent.Next:
+                    status = TextWithIcon(CharIcons.Next);
+                    break;
+                case PlayerEvent.Prev:
+                    status = TextWithIcon(CharIcons.Prev);
+                    break;
+                case PlayerEvent.Playing:
+                    status = TextWithIcon(CharIcons.Play, status);
+                    break;
+                case PlayerEvent.Current:
+                    status = TextWithIcon(CharIcons.SelectedArrow, status);
+                    break;
+                case PlayerEvent.Voice:
+                    status = TextWithIcon(CharIcons.Voice, status);
+                    break;
+            }
+            ShowPlayerStatus(player, status);
+        }
+
+        static string TextWithIcon(string icon, string text = null)
+        {
+            if (text == null)
+            {
+                text = player.Name;
+            }
+            if (icon.Length + text.Length < Radio.DisplayTextMaxLen)
+            {
+                return icon + " " + text;
+            }
+            else
+            {
+                return icon + text;
+            }
         }
 
         static void ShowPlayerStatus(IAudioPlayer player, string status)

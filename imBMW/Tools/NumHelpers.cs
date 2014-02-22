@@ -25,7 +25,7 @@ namespace imBMW.Tools
         public static bool HasBit(this byte b, byte bitIndex)
         {
             checkByteBitIndex(bitIndex);
-            return b.HasBits((byte)System.Math.Pow(2, bitIndex));
+            return b.HasBits((byte)(1 << bitIndex));
         }
 
         public static byte RemoveBits(this byte b, byte bits)
@@ -36,7 +36,7 @@ namespace imBMW.Tools
         public static byte RemoveBit(this byte b, byte bitIndex)
         {
             checkByteBitIndex(bitIndex);
-            return b.RemoveBits((byte)System.Math.Pow(2, bitIndex));
+            return b.RemoveBits((byte)(1 << bitIndex));
         }
 
         public static byte AddBits(this byte b, byte bits)
@@ -47,7 +47,7 @@ namespace imBMW.Tools
         public static byte AddBit(this byte b, byte bitIndex)
         {
             checkByteBitIndex(bitIndex);
-            return b.AddBits((byte)System.Math.Pow(2, bitIndex));
+            return b.AddBits((byte)(1 << bitIndex));
         }
 
         static void checkByteBitIndex(byte bitIndex)

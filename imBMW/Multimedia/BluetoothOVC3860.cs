@@ -54,14 +54,14 @@ namespace imBMW.Multimedia
         {
             SetPlaying(true);
             SendCommand(CmdNext);
-            OnStatusChanged(CharIcons.Next + "Bluetooth");
+            OnStatusChanged(PlayerEvent.Next);
         }
 
         public override void Prev()
         {
             SetPlaying(true);
             SendCommand(CmdPrev);
-            OnStatusChanged(CharIcons.Prev + "Bluetooth");
+            OnStatusChanged(PlayerEvent.Prev);
         }
 
         public override void MFLRT()
@@ -72,19 +72,19 @@ namespace imBMW.Multimedia
         public override void MFLDial()
         {
             SendCommand(CmdAnswer);
-            OnStatusChanged(((char)0xC8) + "AnswerCall");
+            OnStatusChanged("AnswerCall", PlayerEvent.Voice);
         }
 
         public override void MFLDialLong()
         {
             SendCommand(CmdVoiceCall);
-            OnStatusChanged(((char)0xC8) + " VoiceCall");
+            OnStatusChanged("VoiceCall", PlayerEvent.Voice);
         }
 
         public override bool RandomToggle()
         {
             SendCommand(CmdEnterPairing);
-            OnStatusChanged(((char)0xC9) + "Disconnect");
+            OnStatusChanged("Pairing", PlayerEvent.Wireless);
             return false;
         }
 
@@ -179,7 +179,14 @@ namespace imBMW.Multimedia
             switch (s)
             {
                 case "MR":
-                    IsPlaying = true;
+                    if (!IsEnabled)
+                    {
+                        SendCommand(CmdStop);
+                    }
+                    else
+                    {
+                        IsPlaying = true;
+                    }
                     break;
                 case "MP":
                     IsPlaying = false;
@@ -192,8 +199,8 @@ namespace imBMW.Multimedia
                     break;
                 case "IV":
                     Logger.Info("Connected", "BT");
-                    OnStatusChanged(((char)0xC9) + " Bluetooth");
-                    if (IsPlayerHostActive && IsCurrentPlayer)
+                    OnStatusChanged("Connected", PlayerEvent.Wireless);
+                    if (IsEnabled)
                     {
                         Play();
                     }
@@ -201,23 +208,23 @@ namespace imBMW.Multimedia
                 case "II":
                     IsPlaying = false;
                     Logger.Info("Waiting", "BT");
-                    OnStatusChanged(((char)0xC9) + "BT Waiting");
+                    OnStatusChanged("Waiting", PlayerEvent.Wireless);
                     break;
                 case "IA":
                     IsPlaying = false;
                     Logger.Info("Disconnected", "BT");
-                    OnStatusChanged(((char)0xC9) + "Disconnect");
+                    OnStatusChanged("Disconnect", PlayerEvent.Wireless);
                     break;
                 case "IJ2":
                     IsPlaying = false;
                     Logger.Info("Cancel pairing", "BT");
-                    OnStatusChanged(((char)0xC9) + " No BT");
+                    OnStatusChanged("No pair", PlayerEvent.Wireless);
                     break;
                 default:
                     if (s.IsNumeric())
                     {
                         Logger.Info("Phone call: " + s, "BT");
-                        OnStatusChanged(((char)0xC8) + s);
+                        OnStatusChanged(s, PlayerEvent.Call);
                     }
                     else
                     {

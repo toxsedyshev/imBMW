@@ -5,7 +5,19 @@ namespace imBMW.Multimedia
 {
     public delegate void IsPlayingHandler(IAudioPlayer sender, bool isPlaying);
 
-    public delegate void PlayerStatusHandler(IAudioPlayer sender, string status);
+    public delegate void PlayerStatusHandler(IAudioPlayer sender, string status, PlayerEvent playerEvent);
+
+    public enum PlayerEvent
+    {
+        Next,
+        Prev,
+        Voice,
+        Current,
+        Playing,
+        Wireless,
+        Call,
+        Text
+    }
 
     public interface IAudioPlayer
     {
@@ -32,6 +44,8 @@ namespace imBMW.Multimedia
         void VolumeDown();
 
         bool IsPlaying { get; }
+
+        bool IsEnabled { get; }
 
         bool IsCurrentPlayer { get; set; }
 

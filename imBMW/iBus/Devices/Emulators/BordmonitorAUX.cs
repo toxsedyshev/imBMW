@@ -15,9 +15,15 @@ namespace imBMW.iBus.Devices.Emulators
 
         #region Messages
 
-        static byte[] DataRadioAlive = new byte[] { 0x02, 0x00, 0x03 };
+        static Message MessageAUXHighVolumeP6 = new Message(DeviceAddress.OnBoardMonitor, DeviceAddress.Radio, "Set AUX high volume", 0x48, 0x03);
+
         static byte[] DataRadioOn = new byte[] { 0x4A, 0xFF }; // Some cassette-control messages
         static byte[] DataRadioOff = new byte[] { 0x4A, 0x00 }; // or 4A 90?
+        static byte[] DataAUX = new byte[] { 0x23, 0x62, 0x10, 0x41, 0x55, 0x58, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20 };
+        static byte[] DataCD = new byte[] { 0x23, 0x62, 0x10, 0x43, 0x44 };
+        static byte[] DataCDStartPlaying = new byte[] { 0x38, 0x03, 0x00 };
+        static byte[] DataFM = new byte[] { 0xA5, 0x62, 0x01, 0x41, 0x20, 0x20, 0x46, 0x4D, 0x20 };
+        static byte[] DataAM = new byte[] { 0xA5, 0x62, 0x01, 0x41, 0x20, 0x20, 0x41, 0x4D, 0x20 };
 
         #endregion
 
@@ -26,7 +32,7 @@ namespace imBMW.iBus.Devices.Emulators
             Player = player;
 
             // TODO remove
-            IsAUXSelected = true;
+            //IsAUXSelected = true;
             //IsRadioActive = true;
 
             Manager.AddMessageReceiverForSourceDevice(DeviceAddress.Radio, ProcessRadioMessage);
@@ -37,7 +43,7 @@ namespace imBMW.iBus.Devices.Emulators
 
         static void ProcessRadioMessage(Message m)
         {
-            if (m.Data.Compare(DataRadioOn) || m.Data.Compare(DataRadioAlive))
+            if (m.Data.Compare(DataRadioOn))
             {
                 IsRadioActive = true;
                 m.ReceiverDescription = "Radio On";
@@ -46,6 +52,23 @@ namespace imBMW.iBus.Devices.Emulators
             {
                 IsRadioActive = false;
                 m.ReceiverDescription = "Radio Off";
+            }
+            else if (m.Data.Compare(DataAUX))
+            {
+                IsAUXSelected = true;
+                if (lastStatus == null)
+                {
+                    ShowPlayerStatus(player);
+                }
+                else
+                {
+                    ShowPlayerStatus(player, lastStatus);
+                    lastStatus = null;
+                }
+            }
+            else if (m.Data.Compare(DataFM) || m.Data.Compare(DataAM) || m.Data.Compare(true, DataCDStartPlaying))
+            {
+                IsAUXSelected = false;
             }
         }
 
@@ -88,6 +111,10 @@ namespace imBMW.iBus.Devices.Emulators
                 }
                 isAUXSelected = value;
                 CheckAuxOn();
+                if (value)
+                {
+                    Manager.EnqueueMessage(MessageAUXHighVolumeP6);
+                }
             }
         }
 
@@ -135,6 +162,10 @@ namespace imBMW.iBus.Devices.Emulators
 
         static void ShowPlayerName()
         {
+            if (!IsAUXOn)
+            {
+                return;
+            }
             Bordmonitor.ShowText(player.Name, BordmonitorFields.Title);
         }
 
@@ -143,6 +174,11 @@ namespace imBMW.iBus.Devices.Emulators
             player.IsCurrentPlayer = false;
             player.IsPlayingChanged -= ShowPlayerStatus;
             player.StatusChanged -= ShowPlayerStatus;
+        }
+
+        static void ShowPlayerStatus(IAudioPlayer player)
+        {
+            ShowPlayerStatus(player, player.IsPlaying);
         }
 
         static void ShowPlayerStatus(IAudioPlayer player, bool isPlaying)
@@ -154,6 +190,58 @@ namespace imBMW.iBus.Devices.Emulators
         static Timer displayTextDelayTimer;
         const int displayTextDelay = 5000;
         const int displayTextMaxlen = 11;
+        static string lastStatus;
+
+        static void ShowPlayerStatus(IAudioPlayer player, string status, PlayerEvent playerEvent)
+        {
+            if (!IsAUXOn)
+            {
+                return;
+            }
+            bool showAfterWithDelay = false;
+            switch (playerEvent)
+            {
+                case PlayerEvent.Next:
+                    status = "Вперед";
+                    showAfterWithDelay = true;
+                    break;
+                case PlayerEvent.Prev:
+                    status = "Назад";
+                    showAfterWithDelay = true;
+                    break;
+                case PlayerEvent.Playing:
+                    status = TextWithIcon(">", status);
+                    break;
+                case PlayerEvent.Current:
+                    status = TextWithIcon("\x07", status);
+                    break;
+                case PlayerEvent.Voice:
+                    status = TextWithIcon("* ", status);
+                    break;
+            }
+            lastStatus = status;
+            ShowPlayerStatus(player, status);
+            if (showAfterWithDelay)
+            {
+                ShowPlayerStatusWithDelay(player);
+            }
+        }
+
+        static string TextWithIcon(string icon, string text = null)
+        {
+            if (text == null)
+            {
+                text = "";
+            }
+            if (icon.Length + text.Length < displayTextMaxlen)
+            {
+                return icon + " " + text;
+            }
+            else
+            {
+                return icon + text;
+            }
+        }
 
         static void ShowPlayerStatus(IAudioPlayer player, string status)
         {
@@ -182,7 +270,7 @@ namespace imBMW.iBus.Devices.Emulators
 
             displayTextDelayTimer = new Timer(delegate
             {
-                ShowPlayerStatus(player, player.IsPlaying);
+                ShowPlayerStatus(player);
             }, null, displayTextDelay, 0);
         }
 
