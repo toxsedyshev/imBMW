@@ -6,8 +6,9 @@ namespace imBMW.Multimedia
 {
     public abstract class AudioPlayerBase : IAudioPlayer
     {
-        protected bool isCurrentPlayer;
-        protected bool isPlayerHostActive;
+        bool isCurrentPlayer;
+        bool isPlayerHostActive;
+        bool isEnabled;
         protected bool isPlaying;
 
         public virtual void Play()
@@ -58,7 +59,16 @@ namespace imBMW.Multimedia
         {
             get
             {
-                return IsPlayerHostActive && IsCurrentPlayer;
+                return isEnabled;
+            }
+            private set
+            {
+                if (isEnabled == value)
+                {
+                    return;
+                }
+                isEnabled = value;
+                OnIsEnabledChanged(value);
             }
         }
 
@@ -70,7 +80,12 @@ namespace imBMW.Multimedia
             }
             set
             {
+                if (isPlayerHostActive == value)
+                {
+                    return;
+                }
                 isPlayerHostActive = value;
+                OnIsPlayerHostActiveChanged(value);
             }
         }
 
@@ -82,16 +97,40 @@ namespace imBMW.Multimedia
             }
             set
             {
+                if (isCurrentPlayer == value)
+                {
+                    return;
+                }
                 isCurrentPlayer = value;
-                if (!isCurrentPlayer)
-                {
-                    Pause();
-                }
-                else if (IsPlayerHostActive)
-                {
-                    Play();
-                }
+                OnIsCurrentPlayerChanged(value);
             }
+        }
+
+        protected virtual void OnIsEnabledChanged(bool isEnabled)
+        {
+        }
+
+        protected virtual void OnIsCurrentPlayerChanged(bool isCurrentPlayer)
+        {
+            CheckIsEnabled();
+            if (!isCurrentPlayer)
+            {
+                Pause();
+            }
+            else if (IsPlayerHostActive)
+            {
+                Play();
+            }
+        }
+
+        protected virtual void OnIsPlayerHostActiveChanged(bool isPlayerHostActive)
+        {
+            CheckIsEnabled();
+        }
+
+        void CheckIsEnabled()
+        {
+            IsEnabled = IsPlayerHostActive && IsCurrentPlayer;
         }
 
         public event IsPlayingHandler IsPlayingChanged;

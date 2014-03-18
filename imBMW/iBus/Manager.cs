@@ -24,6 +24,8 @@ namespace imBMW.iBus
 
     public delegate void MessageEventHandler(MessageEventArgs e);
 
+    public delegate void DeviceFindHandler(DeviceAddress d, bool found);
+
     #endregion
 
 
@@ -44,6 +46,8 @@ namespace imBMW.iBus
 
         //static QueueThreadWorker messageReadQueue;
 
+        const int messageReadTimeout = 16; // 2 * 30 * Message.PacketLengthMax / 8; // tested on 8byte message, got 30ms (real, instead of theoretical 8ms), and made 2x reserve
+        static DateTime lastMessage = DateTime.Now;
         static byte[] messageBuffer = new byte[Message.PacketLengthMax];
         static int messageBufferLength = 0;
         static object bufferSync = new object();
@@ -62,6 +66,18 @@ namespace imBMW.iBus
                 #if DEBUG
                 //Logger.Info(data.ToHex(' '), "<!");
                 #endif
+                /*#if DEBUG // TODO remove #if after tests
+                if (messageBufferLength > 0)
+                {
+                    Logger.Warning("WD");
+                    var elapsed = (DateTime.Now - lastMessage).GetTotalMilliseconds();
+                    if (elapsed > messageReadTimeout)
+                    {
+                        Logger.Warning("Buffer skip: timeout ("+elapsed+"ms) data: " + messageBuffer.SkipAndTake(0, messageBufferLength).ToHex(" "));
+                        messageBufferLength = 0;
+                    }
+                }
+                #endif*/
                 if (messageBufferLength + data.Length > messageBuffer.Length)
                 {
                     Logger.Info("Buffer overflow. Extending it. " + port.ToString());
@@ -98,6 +114,7 @@ namespace imBMW.iBus
                     //messageReadQueue.Enqueue(m);
                     SkipBuffer(m.PacketLength);
                 }
+                lastMessage = DateTime.Now;
             }
         }
 
@@ -356,6 +373,43 @@ namespace imBMW.iBus
         public static void AddMessageReceiverForSourceOrDestinationDevice(DeviceAddress source, DeviceAddress destination, MessageReceiver callback)
         {
             messageReceiverList.Add(new MessageReceiverRegistration(source, destination, callback, MessageReceiverRegistration.MatchType.SourceOrDestination));
+        }
+
+        #endregion
+
+        #region Device searching on iBus
+
+        const int findDeviceTimeout = 2000;
+
+        static ArrayList foundDevices = new ArrayList();
+
+        public static bool FindDevice(DeviceAddress device)
+        {
+            return FindDevice(device, findDeviceTimeout);
+        }
+
+        public static bool FindDevice(DeviceAddress device, int timeout)
+        {
+            if (foundDevices.Contains(device))
+            {
+                return true;
+            }
+            lock (foundDevices)
+            {
+                AfterMessageReceived += SaveFoundDevice;
+                EnqueueMessage(new Message(DeviceAddress.Diagnostic, device, MessageRegistry.DataPollRequest));
+                Thread.Sleep(timeout);
+                AfterMessageReceived -= SaveFoundDevice;
+                return foundDevices.Contains(device);
+            }
+        }
+
+        static void SaveFoundDevice(MessageEventArgs e)
+        {
+            if (!foundDevices.Contains(e.Message.SourceDevice))
+            {
+                foundDevices.Add(e.Message.SourceDevice);
+            }
         }
 
         #endregion

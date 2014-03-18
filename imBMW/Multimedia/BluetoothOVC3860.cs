@@ -4,9 +4,60 @@ using System.IO.Ports;
 using Microsoft.SPOT.Hardware;
 using imBMW.Tools;
 using System.Threading;
+using System.IO;
+using System.Text;
+using System.Collections;
 
 namespace imBMW.Multimedia
 {
+    #region Enums, handlers, etc
+
+    public class PhoneContact
+    {
+        public string Name { get; set; }
+
+        /*public ArrayList Phones { get; set; }
+
+        public void AddPhone(string phone)
+        {
+            if (Phones == null)
+            {
+                Phones = new ArrayList();
+            }
+            var phoneClear = "";
+            foreach (var c in phone)
+            {
+                if (c.IsNumeric() || c == '+')
+                {
+                    phoneClear += c;
+                }
+            }
+            Phones.Add(phoneClear);
+        }*/
+
+        public string Phones { get; set; }
+
+        public PhoneContact()
+        {
+            Phones = String.Empty;
+        }
+
+        public void AddPhone(string phone)
+        {
+            var phoneClear = "";
+            foreach (var c in phone)
+            {
+                if (c.IsNumeric() || c == '+')
+                {
+                    phoneClear += c;
+                }
+            }
+            Phones += phoneClear + "\n";
+        }
+    }
+
+    #endregion
+
     /// <summary>
     /// Bluetooth module Bolutek BLK-MD-SPK-B based on OmniVision OVC3860 that supports A2DP and AVRCP profiles
     /// Communicates via COM port
@@ -15,21 +66,145 @@ namespace imBMW.Multimedia
     {
         SerialPortBase port;
         QueueThreadWorker queue;
+        string contactsPath;
 
         /// <summary>
         /// </summary>
         /// <param name="port">COM port name</param>
-        public BluetoothOVC3860(string port)
+        /// <param name="contactsPath">Path to contacts VCF file</param>
+        public BluetoothOVC3860(string port, string contactsPath = null)
         {
             Name = "Bluetooth";
-            
+
+            queue = new QueueThreadWorker(ProcessSendCommand);
+
             this.port = new SerialInterruptPort(new SerialPortConfiguration(port, BaudRate.Baudrate115200), Cpu.Pin.GPIO_NONE, 0, 16, 10);
             this.port.DataReceived += port_DataReceived;
 
-            queue = new QueueThreadWorker(ProcessSendCommand);
+            if (contactsPath != null)
+            {
+                if (File.Exists(contactsPath))
+                {
+                    this.contactsPath = contactsPath;
+                }
+                else
+                {
+                    Logger.Info("No contacts file " + contactsPath);
+                }
+            }
+
+            SendCommand("MH"); // disable auto conn
+            SendCommand("VU"); // TODO make loop: volume up
         }
 
-        #region Private methods
+        #region Public methods
+
+        public ArrayList GetContacts(uint offset, uint count)
+        {
+            var contacts = new ArrayList();
+            try
+            {
+                Logger.Info("Load contacts");
+
+                if (contactsPath == null || !File.Exists(contactsPath))
+                {
+                    return contacts;
+                }
+
+                // todo check file exists
+
+                var handle = new FileStream(contactsPath, FileMode.Open, FileAccess.Read);
+                var data = new byte[1000];
+                int read = 0;
+                uint found = 0;
+                bool skip = true;
+                bool parse = false;
+                PhoneContact contact = new PhoneContact();
+                for (int i = 0; i < handle.Length; i += read)
+                {
+                    handle.Seek(i, SeekOrigin.Begin);
+                    read = handle.Read(data, 0, data.Length);
+                    int nextLine = 0;
+                    int len = 0;
+                    for (int j = 0; j < read; j++)
+                    {
+                        var b = data[j];
+                        if (b == '\n' || b == '\r')
+                        {
+                            if (len > 0)
+                            {
+                                var s = Encoding.UTF8.GetString(data, nextLine, len);
+                                if (s == "BEGIN:VCARD")
+                                {
+                                    skip = true;
+                                    parse = found >= offset;
+                                }
+                                else if (s == "END:VCARD")
+                                {
+                                    if (parse)
+                                    {
+                                        if (!skip)
+                                        {
+                                            Logger.Info(contact.Name + " " + contact.Phones, "PH");
+                                            contacts.Add(contact);
+                                            if (contacts.Count == count)
+                                            {
+                                                return contacts;
+                                            }
+                                            contact = new PhoneContact();
+                                        }
+                                        else
+                                        {
+                                            contact.Name = String.Empty;
+                                            contact.Phones = String.Empty;
+                                        }
+                                    }
+                                    if (!skip)
+                                    {
+                                        found++;
+                                    }
+                                }
+                                else if (s.Substring(0, 2) == "FN")
+                                {
+                                    if (parse)
+                                    {
+                                        contact.Name = s.Substring(s.LastIndexOf(':') + 1);
+                                    }
+                                }
+                                else if (s.Substring(0, 3) == "TEL")
+                                {
+                                    if (parse)
+                                    {
+                                        contact.AddPhone(s.Substring(s.LastIndexOf(':') + 1));
+                                    }
+                                    skip = false;
+                                }
+                            }
+                            nextLine = j + 1;
+                            len = 0;
+                        }
+                        else
+                        {
+                            len++;
+                        }
+                    }
+                    read = nextLine;
+                    Debug.GC(true); // Logger.Info("Free memory = " + Debug.GC(true), "MEM");
+                }
+                handle.Close();
+
+                Logger.Info("Contacts loaded");
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(ex, "contacts loading");
+            }
+            return contacts;
+        }
+
+        #endregion
+
+        #region Protected methods
 
         protected override void SetPlaying(bool value)
         {
@@ -116,6 +291,23 @@ namespace imBMW.Multimedia
             }
         }
 
+        protected override void OnIsPlayerHostActiveChanged(bool isPlayerHostActive)
+        {
+            base.OnIsPlayerHostActiveChanged(isPlayerHostActive);
+
+            if (isPlayerHostActive)
+            {
+                SendCommand("CC"); // conn hfp
+                SendCommand("MG"); // enable auto conn
+            }
+            else
+            {
+                SendCommand("MH"); // disable auto conn
+                SendCommand("CD"); // disconn hfp
+                //SendCommand("MJ"); // disconn av
+            }
+        }
+
         #endregion
 
         #region OVC3860 members
@@ -178,6 +370,11 @@ namespace imBMW.Multimedia
         {
             switch (s)
             {
+                /*case "MG3":
+                    SendCommand("PB");
+                    Thread.Sleep(500);
+                    SendCommand("PC");
+                    break;*/
                 case "MR":
                     if (!IsEnabled)
                     {
@@ -200,6 +397,7 @@ namespace imBMW.Multimedia
                 case "IV":
                     Logger.Info("Connected", "BT");
                     OnStatusChanged("Connected", PlayerEvent.Wireless);
+                    //SendCommand("MI"); // conn av
                     if (IsEnabled)
                     {
                         Play();

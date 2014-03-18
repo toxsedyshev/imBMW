@@ -31,10 +31,6 @@ namespace imBMW.iBus.Devices.Emulators
         {
             Player = player;
 
-            // TODO remove
-            //IsAUXSelected = true;
-            //IsRadioActive = true;
-
             Manager.AddMessageReceiverForSourceDevice(DeviceAddress.Radio, ProcessRadioMessage);
             MultiFunctionSteeringWheel.ButtonPressed += MultiFunctionSteeringWheel_ButtonPressed;
         }
@@ -257,7 +253,6 @@ namespace imBMW.iBus.Devices.Emulators
 
             Bordmonitor.ShowText(status, BordmonitorFields.Status);
             ShowPlayerName();
-            //ShowPlayerStatusWithDelay(player);
         }
         
         public static void ShowPlayerStatusWithDelay(IAudioPlayer player)

@@ -37,9 +37,23 @@ namespace imBMW.iBus.Devices.Real
         }
     }
 
+    public class TemperatureEventArgs : EventArgs
+    {
+        public uint Outside { get; private set; }
+        public uint Coolant { get; private set; }
+
+        public TemperatureEventArgs (uint outside, uint coolant)
+	    {
+            Outside = outside;
+            Coolant = coolant;
+	    }
+    }
+
     public delegate void IgnitionEventHandler(IgnitionEventArgs e);
 
     public delegate void SpeedRPMEventHandler(SpeedRPMEventArgs e);
+
+    public delegate void TemperatureEventHandler(TemperatureEventArgs e);
 
     #endregion
 
@@ -50,6 +64,9 @@ namespace imBMW.iBus.Devices.Real
 
         public static uint CurrentRPM { get; private set; }
         public static uint CurrentSpeed { get; private set; }
+
+        public static uint TemperatureOutside { get; private set; }
+        public static uint TemperatureCoolant { get; private set; }
 
         static InstrumentClusterElectronics()
         {
@@ -85,6 +102,11 @@ namespace imBMW.iBus.Devices.Real
                 }
                 m.ReceiverDescription = "Ignition " + CurrentIgnitionState.ToStringValue();
             }
+            else if (m.Data.Length == 2 && m.Data[0] == 0x19)
+            {
+                OnTemperatureChanged(m.Data[1], m.Data[2]);
+                m.ReceiverDescription = "Temperature. Outside " + TemperatureOutside + "°C, Coolant " + TemperatureCoolant + "°C";
+            }
         }
 
         public static IgnitionState CurrentIgnitionState
@@ -114,6 +136,17 @@ namespace imBMW.iBus.Devices.Real
             }
         }
 
+        private static void OnTemperatureChanged(uint outside, uint coolant)
+        {
+            TemperatureOutside = outside;
+            TemperatureCoolant = coolant;
+            var e = TemperatureChanged;
+            if (e != null)
+            {
+                e(new TemperatureEventArgs(outside, coolant));
+            }
+        }
+
         private static void OnSpeedRPMChanged(uint speed, uint rpm)
         {
             CurrentSpeed = speed;
@@ -131,5 +164,10 @@ namespace imBMW.iBus.Devices.Real
         /// IKE sends speed and RPM every 2 sec
         /// </summary>
         public static event SpeedRPMEventHandler SpeedRPMChanged;
+
+        /// <summary>
+        /// IKE sends temperature every TBD sec
+        /// </summary>
+        public static event TemperatureEventHandler TemperatureChanged;
     }
 }

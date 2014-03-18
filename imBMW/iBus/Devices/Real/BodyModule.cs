@@ -25,6 +25,8 @@ namespace imBMW.iBus.Devices.Real
 
     public delegate void RemoteKeyButtonEventHandler(RemoteKeyEventArgs e);
 
+    public delegate void VoltageEventHandler(double voltage);
+
     #endregion
 
 
@@ -60,7 +62,11 @@ namespace imBMW.iBus.Devices.Real
         static Message MessageFoldMirrorsE46 = new Message(DeviceAddress.MirrorMemorySecond, DeviceAddress.MirrorMemory, "Fold mirrors", 0x6D, 0x90);
         static Message MessageUnfoldMirrorsE46 = new Message(DeviceAddress.MirrorMemorySecond, DeviceAddress.MirrorMemory, "Unfold mirrors", 0x6D, 0xA0);
 
+        static Message MessageGetAnalogValues = new Message(DeviceAddress.Diagnostic, DeviceAddress.MirrorMemory, "Get analog values", 0x0B, 0x01);
+
         #endregion
+
+        static double batteryVoltage;
 
         static BodyModule()
         {
@@ -88,6 +94,13 @@ namespace imBMW.iBus.Devices.Real
                         break;
                 }
             }
+            else if (m.Data.Length > 3 && m.Data[0] == 0xA0)
+            {
+                var voltage = m.Data[1] / 10 + m.Data[2] / 1000;
+
+                m.ReceiverDescription = "Analog values. Battery voltage = " + voltage + "V";
+                BatteryVoltage = voltage;
+            }
         }
 
         static void OnRemoteKeyButton(Message m, RemoteKeyButton button)
@@ -99,6 +112,30 @@ namespace imBMW.iBus.Devices.Real
             }
             m.ReceiverDescription = "Remote key press " + button.ToStringValue() + " button";
             Logger.Info(m.ReceiverDescription);
+        }
+
+        public static double BatteryVoltage
+        {
+            get { return batteryVoltage; }
+            private set
+            {
+                if (batteryVoltage == value)
+                {
+                    return;
+                }
+                batteryVoltage = value;
+
+                var e = BatteryVoltageChanged;
+                if (e != null)
+                {
+                    e(value);
+                }
+            }
+        }
+
+        public static void UpdateBatteryVoltage()
+        {
+            Manager.EnqueueMessage(MessageGetAnalogValues);
         }
 
         public static void OpenTrunk()
@@ -169,5 +206,7 @@ namespace imBMW.iBus.Devices.Real
         }
 
         public static event RemoteKeyButtonEventHandler RemoteKeyButtonPressed;
+
+        public static event VoltageEventHandler BatteryVoltageChanged;
     }
 }

@@ -53,11 +53,16 @@ namespace imBMW.Tools
 
         public static string GetString(this Encoding encoding, params byte[] bytes)
         {
+            return encoding.GetString(bytes, 0, bytes.Length);
+        }
+
+        public static string GetString(this Encoding encoding, byte[] bytes, int offset, int length)
+        {
             if (bytes.Length == 0 || bytes.Length == 1 && bytes[0] == 0)
             {
                 return "";
             }
-            return new string(encoding.GetChars(bytes));
+            return new string(encoding.GetChars(bytes, offset, length));
         }
 
         public static bool IsNullOrEmpty(string str)
@@ -73,7 +78,7 @@ namespace imBMW.Tools
             }
             foreach (var c in str)
             {
-                if (c < '0' || c > '9')
+                if (!c.IsNumeric())
                 {
                     if (c == '.' && !integer)
                     {
@@ -87,6 +92,11 @@ namespace imBMW.Tools
                 }
             }
             return true;
+        }
+
+        public static bool IsNumeric(this char c)
+        {
+            return c >= '0' && c <= '9';
         }
     }
 }
