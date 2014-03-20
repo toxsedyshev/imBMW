@@ -128,6 +128,10 @@ namespace imBMW.Tools
 
         public static void PasteASCII(this byte[] data, string s, int offset, int limit, TextAlign align = TextAlign.Left)
         {
+            if (s == null || s.Length == 0)
+            {
+                return;
+            }
             if (offset < 0 || offset >= data.Length)
             {
                 throw new ArgumentException("offset");

@@ -62,7 +62,7 @@ namespace imBMW.iBus.Devices.Real
         static Message MessageFoldMirrorsE46 = new Message(DeviceAddress.MirrorMemorySecond, DeviceAddress.MirrorMemory, "Fold mirrors", 0x6D, 0x90);
         static Message MessageUnfoldMirrorsE46 = new Message(DeviceAddress.MirrorMemorySecond, DeviceAddress.MirrorMemory, "Unfold mirrors", 0x6D, 0xA0);
 
-        static Message MessageGetAnalogValues = new Message(DeviceAddress.Diagnostic, DeviceAddress.MirrorMemory, "Get analog values", 0x0B, 0x01);
+        static Message MessageGetAnalogValues = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Get analog values", 0x0B, 0x01);
 
         #endregion
 
@@ -96,7 +96,7 @@ namespace imBMW.iBus.Devices.Real
             }
             else if (m.Data.Length > 3 && m.Data[0] == 0xA0)
             {
-                var voltage = m.Data[1] / 10 + m.Data[2] / 1000;
+                var voltage = ((double)m.Data[1]) / 10 + ((double)m.Data[2]) / 1000;
 
                 m.ReceiverDescription = "Analog values. Battery voltage = " + voltage + "V";
                 BatteryVoltage = voltage;

@@ -165,11 +165,15 @@ namespace imBMW.Devices.V2
                         {
                             BodyModule.UpdateBatteryVoltage();
                             Thread.Sleep(500);
-                            Bordmonitor.ShowText("Speed:   " + InstrumentClusterElectronics.CurrentSpeed + "km/h", BordmonitorFields.Item, 0);
-                            Bordmonitor.ShowText("RPM:     " + InstrumentClusterElectronics.CurrentRPM, BordmonitorFields.Item, 1);
-                            Bordmonitor.ShowText("Coolant: " + InstrumentClusterElectronics.TemperatureCoolant + "°C", BordmonitorFields.Item, 2);
-                            Bordmonitor.ShowText("Outside: " + InstrumentClusterElectronics.TemperatureOutside + "°C", BordmonitorFields.Item, 3);
-                            Bordmonitor.ShowText("Voltage: " + BodyModule.BatteryVoltage.ToString("#0.0") + "V", BordmonitorFields.Item, 4);
+                            Bordmonitor.ShowText("Скорость:   " + InstrumentClusterElectronics.CurrentSpeed + "км/ч", BordmonitorFields.Item, 0);
+                            Bordmonitor.ShowText("Обороты:    " + InstrumentClusterElectronics.CurrentRPM, BordmonitorFields.Item, 1);
+                            Bordmonitor.ShowText("Двигатель:  " + InstrumentClusterElectronics.TemperatureCoolant + "°C", BordmonitorFields.Item, 2);
+                            //Bordmonitor.ShowText("Улица:      " + InstrumentClusterElectronics.TemperatureOutside + "°C", BordmonitorFields.Item, 3);
+                            Bordmonitor.ShowText("Напряжение: " + BodyModule.BatteryVoltage + "В", BordmonitorFields.Item, 3);
+                            for (int i = 4; i < 10; i++)
+                            {
+                                Bordmonitor.ShowText("", BordmonitorFields.Item, i);
+                            }
                             Bordmonitor.RefreshScreen();
                         }).Start();
                     }

@@ -102,7 +102,7 @@ namespace imBMW.iBus.Devices.Real
                 }
                 m.ReceiverDescription = "Ignition " + CurrentIgnitionState.ToStringValue();
             }
-            else if (m.Data.Length == 2 && m.Data[0] == 0x19)
+            else if (m.Data.Length == 4 && m.Data[0] == 0x19)
             {
                 OnTemperatureChanged(m.Data[1], m.Data[2]);
                 m.ReceiverDescription = "Temperature. Outside " + TemperatureOutside + "°C, Coolant " + TemperatureCoolant + "°C";
