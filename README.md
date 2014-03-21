@@ -19,9 +19,12 @@ CD-changer emulator and Bordmonitor AUX interface were implemented to connect ra
 Also imBMW allows to communicate with instrument cluster, immobilizer, GM, ZKE, navigation and other modules to receive notifications and control doors, windows, lights, etc.
 
 You could [order imBMW boards](http://oshpark.com/profiles/toxsedyshev) from OSH Park.  
+Also you could order imBMW V2 + Bluetooth built by me, details by email: [imbmw@toxs.ru](mailto:imbmw@toxs.ru).  
 Visit [imBMW YouTube playlist](http://www.youtube.com/playlist?list=PLDuwqawzvazj9iFQQ9aeggeXeUPphfv94) on my channel.  
 Stay in touch with [imBMW in vk.com](http://vk.com/imbmw) social network.  
 Photos, videos and creation process of imBMW V1 and V2 devices are located on [e46club.ru forum](http://bmwfanatics.ru/forumvb/viewtopic.php?f=32&t=92399) (for now, only in Russian).
+
+![imBMW V2 + Bluetooth DIY](./Images/v2_proto.jpg "imBMW V2 + Bluetooth DIY")
 
 imBMW compatability
 ------------------
