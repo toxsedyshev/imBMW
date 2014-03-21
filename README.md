@@ -5,16 +5,23 @@
 [toxs]: http://toxs.ru "toxs"
 [iBus]: http://web.archive.org/web/20041204074622/www.openbmw.org/bus/ "iBus"
 
+![imBMW Splash](./Images/Splash.png)
+
 [imBMW] is .NET Micro Framework and hardware project. 
 It was started to add custom features to cars with [iBus] interface 
 such as '91-'10 BMWs and some models of Mini, Land Rover, Rover, MG and Rolls Royce. 
 
-The imBMW device connects iPod, radio unit and other car modules and devices to each other. 
-CD-changer emulator was implemented to connect radio with iPod/iPhone/iPad and other players. 
-Also imBMW allows to communicate with instrument cluster, immobilizer, GM, ZKE, navigation
-and other modules to receive notifications and control doors, windows, lights, etc.
+The imBMW V1 device, that uses FEZ Mini, connects iPod via headset cable to BMW audio system.
 
-Photos, videos and creation process of imBMW V1 device are located on [e46club.ru forum](http://bmwfanatics.ru/forumvb/viewtopic.php?f=32&t=92399) (for now, only in Russian).
+The imBMW V2 device, that uses FEZ Cerb40 II, is a *duino iBus-ready board. It could be used with any shield, for example with imBMW Bluetooth OVC3860 Shield for wireless stereo audio connection to BMW audio system.
+
+CD-changer emulator and Bordmonitor AUX interface were implemented to connect radio with iPod/iPhone/iPad or with other players, phones and tablets like Windows Phone, Android etc. 
+Also imBMW allows to communicate with instrument cluster, immobilizer, GM, ZKE, navigation and other modules to receive notifications and control doors, windows, lights, etc.
+
+You could [order imBMW boards](http://oshpark.com/profiles/toxsedyshev) from OSH Park.  
+Visit [imBMW YouTube playlist](http://www.youtube.com/playlist?list=PLDuwqawzvazj9iFQQ9aeggeXeUPphfv94) on my channel.  
+Stay in touch with [imBMW in vk.com](http://vk.com/imbmw) social network.  
+Photos, videos and creation process of imBMW V1 and V2 devices are located on [e46club.ru forum](http://bmwfanatics.ru/forumvb/viewtopic.php?f=32&t=92399) (for now, only in Russian).
 
 imBMW compatability
 ------------------
@@ -52,4 +59,4 @@ based on it only for noncommercial purposes.
 that governs the original work.
 
 
-© Copyright 2013 [toxs] · All Rights Reserved
+© Copyright 2013-2014 [toxs] · All Rights Reserved
