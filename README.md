@@ -5,7 +5,7 @@
 [toxs]: http://toxs.ru "toxs"
 [iBus]: http://web.archive.org/web/20041204074622/www.openbmw.org/bus/ "iBus"
 
-![imBMW Splash](./Images/Splash.png)
+![imBMW Splash](./Images/splash.png)
 
 [imBMW] is .NET Micro Framework and hardware project. 
 It was started to add custom features to cars with [iBus] interface 
