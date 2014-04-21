@@ -30,14 +30,15 @@ namespace imBMW.iBus.Devices.Real
 
     public static class Bordmonitor
     {
-        static Message MessageRefreshScreen = new Message(DeviceAddress.Radio, DeviceAddress.GraphicsNavigationDriver, "Refresh screen", 0xA5, 0x60, 0x01, 0x00);
+        public static Message MessageRefreshScreen = new Message(DeviceAddress.Radio, DeviceAddress.GraphicsNavigationDriver, "Refresh screen", 0xA5, 0x60, 0x01, 0x00);
+        public static Message MessageClearScreen   = new Message(DeviceAddress.Radio, DeviceAddress.GraphicsNavigationDriver, "Clear screen",   0x46, 0x0C);
 
-        public static void ShowText(string s, BordmonitorFields field, int number = 0)
+        public static void ShowText(string s, BordmonitorFields field, int index = 0, bool check = false)
         {
-            ShowText(s, TextAlign.Left, field, number);
+            ShowText(s, TextAlign.Left, field, index, check);
         }
 
-        public static void ShowText(string s, TextAlign align, BordmonitorFields field, int index = 0)
+        public static void ShowText(string s, TextAlign align, BordmonitorFields field, int index = 0, bool check = false)
         {
             int len;
             byte[] data;
@@ -54,9 +55,9 @@ namespace imBMW.iBus.Devices.Real
                 case BordmonitorFields.Item:
                     len = 23;
                     index += 0x40;
-                    /*if (index == 47)
+                    /*if (index == 0x47)
                     {
-                        index = 7;
+                        index = 0x7;
                     }*/
                     data = new byte[] { 0x21, 0x60, 0x00, (byte)index };
                     break;
@@ -64,8 +65,13 @@ namespace imBMW.iBus.Devices.Real
                     throw new Exception("TODO");
             }
             var offset = data.Length;
-            data = data.PadRight(0x19, len);
+            data = data.PadRight(0x20, len);
             data.PasteASCII(s.UTF8ToASCII(), offset, len);
+            if (check)
+            {
+                // TODO check 24 chars (23 + star)
+                data[data.Length - 1] = 0x2A;
+            }
             Manager.EnqueueMessage(new Message(iBus.DeviceAddress.Radio, iBus.DeviceAddress.GraphicsNavigationDriver, "Show message on BM: " + s, data));
         }
 

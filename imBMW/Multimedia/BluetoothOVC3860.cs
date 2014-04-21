@@ -7,6 +7,8 @@ using System.Threading;
 using System.IO;
 using System.Text;
 using System.Collections;
+using imBMW.Features.Menu;
+using imBMW.Features.Menu.Screens;
 
 namespace imBMW.Multimedia
 {
@@ -66,6 +68,7 @@ namespace imBMW.Multimedia
     {
         SerialPortBase port;
         QueueThreadWorker queue;
+        MenuScreen menu;
         string contactsPath;
 
         /// <summary>
@@ -93,25 +96,25 @@ namespace imBMW.Multimedia
                 }
             }
 
-            SendCommand("MH"); // disable auto conn
-            SendCommand("VU"); // TODO make loop: volume up
+            HomeScreen.Instance.PhoneScreen = CreatePhoneScreen();
+
+            //SendCommand("MH"); // disable auto conn
+            VolumeUp(); // TODO make loop: volume up
         }
 
         #region Public methods
 
         public ArrayList GetContacts(uint offset, uint count)
         {
+            // TODO regenerate file
             var contacts = new ArrayList();
             try
             {
-                Logger.Info("Load contacts");
-
                 if (contactsPath == null || !File.Exists(contactsPath))
                 {
+                    Logger.Info("No contacts file");
                     return contacts;
                 }
-
-                // todo check file exists
 
                 var handle = new FileStream(contactsPath, FileMode.Open, FileAccess.Read);
                 var data = new byte[1000];
@@ -145,7 +148,7 @@ namespace imBMW.Multimedia
                                     {
                                         if (!skip)
                                         {
-                                            Logger.Info(contact.Name + " " + contact.Phones, "PH");
+                                            //Logger.Info(contact.Name + " " + contact.Phones, "PH");
                                             contacts.Add(contact);
                                             if (contacts.Count == count)
                                             {
@@ -192,8 +195,6 @@ namespace imBMW.Multimedia
                     Debug.GC(true); // Logger.Info("Free memory = " + Debug.GC(true), "MEM");
                 }
                 handle.Close();
-
-                Logger.Info("Contacts loaded");
             }
             catch (Exception ex)
             {
@@ -205,6 +206,46 @@ namespace imBMW.Multimedia
         #endregion
 
         #region Protected methods
+
+        protected MenuScreen CreatePhoneScreen()
+        {
+            var menu = new MenuScreen();
+            menu.Title = Name;
+            // TODO update status
+
+            menu.AddItem(new MenuItem("Голосовой набор", i => SendCommand(CmdVoiceCall)));
+            menu.AddItem(new MenuItem("Контакты", MenuItemType.Button, MenuItemAction.GoToScreen) { GoToScreen = CreateContactsScreen() });
+            menu.AddBackButton();
+
+            return menu;
+        }
+
+        protected MenuScreen CreateContactsScreen()
+        {
+            var menu = new MenuScreen();
+            menu.Title = "Контакты";
+
+            return menu;
+
+            menu.AddItem(new MenuItem("< Предыдущие", MenuItemType.Button), 0); // TODO navigate
+            menu.AddItem(new MenuItem("Следующие >", MenuItemType.Button), 5); // TODO test, fix and make 1
+
+            // TODO get contacts only on screen shown
+            menu.UpdateSuspended = true;
+            var contacts = GetContacts(13, 7);
+            var i = 2;
+            foreach (var c in contacts)
+            {
+                var contact = c as PhoneContact;
+                menu.AddItem(new MenuItem(contact.Name, MenuItemType.Button), i++); // TODO show phones
+            }
+            menu.UpdateSuspended = false;
+
+            menu.AddBackButton(9);
+
+            return menu;
+
+        }
 
         protected override void SetPlaying(bool value)
         {
@@ -291,6 +332,28 @@ namespace imBMW.Multimedia
             }
         }
 
+        public override MenuScreen Menu
+        {
+            get
+            {
+                if (menu == null)
+                {
+                    menu = new MenuScreen();
+                    menu.Title = Name;
+                    // TODO update status
+
+                    var item = new MenuItem((i) => IsPlaying ? "Пауза" : "Играть", i => PlayPauseToggle());
+                    IsPlayingChanged += (p, isPlaying) => item.Refresh();
+                    menu.AddItem(item);
+                    
+                    menu.AddItem(new MenuItem("Следующий трек", i => Next()));
+                    menu.AddItem(new MenuItem("Предыдущий трек", i => Prev()));
+                    menu.AddBackButton();
+                }
+                return menu;
+            }
+        }
+
         protected override void OnIsPlayerHostActiveChanged(bool isPlayerHostActive)
         {
             base.OnIsPlayerHostActiveChanged(isPlayerHostActive);
@@ -298,12 +361,13 @@ namespace imBMW.Multimedia
             if (isPlayerHostActive)
             {
                 SendCommand("CC"); // conn hfp
-                SendCommand("MG"); // enable auto conn
+                SendCommand("MI"); // conn av
+                //SendCommand("MG"); // enable auto conn
             }
             else
             {
-                SendCommand("MH"); // disable auto conn
-                SendCommand("CD"); // disconn hfp
+                //SendCommand("MH"); // disable auto conn
+                //SendCommand("CD"); // disconn hfp
                 //SendCommand("MJ"); // disconn av
             }
         }

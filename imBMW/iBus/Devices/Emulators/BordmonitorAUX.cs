@@ -4,6 +4,8 @@ using imBMW.Multimedia;
 using imBMW.iBus.Devices.Real;
 using System.Threading;
 using imBMW.Tools;
+using imBMW.Features.Menu.Screens;
+using imBMW.Features.Menu;
 
 namespace imBMW.iBus.Devices.Emulators
 {
@@ -17,8 +19,8 @@ namespace imBMW.iBus.Devices.Emulators
 
         static Message MessageAUXHighVolumeP6 = new Message(DeviceAddress.OnBoardMonitor, DeviceAddress.Radio, "Set AUX high volume", 0x48, 0x03);
 
-        static byte[] DataRadioOn = new byte[] { 0x4A, 0xFF }; // Some cassette-control messages
-        static byte[] DataRadioOff = new byte[] { 0x4A, 0x00 }; // or 4A 90?
+        static byte[] DataRadioOn = new byte[] { 0x4A, 0xFF };
+        static byte[] DataRadioOff = new byte[] { 0x4A, 0x00 };
         static byte[] DataAUX = new byte[] { 0x23, 0x62, 0x10, 0x41, 0x55, 0x58, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20 };
         static byte[] DataCD = new byte[] { 0x23, 0x62, 0x10, 0x43, 0x44 };
         static byte[] DataCDStartPlaying = new byte[] { 0x38, 0x03, 0x00 };
@@ -52,7 +54,7 @@ namespace imBMW.iBus.Devices.Emulators
             else if (m.Data.Compare(DataAUX))
             {
                 IsAUXSelected = true;
-                if (lastStatus == null)
+                /*if (lastStatus == null)
                 {
                     ShowPlayerStatus(player);
                 }
@@ -60,9 +62,9 @@ namespace imBMW.iBus.Devices.Emulators
                 {
                     ShowPlayerStatus(player, lastStatus);
                     lastStatus = null;
-                }
+                }*/
             }
-            else if (m.Data.Compare(DataFM) || m.Data.Compare(DataAM) || m.Data.Compare(true, DataCDStartPlaying))
+            else if (m.Data.Compare(DataFM) || m.Data.Compare(DataAM) || m.Data.StartsWith(DataCDStartPlaying))
             {
                 IsAUXSelected = false;
             }
@@ -80,6 +82,7 @@ namespace imBMW.iBus.Devices.Emulators
                 player.IsPlayerHostActive = false;
                 Pause();
             }
+            BordmonitorMenu.Instance.IsEnabled = IsAUXOn;
         }
 
         public static bool IsRadioActive
@@ -153,16 +156,7 @@ namespace imBMW.iBus.Devices.Emulators
             player.IsPlayingChanged += ShowPlayerStatus;
             player.StatusChanged += ShowPlayerStatus;
 
-            ShowPlayerName();
-        }
-
-        static void ShowPlayerName()
-        {
-            if (!IsAUXOn)
-            {
-                return;
-            }
-            Bordmonitor.ShowText(player.Name, BordmonitorFields.Title);
+            HomeScreen.Instance.PlayerScreen = player.Menu;
         }
 
         static void UnsetPlayer(IAudioPlayer player)
@@ -171,6 +165,15 @@ namespace imBMW.iBus.Devices.Emulators
             player.IsPlayingChanged -= ShowPlayerStatus;
             player.StatusChanged -= ShowPlayerStatus;
         }
+
+        /*static void ShowPlayerName()
+        {
+            if (!IsAUXOn)
+            {
+                return;
+            }
+            Bordmonitor.ShowText(player.Name, BordmonitorFields.Title);
+        }*/
 
         static void ShowPlayerStatus(IAudioPlayer player)
         {
@@ -184,9 +187,9 @@ namespace imBMW.iBus.Devices.Emulators
         }
         
         static Timer displayTextDelayTimer;
-        const int displayTextDelay = 5000;
-        const int displayTextMaxlen = 11;
-        static string lastStatus;
+        const int displayTextDelay = 2000;
+        const int statusTextMaxlen = 11;
+        //static string lastStatus;
 
         static void ShowPlayerStatus(IAudioPlayer player, string status, PlayerEvent playerEvent)
         {
@@ -215,7 +218,7 @@ namespace imBMW.iBus.Devices.Emulators
                     status = TextWithIcon("* ", status);
                     break;
             }
-            lastStatus = status;
+            //lastStatus = status;
             ShowPlayerStatus(player, status);
             if (showAfterWithDelay)
             {
@@ -229,7 +232,7 @@ namespace imBMW.iBus.Devices.Emulators
             {
                 text = "";
             }
-            if (icon.Length + text.Length < displayTextMaxlen)
+            if (icon.Length + text.Length < statusTextMaxlen)
             {
                 return icon + " " + text;
             }
@@ -251,8 +254,10 @@ namespace imBMW.iBus.Devices.Emulators
                 displayTextDelayTimer = null;
             }
 
-            Bordmonitor.ShowText(status, BordmonitorFields.Status);
-            ShowPlayerName();
+            Player.Menu.Status = status;
+
+            //Bordmonitor.ShowText(status, BordmonitorFields.Status);
+            //ShowPlayerName();
         }
         
         public static void ShowPlayerStatusWithDelay(IAudioPlayer player)

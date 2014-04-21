@@ -1,3 +1,4 @@
+using imBMW.Features.Menu;
 using imBMW.iBus.Devices.Real;
 using imBMW.Tools;
 using Microsoft.SPOT;
@@ -251,6 +252,14 @@ namespace imBMW.Multimedia
                 isPlaying = value;
                 IsInVoiceOverMenu = false;
                 OnIsPlayingChanged(value);
+            }
+        }
+
+        public override MenuScreen Menu
+        {
+            get
+            {
+                return null; // TODO
             }
         }
 

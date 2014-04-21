@@ -1,5 +1,6 @@
 using System;
 using Microsoft.SPOT;
+using imBMW.Features.Menu;
 
 namespace imBMW.Multimedia
 {
@@ -52,6 +53,8 @@ namespace imBMW.Multimedia
         bool IsPlayerHostActive { get; set; }
 
         string Name { get; }
+
+        MenuScreen Menu { get; }
 
         event IsPlayingHandler IsPlayingChanged;
 
