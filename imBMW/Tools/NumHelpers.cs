@@ -14,7 +14,7 @@ namespace imBMW.Tools
 
         public static byte Invert(this byte b)
         {
-            return (byte)(0xFF - b);
+            return (byte)~b;
         }
 
         public static bool HasBits(this byte b, byte bits)

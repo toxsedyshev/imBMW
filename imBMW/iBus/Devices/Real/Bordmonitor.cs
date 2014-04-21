@@ -53,7 +53,11 @@ namespace imBMW.iBus.Devices.Real
                     break;
                 case BordmonitorFields.Item:
                     len = 23;
-                    index += 40;
+                    index += 0x40;
+                    /*if (index == 47)
+                    {
+                        index = 7;
+                    }*/
                     data = new byte[] { 0x21, 0x60, 0x00, (byte)index };
                     break;
                 default:
