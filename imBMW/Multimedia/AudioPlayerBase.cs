@@ -1,6 +1,7 @@
 using System;
 using Microsoft.SPOT;
 using imBMW.iBus.Devices.Real;
+using imBMW.Features.Menu;
 
 namespace imBMW.Multimedia
 {
@@ -46,6 +47,8 @@ namespace imBMW.Multimedia
         public abstract void VolumeUp();
 
         public abstract void VolumeDown();
+
+        public abstract MenuScreen Menu { get; }
 
         public string Name { get; protected set; }
 

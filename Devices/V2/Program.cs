@@ -112,10 +112,10 @@ namespace imBMW.Devices.V2
                 //if (e.Message.Describe() == null) { return; }
                 // Filter CDC emulator messages echoed by iBus
                 //if (e.Message.SourceDevice == iBus.DeviceAddress.CDChanger) { return; }
-                //if (e.Message.SourceDevice != DeviceAddress.Radio
-                //    && e.Message.DestinationDevice != DeviceAddress.Radio
-                //    && e.Message.SourceDevice != DeviceAddress.GraphicsNavigationDriver)
-                if (e.Message.SourceDevice != DeviceAddress.Diagnostic && e.Message.DestinationDevice != DeviceAddress.Diagnostic)
+                if (e.Message.SourceDevice != DeviceAddress.Radio
+                    && e.Message.DestinationDevice != DeviceAddress.Radio
+                    && e.Message.SourceDevice != DeviceAddress.GraphicsNavigationDriver)
+                //if (e.Message.SourceDevice != DeviceAddress.Diagnostic && e.Message.DestinationDevice != DeviceAddress.Diagnostic)
                 {
                     return;
                 }
@@ -143,9 +143,8 @@ namespace imBMW.Devices.V2
             // Set iPod or Bluetooth as AUX or CDC-emulator
             player = new BluetoothOVC3860(Serial.COM2, sd != null ? sd + @"\contacts.vcf" : null);
             
-            // TODO remove
-            var contacts = (player as BluetoothOVC3860).GetContacts(13, 10);
-
+            Radio.Init();
+            Logger.Info("Radio inited");
             if (Manager.FindDevice(DeviceAddress.OnBoardMonitor))
             {
                 iBus.Devices.Emulators.BordmonitorAUX.Init(player); //new Multimedia.iPodViaHeadset(Pin.PC2));
@@ -161,33 +160,9 @@ namespace imBMW.Devices.V2
                     }
                     if (m.Data[0] == 0x48 && m.Data[1] == 0x87) // TODO move to bordmonitor menu
                     {
-                        new Thread(() =>
-                        {
-                            BodyModule.UpdateBatteryVoltage();
-                            Thread.Sleep(500);
-                            Bordmonitor.ShowText("Скорость:   " + InstrumentClusterElectronics.CurrentSpeed + "км/ч", BordmonitorFields.Item, 0);
-                            Bordmonitor.ShowText("Обороты:    " + InstrumentClusterElectronics.CurrentRPM, BordmonitorFields.Item, 1);
-                            Bordmonitor.ShowText("Двигатель:  " + InstrumentClusterElectronics.TemperatureCoolant + "°C", BordmonitorFields.Item, 2);
-                            //Bordmonitor.ShowText("Улица:      " + InstrumentClusterElectronics.TemperatureOutside + "°C", BordmonitorFields.Item, 3);
-                            Bordmonitor.ShowText("Напряжение: " + BodyModule.BatteryVoltage + "В", BordmonitorFields.Item, 3);
-                            for (int i = 4; i < 10; i++)
-                            {
-                                Bordmonitor.ShowText("", BordmonitorFields.Item, i);
-                            }
-                            Bordmonitor.RefreshScreen();
-                        }).Start();
                     }
                     if (m.Data[0] == 0x48 && m.Data[1] == 0x88) // TODO move to bordmonitor menu
                     {
-                        new Thread(() =>
-                        {
-                            int i = 0;
-                            foreach (var c in contacts)
-                            {
-                                Bordmonitor.ShowText((c as PhoneContact).Name, BordmonitorFields.Item, i++);
-                            }
-                            Bordmonitor.RefreshScreen();
-                        }).Start();
                     }
                 });
             }
@@ -279,6 +254,14 @@ namespace imBMW.Devices.V2
                 Logger.Info("Mount", "SD");
                 GHI.OSHW.Hardware.StorageDev.MountSD();
                 Logger.Info("Mounted", "SD");
+            }
+            catch
+            {
+                Logger.Info("Not mounted", "SD");
+                return null;
+            }
+            try
+            {
                 if (VolumeInfo.GetVolumes()[0].IsFormatted)
                 {
                     string rootDirectory = VolumeInfo.GetVolumes()[0].RootDirectory;
@@ -297,7 +280,7 @@ namespace imBMW.Devices.V2
                 }
                 else
                 {
-                    Logger.Error("Not formatted!", "SD");
+                    Logger.Error("Card not formatted!", "SD");
                 }
             }
             catch (Exception ex)

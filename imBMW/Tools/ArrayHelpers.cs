@@ -43,7 +43,12 @@ namespace imBMW.Tools
             return array1.Compare(false, array2);
         }
 
-        public static bool Compare(this byte[] array1, bool startsWith, params byte[] array2)
+        public static bool StartsWith(this byte[] array1, params byte[] array2)
+        {
+            return array1.Compare(true, array2);
+        }
+
+        static bool Compare(this byte[] array1, bool startsWith, params byte[] array2)
         {
             int len2 = array2.Length;
             if (len2 > array1.Length || (!startsWith && len2 != array1.Length))
