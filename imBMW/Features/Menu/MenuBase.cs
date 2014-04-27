@@ -107,7 +107,7 @@ namespace imBMW.Features.Menu
 
         void ScreenNavigated(MenuScreen screen)
         {
-            if (screen == null) // TODO check not navigated
+            if (screen == null || !IsEnabled) // TODO check not navigated
             {
                 return;
             }
