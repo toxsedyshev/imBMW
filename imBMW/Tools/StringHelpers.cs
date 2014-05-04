@@ -19,15 +19,31 @@ namespace imBMW.Tools
         /// <summary>
         /// Prepends chars to string to reach specified length
         /// </summary>
-        /// <param name="s">string prepend to</param>
-        /// <param name="prepend">char to prepend</param>
-        /// <param name="length">required string length</param>
+        /// <param name="prepend">Char to prepend</param>
+        /// <param name="s">String prepend to</param>
+        /// <param name="length">Required string length</param>
         /// <returns></returns>
-        public static string PrependToLength(this string s, char prepend, uint length)
+        public static string PrependToLength(this string s, uint length, char prepend = ' ')
         {
             while (s.Length < length)
             {
                 s = prepend + s;
+            }
+            return s;
+        }
+
+        /// <summary>
+        /// Appends chars to string to reach specified length
+        /// </summary>
+        /// <param name="prepend">Char to append</param>
+        /// <param name="s">String append to</param>
+        /// <param name="length">Required string length</param>
+        /// <returns></returns>
+        public static string AppendToLength(this string s, uint length, char append = ' ')
+        {
+            while (s.Length < length)
+            {
+                s = s + append;
             }
             return s;
         }

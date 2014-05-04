@@ -21,14 +21,14 @@ namespace imBMW.Features.Menu
 
         protected virtual void DrawScreen() { }
 
-        protected void ScreenSuspend()
+        protected virtual void ScreenSuspend()
         {
-            ScreenUnnavigated(CurrentScreen);
+            ScreenNavigatedFrom(CurrentScreen);
         }
 
-        protected void ScreenWakeup()
+        protected virtual void ScreenWakeup()
         {
-            ScreenNavigated(CurrentScreen);
+            ScreenNavigatedTo(CurrentScreen);
         }
 
         public bool IsEnabled
@@ -44,6 +44,7 @@ namespace imBMW.Features.Menu
                 if (value)
                 {
                     ScreenWakeup();
+                    UpdateScreen();
                 }
                 else
                 {
@@ -68,7 +69,11 @@ namespace imBMW.Features.Menu
                 Logger.Error("Navigation to null screen");
                 return;
             }
-            navigationStack.Push(currentScreen);
+            if (CurrentScreen == screen)
+            {
+                return;
+            }
+            navigationStack.Push(CurrentScreen);
             CurrentScreen = screen;
         }
 
@@ -78,12 +83,23 @@ namespace imBMW.Features.Menu
             {
                 CurrentScreen = navigationStack.Pop() as MenuScreen;
             }
+            else
+            {
+                NavigateHome();
+            }
         }
 
         public void NavigateHome()
         {
             CurrentScreen = homeScreen;
             navigationStack.Clear();
+        }
+
+        public void NavigateAfterHome(MenuScreen screen)
+        {
+            navigationStack.Clear();
+            navigationStack.Push(homeScreen);
+            Navigate(screen);
         }
 
         public MenuScreen CurrentScreen
@@ -98,34 +114,32 @@ namespace imBMW.Features.Menu
                 {
                     return;
                 }
-                ScreenUnnavigated(currentScreen);
+                ScreenNavigatedFrom(currentScreen);
                 currentScreen = value;
-                ScreenNavigated(currentScreen);
+                ScreenNavigatedTo(currentScreen);
                 UpdateScreen();
             }
         }
 
-        void ScreenNavigated(MenuScreen screen)
+        void ScreenNavigatedTo(MenuScreen screen)
         {
-            if (screen == null || !IsEnabled) // TODO check not navigated
+            if (screen == null || !screen.OnNavigatedTo(this))
             {
                 return;
             }
 
             screen.ItemClicked += currentScreen_ItemClicked;
             screen.Updated += currentScreen_Updated;
-
-            // TODO notify screen
         }
 
-        void ScreenUnnavigated(MenuScreen screen)
+        void ScreenNavigatedFrom(MenuScreen screen)
         {
-            if (screen == null) // TODO check navigated
+            if (screen == null)
             {
                 return;
             }
 
-            // TODO notify screen
+            screen.OnNavigatedFrom(this);
 
             screen.ItemClicked -= currentScreen_ItemClicked;
             screen.Updated -= currentScreen_Updated;

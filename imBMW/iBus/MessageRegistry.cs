@@ -59,7 +59,7 @@ namespace imBMW.iBus
             "", // "0x2E",
             "", // "0x2F",
             "", // "0x30",
-            "Select menu item", // "0x31",
+            "Select screen item", // "0x31",
             "MFL volume buttons",
             "", // "0x33",
             "DSP Equalizer Button",

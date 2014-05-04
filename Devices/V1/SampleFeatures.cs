@@ -101,7 +101,7 @@ namespace imBMW
 
         static void ShowSpeedRPM(uint speed, uint rpm, bool delay = false)
         {
-            string s = speed.ToString().PrependToLength((char)0x19, 3) + "kmh " + rpm;
+            string s = speed.ToString().PrependToLength(3, (char)0x19) + "kmh " + rpm;
             if (delay)
             {
                 Radio.DisplayTextWithDelay(s);

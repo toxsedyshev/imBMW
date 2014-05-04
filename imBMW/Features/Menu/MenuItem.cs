@@ -30,27 +30,32 @@ namespace imBMW.Features.Menu
 
         private GetTextHandler getTextCallback;
 
-        public MenuItem(string text, MenuItemType type, MenuItemAction action = MenuItemAction.None)
+        public MenuItem(string text, MenuItemType type = MenuItemType.Text, MenuItemAction action = MenuItemAction.None)
         {
+            if (type == MenuItemType.Checkbox && action == MenuItemAction.Refresh)
+            {
+                action = MenuItemAction.Refresh;
+            }
+
             Text = text;
             Type = type;
             Action = action;
         }
 
-        public MenuItem(string text, MenuItemEventHandler callback)
-            : this(text, MenuItemType.Button)
+        public MenuItem(string text, MenuItemEventHandler callback, MenuItemType type = MenuItemType.Button, MenuItemAction action = MenuItemAction.None)
+            : this(text, type, action)
         {
             Clicked += callback;
         }
 
-        public MenuItem(GetTextHandler getTextCallback, MenuItemType type, MenuItemAction action = MenuItemAction.None)
+        public MenuItem(GetTextHandler getTextCallback, MenuItemType type = MenuItemType.Text, MenuItemAction action = MenuItemAction.None)
             : this(String.Empty, type, action)
         {
             this.getTextCallback = getTextCallback;
         }
 
-        public MenuItem(GetTextHandler getTextCallback, MenuItemEventHandler callback)
-            : this(getTextCallback, MenuItemType.Button)
+        public MenuItem(GetTextHandler getTextCallback, MenuItemEventHandler callback, MenuItemType type = MenuItemType.Button, MenuItemAction action = MenuItemAction.None)
+            : this(getTextCallback, type, action)
         {
             Clicked += callback;
         }
@@ -134,17 +139,17 @@ namespace imBMW.Features.Menu
 
         protected void OnClicked()
         {
-            var e = Clicked;
-            if (e != null)
-            {
-                e(this);
-            }
-
             switch (Type)
             {
                 case MenuItemType.Checkbox:
                     IsChecked = !IsChecked;
                     break;
+            }
+
+            var e = Clicked;
+            if (e != null)
+            {
+                e(this);
             }
 
             switch (Action)

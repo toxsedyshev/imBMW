@@ -1,5 +1,6 @@
 using System;
 using Microsoft.SPOT;
+using imBMW.Features.Localizations;
 
 namespace imBMW.Features.Menu
 {
@@ -7,7 +8,7 @@ namespace imBMW.Features.Menu
     {
         public static void AddBackButton(this MenuScreen screen, int index = -1)
         {
-            screen.AddItem(new MenuItem("<<", MenuItemType.Button, MenuItemAction.GoBackScreen), index);
+            screen.AddItem(new MenuItem(i => "« " + Localization.Current.Back, MenuItemType.Button, MenuItemAction.GoBackScreen), index);
         }
     }
 }

@@ -27,7 +27,7 @@ namespace imBMW.iBus.Devices.Emulators
 
         static byte[] DataCurrentDiskTrackRequest = new byte[] { 0x38, 0x00, 0x00 };
         static byte[] DataStopPlaying  = new byte[] { 0x38, 0x01, 0x00 };
-        static byte[] DataTurnOff      = new byte[] { 0x38, 0x02, 0x00 };
+        static byte[] DataTurnOff      = new byte[] { 0x38, 0x02, 0x00 }; // TODO check with BM
         static byte[] DataStartPlaying = new byte[] { 0x38, 0x03, 0x00 };
         static byte[] DataRandomPlay   = new byte[] { 0x38, 0x08, 0x01 };
 
@@ -255,7 +255,7 @@ namespace imBMW.iBus.Devices.Emulators
                 }
                 isCDCActive = value;
                 delayRadioText = true;
-                player.IsPlayerHostActive = isCDCActive;
+                player.PlayerHostState = isCDCActive ? PlayerHostState.On : PlayerHostState.Off;
                 if (isCDCActive)
                 {
                     if (player.IsPlaying)
@@ -292,7 +292,12 @@ namespace imBMW.iBus.Devices.Emulators
 
         static void ProcessCDCMessage(Message m)
         {
-            if (m.Data.Compare(DataStartPlaying))
+            if (m.Data.Compare(DataCurrentDiskTrackRequest))
+            {
+                Manager.EnqueueMessage(MessagePlayingDisk1Track1);
+                m.ReceiverDescription = "CD status request";
+            }
+            else if (m.Data.Compare(DataStartPlaying))
             {
                 Manager.EnqueueMessage(MessagePlayingDisk1Track1);
                 IsCDCActive = true;
@@ -322,7 +327,8 @@ namespace imBMW.iBus.Devices.Emulators
             }
             else if (m.Data.Compare(DataTurnOff))
             {
-                Radio.DisplayText("imBMW", TextAlign.Center);
+                // TODO only with bmw business
+                //Radio.DisplayText("imBMW", TextAlign.Center);
                 m.ReceiverDescription = "Turn off";
             }
         }

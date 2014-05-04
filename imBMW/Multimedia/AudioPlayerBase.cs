@@ -8,7 +8,7 @@ namespace imBMW.Multimedia
     public abstract class AudioPlayerBase : IAudioPlayer
     {
         bool isCurrentPlayer;
-        bool isPlayerHostActive;
+        PlayerHostState playerHostState;
         bool isEnabled;
         protected bool isPlaying;
 
@@ -75,20 +75,20 @@ namespace imBMW.Multimedia
             }
         }
 
-        public bool IsPlayerHostActive
+        public PlayerHostState PlayerHostState
         {
             get
             {
-                return isPlayerHostActive;
+                return playerHostState;
             }
             set
             {
-                if (isPlayerHostActive == value)
+                if (playerHostState == value)
                 {
                     return;
                 }
-                isPlayerHostActive = value;
-                OnIsPlayerHostActiveChanged(value);
+                playerHostState = value;
+                OnPlayerHostStateChanged(value);
             }
         }
 
@@ -120,20 +120,20 @@ namespace imBMW.Multimedia
             {
                 Pause();
             }
-            else if (IsPlayerHostActive)
+            else if (PlayerHostState == Multimedia.PlayerHostState.On)
             {
                 Play();
             }
         }
 
-        protected virtual void OnIsPlayerHostActiveChanged(bool isPlayerHostActive)
+        protected virtual void OnPlayerHostStateChanged(PlayerHostState playerHostState)
         {
             CheckIsEnabled();
         }
 
         void CheckIsEnabled()
         {
-            IsEnabled = IsPlayerHostActive && IsCurrentPlayer;
+            IsEnabled = PlayerHostState == Multimedia.PlayerHostState.On && IsCurrentPlayer;
         }
 
         public event IsPlayingHandler IsPlayingChanged;

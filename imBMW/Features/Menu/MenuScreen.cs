@@ -9,21 +9,45 @@ namespace imBMW.Features.Menu
 
     public delegate void MenuScreenItemEventHandler(MenuScreen screen, MenuItem item);
 
+    public delegate string MenuScreenGetTextHandler(MenuScreen screen);
+
     public class MenuScreen
     {
         string title;
         string status;
         bool updateSuspended;
+        MenuBase parentMenu;
+
+        public MenuScreen(string title = null)
+            : this()
+        {
+            if (title != null)
+            {
+                Title = title;
+            }
+        }
+
+        public MenuScreen(MenuScreenGetTextHandler titleCallback = null)
+            : this()
+        {
+            TitleCallback = titleCallback;
+        }
 
         public MenuScreen()
         {
             Items = new ArrayList();
         }
 
+        public MenuScreenGetTextHandler TitleCallback { get; set; }
+
         public string Title
         {
             get
             {
+                if (TitleCallback != null)
+                {
+                    title = TitleCallback(this);
+                }
                 return title;
             }
             set
@@ -77,7 +101,7 @@ namespace imBMW.Features.Menu
         {
             if (index > 9 || index < 0 && ItemsCount == 10)
             {
-                Logger.Error("Can't add menu item \"" + menuItem + "\" with index=" + index + ", count=" + ItemsCount);
+                Logger.Error("Can't add screen item \"" + menuItem + "\" with index=" + index + ", count=" + ItemsCount);
                 index = 9;
             }
             if (index < 0)
@@ -91,22 +115,15 @@ namespace imBMW.Features.Menu
                     UnsubscribeItem(Items[index] as MenuItem);
                     Items.RemoveAt(index);
                 }
-                Items.Capacity = System.Math.Max(Items.Capacity, index + 1);
+                while (index > Items.Count)
+                {
+                    Items.Add(null);
+                }
                 Items.Insert(index, menuItem);
             }
             menuItem.Changed += menuItem_Changed;
             menuItem.Clicked += menuItem_Clicked;
             OnUpdated();
-        }
-
-        void UnsubscribeItem(MenuItem item)
-        {
-            if (item == null)
-            {
-                return;
-            }
-            item.Clicked -= menuItem_Clicked;
-            item.Changed -= menuItem_Changed;
         }
 
         public void ClearItems()
@@ -122,7 +139,75 @@ namespace imBMW.Features.Menu
             OnUpdated();
         }
 
-        public bool UpdateSuspended
+        public virtual bool OnNavigatedTo(MenuBase menu)
+        {
+            if (parentMenu == menu)
+            {
+                return false;
+            }
+            if (parentMenu != null)
+            {
+                throw new Exception("Already navigated to screen " + this + " in another menu " + parentMenu + ". Can't navigate in " + menu);
+            }
+            parentMenu = menu;
+
+            var e = NavigatedTo;
+            if (e != null)
+            {
+                e(this);
+            }
+
+            return true;
+        }
+
+        public virtual bool OnNavigatedFrom(MenuBase menu)
+        {
+            if (parentMenu == menu)
+            {
+                parentMenu = null;
+
+                var e = NavigatedFrom;
+                if (e != null)
+                {
+                    e(this);
+                }
+
+                return true;
+            }
+            if (parentMenu != null)
+            {
+                throw new Exception("Navigated to screen " + this + " in another menu " + parentMenu + ". Can't navigate from in " + menu);
+            }
+            return false;
+        }
+
+        public override string ToString()
+        {
+            return Title;
+        }
+
+        public void WithUpdateSuspended(MenuScreenEventHandler callback)
+        {
+            IsUpdateSuspended = true;
+            callback(this);
+            IsUpdateSuspended = false;
+        }
+
+        /// <summary>
+        /// Menu navigated to this screen and screen is not suspended (screen, but not screen update).
+        /// </summary>
+        public bool IsNavigated
+        {
+            get
+            {
+                return parentMenu != null;
+            }
+        }
+
+        /// <summary>
+        /// Is screen update suspended, eg. for batch update.
+        /// </summary>
+        public bool IsUpdateSuspended
         {
             get
             {
@@ -146,12 +231,26 @@ namespace imBMW.Features.Menu
 
         public event MenuScreenEventHandler Updated;
 
-        void menuItem_Clicked(MenuItem item)
+        public event MenuScreenEventHandler NavigatedTo;
+
+        public event MenuScreenEventHandler NavigatedFrom;
+
+        protected void UnsubscribeItem(MenuItem item)
+        {
+            if (item == null)
+            {
+                return;
+            }
+            item.Clicked -= menuItem_Clicked;
+            item.Changed -= menuItem_Changed;
+        }
+
+        protected void menuItem_Clicked(MenuItem item)
         {
             OnItemClicked(item);
         }
 
-        void menuItem_Changed(MenuItem item)
+        protected void menuItem_Changed(MenuItem item)
         {
             OnUpdated();
         }

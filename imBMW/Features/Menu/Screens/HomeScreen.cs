@@ -1,5 +1,6 @@
 using System;
 using Microsoft.SPOT;
+using imBMW.Features.Localizations;
 
 namespace imBMW.Features.Menu.Screens
 {
@@ -17,19 +18,19 @@ namespace imBMW.Features.Menu.Screens
         {
             Title = "imBMW";
 
-            itemPlayer = new MenuItem("Плеер", MenuItemType.Button, MenuItemAction.GoToScreen);
-            itemPhone = new MenuItem("Телефон", MenuItemType.Button, MenuItemAction.GoToScreen);
-            itemFav = new MenuItem("Избранное", MenuItemType.Button, MenuItemAction.GoToScreen)
+            itemPlayer = new MenuItem(i => Localization.Current.Player, MenuItemType.Button, MenuItemAction.GoToScreen);
+            itemPhone = new MenuItem(i => Localization.Current.Phone, MenuItemType.Button, MenuItemAction.GoToScreen);
+            itemFav = new MenuItem(i => Localization.Current.QuickAccess, MenuItemType.Button, MenuItemAction.GoToScreen)
             {
                 GoToScreen = null // TODO fav screen
             };
-            itemBC = new MenuItem("Борткомпьютер", MenuItemType.Button, MenuItemAction.GoToScreen)
+            itemBC = new MenuItem(i => Localization.Current.Bordcomputer, MenuItemType.Button, MenuItemAction.GoToScreen)
             {
                 GoToScreen = BordcomputerScreen.Instance
             };
-            itemSettings = new MenuItem("Настройки", MenuItemType.Button, MenuItemAction.GoToScreen)
+            itemSettings = new MenuItem(i => Localization.Current.Settings, MenuItemType.Button, MenuItemAction.GoToScreen)
             {
-                GoToScreen = null // TODO settings screen
+                GoToScreen = SettingsScreen.Instance
             };
             SetItems();
         }
@@ -45,7 +46,7 @@ namespace imBMW.Features.Menu.Screens
             {
                 AddItem(itemPhone);
             }
-            AddItem(itemFav);
+            //AddItem(itemFav);
             AddItem(itemBC);
             AddItem(itemSettings);
         }
@@ -58,7 +59,7 @@ namespace imBMW.Features.Menu.Screens
             }
             set
             {
-                // TODO check it is shown now
+                // TODO check it is shown now and renavigate
                 itemPlayer.GoToScreen = value;
                 SetItems();
             }

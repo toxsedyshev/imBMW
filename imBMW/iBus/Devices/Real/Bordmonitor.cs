@@ -32,13 +32,17 @@ namespace imBMW.iBus.Devices.Real
     {
         public static Message MessageRefreshScreen = new Message(DeviceAddress.Radio, DeviceAddress.GraphicsNavigationDriver, "Refresh screen", 0xA5, 0x60, 0x01, 0x00);
         public static Message MessageClearScreen   = new Message(DeviceAddress.Radio, DeviceAddress.GraphicsNavigationDriver, "Clear screen",   0x46, 0x0C);
-
-        public static void ShowText(string s, BordmonitorFields field, int index = 0, bool check = false)
+        public static Message MessageDisableRadioMenu = new Message(DeviceAddress.GraphicsNavigationDriver, DeviceAddress.Radio, "Disable radio screen", 0x45, 0x02); // Thanks to RichardP (Intravee) for these two messages
+        public static Message MessageEnableRadioMenu = new Message(DeviceAddress.GraphicsNavigationDriver, DeviceAddress.Radio, "Enable radio screen", 0x45, 0x00);
+        
+        public static byte[] DataAUX = new byte[] { 0x23, 0x62, 0x10, 0x41, 0x55, 0x58, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20 };
+        
+        public static void ShowText(string s, BordmonitorFields field, byte index = 0, bool check = false)
         {
             ShowText(s, TextAlign.Left, field, index, check);
         }
 
-        public static void ShowText(string s, TextAlign align, BordmonitorFields field, int index = 0, bool check = false)
+        public static void ShowText(string s, TextAlign align, BordmonitorFields field, byte index = 0, bool check = false)
         {
             int len;
             byte[] data;
@@ -72,12 +76,22 @@ namespace imBMW.iBus.Devices.Real
                 // TODO check 24 chars (23 + star)
                 data[data.Length - 1] = 0x2A;
             }
-            Manager.EnqueueMessage(new Message(iBus.DeviceAddress.Radio, iBus.DeviceAddress.GraphicsNavigationDriver, "Show message on BM: " + s, data));
+            Manager.EnqueueMessage(new Message(iBus.DeviceAddress.Radio, iBus.DeviceAddress.GraphicsNavigationDriver, "Show message on BM (" + index.ToHex() + "): " + s, data));
         }
 
         public static void RefreshScreen()
         {
             Manager.EnqueueMessage(MessageRefreshScreen);
+        }
+
+        public static void DisableRadioMenu()
+        {
+            Manager.EnqueueMessage(MessageDisableRadioMenu);
+        }
+
+        public static void EnableRadioMenu()
+        {
+            Manager.EnqueueMessage(MessageEnableRadioMenu);
         }
     }
 }

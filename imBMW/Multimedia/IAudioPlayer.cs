@@ -20,6 +20,13 @@ namespace imBMW.Multimedia
         Text
     }
 
+    public enum PlayerHostState
+    {
+        Off,
+        StandBy,
+        On
+    }
+
     public interface IAudioPlayer
     {
         void Next();
@@ -50,7 +57,7 @@ namespace imBMW.Multimedia
 
         bool IsCurrentPlayer { get; set; }
 
-        bool IsPlayerHostActive { get; set; }
+        PlayerHostState PlayerHostState { get; set; }
 
         string Name { get; }
 

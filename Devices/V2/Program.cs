@@ -28,7 +28,7 @@ namespace imBMW.Devices.V2
 
             var player = new BluetoothOVC3860(Serial.COM2);
             player.IsCurrentPlayer = true;
-            player.IsPlayerHostActive = true;
+            player.PlayerHostState = PlayerHostState.On;
             player.IsPlayingChanged += (p, value) => LED.Write(value);
             
             //Button.OnPress(Pin.PC1, player.PlayPauseToggle);
@@ -114,8 +114,8 @@ namespace imBMW.Devices.V2
                 //if (e.Message.SourceDevice == iBus.DeviceAddress.CDChanger) { return; }
                 if (e.Message.SourceDevice != DeviceAddress.Radio
                     && e.Message.DestinationDevice != DeviceAddress.Radio
-                    && e.Message.SourceDevice != DeviceAddress.GraphicsNavigationDriver)
-                //if (e.Message.SourceDevice != DeviceAddress.Diagnostic && e.Message.DestinationDevice != DeviceAddress.Diagnostic)
+                    && e.Message.SourceDevice != DeviceAddress.GraphicsNavigationDriver
+                    && e.Message.SourceDevice != DeviceAddress.Diagnostic && e.Message.DestinationDevice != DeviceAddress.Diagnostic)
                 {
                     return;
                 }
@@ -151,7 +151,7 @@ namespace imBMW.Devices.V2
                 Logger.Info("BordmonitorAUX inited");
 
                 // TODO remove to features
-                BodyModule.UpdateBatteryVoltage();
+                //BodyModule.UpdateBatteryVoltage();
                 Manager.AddMessageReceiverForSourceDevice(DeviceAddress.OnBoardMonitor, (m) =>
                 {
                     if (!player.IsEnabled)
@@ -238,7 +238,7 @@ namespace imBMW.Devices.V2
             }
             if (blinkerOn)
             {
-                b = b.AddBit(2);
+                //b = b.AddBit(2);
             }
             if (player.IsPlaying)
             {

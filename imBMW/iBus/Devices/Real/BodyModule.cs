@@ -36,8 +36,8 @@ namespace imBMW.iBus.Devices.Real
 
         static Message MessageOpenTrunk = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Open trunk", 0x0C, 0x95, 0x01);
 
-        static Message MessageLockDoors = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Lock doors", 0x0C, 0x97, 0x01);
-        static Message MessageUnlockDoors = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Unlock doors", 0x0C, 0x03, 0x01);
+        static Message MessageLockDoors = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Lock doors", 0x0C, 0x4F, 0x01); // 0x0C, 0x97, 0x01
+        static Message MessageUnlockDoors = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Unlock doors", 0x0C, 0x45, 0x01); // 0x0C, 0x03, 0x01
 
         //static Message MessageOpenWindows = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, 0x0C, 0x00, 0x65);
         
@@ -80,17 +80,20 @@ namespace imBMW.iBus.Devices.Real
                 var btn = m.Data[1];
                 switch (btn)
                 {
-                    case 0x12:
+                    case 0x12: // TODO maybe it contains key number?
+                    case 0x16:
                         OnRemoteKeyButton(m, RemoteKeyButton.Lock);
                         break;
                     case 0x22:
+                    case 0x26:
                         OnRemoteKeyButton(m, RemoteKeyButton.Unlock);
                         break;
                     case 0x42:
+                    case 0x46:
                         OnRemoteKeyButton(m, RemoteKeyButton.Trunk);
                         break;
                     default:
-                        m.ReceiverDescription = "Remote key unknown button " + btn + " press";
+                        m.ReceiverDescription = "Remote key unknown button " + btn.ToHex() + " press";
                         break;
                 }
             }
@@ -119,10 +122,11 @@ namespace imBMW.iBus.Devices.Real
             get { return batteryVoltage; }
             private set
             {
-                if (batteryVoltage == value)
+                // always notify to know that message was received
+                /*if (batteryVoltage == value)
                 {
                     return;
-                }
+                }*/
                 batteryVoltage = value;
 
                 var e = BatteryVoltageChanged;

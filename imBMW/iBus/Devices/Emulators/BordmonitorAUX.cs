@@ -6,6 +6,7 @@ using System.Threading;
 using imBMW.Tools;
 using imBMW.Features.Menu.Screens;
 using imBMW.Features.Menu;
+using imBMW.Features.Localizations;
 
 namespace imBMW.iBus.Devices.Emulators
 {
@@ -21,7 +22,6 @@ namespace imBMW.iBus.Devices.Emulators
 
         static byte[] DataRadioOn = new byte[] { 0x4A, 0xFF };
         static byte[] DataRadioOff = new byte[] { 0x4A, 0x00 };
-        static byte[] DataAUX = new byte[] { 0x23, 0x62, 0x10, 0x41, 0x55, 0x58, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20 };
         static byte[] DataCD = new byte[] { 0x23, 0x62, 0x10, 0x43, 0x44 };
         static byte[] DataCDStartPlaying = new byte[] { 0x38, 0x03, 0x00 };
         static byte[] DataFM = new byte[] { 0xA5, 0x62, 0x01, 0x41, 0x20, 0x20, 0x46, 0x4D, 0x20 };
@@ -45,13 +45,14 @@ namespace imBMW.iBus.Devices.Emulators
             {
                 IsRadioActive = true;
                 m.ReceiverDescription = "Radio On";
+                Bordmonitor.EnableRadioMenu();
             }
             else if (m.Data.Compare(DataRadioOff))
             {
                 IsRadioActive = false;
                 m.ReceiverDescription = "Radio Off";
             }
-            else if (m.Data.Compare(DataAUX))
+            else if (m.Data.Compare(Bordmonitor.DataAUX))
             {
                 IsAUXSelected = true;
                 /*if (lastStatus == null)
@@ -67,6 +68,7 @@ namespace imBMW.iBus.Devices.Emulators
             else if (m.Data.Compare(DataFM) || m.Data.Compare(DataAM) || m.Data.StartsWith(DataCDStartPlaying))
             {
                 IsAUXSelected = false;
+                Bordmonitor.EnableRadioMenu();
             }
         }
 
@@ -74,12 +76,12 @@ namespace imBMW.iBus.Devices.Emulators
         {
             if (IsAUXOn)
             {
-                player.IsPlayerHostActive = true;
+                player.PlayerHostState = PlayerHostState.On;
                 Play();
             }
             else
             {
-                player.IsPlayerHostActive = false;
+                player.PlayerHostState = IsRadioActive ? PlayerHostState.StandBy : PlayerHostState.Off;
                 Pause();
             }
             BordmonitorMenu.Instance.IsEnabled = IsAUXOn;
@@ -182,7 +184,7 @@ namespace imBMW.iBus.Devices.Emulators
 
         static void ShowPlayerStatus(IAudioPlayer player, bool isPlaying)
         {
-            string s = isPlaying ? "Играет" : "Пауза";
+            string s = isPlaying ? Localization.Current.Playing : Localization.Current.Paused;
             ShowPlayerStatus(Player, s);
         }
         
@@ -201,11 +203,11 @@ namespace imBMW.iBus.Devices.Emulators
             switch (playerEvent)
             {
                 case PlayerEvent.Next:
-                    status = "Вперед";
+                    status = Localization.Current.Next;
                     showAfterWithDelay = true;
                     break;
                 case PlayerEvent.Prev:
-                    status = "Назад";
+                    status = Localization.Current.Previous;
                     showAfterWithDelay = true;
                     break;
                 case PlayerEvent.Playing:
@@ -327,7 +329,7 @@ namespace imBMW.iBus.Devices.Emulators
 
         static void MFLRT()
         {
-            Player.MFLRT();
+            //Player.MFLRT();
         }
 
         static void MFLDial()

@@ -36,6 +36,9 @@
   <ItemGroup>
     <Compile Include="Features\Comfort.cs" />
     <Compile Include="Features\Light.cs" />
+    <Compile Include="Features\Localizations\EnglishLocalization.cs" />
+    <Compile Include="Features\Localizations\Localization.cs" />
+    <Compile Include="Features\Localizations\RussianLocalization.cs" />
     <Compile Include="Features\Menu\MenuHelpers.cs" />
     <Compile Include="Features\Menu\Screens\BordcomputerScreen.cs" />
     <Compile Include="Features\Menu\Screens\HomeScreen.cs" />
@@ -44,6 +47,7 @@
     <Compile Include="Features\Menu\MenuScreen.cs" />
     <Compile Include="Features\Menu\BordmonitorMenu.cs" />
     <Compile Include="Features\Menu\RadioMenu.cs" />
+    <Compile Include="Features\Menu\Screens\SettingsScreen.cs" />
     <Compile Include="iBus\DeviceAddress.cs" />
     <Compile Include="iBus\Devices\Emulators\BordmonitorAUX.cs" />
     <Compile Include="iBus\Devices\Real\BodyModule.cs" />

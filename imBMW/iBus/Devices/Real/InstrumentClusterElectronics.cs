@@ -39,14 +39,14 @@ namespace imBMW.iBus.Devices.Real
 
     public class TemperatureEventArgs : EventArgs
     {
-        public uint Outside { get; private set; }
-        public uint Coolant { get; private set; }
+        public sbyte Outside { get; private set; }
+        public sbyte Coolant { get; private set; }
 
-        public TemperatureEventArgs (uint outside, uint coolant)
-	    {
+        public TemperatureEventArgs(sbyte outside, sbyte coolant)
+        {
             Outside = outside;
             Coolant = coolant;
-	    }
+        }
     }
 
     public delegate void IgnitionEventHandler(IgnitionEventArgs e);
@@ -65,11 +65,14 @@ namespace imBMW.iBus.Devices.Real
         public static uint CurrentRPM { get; private set; }
         public static uint CurrentSpeed { get; private set; }
 
-        public static uint TemperatureOutside { get; private set; }
-        public static uint TemperatureCoolant { get; private set; }
+        public static sbyte TemperatureOutside { get; private set; }
+        public static sbyte TemperatureCoolant { get; private set; }
 
         static InstrumentClusterElectronics()
         {
+            TemperatureOutside = sbyte.MinValue;
+            TemperatureCoolant = sbyte.MinValue;
+
             Manager.AddMessageReceiverForSourceDevice(DeviceAddress.InstrumentClusterElectronics, ProcessIKEMessage);
         }
 
@@ -104,7 +107,7 @@ namespace imBMW.iBus.Devices.Real
             }
             else if (m.Data.Length == 4 && m.Data[0] == 0x19)
             {
-                OnTemperatureChanged(m.Data[1], m.Data[2]);
+                OnTemperatureChanged((sbyte)m.Data[1], (sbyte)m.Data[2]);
                 m.ReceiverDescription = "Temperature. Outside " + TemperatureOutside + "°C, Coolant " + TemperatureCoolant + "°C";
             }
         }
@@ -136,7 +139,7 @@ namespace imBMW.iBus.Devices.Real
             }
         }
 
-        private static void OnTemperatureChanged(uint outside, uint coolant)
+        private static void OnTemperatureChanged(sbyte outside, sbyte coolant)
         {
             TemperatureOutside = outside;
             TemperatureCoolant = coolant;
