@@ -78,23 +78,21 @@ namespace imBMW.iBus.Devices.Real
             if (m.Data.Length == 2 && m.Data[0] == 0x72)
             {
                 var btn = m.Data[1];
-                switch (btn)
+                if (btn.HasBit(4)) // 0x1_
                 {
-                    case 0x12: // TODO maybe it contains key number?
-                    case 0x16:
-                        OnRemoteKeyButton(m, RemoteKeyButton.Lock);
-                        break;
-                    case 0x22:
-                    case 0x26:
-                        OnRemoteKeyButton(m, RemoteKeyButton.Unlock);
-                        break;
-                    case 0x42:
-                    case 0x46:
-                        OnRemoteKeyButton(m, RemoteKeyButton.Trunk);
-                        break;
-                    default:
-                        m.ReceiverDescription = "Remote key unknown button " + btn.ToHex() + " press";
-                        break;
+                    OnRemoteKeyButton(m, RemoteKeyButton.Lock);
+                }
+                else if (btn.HasBit(5)) // 0x2_
+                {
+                    OnRemoteKeyButton(m, RemoteKeyButton.Unlock);
+                }
+                else if (btn.HasBit(6)) // 0x4_
+                {
+                    OnRemoteKeyButton(m, RemoteKeyButton.Trunk);
+                }
+                else
+                {
+                    m.ReceiverDescription = "Remote key unknown button " + btn.ToHex() + " press";
                 }
             }
             else if (m.Data.Length > 3 && m.Data[0] == 0xA0)
