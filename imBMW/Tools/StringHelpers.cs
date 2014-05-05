@@ -1,4 +1,4 @@
-using System;
+Ôªøusing System;
 using Microsoft.SPOT;
 using System.Text;
 
@@ -50,9 +50,9 @@ namespace imBMW.Tools
 
         public static string UTF8ToASCII(this string s)
         {
-            //   C0 = ¿, F0 = ﬂ, F1 = ‡, FF = ˇ - ASCII
-            // 0410 = ¿,               044F = ˇ - UTF8
-            // TODO 1025 ® 1105 ∏
+            //   C0 = –ê, F0 = –Ø, F1 = –∞, FF = —è - ASCII
+            // 0410 = –ê,               044F = —è - UTF8
+            // TODO 1025 –Å 1105 —ë
             var res = new byte[s.Length];
             char c;
             for (var i = 0; i < s.Length; i++)

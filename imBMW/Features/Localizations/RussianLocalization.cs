@@ -1,4 +1,4 @@
-using System;
+п»їusing System;
 using Microsoft.SPOT;
 
 namespace imBMW.Features.Localizations
@@ -7,202 +7,202 @@ namespace imBMW.Features.Localizations
     {
         public override string LanguageName
         {
-            get { return "Русский"; }
+            get { return "Р СѓСЃСЃРєРёР№"; }
         }
 
         public override string Language
         {
-            get { return "Язык"; }
+            get { return "РЇР·С‹Рє"; }
         }
 
         public override string Settings
         {
-            get { return "Настройки"; }
+            get { return "РќР°СЃС‚СЂРѕР№РєРё"; }
         }
 
         public override string Bordcomputer
         {
-            get { return "Борткомпьютер"; }
+            get { return "Р‘РѕСЂС‚РєРѕРјРїСЊСЋС‚РµСЂ"; }
         }
 
         public override string BordcomputerShort
         {
-            get { return "БК"; }
+            get { return "Р‘Рљ"; }
         }
 
         public override string Speed
         {
-            get { return "Скорость"; }
+            get { return "РЎРєРѕСЂРѕСЃС‚СЊ"; }
         }
 
         public override string KMH
         {
-            get { return "км/ч"; }
+            get { return "РєРј/С‡"; }
         }
 
         public override string Revs
         {
-            get { return "Обороты"; }
+            get { return "РћР±РѕСЂРѕС‚С‹"; }
         }
 
         public override string Voltage
         {
-            get { return "Напряжение"; }
+            get { return "РќР°РїСЂСЏР¶РµРЅРёРµ"; }
         }
 
         public override string VoltageShort
         {
-            get { return "В"; }
+            get { return "Р’"; }
         }
 
         public override string Engine
         {
-            get { return "Двигатель"; }
+            get { return "Р”РІРёРіР°С‚РµР»СЊ"; }
         }
 
         public override string Outside
         {
-            get { return "За бортом"; }
+            get { return "Р—Р° Р±РѕСЂС‚РѕРј"; }
         }
 
         public override string Refreshing
         {
-            get { return "Обновление"; }
+            get { return "РћР±РЅРѕРІР»РµРЅРёРµ"; }
         }
 
         public override string Player
         {
-            get { return "Плеер"; }
+            get { return "РџР»РµРµСЂ"; }
         }
 
         public override string Phone
         {
-            get { return "Телефон"; }
+            get { return "РўРµР»РµС„РѕРЅ"; }
         }
 
         public override string QuickAccess
         {
-            get { return "Быстрый доступ"; }
+            get { return "Р‘С‹СЃС‚СЂС‹Р№ РґРѕСЃС‚СѓРї"; }
         }
 
         public override string ComfortWindows
         {
-            get { return "Комфорт окна"; }
+            get { return "РљРѕРјС„РѕСЂС‚ РѕРєРЅР°"; }
         }
 
         public override string ComfortSunroof
         {
-            get { return "Комфорт люк"; }
+            get { return "РљРѕРјС„РѕСЂС‚ Р»СЋРє"; }
         }
 
         public override string AutoLock
         {
-            get { return "Авто запирание"; }
+            get { return "РђРІС‚Рѕ Р·Р°РїРёСЂР°РЅРёРµ"; }
         }
 
         public override string AutoUnlock
         {
-            get { return "Авто отпирание"; }
+            get { return "РђРІС‚Рѕ РѕС‚РїРёСЂР°РЅРёРµ"; }
         }
 
         public override string VoiceCall
         {
-            get { return "Голосовые команды"; }
+            get { return "Р“РѕР»РѕСЃРѕРІС‹Рµ РєРѕРјР°РЅРґС‹"; }
         }
 
         public override string Contacts
         {
-            get { return "Контакты"; }
+            get { return "РљРѕРЅС‚Р°РєС‚С‹"; }
         }
 
         public override string PrevItems
         {
-            get { return "Предыдущие"; }
+            get { return "РџСЂРµРґС‹РґСѓС‰РёРµ"; }
         }
 
         public override string NextItems
         {
-            get { return "Следующие"; }
+            get { return "РЎР»РµРґСѓСЋС‰РёРµ"; }
         }
 
         public override string Back
         {
-            get { return "Назад"; }
+            get { return "РќР°Р·Р°Рґ"; }
         }
 
         public override string Volume
         {
-            get { return "Громкость"; }
+            get { return "Р“СЂРѕРјРєРѕСЃС‚СЊ"; }
         }
 
         public override string Reconnect
         {
-            get { return "Переподключение"; }
+            get { return "РџРµСЂРµРїРѕРґРєР»СЋС‡РµРЅРёРµ"; }
         }
 
         public override string Pair
         {
-            get { return "Сопряжение"; }
+            get { return "РЎРѕРїСЂСЏР¶РµРЅРёРµ"; }
         }
 
         public override string Playing
         {
-            get { return "Играет"; }
+            get { return "РРіСЂР°РµС‚"; }
         }
 
         public override string Paused
         {
-            get { return "Пауза"; }
+            get { return "РџР°СѓР·Р°"; }
         }
 
         public override string Play
         {
-            get { return "Играть"; }
+            get { return "РРіСЂР°С‚СЊ"; }
         }
 
         public override string Pause
         {
-            get { return "Пауза"; }
+            get { return "РџР°СѓР·Р°"; }
         }
 
         public override string PrevTrack
         {
-            get { return "Предыдущий трек"; }
+            get { return "РџСЂРµРґС‹РґСѓС‰РёР№ С‚СЂРµРє"; }
         }
 
         public override string NextTrack
         {
-            get { return "Следующий трек"; }
+            get { return "РЎР»РµРґСѓСЋС‰РёР№ С‚СЂРµРє"; }
         }
 
         public override string Connected
         {
-            get { return "Подключен"; }
+            get { return "РџРѕРґРєР»СЋС‡РµРЅ"; }
         }
 
         public override string Waiting
         {
-            get { return "Ожидается"; }
+            get { return "РћР¶РёРґР°РµС‚СЃСЏ"; }
         }
 
         public override string Disconnected
         {
-            get { return "Отключен"; }
+            get { return "РћС‚РєР»СЋС‡РµРЅ"; }
         }
 
         public override string NotPaired
         {
-            get { return "Не спарен"; }
+            get { return "РќРµ СЃРїР°СЂРµРЅ"; }
         }
 
         public override string Next
         {
-            get { return "Следующий"; }
+            get { return "РЎР»РµРґСѓСЋС‰РёР№"; }
         }
 
         public override string Previous
         {
-            get { return "Предыдущий"; }
+            get { return "РџСЂРµРґС‹РґСѓС‰РёР№"; }
         }
     }
 }
