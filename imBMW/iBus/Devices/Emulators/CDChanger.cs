@@ -8,15 +8,12 @@ using imBMW.Multimedia;
 
 namespace imBMW.iBus.Devices.Emulators
 {
-    public static class CDChanger
+    public class CDChanger : MediaEmulator
     {
         const int StopDelayMilliseconds = 1000;
 
-        static IAudioPlayer player;
-        static Thread announceThread;
-        static Timer stopDelay;
-
-        static bool isCDCActive;
+        Thread announceThread;
+        Timer stopDelay;
 
         #region Messages
 
@@ -33,12 +30,10 @@ namespace imBMW.iBus.Devices.Emulators
 
         #endregion
 
-        public static void Init(IAudioPlayer player)
+        public CDChanger(IAudioPlayer player)
+            : base(player)
         {
-            Player = player;
-
             Manager.AddMessageReceiverForDestinationDevice(DeviceAddress.CDChanger, ProcessCDCMessage);
-            MultiFunctionSteeringWheel.ButtonPressed += MultiFunctionSteeringWheel_ButtonPressed;
 
             announceThread = new Thread(announce);
             announceThread.Start();
@@ -46,52 +41,18 @@ namespace imBMW.iBus.Devices.Emulators
 
         #region Player control
 
-        internal static IAudioPlayer Player
-        {
-            get
-            {
-                return player;
-            }
-            set
-            {
-                if (value == null)
-                {
-                    throw new ArgumentNullException();
-                }
-                if (player != null)
-                {
-                    UnsetPlayer(player);
-                }
-                player = value;
-                SetupPlayer(value);
-            }
-        }
+        // TODO move to radio menu
+        /*bool delayRadioText = false;
 
-        static void SetupPlayer(IAudioPlayer player)
-        {
-            player.IsCurrentPlayer = true;
-            player.IsPlayingChanged += ShowPlayerStatus;
-            player.StatusChanged += ShowPlayerStatus;
-        }
-
-        static void UnsetPlayer(IAudioPlayer player)
-        {
-            player.IsCurrentPlayer = false;
-            player.IsPlayingChanged -= ShowPlayerStatus;
-            player.StatusChanged -= ShowPlayerStatus;
-        }
-
-        static bool delayRadioText = false;
-
-        static void ShowPlayerStatus(IAudioPlayer player, bool isPlaying)
+        void ShowPlayerStatus(IAudioPlayer player, bool isPlaying)
         {
             string s = TextWithIcon(isPlaying ? CharIcons.Play : CharIcons.Pause);
             ShowPlayerStatus(player, s);
         }
 
-        static void ShowPlayerStatus(IAudioPlayer player, string status, PlayerEvent playerEvent)
+        void ShowPlayerStatus(IAudioPlayer player, string status, PlayerEvent playerEvent)
         {
-            if (!IsCDCActive)
+            if (!IsEnabled)
             {
                 return;
             }
@@ -116,7 +77,7 @@ namespace imBMW.iBus.Devices.Emulators
             ShowPlayerStatus(player, status);
         }
 
-        static string TextWithIcon(string icon, string text = null)
+        string TextWithIcon(string icon, string text = null)
         {
             if (text == null)
             {
@@ -132,9 +93,9 @@ namespace imBMW.iBus.Devices.Emulators
             }
         }
 
-        static void ShowPlayerStatus(IAudioPlayer player, string status)
+        void ShowPlayerStatus(IAudioPlayer player, string status)
         {
-            if (!IsCDCActive)
+            if (!IsEnabled)
             {
                 return;
             }
@@ -151,88 +112,31 @@ namespace imBMW.iBus.Devices.Emulators
                 Radio.DisplayText(status, TextAlign.Center);
             }
             delayRadioText = false;
-        }
+        }*/
 
-        static void MultiFunctionSteeringWheel_ButtonPressed(MFLButton button)
-        {
-            if (!IsCDCActive)
-            {
-                return;
-            }
-            switch (button)
-            {
-                case MFLButton.Next:
-                    Next();
-                    break;
-                case MFLButton.Prev:
-                    Prev();
-                    break;
-                case MFLButton.RT:
-                    MFLRT();
-                    break;
-                case MFLButton.Dial:
-                    MFLDial();
-                    break;
-                case MFLButton.DialLong:
-                    MFLDialLong();
-                    break;
-            }
-        }
-
-        static void Play()
+        protected override void Play()
         {
             CancelStopDelay();
-            Player.Play();
+            base.Play();
         }
 
-        static void Pause()
+        protected override void Pause()
         {
             CancelStopDelay();
-            Player.Pause();
+            base.Pause();
         }
 
-        static void PlayPauseToggle()
+        protected override void PlayPauseToggle()
         {
             CancelStopDelay();
-            Player.PlayPauseToggle();
-        }
-
-        static void Next()
-        {
-            Player.Next();
-        }
-
-        static void Prev()
-        {
-            Player.Prev();
-        }
-
-        static void MFLRT()
-        {
-            Player.MFLRT();
-        }
-
-        static void MFLDial()
-        {
-            Player.MFLDial();
-        }
-
-        static void MFLDialLong()
-        {
-            Player.MFLDialLong();
-        }
-
-        static void RandomToggle()
-        {
-            bool rnd = Player.RandomToggle();
-            // TODO send rnd status to radio
+            base.PlayPauseToggle();
         }
 
         #endregion
 
         #region CD-changer emulation
 
-        static void CancelStopDelay()
+        void CancelStopDelay()
         {
             if (stopDelay != null)
             {
@@ -241,56 +145,47 @@ namespace imBMW.iBus.Devices.Emulators
             }
         }
 
-        public static bool IsCDCActive
+        protected override void OnIsEnabledChanged(bool isEnabled)
         {
-            get
+            //delayRadioText = true; // TODO move to radio menu
+            Player.PlayerHostState = isEnabled ? PlayerHostState.On : PlayerHostState.Off;
+            if (isEnabled)
             {
-                return isCDCActive;
-            }
-            private set
-            {
-                if (isCDCActive == value)
+                if (Player.IsPlaying)
                 {
-                    return;
-                }
-                isCDCActive = value;
-                delayRadioText = true;
-                player.PlayerHostState = isCDCActive ? PlayerHostState.On : PlayerHostState.Off;
-                if (isCDCActive)
-                {
-                    if (player.IsPlaying)
-                    {
-                        // Already playing - CDC turning off cancelled
-                        ShowPlayerStatus(player, player.IsPlaying);
-                    }
-                    else
-                    {
-                        Play();
-                    }
-
-                    if (announceThread.ThreadState != ThreadState.Suspended)
-                    {
-                        announceThread.Suspend();
-                    }
+                    // Already playing - CDC turning off cancelled
+                    //ShowPlayerStatus(player, player.IsPlaying); // TODO need it?
                 }
                 else
                 {
-                    CancelStopDelay();
-                    // Don't pause immediately - the radio can send "start play" command soon
-                    stopDelay = new Timer(delegate
-                    {
-                        Pause();
-
-                        if (announceThread.ThreadState == ThreadState.Suspended)
-                        {
-                            announceThread.Resume();
-                        }
-                    }, null, StopDelayMilliseconds, 0);
+                    Play();
                 }
+
+                if (announceThread.ThreadState != ThreadState.Suspended)
+                {
+                    announceThread.Suspend();
+                }
+            }
+
+            base.OnIsEnabledChanged(isEnabled);
+
+            if (!isEnabled)
+            {
+                CancelStopDelay();
+                // Don't pause immediately - the radio can send "start play" command soon
+                stopDelay = new Timer(delegate
+                {
+                    Pause();
+
+                    if (announceThread.ThreadState == ThreadState.Suspended)
+                    {
+                        announceThread.Resume();
+                    }
+                }, null, StopDelayMilliseconds, 0);
             }
         }
 
-        static void ProcessCDCMessage(Message m)
+        void ProcessCDCMessage(Message m)
         {
             if (m.Data.Compare(DataCurrentDiskTrackRequest))
             {
@@ -300,12 +195,12 @@ namespace imBMW.iBus.Devices.Emulators
             else if (m.Data.Compare(DataStartPlaying))
             {
                 Manager.EnqueueMessage(MessagePlayingDisk1Track1);
-                IsCDCActive = true;
+                IsEnabled = true;
                 m.ReceiverDescription = "Start playing";
             }
             else if (m.Data.Compare(DataStopPlaying))
             {
-                IsCDCActive = false;
+                IsEnabled = false;
                 m.ReceiverDescription = "Stop playing";
             }
             else if (m.Data.Compare(MessageRegistry.DataPollRequest))
@@ -327,9 +222,14 @@ namespace imBMW.iBus.Devices.Emulators
             }
             else if (m.Data.Compare(DataTurnOff))
             {
-                // TODO only with bmw business
+                // TODO show "splash" only with bmw business (not with BM)
                 //Radio.DisplayText("imBMW", TextAlign.Center);
                 m.ReceiverDescription = "Turn off";
+            }
+            else if (m.Data[0] == 0x38)
+            {
+                // TODO remove
+                Logger.Warning("Need response!!!");
             }
         }
 

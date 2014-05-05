@@ -50,6 +50,7 @@
     <Compile Include="Features\Menu\Screens\SettingsScreen.cs" />
     <Compile Include="iBus\DeviceAddress.cs" />
     <Compile Include="iBus\Devices\Emulators\BordmonitorAUX.cs" />
+    <Compile Include="iBus\Devices\Emulators\MediaEmulator.cs" />
     <Compile Include="iBus\Devices\Real\BodyModule.cs" />
     <Compile Include="iBus\Devices\Real\Bordmonitor.cs" />
     <Compile Include="iBus\Devices\Real\Immobiliser.cs" />

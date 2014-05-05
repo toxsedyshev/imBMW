@@ -34,7 +34,9 @@ namespace imBMW.iBus.Devices.Real
         public static Message MessageClearScreen   = new Message(DeviceAddress.Radio, DeviceAddress.GraphicsNavigationDriver, "Clear screen",   0x46, 0x0C);
         public static Message MessageDisableRadioMenu = new Message(DeviceAddress.GraphicsNavigationDriver, DeviceAddress.Radio, "Disable radio screen", 0x45, 0x02); // Thanks to RichardP (Intravee) for these two messages
         public static Message MessageEnableRadioMenu = new Message(DeviceAddress.GraphicsNavigationDriver, DeviceAddress.Radio, "Enable radio screen", 0x45, 0x00);
-        
+
+        public static byte[] DataRadioOn = new byte[] { 0x4A, 0xFF };
+        public static byte[] DataRadioOff = new byte[] { 0x4A, 0x00 };
         public static byte[] DataAUX = new byte[] { 0x23, 0x62, 0x10, 0x41, 0x55, 0x58, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20 };
         
         public static void ShowText(string s, BordmonitorFields field, byte index = 0, bool check = false)

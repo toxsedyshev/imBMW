@@ -14,6 +14,8 @@ using System.Text;
 using imBMW.Tools;
 using Microsoft.SPOT.IO;
 using System.IO;
+using imBMW.Features.Menu;
+using imBMW.iBus.Devices.Emulators;
 
 namespace imBMW.Devices.V2
 {
@@ -142,33 +144,22 @@ namespace imBMW.Devices.V2
 
             // Set iPod or Bluetooth as AUX or CDC-emulator
             player = new BluetoothOVC3860(Serial.COM2, sd != null ? sd + @"\contacts.vcf" : null);
+            //player = new iPodViaHeadset(Pin.PC2);
             
             Radio.Init();
             Logger.Info("Radio inited");
             if (Manager.FindDevice(DeviceAddress.OnBoardMonitor))
             {
-                iBus.Devices.Emulators.BordmonitorAUX.Init(player); //new Multimedia.iPodViaHeadset(Pin.PC2));
+                MediaEmulator emulator;
+                emulator = new BordmonitorAUX(player);
+                //emulator = new CDChanger(player);
+                BordmonitorMenu.Init(emulator);
                 Logger.Info("BordmonitorAUX inited");
-
-                // TODO remove to features
-                //BodyModule.UpdateBatteryVoltage();
-                Manager.AddMessageReceiverForSourceDevice(DeviceAddress.OnBoardMonitor, (m) =>
-                {
-                    if (!player.IsEnabled)
-                    {
-                        return;
-                    }
-                    if (m.Data[0] == 0x48 && m.Data[1] == 0x87) // TODO move to bordmonitor menu
-                    {
-                    }
-                    if (m.Data[0] == 0x48 && m.Data[1] == 0x88) // TODO move to bordmonitor menu
-                    {
-                    }
-                });
             }
             else
             {
-                iBus.Devices.Emulators.CDChanger.Init(player); //new Multimedia.iPodViaHeadset(Pin.PC2));
+                // TODO implement radio menu
+                //iBus.Devices.Emulators.CDChanger.Init(player);
                 Logger.Info("CDChanger emulator inited");
             }
             ShieldLED = new OutputPort(Pin.PA7, false);
@@ -189,28 +180,6 @@ namespace imBMW.Devices.V2
             SampleFeatures.Init();
             Logger.Info("Sample features inited");
 
-            /*iBus.Manager.AddMessageReceiverForSourceDevice(iBus.DeviceAddress.OnBoardMonitor, (m) =>
-            {
-                if (m.Data[0] == 0x48 && m.Data[1] == 0x81)
-                {
-                    BodyModule.LockDoors();
-                    //iBus.Manager.EnqueueMessage(new iBus.Message(iBus.DeviceAddress.CDChanger, iBus.DeviceAddress.Broadcast, 0x02, 0x01),
-                    //    new iBus.Message(iBus.DeviceAddress.CDChanger, iBus.DeviceAddress.Broadcast, 0x02, 0x00));
-                    //Thread.Sleep(100);
-                    //iBus.Manager.EnqueueMessage(new iBus.Message(iBus.DeviceAddress.OnBoardMonitor, iBus.DeviceAddress.GraphicsNavigationDriver, 0x49, 0x01));
-                    //iBus.Manager.EnqueueMessage(new iBus.Message(iBus.DeviceAddress.Radio, iBus.DeviceAddress.GraphicsNavigationDriver, 0x23, 0x62, 0x30, (byte)'A', (byte)'B'));
-                }
-            });*/
-
-            /*ISerialPort iBusPort2 = new SerialPortTH3122(Serial.COM2, Pin.PC1, true);
-            while (true)
-            {
-
-                Thread.Sleep(500);
-                iBusPort2.Write(new iBus.Message(iBus.DeviceAddress.Radio, iBus.DeviceAddress.GraphicsNavigationDriver, 0x23, 0x62, 0x30, (byte)'A', (byte)'B').Packet);
-                //iBus.Manager.EnqueueMessage(new iBus.Message(iBus.DeviceAddress.Radio, iBus.DeviceAddress.GraphicsNavigationDriver, 0x23, 0x62, 0x30, (byte)'A', (byte)'B'));
-            }*/
-
             blinkerTimer = new Timer((s) =>
             {
                 if (InstrumentClusterElectronics.CurrentIgnitionState == IgnitionState.Off && !blinkerOn)
@@ -220,8 +189,6 @@ namespace imBMW.Devices.V2
                 blinkerOn = !blinkerOn;
                 RefreshLEDs();
             }, null, 0, 3000);
-
-            //TestFlash();
 
             LED.Write(true);
             Thread.Sleep(50);
