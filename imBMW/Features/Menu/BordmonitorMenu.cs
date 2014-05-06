@@ -300,8 +300,9 @@ namespace imBMW.Features.Menu
                         NavigateAfterHome(BordcomputerScreen.Instance);
                         break;
                     case 0x20:
-                        m.ReceiverDescription = "BM button Sel - navigate player";
-                        NavigateAfterHome(HomeScreen.Instance.PlayerScreen);
+                        m.ReceiverDescription = "BM button Sel"; // - navigate player";
+                        // TODO fix in cdc mode
+                        //NavigateAfterHome(HomeScreen.Instance.PlayerScreen);
                         break;
                     case 0x30:
                         m.ReceiverDescription = "BM button Switch Screen";

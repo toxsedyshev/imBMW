@@ -16,6 +16,7 @@ using Microsoft.SPOT.IO;
 using System.IO;
 using imBMW.Features.Menu;
 using imBMW.iBus.Devices.Emulators;
+using imBMW.Features.Menu.Screens;
 
 namespace imBMW.Devices.V2
 {
@@ -76,6 +77,10 @@ namespace imBMW.Devices.V2
         static void Init()
         {
             LED = new OutputPort(Pin.PA8, false);
+
+            var version = "HW V2, FW V1.0";
+            SettingsScreen.Instance.Status = version;
+            Logger.Info(version);
 
             var sd = GetRootDirectory();
 
