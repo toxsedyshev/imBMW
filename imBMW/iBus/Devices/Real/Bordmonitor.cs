@@ -37,14 +37,15 @@ namespace imBMW.iBus.Devices.Real
 
         public static byte[] DataRadioOn = new byte[] { 0x4A, 0xFF };
         public static byte[] DataRadioOff = new byte[] { 0x4A, 0x00 };
+        public static byte[] DataShowTitle = new byte[] { 0x23, 0x62, 0x10 };
         public static byte[] DataAUX = new byte[] { 0x23, 0x62, 0x10, 0x41, 0x55, 0x58, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20 };
         
-        public static void ShowText(string s, BordmonitorFields field, byte index = 0, bool check = false)
+        public static Message ShowText(string s, BordmonitorFields field, byte index = 0, bool check = false)
         {
-            ShowText(s, TextAlign.Left, field, index, check);
+            return ShowText(s, TextAlign.Left, field, index, check);
         }
 
-        public static void ShowText(string s, TextAlign align, BordmonitorFields field, byte index = 0, bool check = false)
+        public static Message ShowText(string s, TextAlign align, BordmonitorFields field, byte index = 0, bool check = false)
         {
             int len;
             byte[] data;
@@ -52,14 +53,21 @@ namespace imBMW.iBus.Devices.Real
             {
                 case BordmonitorFields.Title:
                     len = 11;
-                    data = new byte[] { 0x23, 0x62, 0x10 };
+                    data = DataShowTitle;
                     break;
                 case BordmonitorFields.Status:
                     len = 11;
                     data = new byte[] { 0xA5, 0x62, 0x01, 0x06 };
                     break;
                 case BordmonitorFields.Item:
-                    len = 23;
+                    if (check)
+                    {
+                        len = 14;
+                    }
+                    else
+                    {
+                        len = 23;
+                    }
                     index += 0x40;
                     /*if (index == 0x47)
                     {
@@ -75,10 +83,11 @@ namespace imBMW.iBus.Devices.Real
             data.PasteASCII(s.UTF8ToASCII(), offset, len);
             if (check)
             {
-                // TODO check 24 chars (23 + star)
                 data[data.Length - 1] = 0x2A;
             }
-            Manager.EnqueueMessage(new Message(iBus.DeviceAddress.Radio, iBus.DeviceAddress.GraphicsNavigationDriver, "Show message on BM (" + index.ToHex() + "): " + s, data));
+            var m = new Message(iBus.DeviceAddress.Radio, iBus.DeviceAddress.GraphicsNavigationDriver, "Show message on BM (" + index.ToHex() + "): " + s, data);
+            Manager.EnqueueMessage(m);
+            return m;
         }
 
         public static void RefreshScreen()

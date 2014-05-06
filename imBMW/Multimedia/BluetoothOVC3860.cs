@@ -255,6 +255,7 @@ namespace imBMW.Multimedia
                 return;
             }
 
+            contactsScreen.Status = Localization.Current.Refreshing;
             contactsScreen.IsUpdateSuspended = true;
             var i = 2;
             foreach (var c in contacts)
@@ -263,6 +264,7 @@ namespace imBMW.Multimedia
                 contactsScreen.AddItem(new MenuItem(contact.Name, it => CallPhone(contact.Phones)), i++); // TODO show phones
             }
             contactsScreen.IsUpdateSuspended = false;
+            contactsScreen.Status = "";
         }
 
         protected override void SetPlaying(bool value)
@@ -538,17 +540,17 @@ namespace imBMW.Multimedia
                     IsPlaying = false;
                     break;
                 case "MA":
-                    if (IsEnabled && lastCommand == "MI")
+                    /*if (IsEnabled && lastCommand == "MI")
                     {
                         Play();
                     }
                     else
                     {
                         IsPlaying = false;
-                    }
+                    }*/
                     break;
                 case "MB":
-                    IsPlaying = true;
+                    //IsPlaying = true; // sent even when paused?
                     break;
                 case "MX":
                     Logger.Info("NextItems", "BT");
@@ -592,7 +594,7 @@ namespace imBMW.Multimedia
                     if (s.IsNumeric())
                     {
                         Logger.Info("Phone call: " + s, "BT");
-                        OnStatusChanged(s, PlayerEvent.Call);
+                        OnStatusChanged(s, PlayerEvent.IncomingCall);
                     }
                     else
                     {

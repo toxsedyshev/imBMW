@@ -16,7 +16,7 @@ namespace imBMW.Multimedia
         Current,
         Playing,
         Wireless,
-        Call,
+        IncomingCall,
         Text
     }
 

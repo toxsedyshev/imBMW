@@ -37,6 +37,7 @@ namespace imBMW.iBus.Devices.Real
         static Message MessageOpenTrunk = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Open trunk", 0x0C, 0x95, 0x01);
 
         static Message MessageLockDoors = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Lock doors", 0x0C, 0x4F, 0x01); // 0x0C, 0x97, 0x01
+        static Message MessageLockDriverDoor = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Lock driver door", 0x0C, 0x47, 0x01);
         static Message MessageUnlockDoors = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Unlock doors", 0x0C, 0x45, 0x01); // 0x0C, 0x03, 0x01
 
         //static Message MessageOpenWindows = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, 0x0C, 0x00, 0x65);
@@ -89,10 +90,6 @@ namespace imBMW.iBus.Devices.Real
                 else if (btn.HasBit(6)) // 0x4_
                 {
                     OnRemoteKeyButton(m, RemoteKeyButton.Trunk);
-                }
-                else
-                {
-                    m.ReceiverDescription = "Remote key unknown button " + btn.ToHex() + " press";
                 }
             }
             else if (m.Data.Length > 3 && m.Data[0] == 0xA0)
@@ -148,6 +145,7 @@ namespace imBMW.iBus.Devices.Real
         public static void LockDoors()
         {
             Manager.EnqueueMessage(MessageLockDoors);
+            Manager.EnqueueMessage(MessageLockDriverDoor);
         }
 
         public static void UnlockDoors()

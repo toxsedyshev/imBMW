@@ -68,6 +68,9 @@ namespace imBMW.iBus.Devices.Real
         public static sbyte TemperatureOutside { get; private set; }
         public static sbyte TemperatureCoolant { get; private set; }
 
+        static Message MessageGong1 = new Message(DeviceAddress.Radio, DeviceAddress.InstrumentClusterElectronics, "Gong 1", 0x23, 0x62, 0x30, 0x37, 0x08);
+        static Message MessageGong2 = new Message(DeviceAddress.Radio, DeviceAddress.InstrumentClusterElectronics, "Gong 2", 0x23, 0x62, 0x30, 0x37, 0x10);
+
         static InstrumentClusterElectronics()
         {
             TemperatureOutside = sbyte.MinValue;
@@ -110,6 +113,16 @@ namespace imBMW.iBus.Devices.Real
                 OnTemperatureChanged((sbyte)m.Data[1], (sbyte)m.Data[2]);
                 m.ReceiverDescription = "Temperature. Outside " + TemperatureOutside + "°C, Coolant " + TemperatureCoolant + "°C";
             }
+        }
+
+        public static void Gong1()
+        {
+            Manager.EnqueueMessage(MessageGong1);
+        }
+
+        public static void Gong2()
+        {
+            Manager.EnqueueMessage(MessageGong2);
         }
 
         public static IgnitionState CurrentIgnitionState

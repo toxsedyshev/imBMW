@@ -19,13 +19,14 @@ namespace imBMW.iBus.Devices.Emulators
 
         static Message MessagePollResponse = new Message(DeviceAddress.CDChanger, DeviceAddress.Broadcast, 0x02, 0x00);
         static Message MessageAnnounce = new Message(DeviceAddress.CDChanger, DeviceAddress.Broadcast, 0x02, 0x01);
-        static Message MessagePlayingDisk1Track1 = new Message(DeviceAddress.CDChanger, DeviceAddress.Radio, "Playing D1 T1", 0x39, 0x00, 0x09, 0x00, 0x3F, 0x00, 0x01, 0x01);
-        static Message MessageStoppedDisk1Track1 = new Message(DeviceAddress.CDChanger, DeviceAddress.Radio, "Stopped D1 T1", 0x39, 0x00, 0x02, 0x00, 0x3F, 0x00, 0x01, 0x01);
+        static Message MessagePlayingDisk1Track1 = new Message(DeviceAddress.CDChanger, DeviceAddress.Radio, "Playing D1 T1", 0x39, 0x02, 0x09, 0x00, 0x3F, 0x00, 0x01, 0x01); // was 39 00 09
+        static Message MessageStoppedDisk1Track1 = new Message(DeviceAddress.CDChanger, DeviceAddress.Radio, "Stopped D1 T1", 0x39, 0x00, 0x02, 0x00, 0x3F, 0x00, 0x01, 0x01); // try 39 00 0C ?
+        static Message MessagePausedDisk1Track1  = new Message(DeviceAddress.CDChanger, DeviceAddress.Radio, "Paused D1 T1",  0x39, 0x01, 0x0C, 0x00, 0x3F, 0x00, 0x01, 0x01);
 
         static byte[] DataCurrentDiskTrackRequest = new byte[] { 0x38, 0x00, 0x00 };
-        static byte[] DataStopPlaying  = new byte[] { 0x38, 0x01, 0x00 };
-        static byte[] DataTurnOff      = new byte[] { 0x38, 0x02, 0x00 }; // TODO check with BM
-        static byte[] DataStartPlaying = new byte[] { 0x38, 0x03, 0x00 };
+        static byte[] DataStop  = new byte[] { 0x38, 0x01, 0x00 };
+        static byte[] DataPause = new byte[] { 0x38, 0x02, 0x00 };
+        static byte[] DataPlay  = new byte[] { 0x38, 0x03, 0x00 };
         static byte[] DataRandomPlay   = new byte[] { 0x38, 0x08, 0x01 };
 
         #endregion
@@ -189,17 +190,25 @@ namespace imBMW.iBus.Devices.Emulators
         {
             if (m.Data.Compare(DataCurrentDiskTrackRequest))
             {
-                Manager.EnqueueMessage(MessagePlayingDisk1Track1);
+                if (Player.IsPlaying)
+                {
+                    Manager.EnqueueMessage(MessagePlayingDisk1Track1);
+                }
+                else
+                {
+                    Manager.EnqueueMessage(MessagePausedDisk1Track1);
+                }
                 m.ReceiverDescription = "CD status request";
             }
-            else if (m.Data.Compare(DataStartPlaying))
+            else if (m.Data.Compare(DataPlay))
             {
                 Manager.EnqueueMessage(MessagePlayingDisk1Track1);
                 IsEnabled = true;
                 m.ReceiverDescription = "Start playing";
             }
-            else if (m.Data.Compare(DataStopPlaying))
+            else if (m.Data.Compare(DataStop))
             {
+                Manager.EnqueueMessage(MessageStoppedDisk1Track1);
                 IsEnabled = false;
                 m.ReceiverDescription = "Stop playing";
             }
@@ -212,19 +221,22 @@ namespace imBMW.iBus.Devices.Emulators
                 }
                 else
                 {
-                    Manager.EnqueueMessage(MessageStoppedDisk1Track1);
+                    Manager.EnqueueMessage(MessagePausedDisk1Track1);
                 }
             }
             else if (m.Data.Compare(DataRandomPlay))
             {
+                Manager.EnqueueMessage(MessagePlayingDisk1Track1);
                 RandomToggle();
                 m.ReceiverDescription = "Random toggle";
             }
-            else if (m.Data.Compare(DataTurnOff))
+            else if (m.Data.Compare(DataPause))
             {
+                //IsEnabled = false;
+                Manager.EnqueueMessage(MessagePausedDisk1Track1);
                 // TODO show "splash" only with bmw business (not with BM)
                 //Radio.DisplayText("imBMW", TextAlign.Center);
-                m.ReceiverDescription = "Turn off";
+                m.ReceiverDescription = "Pause";
             }
             else if (m.Data[0] == 0x38)
             {

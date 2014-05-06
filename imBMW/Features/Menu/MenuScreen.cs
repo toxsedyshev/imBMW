@@ -220,10 +220,6 @@ namespace imBMW.Features.Menu
                     return;
                 }
                 updateSuspended = value;
-                if (!value)
-                {
-                    OnUpdated();
-                }
             }
         }
 

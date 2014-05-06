@@ -102,6 +102,8 @@ namespace imBMW.Devices.V2
             iBus.Manager.Init(iBusPort);
             Logger.Info("iBus manager inited");
 
+            Message sent1 = null, sent2 = null; // light "buffer" for last 2 messages
+            bool isSent1 = false;
             iBus.Manager.BeforeMessageReceived += (e) =>
             {
                 LED.Write(Busy(true, 1));
@@ -121,7 +123,18 @@ namespace imBMW.Devices.V2
                 {
                     return;
                 }
-                Logger.Info(e.Message, "<<");
+                if (e.Message.ReceiverDescription == null)
+                {
+                    if (sent1 != null && sent1.Data.Compare(e.Message.Data))
+                    {
+                        e.Message.ReceiverDescription = sent1.ReceiverDescription;
+                    }
+                    else if (sent2 != null && sent2.Data.Compare(e.Message.Data))
+                    {
+                        e.Message.ReceiverDescription = sent2.ReceiverDescription;
+                    }
+                }
+                Logger.Info(e.Message, "< ");
                 /*if (e.Message.ReceiverDescription == null)
                 {
                     Logger.Info(ASCIIEncoding.GetString(e.Message.Data));
@@ -137,10 +150,26 @@ namespace imBMW.Devices.V2
             {
                 LED.Write(Busy(false, 2));
 #if DEBUG
-                Logger.Info(e.Message, ">>");
+                Logger.Info(e.Message, " >");
+                if (isSent1)
+                {
+                    sent1 = e.Message;
+                }
+                else
+                {
+                    sent2 = e.Message;
+                }
+                isSent1 = !isSent1;
 #endif
             };
             Logger.Info("iBus manager events subscribed");
+
+            // Enable comfort features
+            //Features.Comfort.AllFeaturesEnabled = true;
+            Features.Comfort.AutoLockDoors = true;
+            Features.Comfort.AutoUnlockDoors = true;
+            Features.Comfort.AutoCloseWindows = true;
+            Logger.Info("Comfort features inited");
 
             // Set iPod or Bluetooth as AUX or CDC-emulator
             player = new BluetoothOVC3860(Serial.COM2, sd != null ? sd + @"\contacts.vcf" : null);
@@ -168,19 +197,19 @@ namespace imBMW.Devices.V2
                 ShieldLED.Write(s);
                 RefreshLEDs();
             };
+            player.StatusChanged += (p, s, e) =>
+            {
+                if (e == PlayerEvent.IncomingCall && !p.IsEnabled)
+                {
+                    InstrumentClusterElectronics.Gong1();
+                }
+            };
             Logger.Info("Player events subscribed");
-
-            // Enable comfort features
-            //Features.Comfort.AllFeaturesEnabled = true;
-            Features.Comfort.AutoLockDoors = true;
-            Features.Comfort.AutoUnlockDoors = true;
-            Features.Comfort.AutoCloseWindows = true;
-            Logger.Info("Comfort features inited");
 
             SampleFeatures.Init();
             Logger.Info("Sample features inited");
 
-            blinkerTimer = new Timer((s) =>
+            /*blinkerTimer = new Timer((s) =>
             {
                 if (InstrumentClusterElectronics.CurrentIgnitionState == IgnitionState.Off && !blinkerOn)
                 {
@@ -188,7 +217,7 @@ namespace imBMW.Devices.V2
                 }
                 blinkerOn = !blinkerOn;
                 RefreshLEDs();
-            }, null, 0, 3000);
+            }, null, 0, 3000);*/
 
             LED.Write(true);
             Thread.Sleep(50);
@@ -305,6 +334,7 @@ namespace imBMW.Devices.V2
             {
                 // store errors to arraylist
                 error = true;
+                RefreshLEDs();
             }
             Debug.Print(args.LogString);
         }

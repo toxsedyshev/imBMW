@@ -250,10 +250,17 @@ namespace imBMW.Features.Menu
                 return;
             }
 
-            if (m.Data.Compare(Bordmonitor.DataAUX))
+            /*if (m.Data.Compare(Bordmonitor.DataAUX))
             {
                 IsScreenSwitched = false;
                 UpdateScreen(); // TODO prevent flickering
+                return;
+            }*/
+
+            if (m.Data.StartsWith(Bordmonitor.DataShowTitle) && (lastTitle == null || !lastTitle.Data.Compare(m.Data)))
+            {
+                IsScreenSwitched = false;
+                disableRadioMenu = true;
                 return;
             }
         }
@@ -284,15 +291,15 @@ namespace imBMW.Features.Menu
                 switch (m.Data[1])
                 {
                     case 0x14: // <>
-                        m.ReceiverDescription = "BM button <>";
+                        m.ReceiverDescription = "BM button <> - navigate home";
                         NavigateHome();
                         break;
                     case 0x07:
-                        m.ReceiverDescription = "BM button Clock";
+                        m.ReceiverDescription = "BM button Clock - navigate BC";
                         NavigateAfterHome(BordcomputerScreen.Instance);
                         break;
                     case 0x20:
-                        m.ReceiverDescription = "BM button Sel";
+                        m.ReceiverDescription = "BM button Sel - navigate player";
                         NavigateAfterHome(HomeScreen.Instance.PlayerScreen);
                         break;
                     case 0x30:
@@ -310,23 +317,37 @@ namespace imBMW.Features.Menu
                         m.ReceiverDescription = "BM button Tone";
                         Bordmonitor.EnableRadioMenu(); // TODO test [and remove]
                         break;
+                    case 0x10:
+                        m.ReceiverDescription = "BM Button < prev track";
+                        mediaEmulator.Player.Prev();
+                        break;
+                    case 0x00:
+                        m.ReceiverDescription = "BM Button > next track";
+                        mediaEmulator.Player.Next();
+                        break;
                 }
                 return;
             }
         }
 
-        //Message resendMessage;
+        bool isDrawing;
+        Message lastTitle;
 
         protected override void DrawScreen()
         {
+            if (isDrawing)
+            {
+                return; // TODO test
+            }
             lock (drawLock)
             {
+                isDrawing = true;
                 skipRefreshScreen = true;
                 skipClearTillRefresh = true; // TODO test no screen items lost
                 base.DrawScreen();
 
                 Bordmonitor.ShowText(CurrentScreen.Status ?? String.Empty, BordmonitorFields.Status);
-                Bordmonitor.ShowText(CurrentScreen.Title ?? String.Empty, BordmonitorFields.Title);
+                lastTitle = Bordmonitor.ShowText(CurrentScreen.Title ?? String.Empty, BordmonitorFields.Title);
                 for (byte i = 0; i < 10; i++)
                 {
                     var index = GetItemIndex(i, true);
@@ -337,6 +358,7 @@ namespace imBMW.Features.Menu
                 skipRefreshScreen = true;
                 skipClearTillRefresh = true;
                 Bordmonitor.RefreshScreen();
+                isDrawing = false;
             }
         }
 

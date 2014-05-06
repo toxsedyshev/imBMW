@@ -99,7 +99,7 @@ namespace imBMW.Features.Menu
         {
             navigationStack.Clear();
             navigationStack.Push(homeScreen);
-            Navigate(screen);
+            CurrentScreen = screen;
         }
 
         public MenuScreen CurrentScreen
@@ -110,7 +110,7 @@ namespace imBMW.Features.Menu
             }
             set
             {
-                if (currentScreen == value)
+                if (currentScreen == value || value == null)
                 {
                     return;
                 }
