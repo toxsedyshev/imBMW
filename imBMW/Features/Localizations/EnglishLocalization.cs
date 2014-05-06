@@ -42,7 +42,7 @@ namespace imBMW.Features.Localizations
 
         public override string Revs
         {
-            get { return "Revs"; }
+            get { return "RPM"; }
         }
 
         public override string Voltage
