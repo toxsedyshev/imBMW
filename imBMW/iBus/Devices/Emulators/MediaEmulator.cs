@@ -37,13 +37,26 @@ namespace imBMW.iBus.Devices.Emulators
 
         public event MediaEmulatorEnabledEventHandler IsEnabledChanged;
 
-        protected virtual void OnIsEnabledChanged(bool isEnabled)
+        protected virtual void OnIsEnabledChanged(bool isEnabled, bool fire = true)
+        {
+            if (fire)
+            {
+                FireIsEnabledChanged(isEnabled);
+            }
+        }
+
+        protected void FireIsEnabledChanged(bool isEnabled)
         {
             var e = IsEnabledChanged;
             if (e != null)
             {
                 e(this, isEnabled);
             }
+        }
+
+        protected void FireIsEnabledChanged()
+        {
+            FireIsEnabledChanged(IsEnabled);
         }
 
         public IAudioPlayer Player

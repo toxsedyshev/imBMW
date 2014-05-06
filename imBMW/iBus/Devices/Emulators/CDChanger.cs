@@ -146,7 +146,7 @@ namespace imBMW.iBus.Devices.Emulators
             }
         }
 
-        protected override void OnIsEnabledChanged(bool isEnabled)
+        protected override void OnIsEnabledChanged(bool isEnabled, bool fire = true)
         {
             //delayRadioText = true; // TODO move to radio menu
             Player.PlayerHostState = isEnabled ? PlayerHostState.On : PlayerHostState.Off;
@@ -168,7 +168,7 @@ namespace imBMW.iBus.Devices.Emulators
                 }
             }
 
-            base.OnIsEnabledChanged(isEnabled);
+            base.OnIsEnabledChanged(isEnabled, isEnabled); // fire only if enabled
 
             if (!isEnabled)
             {
@@ -176,6 +176,7 @@ namespace imBMW.iBus.Devices.Emulators
                 // Don't pause immediately - the radio can send "start play" command soon
                 stopDelay = new Timer(delegate
                 {
+                    FireIsEnabledChanged();
                     Pause();
 
                     if (announceThread.ThreadState == ThreadState.Suspended)

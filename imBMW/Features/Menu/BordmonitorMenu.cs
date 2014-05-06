@@ -261,6 +261,7 @@ namespace imBMW.Features.Menu
             {
                 IsScreenSwitched = false;
                 disableRadioMenu = true;
+                UpdateScreen();
                 return;
             }
         }

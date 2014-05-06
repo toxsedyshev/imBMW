@@ -86,7 +86,7 @@ namespace imBMW.Tools
             return str == null || str.Length == 0;
         }
 
-        public static bool IsNumeric(this string str, bool positive = true, bool integer = true)
+        public static bool IsNumeric(this string str, bool positiveOnly = true, bool integerOnly = true)
         {
             if (IsNullOrEmpty(str))
             {
@@ -96,11 +96,15 @@ namespace imBMW.Tools
             {
                 if (!c.IsNumeric())
                 {
-                    if (c == '.' && !integer)
+                    if (c == '+')
                     {
                         continue;
                     }
-                    if (c == '-' && !positive)
+                    if (c == '.' && !integerOnly)
+                    {
+                        continue;
+                    }
+                    if (c == '-' && !positiveOnly)
                     {
                         continue;
                     }

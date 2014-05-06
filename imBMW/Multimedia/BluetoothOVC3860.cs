@@ -498,6 +498,9 @@ namespace imBMW.Multimedia
             }
         }
 
+        const int PlayAfterConnectMilliseconds = 1000;
+        Timer playAfterConnectTimer;
+
         void ProcessBTNotification(string s)
         {
             switch (s)
@@ -565,7 +568,10 @@ namespace imBMW.Multimedia
                     SendCommand("MI"); // conn av
                     if (IsEnabled)
                     {
-                        //Play(); // TODO move to ProcessOK
+                        playAfterConnectTimer = new Timer(delegate
+                        {
+                            Play();
+                        }, null, PlayAfterConnectMilliseconds, 0);
                     }
                     break;
                 case "II":

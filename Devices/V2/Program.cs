@@ -206,8 +206,8 @@ namespace imBMW.Devices.V2
             };
             Logger.Info("Player events subscribed");
 
-            SampleFeatures.Init();
-            Logger.Info("Sample features inited");
+            //SampleFeatures.Init();
+            //Logger.Info("Sample features inited");
 
             /*blinkerTimer = new Timer((s) =>
             {

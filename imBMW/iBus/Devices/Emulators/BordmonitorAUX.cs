@@ -61,7 +61,7 @@ namespace imBMW.iBus.Devices.Emulators
             IsEnabled = IsAUXSelected && IsRadioActive;
         }
 
-        protected override void OnIsEnabledChanged(bool isEnabled)
+        protected override void OnIsEnabledChanged(bool isEnabled, bool fire = true)
         {
             if (isEnabled)
             {
