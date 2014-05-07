@@ -37,7 +37,7 @@ namespace imBMW.Features.Menu
             Manager.AddMessageReceiverForDestinationDevice(DeviceAddress.Radio, ProcessToRadioMessage);
         }
 
-        public static void Init(MediaEmulator mediaEmulator)
+        public static BordmonitorMenu Init(MediaEmulator mediaEmulator)
         {
             if (instance != null)
             {
@@ -45,6 +45,7 @@ namespace imBMW.Features.Menu
                 throw new Exception("Already inited");
             }
             instance = new BordmonitorMenu(mediaEmulator);
+            return instance;
         }
 
         #region Player items

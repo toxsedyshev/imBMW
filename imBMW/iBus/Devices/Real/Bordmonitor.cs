@@ -39,7 +39,9 @@ namespace imBMW.iBus.Devices.Real
         public static byte[] DataRadioOff = new byte[] { 0x4A, 0x00 };
         public static byte[] DataShowTitle = new byte[] { 0x23, 0x62, 0x10 };
         public static byte[] DataAUX = new byte[] { 0x23, 0x62, 0x10, 0x41, 0x55, 0x58, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20 };
-        
+
+        public static bool MK2Mode { get; set; }
+
         public static Message ShowText(string s, BordmonitorFields field, byte index = 0, bool check = false)
         {
             return ShowText(s, TextAlign.Left, field, index, check);
@@ -60,7 +62,7 @@ namespace imBMW.iBus.Devices.Real
                     data = new byte[] { 0xA5, 0x62, 0x01, 0x06 };
                     break;
                 case BordmonitorFields.Item:
-                    if (check)
+                    if (check) // TODO test MK2 length
                     {
                         len = 14;
                     }
@@ -73,7 +75,14 @@ namespace imBMW.iBus.Devices.Real
                     {
                         index = 0x7;
                     }*/
-                    data = new byte[] { 0x21, 0x60, 0x00, (byte)index };
+                    if (MK2Mode)
+                    {
+                        data = new byte[] { 0xA5, 0x62, 0x00, (byte)index };
+                    }
+                    else
+                    {
+                        data = new byte[] { 0x21, 0x60, 0x00, (byte)index };
+                    }
                     break;
                 default:
                     throw new Exception("TODO");

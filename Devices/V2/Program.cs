@@ -187,6 +187,8 @@ namespace imBMW.Devices.V2
                 MediaEmulator emulator;
                 emulator = new BordmonitorAUX(player);
                 //emulator = new CDChanger(player);
+                //MenuScreen.MaxItemsCount = 6;
+                //Bordmonitor.MK2Mode = true;
                 BordmonitorMenu.Init(emulator);
                 Logger.Info("BordmonitorAUX inited");
             }

@@ -38,6 +38,13 @@ namespace imBMW.Features.Menu
             Items = new ArrayList();
         }
 
+        static MenuScreen()
+        {
+            MaxItemsCount = 10;
+        }
+
+        public static int MaxItemsCount { get; set; } // TODO refactor
+
         public MenuScreenGetTextHandler TitleCallback { get; set; }
 
         public string Title
@@ -99,10 +106,10 @@ namespace imBMW.Features.Menu
 
         public void AddItem(MenuItem menuItem, int index = -1)
         {
-            if (index > 9 || index < 0 && ItemsCount == 10)
+            if (index >= MaxItemsCount || index < 0 && ItemsCount == MaxItemsCount)
             {
                 Logger.Error("Can't add screen item \"" + menuItem + "\" with index=" + index + ", count=" + ItemsCount);
-                index = 9;
+                index = MaxItemsCount - 1;
             }
             if (index < 0)
             {

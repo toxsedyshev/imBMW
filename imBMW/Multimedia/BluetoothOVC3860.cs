@@ -221,16 +221,18 @@ namespace imBMW.Multimedia
             return screen;
         }
 
-        const byte contactsPerPage = 7;
+        int contactsPerPage = 7;
         int offset = 0;
         MenuScreen contactsScreen;
 
         protected MenuScreen CreateContactsScreen()
         {
+            contactsPerPage = MenuScreen.MaxItemsCount - 3;
+
             contactsScreen = new MenuScreen(s => Localization.Current.Contacts);
             contactsScreen.AddItem(new MenuItem(i => "< " + Localization.Current.PrevItems, i => { offset -= contactsPerPage; SetContactsScreenItems(); }), 0); // TODO navigate
             contactsScreen.AddItem(new MenuItem(i => Localization.Current.NextItems + " >", i => { offset += contactsPerPage; SetContactsScreenItems(); }), 1); // TODO test, fix and make 1
-            contactsScreen.AddBackButton(9);
+            contactsScreen.AddBackButton(MenuScreen.MaxItemsCount - 1);
 
             contactsScreen.NavigatedTo += s =>
             {
@@ -247,7 +249,7 @@ namespace imBMW.Multimedia
             {
                 offset = 0;
             }
-            var contacts = GetContacts((uint)offset, contactsPerPage);
+            var contacts = GetContacts((uint)offset, (uint)contactsPerPage);
             if (contacts.Count == 0 && offset > 0)
             {
                 offset = 0;
