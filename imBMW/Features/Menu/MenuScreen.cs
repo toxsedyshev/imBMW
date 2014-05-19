@@ -1,5 +1,4 @@
 using System;
-using Microsoft.SPOT;
 using System.Collections;
 using imBMW.Tools;
 
@@ -13,10 +12,10 @@ namespace imBMW.Features.Menu
 
     public class MenuScreen
     {
-        string title;
-        string status;
-        bool updateSuspended;
-        MenuBase parentMenu;
+        string _title;
+        string _status;
+        bool _updateSuspended;
+        MenuBase _parentMenu;
 
         public MenuScreen(string title = null)
             : this()
@@ -53,17 +52,17 @@ namespace imBMW.Features.Menu
             {
                 if (TitleCallback != null)
                 {
-                    title = TitleCallback(this);
+                    _title = TitleCallback(this);
                 }
-                return title;
+                return _title;
             }
             set
             {
-                if (title == value)
+                if (_title == value)
                 {
                     return;
                 }
-                title = value;
+                _title = value;
                 OnUpdated();
             }
         }
@@ -72,15 +71,15 @@ namespace imBMW.Features.Menu
         {
             get
             {
-                return status;
+                return _status;
             }
             set
             {
-                if (status == value)
+                if (_status == value)
                 {
                     return;
                 }
-                status = value;
+                _status = value;
                 OnUpdated();
             }
         }
@@ -148,15 +147,15 @@ namespace imBMW.Features.Menu
 
         public virtual bool OnNavigatedTo(MenuBase menu)
         {
-            if (parentMenu == menu)
+            if (_parentMenu == menu)
             {
                 return false;
             }
-            if (parentMenu != null)
+            if (_parentMenu != null)
             {
-                throw new Exception("Already navigated to screen " + this + " in another menu " + parentMenu + ". Can't navigate in " + menu);
+                throw new Exception("Already navigated to screen " + this + " in another menu " + _parentMenu + ". Can't navigate in " + menu);
             }
-            parentMenu = menu;
+            _parentMenu = menu;
 
             var e = NavigatedTo;
             if (e != null)
@@ -169,9 +168,9 @@ namespace imBMW.Features.Menu
 
         public virtual bool OnNavigatedFrom(MenuBase menu)
         {
-            if (parentMenu == menu)
+            if (_parentMenu == menu)
             {
-                parentMenu = null;
+                _parentMenu = null;
 
                 var e = NavigatedFrom;
                 if (e != null)
@@ -181,9 +180,9 @@ namespace imBMW.Features.Menu
 
                 return true;
             }
-            if (parentMenu != null)
+            if (_parentMenu != null)
             {
-                throw new Exception("Navigated to screen " + this + " in another menu " + parentMenu + ". Can't navigate from in " + menu);
+                throw new Exception("Navigated to screen " + this + " in another menu " + _parentMenu + ". Can't navigate from in " + menu);
             }
             return false;
         }
@@ -207,7 +206,7 @@ namespace imBMW.Features.Menu
         {
             get
             {
-                return parentMenu != null;
+                return _parentMenu != null;
             }
         }
 
@@ -218,15 +217,11 @@ namespace imBMW.Features.Menu
         {
             get
             {
-                return updateSuspended;
+                return _updateSuspended;
             }
             set
             {
-                if (updateSuspended == value)
-                {
-                    return;
-                }
-                updateSuspended = value;
+                _updateSuspended = value;
             }
         }
 
@@ -260,7 +255,7 @@ namespace imBMW.Features.Menu
 
         protected void OnUpdated()
         {
-            if (updateSuspended)
+            if (_updateSuspended)
             {
                 return;
             }

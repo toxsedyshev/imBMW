@@ -1,5 +1,4 @@
 using System;
-using Microsoft.SPOT;
 using imBMW.Tools;
 
 namespace imBMW.iBus.Devices.Real
@@ -35,10 +34,10 @@ namespace imBMW.iBus.Devices.Real
         public static Message MessageDisableRadioMenu = new Message(DeviceAddress.GraphicsNavigationDriver, DeviceAddress.Radio, "Disable radio menu", 0x45, 0x02); // Thanks to RichardP (Intravee) for these two messages
         public static Message MessageEnableRadioMenu = new Message(DeviceAddress.GraphicsNavigationDriver, DeviceAddress.Radio, "Enable radio menu", 0x45, 0x00);
 
-        public static byte[] DataRadioOn = new byte[] { 0x4A, 0xFF };
-        public static byte[] DataRadioOff = new byte[] { 0x4A, 0x00 };
-        public static byte[] DataShowTitle = new byte[] { 0x23, 0x62, 0x10 };
-        public static byte[] DataAUX = new byte[] { 0x23, 0x62, 0x10, 0x41, 0x55, 0x58, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20 };
+        public static byte[] DataRadioOn = { 0x4A, 0xFF };
+        public static byte[] DataRadioOff = { 0x4A, 0x00 };
+        public static byte[] DataShowTitle = { 0x23, 0x62, 0x10 };
+        public static byte[] DataAUX = { 0x23, 0x62, 0x10, 0x41, 0x55, 0x58, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20 };
 
         public static bool MK2Mode { get; set; }
 
@@ -62,27 +61,14 @@ namespace imBMW.iBus.Devices.Real
                     data = new byte[] { 0xA5, 0x62, 0x01, 0x06 };
                     break;
                 case BordmonitorFields.Item:
-                    if (check) // TODO test MK2 length
-                    {
-                        len = 14;
-                    }
-                    else
-                    {
-                        len = 23;
-                    }
+                    // TODO test MK2 length
+                    len = check ? 14 : 23;
                     index += 0x40;
                     /*if (index == 0x47)
                     {
                         index = 0x7;
                     }*/
-                    if (MK2Mode)
-                    {
-                        data = new byte[] { 0xA5, 0x62, 0x00, (byte)index };
-                    }
-                    else
-                    {
-                        data = new byte[] { 0x21, 0x60, 0x00, (byte)index };
-                    }
+                    data = MK2Mode ? new byte[] { 0xA5, 0x62, 0x00, index } : new byte[] { 0x21, 0x60, 0x00, index };
                     break;
                 default:
                     throw new Exception("TODO");
@@ -94,7 +80,7 @@ namespace imBMW.iBus.Devices.Real
             {
                 data[data.Length - 1] = 0x2A;
             }
-            var m = new Message(iBus.DeviceAddress.Radio, iBus.DeviceAddress.GraphicsNavigationDriver, "Show message on BM (" + index.ToHex() + "): " + s, data);
+            var m = new Message(DeviceAddress.Radio, DeviceAddress.GraphicsNavigationDriver, "Show message on BM (" + index.ToHex() + "): " + s, data);
             Manager.EnqueueMessage(m);
             return m;
         }

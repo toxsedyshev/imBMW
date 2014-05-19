@@ -1,5 +1,3 @@
-using System;
-using Microsoft.SPOT;
 using imBMW.iBus.Devices.Real;
 using System.Threading;
 using imBMW.Tools;
@@ -12,62 +10,63 @@ namespace imBMW.Features
         enum Command
         {
             FullCloseWindows,
-            FullOpenWindows
+            FullOpenWindows,
+			UnlockDoors
         }
         #endregion
 
-        static QueueThreadWorker commands;
+        static readonly QueueThreadWorker Commands;
 
-        static bool needLockDoors = true;
-        static bool needUnlockDoors = false;
-        static bool needComfortClose = true;
+        static bool _needLockDoors = true;
+        static bool _needUnlockDoors;
+        static bool _needComfortClose = true;
 
         static Comfort()
         {
-            commands = new QueueThreadWorker(ProcessCommand);
+            Commands = new QueueThreadWorker(ProcessCommand);
 
-            InstrumentClusterElectronics.SpeedRPMChanged += (e) =>
+            InstrumentClusterElectronics.SpeedRPMChanged += e =>
             {
-                if (needLockDoors && e.Speed > DoorsLockSpeed)
+                if (_needLockDoors && e.Speed > DoorsLockSpeed)
                 {
                     if (AutoLockDoors)
                     {
                         BodyModule.LockDoors();
                     }
-                    needLockDoors = false;
-                    needUnlockDoors = true;
+                    _needLockDoors = false;
+                    _needUnlockDoors = true;
                 }
                 if (e.Speed == 0)
                 {
-                    needLockDoors = true;
+                    _needLockDoors = true;
                 }
             };
-            InstrumentClusterElectronics.IgnitionStateChanged += (e) =>
+            InstrumentClusterElectronics.IgnitionStateChanged += e =>
             {
-                if (!needComfortClose 
+                if (!_needComfortClose 
                     && e.CurrentIgnitionState != IgnitionState.Off 
                     && e.PreviousIgnitionState == IgnitionState.Off)
                 {
-                    needComfortClose = true;
+                    _needComfortClose = true;
                 }
-                if (needUnlockDoors && e.CurrentIgnitionState == IgnitionState.Off)
+                if (_needUnlockDoors && e.CurrentIgnitionState == IgnitionState.Off)
                 {
                     if (AutoUnlockDoors)
                     {
-                        BodyModule.UnlockDoors();
+						Commands.Enqueue(Command.UnlockDoors);
                     }
-                    needUnlockDoors = false;
-                    needLockDoors = true;
+                    _needUnlockDoors = false;
+                    _needLockDoors = true;
                 }
             };
-            BodyModule.RemoteKeyButtonPressed += (e) =>
+            BodyModule.RemoteKeyButtonPressed += e =>
             {
-                if (e.Button == RemoteKeyButton.Lock && needComfortClose)
+                if (e.Button == RemoteKeyButton.Lock && _needComfortClose)
                 {
-                    needComfortClose = false;
+                    _needComfortClose = false;
                     if (AutoCloseWindows)
                     {
-                        commands.Enqueue(Command.FullCloseWindows);
+                        Commands.Enqueue(Command.FullCloseWindows);
                     }
                     if (AutoCloseSunroof)
                     {
@@ -108,6 +107,11 @@ namespace imBMW.Features
                     Thread.Sleep(3000);
                     BodyModule.OpenWindows();
                     break;
+				case Command.UnlockDoors:
+					BodyModule.UnlockDoors();
+					Thread.Sleep(1000);
+					BodyModule.UnlockDoors();
+		            break;
             }
         }
 
@@ -154,11 +158,11 @@ namespace imBMW.Features
         {
             get
             {
-                return needComfortClose;
+                return _needComfortClose;
             }
             set
             {
-                needComfortClose = value;
+                _needComfortClose = value;
             }
         }
 
@@ -169,12 +173,12 @@ namespace imBMW.Features
         {
             set
             {
-                Features.Comfort.AutoLockDoors = value;
-                Features.Comfort.AutoUnlockDoors = value;
-                Features.Comfort.AutoCloseWindows = value;
-                Features.Comfort.AutoCloseSunroof = value;
-                Features.Comfort.AutoFoldMirrors = value;
-                Features.Comfort.AutoUnfoldMirrors = value;
+                AutoLockDoors = value;
+                AutoUnlockDoors = value;
+                AutoCloseWindows = value;
+                AutoCloseSunroof = value;
+                AutoFoldMirrors = value;
+                AutoUnfoldMirrors = value;
             }
         }
     }

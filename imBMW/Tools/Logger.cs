@@ -1,5 +1,4 @@
 using System;
-using Microsoft.SPOT;
 using imBMW.iBus;
 
 namespace imBMW.Tools
@@ -19,8 +18,8 @@ namespace imBMW.Tools
         public readonly String Message;
         public readonly String LogString;
         public readonly LogPriority Priority;
-        public readonly Exception Exception;
-        public readonly iBus.Message iBusMessage;
+        //public readonly Exception Exception;
+        //public readonly Message iBusMessage;
         public readonly String PriorityTitle;
 
         public LoggerArgs(LogPriority priority, string message, string priorityTitle = null)
@@ -81,7 +80,7 @@ namespace imBMW.Tools
             Log(LogPriority.Info, message, priorityTitle);
         }
 
-        public static void Info(iBus.Message message, string priorityTitle = null)
+        public static void Info(Message message, string priorityTitle = null)
         {
             Log(LogPriority.Info, message.ToPrettyString(true), priorityTitle);
         }
@@ -91,7 +90,7 @@ namespace imBMW.Tools
             Log(LogPriority.Warning, message, priorityTitle);
         }
 
-        public static void Warning(iBus.Message message, string priorityTitle = null)
+        public static void Warning(Message message, string priorityTitle = null)
         {
             Log(LogPriority.Warning, message.ToPrettyString(true), priorityTitle);
         }

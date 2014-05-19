@@ -1,8 +1,3 @@
-using System;
-using Microsoft.SPOT;
-using System.IO.Ports;
-using Microsoft.SPOT.Hardware;
-
 namespace System.IO.Ports
 {
     public delegate void BusyChangedEventHandler(bool busy);

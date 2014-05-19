@@ -1,5 +1,4 @@
 using System;
-using System.Text;
 using imBMW.Tools;
 
 namespace imBMW.iBus
@@ -9,18 +8,18 @@ namespace imBMW.iBus
         public const int PacketLengthMin = 5;
         public const int PacketLengthMax = 64;
 
-        byte source;
-        byte destination;
-        byte[] data;
-        byte check;
+        byte _source;
+        byte _destination;
+        byte[] _data;
+        byte _check;
 
-        byte[] packet;
-        byte packetLength;
-        string packetDump;
-        string dataDump;
-        DeviceAddress sourceDevice = DeviceAddress.Unset;
-        DeviceAddress destinationDevice = DeviceAddress.Unset;
-        PerformanceInfo performanceInfo;
+        byte[] _packet;
+        byte _packetLength;
+        string _packetDump;
+        string _dataDump;
+        DeviceAddress _sourceDevice = DeviceAddress.Unset;
+        DeviceAddress _destinationDevice = DeviceAddress.Unset;
+        PerformanceInfo _performanceInfo;
 
         public Message(DeviceAddress source, DeviceAddress destination, params byte[] data)
             : this(source, destination, null, data)
@@ -37,9 +36,9 @@ namespace imBMW.iBus
             {
                 throw new ArgumentException("Wrong destination device");
             }
-            init((byte)source, (byte)destination, data, description);
-            sourceDevice = source;
-            destinationDevice = destination;
+            Init((byte)source, (byte)destination, data, description);
+            _sourceDevice = source;
+            _destinationDevice = destination;
         }
 
         public Message(byte source, byte destination, params byte[] data)
@@ -49,26 +48,26 @@ namespace imBMW.iBus
 
         public Message(byte source, byte destination, string description, params byte[] data)
         {
-            init(source, destination, data, description);
+            Init(source, destination, data, description);
         }
 
-        void init(byte source, byte destination, byte[] data, string description = null) 
+        void Init(byte source, byte destination, byte[] data, string description = null) 
         {
-            this.source = source;
-            this.destination = destination;
-            this.data = data;
-            this.ReceiverDescription = description;
-            packetLength = (byte)(data.Length + 4); // + source + destination + len + chksum
+            _source = source;
+            _destination = destination;
+            _data = data;
+            ReceiverDescription = description;
+            _packetLength = (byte)(data.Length + 4); // + source + destination + len + chksum
 
             byte check = 0x00;
             check ^= source;
-            check ^= (byte)(packetLength - 2);
+            check ^= (byte)(_packetLength - 2);
             check ^= destination;
             foreach (byte b in data)
             {
                 check ^= b;
             }
-            this.check = check;
+            _check = check;
         }
 
         public static Message TryCreate(byte[] packet)
@@ -98,7 +97,7 @@ namespace imBMW.iBus
                 return false;
             }
 
-            byte packetLength = (byte)(packet[1] + 2);
+            var packetLength = (byte)(packet[1] + 2);
             if (length < packetLength || packetLength < PacketLengthMin)
             {
                 return false;
@@ -119,7 +118,7 @@ namespace imBMW.iBus
                 return true;
             }
 
-            byte packetLength = (byte)(packet[1] + 2);
+            var packetLength = (byte)(packet[1] + 2);
             if (packetLength < PacketLengthMin
                 || packetLength > PacketLengthMax)
             {
@@ -138,7 +137,7 @@ namespace imBMW.iBus
         {
             get
             {
-                return packetLength;
+                return _packetLength;
             }
         }
 
@@ -146,19 +145,19 @@ namespace imBMW.iBus
         {
             get
             {
-                if (this.packet != null)
+                if (_packet != null)
                 {
-                    return this.packet;
+                    return _packet;
                 }
 
-                byte[] packet = new byte[PacketLength];
-                packet[0] = source;
+                var packet = new byte[PacketLength];
+                packet[0] = _source;
                 packet[1] = (byte)(PacketLength - 2);
-                packet[2] = destination;
-                data.CopyTo(packet, 3);
-                packet[PacketLength - 1] = check;
+                packet[2] = _destination;
+                _data.CopyTo(packet, 3);
+                packet[PacketLength - 1] = _check;
 
-                this.packet = packet;
+                _packet = packet;
                 return packet;
             }
         }
@@ -167,49 +166,35 @@ namespace imBMW.iBus
         {
             get
             {
-                return data;
+                return _data;
             }
         }
 
         public String PacketDump
         {
-            get
-            {
-                if (packetDump == null)
-                {
-                    packetDump = Packet.ToHex(' ');
-                }
-                return packetDump;
-            }
+            get { return _packetDump ?? (_packetDump = Packet.ToHex(' ')); }
         }
 
         public String DataDump
         {
-            get
-            {
-                if (dataDump == null)
-                {
-                    dataDump = data.ToHex(' ');
-                }
-                return dataDump;
-            }
+            get { return _dataDump ?? (_dataDump = _data.ToHex(' ')); }
         }
 
         public DeviceAddress SourceDevice {
             get
             {
-                if (sourceDevice == DeviceAddress.Unset)
+                if (_sourceDevice == DeviceAddress.Unset)
                 {
                     try
                     {
-                        sourceDevice = (DeviceAddress)source;
+                        _sourceDevice = (DeviceAddress)_source;
                     }
                     catch (InvalidCastException)
                     {
-                        sourceDevice = DeviceAddress.Unknown;
+                        _sourceDevice = DeviceAddress.Unknown;
                     }
                 }
-                return sourceDevice;
+                return _sourceDevice;
             }
         }
 
@@ -218,18 +203,18 @@ namespace imBMW.iBus
         {
             get
             {
-                if (destinationDevice == DeviceAddress.Unset)
+                if (_destinationDevice == DeviceAddress.Unset)
                 {
                     try
                     {
-                        destinationDevice = (DeviceAddress)destination;
+                        _destinationDevice = (DeviceAddress)_destination;
                     }
                     catch (InvalidCastException)
                     {
-                        destinationDevice = DeviceAddress.Unknown;
+                        _destinationDevice = DeviceAddress.Unknown;
                     }
                 }
-                return destinationDevice;
+                return _destinationDevice;
             }
         }
 
@@ -240,14 +225,7 @@ namespace imBMW.iBus
 
         public PerformanceInfo PerformanceInfo
         {
-            get
-            {
-                if (performanceInfo == null)
-                {
-                    performanceInfo = new PerformanceInfo();
-                }
-                return performanceInfo;
-            }
+            get { return _performanceInfo ?? (_performanceInfo = new PerformanceInfo()); }
         }
 
         public override string ToString()

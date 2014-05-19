@@ -1,7 +1,6 @@
 using System;
 using Microsoft.SPOT;
 using System.Collections;
-using Microsoft.SPOT.Hardware;
 using System.IO.Ports;
 using System.Threading;
 using imBMW.Tools;
@@ -28,39 +27,38 @@ namespace imBMW.iBus
 
     #endregion
 
-
     public static class Manager
     {
-        static ISerialPort iBus;
+        static ISerialPort _iBus;
 
         public static void Init(ISerialPort port)
         {
-            messageWriteQueue = new QueueThreadWorker(SendMessage);
+            _messageWriteQueue = new QueueThreadWorker(SendMessage);
             //messageReadQueue = new QueueThreadWorker(ProcessMessage);
 
-            iBus = port;
-            iBus.DataReceived += new SerialDataReceivedEventHandler(iBus_DataReceived);
+            _iBus = port;
+            _iBus.DataReceived += iBus_DataReceived;
         }
 
         #region Message reading and processing
 
         //static QueueThreadWorker messageReadQueue;
 
-        const int messageReadTimeout = 16; // 2 * 30 * Message.PacketLengthMax / 8; // tested on 8byte message, got 30ms (real, instead of theoretical 8ms), and made 2x reserve
-        static DateTime lastMessage = DateTime.Now;
-        static byte[] messageBuffer = new byte[Message.PacketLengthMax];
-        static int messageBufferLength = 0;
-        static object bufferSync = new object();
+        const int MessageReadTimeout = 16; // 2 * 30 * Message.PacketLengthMax / 8; // tested on 8byte message, got 30ms (real, instead of theoretical 8ms), and made 2x reserve
+        static DateTime _lastMessage = DateTime.Now;
+        static byte[] _messageBuffer = new byte[Message.PacketLengthMax];
+        static int _messageBufferLength;
+        static readonly object BufferSync = new object();
 
         static void iBus_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
-            ISerialPort port = (ISerialPort)sender;
+            var port = (ISerialPort)sender;
             if (port.AvailableBytes == 0)
             {
-                Logger.Warning("Available bytes lost! " + port.ToString());
+                Logger.Warning("Available bytes lost! " + port);
                 return;
             }
-            lock (bufferSync)
+            lock (BufferSync)
             {
                 byte[] data = port.ReadAvailable();
                 #if DEBUG
@@ -78,30 +76,30 @@ namespace imBMW.iBus
                     }
                 }
                 #endif*/
-                if (messageBufferLength + data.Length > messageBuffer.Length)
+                if (_messageBufferLength + data.Length > _messageBuffer.Length)
                 {
-                    Logger.Info("Buffer overflow. Extending it. " + port.ToString());
-                    byte[] newBuffer = new byte[messageBuffer.Length * 2];
-                    Array.Copy(messageBuffer, newBuffer, messageBufferLength);
-                    messageBuffer = newBuffer;
+                    Logger.Info("Buffer overflow. Extending it. " + port);
+                    var newBuffer = new byte[_messageBuffer.Length * 2];
+                    Array.Copy(_messageBuffer, newBuffer, _messageBufferLength);
+                    _messageBuffer = newBuffer;
                 }
                 if (data.Length == 1)
                 {
-                    messageBuffer[messageBufferLength++] = data[0];
+                    _messageBuffer[_messageBufferLength++] = data[0];
                 }
                 else
                 {
-                    Array.Copy(data, 0, messageBuffer, messageBufferLength, data.Length);
-                    messageBufferLength += data.Length;
+                    Array.Copy(data, 0, _messageBuffer, _messageBufferLength, data.Length);
+                    _messageBufferLength += data.Length;
                 }
-                while (messageBufferLength >= Message.PacketLengthMin)
+                while (_messageBufferLength >= Message.PacketLengthMin)
                 {
-                    Message m = Message.TryCreate(messageBuffer, messageBufferLength);
+                    Message m = Message.TryCreate(_messageBuffer, _messageBufferLength);
                     if (m == null)
                     {
-                        if (!Message.CanStartWith(messageBuffer, messageBufferLength))
+                        if (!Message.CanStartWith(_messageBuffer, _messageBufferLength))
                         {
-                            Logger.Warning("Buffer skip: non-iBus data detected: " + messageBuffer[0].ToHex());
+                            Logger.Warning("Buffer skip: non-iBus data detected: " + _messageBuffer[0].ToHex());
                             SkipBuffer(1);
                             continue;
                         }
@@ -114,16 +112,16 @@ namespace imBMW.iBus
                     //messageReadQueue.Enqueue(m);
                     SkipBuffer(m.PacketLength);
                 }
-                lastMessage = DateTime.Now;
+                _lastMessage = DateTime.Now;
             }
         }
 
         static void SkipBuffer(byte count)
         {
-            messageBufferLength -= count;
-            if (messageBufferLength > 0)
+            _messageBufferLength -= count;
+            if (_messageBufferLength > 0)
             {
-                Array.Copy(messageBuffer, count, messageBuffer, 0, messageBufferLength);
+                Array.Copy(_messageBuffer, count, _messageBuffer, 0, _messageBufferLength);
             }
         }
 
@@ -155,7 +153,7 @@ namespace imBMW.iBus
                 return;
             }
 
-            foreach (MessageReceiverRegistration receiver in messageReceiverList)
+            foreach (MessageReceiverRegistration receiver in MessageReceiverList)
             {
                 try
                 {
@@ -227,7 +225,7 @@ namespace imBMW.iBus
 
         #region Message writing and queue
 
-        static QueueThreadWorker messageWriteQueue;
+        static QueueThreadWorker _messageWriteQueue;
 
         static void SendMessage(object o)
         {
@@ -249,7 +247,7 @@ namespace imBMW.iBus
                 }
             }
 
-            iBus.Write(m.Packet);
+            _iBus.Write(m.Packet);
 
             #if DEBUG
             m.PerformanceInfo.TimeEndedProcessing = DateTime.Now;
@@ -265,12 +263,12 @@ namespace imBMW.iBus
                 e(args);
             }
 
-            Thread.Sleep(iBus.AfterWriteDelay); // Don't flood iBus
+            Thread.Sleep(_iBus.AfterWriteDelay); // Don't flood iBus
         }
 
         public static void EnqueueMessage(Message m)
         {
-            if (iBus is SerialPortHub)
+            if (_iBus is SerialPortHub)
             {
                 SendMessage(m);
                 return;
@@ -278,12 +276,12 @@ namespace imBMW.iBus
             #if DEBUG
             m.PerformanceInfo.TimeEnqueued = DateTime.Now;
             #endif
-            messageWriteQueue.Enqueue(m);
+            _messageWriteQueue.Enqueue(m);
         }
 
         public static void EnqueueMessage(params Message[] messages)
         {
-            if (iBus is SerialPortHub)
+            if (_iBus is SerialPortHub)
             {
                 foreach (Message m in messages)
                 {
@@ -298,7 +296,7 @@ namespace imBMW.iBus
                 m.PerformanceInfo.TimeEnqueued = now;
             }
             #endif
-            messageWriteQueue.EnqueueArray(messages);
+            _messageWriteQueue.EnqueueArray(messages);
         }
 
         #endregion
@@ -353,63 +351,63 @@ namespace imBMW.iBus
             }
         }
 
-        static ArrayList messageReceiverList = new ArrayList();
+        static readonly ArrayList MessageReceiverList = new ArrayList();
 
         public static void AddMessageReceiverForSourceDevice(DeviceAddress source, MessageReceiver callback)
         {
-            messageReceiverList.Add(new MessageReceiverRegistration(source, DeviceAddress.Unset, callback, MessageReceiverRegistration.MatchType.Source));
+            MessageReceiverList.Add(new MessageReceiverRegistration(source, DeviceAddress.Unset, callback, MessageReceiverRegistration.MatchType.Source));
         }
 
         public static void AddMessageReceiverForDestinationDevice(DeviceAddress destination, MessageReceiver callback)
         {
-            messageReceiverList.Add(new MessageReceiverRegistration(DeviceAddress.Unset, destination, callback, MessageReceiverRegistration.MatchType.Destination));
+            MessageReceiverList.Add(new MessageReceiverRegistration(DeviceAddress.Unset, destination, callback, MessageReceiverRegistration.MatchType.Destination));
         }
 
         public static void AddMessageReceiverForSourceAndDestinationDevice(DeviceAddress source, DeviceAddress destination, MessageReceiver callback)
         {
-            messageReceiverList.Add(new MessageReceiverRegistration(source, destination, callback, MessageReceiverRegistration.MatchType.SourceAndDestination));
+            MessageReceiverList.Add(new MessageReceiverRegistration(source, destination, callback, MessageReceiverRegistration.MatchType.SourceAndDestination));
         }
 
         public static void AddMessageReceiverForSourceOrDestinationDevice(DeviceAddress source, DeviceAddress destination, MessageReceiver callback)
         {
-            messageReceiverList.Add(new MessageReceiverRegistration(source, destination, callback, MessageReceiverRegistration.MatchType.SourceOrDestination));
+            MessageReceiverList.Add(new MessageReceiverRegistration(source, destination, callback, MessageReceiverRegistration.MatchType.SourceOrDestination));
         }
 
         #endregion
 
         #region Device searching on iBus
 
-        const int findDeviceTimeout = 2000;
+        const int FindDeviceTimeout = 2000;
 
-        static ArrayList foundDevices = new ArrayList();
+        static readonly ArrayList FoundDevices = new ArrayList();
 
         public static bool FindDevice(DeviceAddress device)
         {
-            return FindDevice(device, findDeviceTimeout);
+            return FindDevice(device, FindDeviceTimeout);
         }
 
         public static bool FindDevice(DeviceAddress device, int timeout)
         {
-            if (foundDevices.Contains(device))
+            if (FoundDevices.Contains(device))
             {
                 return true;
             }
-            lock (foundDevices)
+            lock (FoundDevices)
             {
                 AfterMessageReceived += SaveFoundDevice;
                 // TODO check broadcast poll request              // device
                 EnqueueMessage(new Message(DeviceAddress.Diagnostic, DeviceAddress.Broadcast, MessageRegistry.DataPollRequest));
                 Thread.Sleep(timeout);
                 AfterMessageReceived -= SaveFoundDevice;
-                return foundDevices.Contains(device);
+                return FoundDevices.Contains(device);
             }
         }
 
         static void SaveFoundDevice(MessageEventArgs e)
         {
-            if (!foundDevices.Contains(e.Message.SourceDevice))
+            if (!FoundDevices.Contains(e.Message.SourceDevice))
             {
-                foundDevices.Add(e.Message.SourceDevice);
+                FoundDevices.Add(e.Message.SourceDevice);
             }
         }
 

@@ -1,9 +1,6 @@
-using System;
-using Microsoft.SPOT;
 using System.Text;
 using System.Threading;
 using System.Runtime.CompilerServices;
-using Microsoft.SPOT.Hardware;
 
 namespace System.IO.Ports
 {
@@ -41,13 +38,13 @@ namespace System.IO.Ports
 
         protected AutoResetEvent _readToEvent;        // Handles the thread synchronization when both DataReceived event is being requested and user calls ReadTo().
 
-        public SerialPortBase() : this(0, 1) { }
+        protected SerialPortBase() : this(0, 1) { }
 
-        public SerialPortBase(int writeBufferSize, int readBufferSize)
+        protected SerialPortBase(int writeBufferSize, int readBufferSize)
         {
             // some initial parameter checks.
             if (writeBufferSize < 0) throw new ArgumentOutOfRangeException("writeBufferSize");
-            if (readBufferSize < 1) throw new ArgumentOutOfRangeException("readBuferSize");
+            if (readBufferSize < 1) throw new ArgumentOutOfRangeException("readBufferSize");
 
             _writeBufferSize = writeBufferSize;
             _readBufferSize = readBufferSize;
@@ -144,7 +141,6 @@ namespace System.IO.Ports
 
         #endregion
 
-
         #region Reading
 
         protected abstract int ReadDirect(byte[] data, int offset, int length);
@@ -172,7 +168,7 @@ namespace System.IO.Ports
         {
             lock (_bufferSync)
             {
-                int count = System.Math.Min(_incomingBufferValidLength, maxCount);  // update the count if there are less data available then requested
+                int count = Math.Min(_incomingBufferValidLength, maxCount);  // update the count if there are less data available then requested
 
                 byte[] data = GetBufferedData(count);                               // read the data from buffer
                 AdvancePosition(count);                                             // "remove" the data from buffer
@@ -183,10 +179,10 @@ namespace System.IO.Ports
         // The main loop of reading thread. This uses the blocking SerialPort.Read() method to monitor the serial port and fires the DataReceived event.
         protected void ReadLoop()
         {
-            byte[] buffer = new byte[_readBufferSize];
-            int read;
+            var buffer = new byte[_readBufferSize];
             while (_continueReading)
             {
+                int read;
                 try { read = ReadDirect(buffer, 0, _readBufferSize); }    // wait for some data (set _readBufferSize to 1 to wait for any data)
                 catch (ThreadAbortException) { return; }                                    // (if we were aborted, pass away silently)
                 OnDataReceived(buffer, read);                                               // and process it
@@ -209,8 +205,7 @@ namespace System.IO.Ports
                     AdvancePosition(usedLength);                                // and remove them.
                     return usedLength;                                          // TODO: Implement read timeout.
                 }
-            else
-                return ReadDirect(buffer, offset, count);          // Otherwise, we can directly read the serial port data.
+            return ReadDirect(buffer, offset, count);          // Otherwise, we can directly read the serial port data.
         }
 
         /// <summary>
@@ -283,12 +278,11 @@ namespace System.IO.Ports
 
                 _readToEvent = null;                                            // do some cleaning of stuff we don't need for the direct serial port manipulation
                 if (timedOut) return null;
-                else
-                    if (readToTimeout != null)
-                        readToTimeout.Dispose();
+                if (readToTimeout != null)
+                    readToTimeout.Dispose();
             }
 
-            byte[] data = new byte[System.Math.Max(_incomingBufferValidLength, _readBufferSize) + mark.Length];
+            var data = new byte[Math.Max(_incomingBufferValidLength, _readBufferSize) + mark.Length];
             int offset = GetBufferedData(data, 0, _incomingBufferValidLength); // read any data which left in the internal read buffer
 
             int markSearchStart = 0;
@@ -296,7 +290,7 @@ namespace System.IO.Ports
             {
                 if (offset >= data.Length)                                     // If we have filled the buffer, make a bigger one!   
                 {                                                              // (the >= is for paranoia reasons, the offset never becomes greater than data.Length in this method)
-                    byte[] biggerData = new byte[data.Length * 2];
+                    var biggerData = new byte[data.Length * 2];
                     data.CopyTo(biggerData, 0);
                     data = biggerData;
                 }
@@ -319,7 +313,7 @@ namespace System.IO.Ports
 
                         if (i >= mark.Length)
                         {
-                            byte[] finalData = new byte[markPos];                                       // if they do, copy data before marker into the new array
+                            var finalData = new byte[markPos];                                       // if they do, copy data before marker into the new array
                             Array.Copy(data, 0, finalData, 0, markPos);
 
                             int remains = offset - markPos - mark.Length;
@@ -336,8 +330,7 @@ namespace System.IO.Ports
 
                             return finalData;
                         }
-                        else                                                                            // If the other bytes do not match the mark bytes, it is not part of the mark, 
-                            markSearchStart = markPos + 1;                                              // and start the next search at the next position.
+                        markSearchStart = markPos + 1;                                              // If the other bytes do not match the mark bytes, it is not part of the mark, and start the next search at the next position.
                     }
                     else
                         markSearchStart = markPos;                                                      // We don't know if this is marker or not, so try again this position with more data.
@@ -376,7 +369,6 @@ namespace System.IO.Ports
         }
 
         #endregion
-
 
         #region DataReceived event stuff
 
@@ -446,7 +438,7 @@ namespace System.IO.Ports
         /// <returns>An array of size arraySize, filled with data from internal read buffer, if available.</returns>
         protected byte[] GetBufferedData(int arraySize)
         {
-            byte[] data = new byte[arraySize];          // This method can be (and is) used to increase the internal buffer size,
+            var data = new byte[arraySize];          // This method can be (and is) used to increase the internal buffer size,
             GetBufferedData(data, 0, arraySize);        // with the side effect of aligning the circular wrapped data linearly from the beginning.
             return data;
         }
@@ -467,7 +459,7 @@ namespace System.IO.Ports
             // copy 1st phase:               start1 = 9, end1 = 13
             // copy 2nd phase:              (start2 = 0) len2 = 2                  (virtual copy end = 15)
 
-            count = System.Math.Min(_incomingBufferValidLength, count);
+            count = Math.Min(_incomingBufferValidLength, count);
             if (count < 1) return 0;
 
             int end1 = _incomingBufferPosition + count;    // virtual copy end
@@ -512,7 +504,7 @@ namespace System.IO.Ports
             add
             {
                 SerialDataReceivedEventHandler oldHandlers = _dataReceivedHandlers;
-                SerialDataReceivedEventHandler newHandlers = (SerialDataReceivedEventHandler)Delegate.Combine(oldHandlers, value);  // add a new handler
+                var newHandlers = (SerialDataReceivedEventHandler)Delegate.Combine(oldHandlers, value);  // add a new handler
                 try
                 {
                     _dataReceivedHandlers = newHandlers;
@@ -532,7 +524,7 @@ namespace System.IO.Ports
             remove
             {
                 SerialDataReceivedEventHandler oldHandlers = _dataReceivedHandlers;
-                SerialDataReceivedEventHandler newHandlers = (SerialDataReceivedEventHandler)Delegate.Remove(oldHandlers, value);   // remove a handler
+                var newHandlers = (SerialDataReceivedEventHandler)Delegate.Remove(oldHandlers, value);   // remove a handler
                 try
                 {
                     _dataReceivedHandlers = newHandlers;

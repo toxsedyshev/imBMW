@@ -1,30 +1,26 @@
-using System;
-using Microsoft.SPOT;
-using System.Collections;
-using System.Threading;
 using imBMW.Tools;
 
 namespace System.IO.Ports
 {
-    public class SerialPortHub : SerialPortBase, ISerialPort
+    public class SerialPortHub : SerialPortBase
     {
-        ISerialPort[] ports;
-        QueueThreadWorker[] queues;
+        readonly ISerialPort[] _ports;
+        readonly QueueThreadWorker[] _queues;
 
         public SerialPortHub(params ISerialPort[] ports)
         {
-            this.ports = ports;
+            _ports = ports;
 
-            queues = new QueueThreadWorker[ports.Length];
+            _queues = new QueueThreadWorker[ports.Length];
 
             for (int i = 0; i < ports.Length; i++)
             {
                 int index = i;
                 ISerialPort port = ports[index];
 
-                queues[index] = new QueueThreadWorker((o) =>
+                _queues[index] = new QueueThreadWorker(o =>
                 {
-                    byte[] data = (byte[])o;
+                    var data = (byte[])o;
                     port.Write(data, 0, data.Length);
                 });
             }
@@ -51,11 +47,11 @@ namespace System.IO.Ports
 
         protected void Write(byte[] data, int offset, int length, int except)
         {
-            if (except < 0 || except >= ports.Length)
+            if (except < 0 || except >= _ports.Length)
             {
                 except = -1;
             }
-            int count = ports.Length - (except == -1 ? 0 : 1);
+            int count = _ports.Length - (except == -1 ? 0 : 1);
             if (count == 0)
             {
                 return;
@@ -66,11 +62,11 @@ namespace System.IO.Ports
                 data = data.SkipAndTake(offset, length);
             }
 
-            for (int i = 0; i < ports.Length; i++)
+            for (int i = 0; i < _ports.Length; i++)
             {
                 if (i != except)
                 {
-                    queues[i].Enqueue(data);
+                    _queues[i].Enqueue(data);
                 }
             }
         }
@@ -123,7 +119,7 @@ namespace System.IO.Ports
 
         public override void Flush()
         {
-            foreach (ISerialPort port in ports)
+            foreach (ISerialPort port in _ports)
             {
                 port.Flush();
             }

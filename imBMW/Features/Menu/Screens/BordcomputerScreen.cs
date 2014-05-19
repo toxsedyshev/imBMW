@@ -1,5 +1,4 @@
 using System;
-using Microsoft.SPOT;
 using imBMW.iBus.Devices.Real;
 using imBMW.Tools;
 using imBMW.Features.Localizations;
@@ -8,14 +7,14 @@ namespace imBMW.Features.Menu.Screens
 {
     public class BordcomputerScreen : MenuScreen
     {
-        protected static BordcomputerScreen instance;
+        protected static BordcomputerScreen _instance;
 
-        protected MenuItem itemPlayer;
-        protected MenuItem itemFav;
-        protected MenuItem itemBC;
-        protected MenuItem itemSettings;
+        protected MenuItem _itemPlayer;
+        protected MenuItem _itemFav;
+        protected MenuItem _itemBc;
+        protected MenuItem _itemSettings;
 
-        protected DateTime lastUpdated;
+        protected DateTime _lastUpdated;
 
         protected BordcomputerScreen()
         {
@@ -42,11 +41,11 @@ namespace imBMW.Features.Menu.Screens
         {
             //BodyModule.UpdateBatteryVoltage(); // TODO solve mem leak
             var now = DateTime.Now;
-            if (lastUpdated != DateTime.MinValue && (now - lastUpdated).GetTotalSeconds() < 4)
+            if (_lastUpdated != DateTime.MinValue && (now - _lastUpdated).GetTotalSeconds() < 4)
             {
                 return false;
             }
-            lastUpdated = now;
+            _lastUpdated = now;
             OnUpdated();
             return true;
         }
@@ -78,14 +77,7 @@ namespace imBMW.Features.Menu.Screens
 
         public static BordcomputerScreen Instance
         {
-            get
-            {
-                if (instance == null)
-                {
-                    instance = new BordcomputerScreen();
-                }
-                return instance;
-            }
+            get { return _instance ?? (_instance = new BordcomputerScreen()); }
         }
     }
 }

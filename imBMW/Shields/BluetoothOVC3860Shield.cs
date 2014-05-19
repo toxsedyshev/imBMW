@@ -1,6 +1,3 @@
-using System;
-using Microsoft.SPOT;
-
 namespace imBMW.Shields
 {
     public class BluetoothOVC3860Shield : ShieldBase

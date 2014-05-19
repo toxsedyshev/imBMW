@@ -1,5 +1,4 @@
 using System;
-using Microsoft.SPOT;
 using imBMW.iBus.Devices.Real;
 using imBMW.iBus;
 using imBMW.Tools;
@@ -13,20 +12,20 @@ namespace imBMW.Features.Menu
 {
     public class BordmonitorMenu : MenuBase
     {
-        static BordmonitorMenu instance;
+        static BordmonitorMenu _instance;
 
-        MediaEmulator mediaEmulator;
+        readonly MediaEmulator _mediaEmulator;
 
-        bool skipRefreshScreen;
-        bool skipClearScreen;
-        bool skipClearTillRefresh;
-        bool disableRadioMenu;
-        bool isScreenSwitched;
-        object drawLock = new object();
+        bool _skipRefreshScreen;
+        bool _skipClearScreen;
+        bool _skipClearTillRefresh;
+        bool _disableRadioMenu;
+        bool _isScreenSwitched;
+        readonly object _drawLock = new object();
 
         private BordmonitorMenu(MediaEmulator mediaEmulator)
         {
-            this.mediaEmulator = mediaEmulator;
+            _mediaEmulator = mediaEmulator;
             mediaEmulator.IsEnabledChanged += mediaEmulator_IsEnabledChanged;
             mediaEmulator.PlayerIsPlayingChanged += ShowPlayerStatus;
             mediaEmulator.PlayerStatusChanged += ShowPlayerStatus;
@@ -39,13 +38,13 @@ namespace imBMW.Features.Menu
 
         public static BordmonitorMenu Init(MediaEmulator mediaEmulator)
         {
-            if (instance != null)
+            if (_instance != null)
             {
                 // TODO implement hot switch of emulators
                 throw new Exception("Already inited");
             }
-            instance = new BordmonitorMenu(mediaEmulator);
-            return instance;
+            _instance = new BordmonitorMenu(mediaEmulator);
+            return _instance;
         }
 
         #region Player items
@@ -61,9 +60,9 @@ namespace imBMW.Features.Menu
             ShowPlayerStatus(player, s);
         }
 
-        Timer displayTextDelayTimer;
-        const int displayTextDelay = 2000;
-        const int statusTextMaxlen = 11;
+        Timer _displayTextDelayTimer;
+        const int DisplayTextDelay = 2000;
+        const int StatusTextMaxlen = 11;
 
         void ShowPlayerStatus(IAudioPlayer player, string status, PlayerEvent playerEvent)
         {
@@ -105,14 +104,11 @@ namespace imBMW.Features.Menu
             {
                 text = "";
             }
-            if (icon.Length + text.Length < statusTextMaxlen)
+            if (icon.Length + text.Length < StatusTextMaxlen)
             {
                 return icon + " " + text;
             }
-            else
-            {
-                return icon + text;
-            }
+            return icon + text;
         }
 
         void ShowPlayerStatus(IAudioPlayer player, string status)
@@ -121,10 +117,10 @@ namespace imBMW.Features.Menu
             {
                 return;
             }
-            if (displayTextDelayTimer != null)
+            if (_displayTextDelayTimer != null)
             {
-                displayTextDelayTimer.Dispose();
-                displayTextDelayTimer = null;
+                _displayTextDelayTimer.Dispose();
+                _displayTextDelayTimer = null;
             }
 
             player.Menu.Status = status;
@@ -132,16 +128,16 @@ namespace imBMW.Features.Menu
 
         public void ShowPlayerStatusWithDelay(IAudioPlayer player)
         {
-            if (displayTextDelayTimer != null)
+            if (_displayTextDelayTimer != null)
             {
-                displayTextDelayTimer.Dispose();
-                displayTextDelayTimer = null;
+                _displayTextDelayTimer.Dispose();
+                _displayTextDelayTimer = null;
             }
 
-            displayTextDelayTimer = new Timer(delegate
+            _displayTextDelayTimer = new Timer(delegate
             {
                 ShowPlayerStatus(player);
-            }, null, displayTextDelay, 0);
+            }, null, DisplayTextDelay, 0);
         }
 
         void mediaEmulator_PlayerChanged(IAudioPlayer player)
@@ -166,7 +162,7 @@ namespace imBMW.Features.Menu
         {
             base.ScreenWakeup();
 
-            disableRadioMenu = true;
+            _disableRadioMenu = true;
         }
 
         public override void UpdateScreen()
@@ -196,10 +192,10 @@ namespace imBMW.Features.Menu
             if (isRefresh)
             {
                 m.ReceiverDescription = "Screen refresh";
-                skipClearTillRefresh = false;
-                if (skipRefreshScreen)
+                _skipClearTillRefresh = false;
+                if (_skipRefreshScreen)
                 {
-                    skipRefreshScreen = false;
+                    _skipRefreshScreen = false;
                     return;
                 }
             }
@@ -207,9 +203,9 @@ namespace imBMW.Features.Menu
             if (isClear)
             {
                 m.ReceiverDescription = "Screen clear";
-                if (skipClearScreen || skipClearTillRefresh)
+                if (_skipClearScreen || _skipClearTillRefresh)
                 {
-                    skipClearScreen = false;
+                    _skipClearScreen = false;
                     return;
                 }
             }
@@ -220,9 +216,9 @@ namespace imBMW.Features.Menu
                     IsScreenSwitched = false;
                 }
 
-                if (disableRadioMenu || isClear)
+                if (_disableRadioMenu || isClear)
                 {
-                    disableRadioMenu = false;
+                    _disableRadioMenu = false;
                     Bordmonitor.DisableRadioMenu();
                     return;
                 }
@@ -244,7 +240,7 @@ namespace imBMW.Features.Menu
                         break;
                     case 0x02:
                         m.ReceiverDescription = "Screen SW by rad";
-                        skipClearScreen = true; // to prevent on "clear screen" update on switch to BC/nav
+                        _skipClearScreen = true; // to prevent on "clear screen" update on switch to BC/nav
                         break;
                 }
                 IsScreenSwitched = true;
@@ -258,10 +254,10 @@ namespace imBMW.Features.Menu
                 return;
             }*/
 
-            if (m.Data.StartsWith(Bordmonitor.DataShowTitle) && (lastTitle == null || !lastTitle.Data.Compare(m.Data)))
+            if (m.Data.StartsWith(Bordmonitor.DataShowTitle) && (_lastTitle == null || !_lastTitle.Data.Compare(m.Data)))
             {
                 IsScreenSwitched = false;
-                disableRadioMenu = true;
+                _disableRadioMenu = true;
                 UpdateScreen();
                 return;
             }
@@ -322,35 +318,35 @@ namespace imBMW.Features.Menu
                         break;
                     case 0x10:
                         m.ReceiverDescription = "BM Button < prev track";
-                        mediaEmulator.Player.Prev();
+                        _mediaEmulator.Player.Prev();
                         break;
                     case 0x00:
                         m.ReceiverDescription = "BM Button > next track";
-                        mediaEmulator.Player.Next();
+                        _mediaEmulator.Player.Next();
                         break;
                 }
                 return;
             }
         }
 
-        bool isDrawing;
-        Message lastTitle;
+        bool _isDrawing;
+        Message _lastTitle;
 
         protected override void DrawScreen()
         {
-            if (isDrawing)
+            if (_isDrawing)
             {
                 return; // TODO test
             }
-            lock (drawLock)
+            lock (_drawLock)
             {
-                isDrawing = true;
-                skipRefreshScreen = true;
-                skipClearTillRefresh = true; // TODO test no screen items lost
+                _isDrawing = true;
+                _skipRefreshScreen = true;
+                _skipClearTillRefresh = true; // TODO test no screen items lost
                 base.DrawScreen();
 
                 Bordmonitor.ShowText(CurrentScreen.Status ?? String.Empty, BordmonitorFields.Status);
-                lastTitle = Bordmonitor.ShowText(CurrentScreen.Title ?? String.Empty, BordmonitorFields.Title);
+                _lastTitle = Bordmonitor.ShowText(CurrentScreen.Title ?? String.Empty, BordmonitorFields.Title);
                 for (byte i = 0; i < 10; i++)
                 {
                     var index = GetItemIndex(i, true);
@@ -358,10 +354,10 @@ namespace imBMW.Features.Menu
                     var s = item == null ? String.Empty : item.Text;
                     Bordmonitor.ShowText(s ?? String.Empty, BordmonitorFields.Item, i, item != null && item.IsChecked);
                 }
-                skipRefreshScreen = true;
-                skipClearTillRefresh = true;
+                _skipRefreshScreen = true;
+                _skipClearTillRefresh = true;
                 Bordmonitor.RefreshScreen();
-                isDrawing = false;
+                _isDrawing = false;
             }
         }
 
@@ -386,14 +382,14 @@ namespace imBMW.Features.Menu
 
         public bool IsScreenSwitched
         {
-            get { return isScreenSwitched; }
+            get { return _isScreenSwitched; }
             set
             {
-                if (isScreenSwitched == value)
+                if (_isScreenSwitched == value)
                 {
                     return;
                 }
-                isScreenSwitched = value;
+                _isScreenSwitched = value;
                 if (value)
                 {
                     ScreenSuspend();
@@ -412,12 +408,12 @@ namespace imBMW.Features.Menu
         {
             get
             {
-                if (instance == null)
+                if (_instance == null)
                 {
                     //instance = new BordmonitorMenu();
                     throw new Exception("Not inited BM menu");
                 }
-                return instance;
+                return _instance;
             }
         }
     }

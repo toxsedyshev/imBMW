@@ -1,23 +1,14 @@
-using System;
-using Microsoft.SPOT;
-
 namespace System.IO.Ports
 {
     public class SerialPortConfiguration
     {
-        string portName;
-        BaudRate baudRate;
-        Parity parity;
-        int dataBits;
-        StopBits stopBits;
-
         public SerialPortConfiguration(string portName, BaudRate baudRate, Parity parity, int dataBits, StopBits stopBits)
         {
-            this.portName = portName;
-            this.baudRate = baudRate;
-            this.parity = parity;
-            this.dataBits = dataBits;
-            this.stopBits = stopBits;
+            PortName = portName;
+            BaudRate = baudRate;
+            Parity = parity;
+            DataBits = dataBits;
+            StopBits = stopBits;
         }
 
         public SerialPortConfiguration(string portName, BaudRate baudRate, Parity parity, int dataBits) : this(portName, baudRate, parity, dataBits, StopBits.One) { }
@@ -26,34 +17,14 @@ namespace System.IO.Ports
 
         public SerialPortConfiguration(string portName, BaudRate baudRate) : this(portName, baudRate, Parity.None) { }
 
-        public StopBits StopBits
-        {
-            get { return stopBits; }
-            set { stopBits = value; }
-        }
+        public StopBits StopBits { get; set; }
 
-        public int DataBits
-        {
-            get { return dataBits; }
-            set { dataBits = value; }
-        }
+        public int DataBits { get; set; }
 
-        public Parity Parity
-        {
-            get { return parity; }
-            set { parity = value; }
-        }
+        public Parity Parity { get; set; }
 
-        public BaudRate BaudRate
-        {
-            get { return baudRate; }
-            set { baudRate = value; }
-        }
+        public BaudRate BaudRate { get; set; }
 
-        public string PortName
-        {
-            get { return portName; }
-            set { portName = value; }
-        }
+        public string PortName { get; set; }
     }
 }

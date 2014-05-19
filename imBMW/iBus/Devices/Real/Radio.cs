@@ -1,5 +1,3 @@
-using System;
-using Microsoft.SPOT;
 using imBMW.Tools;
 using System.Threading;
 
@@ -9,22 +7,22 @@ namespace imBMW.iBus.Devices.Real
     {
         public const byte DisplayTextMaxLen = 11;
 
-        const int displayTextDelay = 150;
+        const int DisplayTextDelay = 150;
 
-        static Timer displayTextDelayTimer;
-        static bool hasMID = false;
+        static Timer _displayTextDelayTimer;
+        static bool _hasMID;
 
         public static void Init()
         {
-            hasMID = Manager.FindDevice(DeviceAddress.MultiInfoDisplay);
+            _hasMID = Manager.FindDevice(DeviceAddress.MultiInfoDisplay);
         }
 
         static void ClearTimer()
         {
-            if (displayTextDelayTimer != null)
+            if (_displayTextDelayTimer != null)
             {
-                displayTextDelayTimer.Dispose();
-                displayTextDelayTimer = null;
+                _displayTextDelayTimer.Dispose();
+                _displayTextDelayTimer = null;
             }
         }
 
@@ -32,17 +30,17 @@ namespace imBMW.iBus.Devices.Real
         {
             ClearTimer();
 
-            displayTextDelayTimer = new Timer(delegate
+            _displayTextDelayTimer = new Timer(delegate
             {
                 DisplayText(s, align);
-            }, null, displayTextDelay, 0);
+            }, null, DisplayTextDelay, 0);
         }
 
         public static void DisplayText(string s, TextAlign align = TextAlign.Left)
         {
             ClearTimer();
 
-            if (hasMID)
+            if (_hasMID)
             {
                 DisplayTextMID(s, align);
             }
@@ -54,7 +52,7 @@ namespace imBMW.iBus.Devices.Real
 
         private static void DisplayTextMID(string s, TextAlign align)
         {
-            byte[] data = new byte[] { 0x23, 0x40, 0x20 };
+            byte[] data = { 0x23, 0x40, 0x20 };
             data = data.PadRight(0x20, DisplayTextMaxLen);
             data.PasteASCII(s, 3, DisplayTextMaxLen, align);
             Manager.EnqueueMessage(new Message(DeviceAddress.Radio, DeviceAddress.MultiInfoDisplay, "Show text \"" + s + "\" on MID", data));
@@ -62,7 +60,7 @@ namespace imBMW.iBus.Devices.Real
 
         private static void DisplayTextRadio(string s, TextAlign align)
         {
-            byte[] data = new byte[] { 0x23, 0x42, 0x30 };
+            byte[] data = { 0x23, 0x42, 0x30 };
             data = data.PadRight(0x19, DisplayTextMaxLen);
             data.PasteASCII(s, 3, DisplayTextMaxLen, align);
             Manager.EnqueueMessage(new Message(DeviceAddress.Telephone, DeviceAddress.InstrumentClusterElectronics, "Show text \"" + s + "\" on the radio", data));

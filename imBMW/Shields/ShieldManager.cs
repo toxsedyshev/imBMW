@@ -1,5 +1,3 @@
-using System;
-using Microsoft.SPOT;
 using System.Collections;
 using Microsoft.SPOT.Hardware;
 
@@ -31,7 +29,7 @@ namespace imBMW.Shields
 
         public static ArrayList InitShields(Cpu.AnalogChannel detectPin)
         {
-            ArrayList shields = new ArrayList();
+            var shields = new ArrayList();
             var port = new AnalogInput(detectPin, 3300, 0, 12);
             var val = port.Read();
             if (val == BluetoothOVC3860Shield.DetectValue)

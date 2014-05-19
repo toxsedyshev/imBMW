@@ -4,6 +4,7 @@ using imBMW.Multimedia;
 
 namespace imBMW.Tools
 {
+
     static class EnumConverter
 {
         /**
@@ -25,7 +26,7 @@ namespace imBMW.Tools
                 case iPodViaHeadset.iPodCommand.VolumeUp: return "VolumeUp";
                 case iPodViaHeadset.iPodCommand.VolumeDown: return "VolumeDown";
             }
-            return "NotSpecified(" + e.ToString() + ")";
+            return "NotSpecified(" + e + ")";
         }
 
         public static string ToStringValue(this MFLButton e)
@@ -33,12 +34,17 @@ namespace imBMW.Tools
             switch (e)
             {
                 case MFLButton.Next: return "Next";
+                case MFLButton.NextHold: return "NextHold";
                 case MFLButton.Prev: return "Prev";
+                case MFLButton.PrevHold: return "PrevHold";
                 case MFLButton.RT: return "RT";
+                case MFLButton.RTRelease: return "RTRelease";
                 case MFLButton.Dial: return "Dial";
                 case MFLButton.DialLong: return "DialLong";
+                case MFLButton.VolumeDown: return "VolumeDown";
+                case MFLButton.VolumeUp: return "VolumeUp";
             }
-            return "NotSpecified(" + e.ToString() + ")";
+            return "NotSpecified(" + e + ")";
         }
 
         public static string ToStringValue(this IgnitionState e)
@@ -49,7 +55,7 @@ namespace imBMW.Tools
                 case IgnitionState.Acc: return "Acc";
                 case IgnitionState.Ign: return "Ign";
             }
-            return "NotSpecified(" + e.ToString() + ")";
+            return "NotSpecified(" + e + ")";
         }
 
         public static string ToStringValue(this RemoteKeyButton e)
@@ -60,7 +66,7 @@ namespace imBMW.Tools
                 case RemoteKeyButton.Trunk: return "Trunk";
                 case RemoteKeyButton.Unlock: return "Unlock";
             }
-            return "NotSpecified(" + e.ToString() + ")";
+            return "NotSpecified(" + e + ")";
         }
 
         public static string ToStringValue(this DeviceAddress e)
@@ -110,7 +116,7 @@ namespace imBMW.Tools
                 case DeviceAddress.Unset: return "Unset";
                 case DeviceAddress.Unknown: return "Unknown";
             }
-            return "NotSpecified(" + e.ToString() + ")";
+            return "NotSpecified(" + e + ")";
         }
     }
 }

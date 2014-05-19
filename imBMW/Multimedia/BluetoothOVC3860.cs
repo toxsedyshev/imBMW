@@ -52,7 +52,7 @@ namespace imBMW.Multimedia
                 return; // TODO more than one phone
             }
             var phoneClear = "";
-            foreach (var c in phone)
+            foreach (var c in phone.ToCharArray())
             {
                 if (c.IsNumeric() || c == '+')
                 {
@@ -71,10 +71,15 @@ namespace imBMW.Multimedia
     /// </summary>
     public class BluetoothOVC3860 : AudioPlayerBase
     {
-        SerialPortBase port;
-        QueueThreadWorker queue;
-        MenuScreen menu;
-        string contactsPath;
+        readonly SerialPortBase _port;
+        readonly QueueThreadWorker _queue;
+        readonly string _contactsPath;
+
+        MenuScreen _menu;
+
+        int _contactsPerPage = 7;
+        int _offset;
+        MenuScreen _contactsScreen;
 
         /// <summary>
         /// </summary>
@@ -84,16 +89,16 @@ namespace imBMW.Multimedia
         {
             Name = "Bluetooth";
 
-            queue = new QueueThreadWorker(ProcessSendCommand);
+            _queue = new QueueThreadWorker(ProcessSendCommand);
 
-            this.port = new SerialInterruptPort(new SerialPortConfiguration(port, BaudRate.Baudrate115200), Cpu.Pin.GPIO_NONE, 0, 16, 10);
-            this.port.DataReceived += port_DataReceived;
+            _port = new SerialInterruptPort(new SerialPortConfiguration(port, BaudRate.Baudrate115200), Cpu.Pin.GPIO_NONE, 0, 16, 10);
+            _port.DataReceived += port_DataReceived;
 
             if (contactsPath != null)
             {
                 if (File.Exists(contactsPath))
                 {
-                    this.contactsPath = contactsPath;
+                    _contactsPath = contactsPath;
                 }
                 else
                 {
@@ -115,19 +120,19 @@ namespace imBMW.Multimedia
             var contacts = new ArrayList();
             try
             {
-                if (contactsPath == null || !File.Exists(contactsPath))
+                if (_contactsPath == null || !File.Exists(_contactsPath))
                 {
                     Logger.Info("No contacts file");
                     return contacts;
                 }
 
-                var handle = new FileStream(contactsPath, FileMode.Open, FileAccess.Read);
+                var handle = new FileStream(_contactsPath, FileMode.Open, FileAccess.Read);
                 var data = new byte[1000];
-                int read = 0;
+                int read;
                 uint found = 0;
                 bool skip = true;
                 bool parse = false;
-                PhoneContact contact = new PhoneContact();
+                var contact = new PhoneContact();
                 for (int i = 0; i < handle.Length; i += read)
                 {
                     handle.Seek(i, SeekOrigin.Begin);
@@ -221,52 +226,49 @@ namespace imBMW.Multimedia
             return screen;
         }
 
-        int contactsPerPage = 7;
-        int offset = 0;
-        MenuScreen contactsScreen;
-
         protected MenuScreen CreateContactsScreen()
         {
-            contactsPerPage = MenuScreen.MaxItemsCount - 3;
+            _contactsPerPage = MenuScreen.MaxItemsCount - 3;
 
-            contactsScreen = new MenuScreen(s => Localization.Current.Contacts);
-            contactsScreen.AddItem(new MenuItem(i => "< " + Localization.Current.PrevItems, i => { offset -= contactsPerPage; SetContactsScreenItems(); }), 0); // TODO navigate
-            contactsScreen.AddItem(new MenuItem(i => Localization.Current.NextItems + " >", i => { offset += contactsPerPage; SetContactsScreenItems(); }), 1); // TODO test, fix and make 1
-            contactsScreen.AddBackButton(MenuScreen.MaxItemsCount - 1);
+            _contactsScreen = new MenuScreen(s => Localization.Current.Contacts);
+            _contactsScreen.AddItem(new MenuItem(i => "< " + Localization.Current.PrevItems, i => { _offset -= _contactsPerPage; SetContactsScreenItems(); }), 0); // TODO navigate
+            _contactsScreen.AddItem(new MenuItem(i => Localization.Current.NextItems + " >", i => { _offset += _contactsPerPage; SetContactsScreenItems(); }), 1); // TODO test, fix and make 1
+            _contactsScreen.AddBackButton(MenuScreen.MaxItemsCount - 1);
 
-            contactsScreen.NavigatedTo += s =>
+            _contactsScreen.NavigatedTo += s =>
             {
-                offset = 0; // TODO don't scroll on navigate back
+                _offset = 0; // TODO don't scroll on navigate back
                 SetContactsScreenItems();
             };
 
-            return contactsScreen;
+            return _contactsScreen;
         }
 
         protected void SetContactsScreenItems()
         {
-            if (offset < 0)
+            if (_offset < 0)
             {
-                offset = 0;
+                _offset = 0;
             }
-            var contacts = GetContacts((uint)offset, (uint)contactsPerPage);
-            if (contacts.Count == 0 && offset > 0)
+            var contacts = GetContacts((uint)_offset, (uint)_contactsPerPage);
+            if (contacts.Count == 0 && _offset > 0)
             {
-                offset = 0;
+                _offset = 0;
                 SetContactsScreenItems();
                 return;
             }
 
-            contactsScreen.Status = Localization.Current.Refreshing;
-            contactsScreen.IsUpdateSuspended = true;
+            _contactsScreen.Status = Localization.Current.Refreshing;
+            _contactsScreen.IsUpdateSuspended = true;
             var i = 2;
             foreach (var c in contacts)
             {
                 var contact = c as PhoneContact;
-                contactsScreen.AddItem(new MenuItem(contact.Name, it => CallPhone(contact.Phones)), i++); // TODO show phones
+                if (contact == null) continue;
+                _contactsScreen.AddItem(new MenuItem(contact.Name, it => CallPhone(contact.Phones)), i++); // TODO show phones
             }
-            contactsScreen.IsUpdateSuspended = false;
-            contactsScreen.Status = "";
+            _contactsScreen.IsUpdateSuspended = false;
+            _contactsScreen.Status = "";
         }
 
         protected override void SetPlaying(bool value)
@@ -327,12 +329,12 @@ namespace imBMW.Multimedia
             return false;
         }
 
-        public override void VolumeUp()
+        public sealed override void VolumeUp()
         {
             SendCommand(CmdVolumeUp);
         }
 
-        public override void VolumeDown()
+        public sealed override void VolumeDown()
         {
             SendCommand(CmdVolumeDown);
         }
@@ -341,15 +343,15 @@ namespace imBMW.Multimedia
         {
             get
             {
-                return isPlaying;
+                return _isPlaying;
             }
             protected set
             {
-                if (isPlaying == value)
+                if (_isPlaying == value)
                 {
                     return;
                 }
-                isPlaying = value;
+                _isPlaying = value;
                 OnIsPlayingChanged(value);
                 Logger.Info(value ? "Playing" : "Paused", "BT");
             }
@@ -359,18 +361,17 @@ namespace imBMW.Multimedia
         {
             get
             {
-                if (menu == null)
+                if (_menu == null)
                 {
-                    menu = new MenuScreen(Name);
+                    _menu = new MenuScreen(Name);
 
-                    var playerSettings = new MenuScreen(s => Localization.Current.Settings);
-                    playerSettings.Status = Name;
+                    var playerSettings = new MenuScreen(s => Localization.Current.Settings) {Status = Name};
                     playerSettings.AddItem(new MenuItem(i => Localization.Current.Volume + " +", i => VolumeUp()));
                     playerSettings.AddItem(new MenuItem(i => Localization.Current.Volume + " -", i => VolumeDown()));
                     playerSettings.AddItem(new MenuItem(i => Localization.Current.Reconnect, i => Reconnect()), 3);
                     playerSettings.AddItem(new MenuItem(i => Localization.Current.Pair, i =>
                     {
-                        if (lastCommand == "CA")
+                        if (_lastCommand == "CA")
                         {
                             SendCommand("CB"); // cancel pair
                         }
@@ -381,14 +382,14 @@ namespace imBMW.Multimedia
                     }));
                     playerSettings.AddBackButton();
 
-                    menu.AddItem(new MenuItem(i => IsPlaying ? Localization.Current.Pause : Localization.Current.Play, i => PlayPauseToggle()));
-                    menu.AddItem(new MenuItem(i => Localization.Current.NextTrack, i => Next()));
-                    menu.AddItem(new MenuItem(i => Localization.Current.PrevTrack, i => Prev()));
-                    menu.AddItem(new MenuItem(i => Localization.Current.Settings, MenuItemType.Button, MenuItemAction.GoToScreen) { GoToScreen = playerSettings });
-                    menu.AddBackButton();
-                    menu.Updated += m => playerSettings.Status = m.Status;
+                    _menu.AddItem(new MenuItem(i => IsPlaying ? Localization.Current.Pause : Localization.Current.Play, i => PlayPauseToggle()));
+                    _menu.AddItem(new MenuItem(i => Localization.Current.NextTrack, i => Next()));
+                    _menu.AddItem(new MenuItem(i => Localization.Current.PrevTrack, i => Prev()));
+                    _menu.AddItem(new MenuItem(i => Localization.Current.Settings, MenuItemType.Button, MenuItemAction.GoToScreen) { GoToScreen = playerSettings });
+                    _menu.AddBackButton();
+                    _menu.Updated += m => playerSettings.Status = m.Status;
                 }
-                return menu;
+                return _menu;
             }
         }
 
@@ -399,7 +400,7 @@ namespace imBMW.Multimedia
             switch (playerHostState)
             {
                 case PlayerHostState.On:
-                    if (!connected)
+                    if (!_connected)
                     {
                         Reconnect();
                     }
@@ -430,12 +431,12 @@ namespace imBMW.Multimedia
         const string CmdAnswer = "CE";
         const string CmdCall = "CW";
 
-        string lastCommand;
-        bool connected;
+        string _lastCommand;
+        bool _connected;
 
         public void Reconnect()
         {
-            if (connected)
+            if (_connected)
             {
                 //SendCommand(CmdStop);
                 //SendCommand("CD");   // disconn hfp
@@ -462,40 +463,40 @@ namespace imBMW.Multimedia
             {
                 command += param;
             }
-            lastCommand = command;
-            queue.Enqueue("AT#" + command);
+            _lastCommand = command;
+            _queue.Enqueue("AT#" + command);
         }
 
         void ProcessSendCommand(object o)
         {
             var s = (string)o;
-            port.WriteLine(s);
+            _port.WriteLine(s);
             Logger.Info(s, "BT>");
         }
 
-        string btBuffer = "";
+        string _btBuffer = "";
 
         void port_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
-            if (port.AvailableBytes == 0)
+            if (_port.AvailableBytes == 0)
             {
                 return;
             }
-            var data = port.ReadAvailable();
+            var data = _port.ReadAvailable();
             var s = ASCIIEncoding.GetString(data);
-            foreach (var c in s)
+            foreach (var c in s.ToCharArray())
             {
                 if (c == '\r' || c == '\n')
                 {
-                    if (btBuffer != "")
+                    if (_btBuffer != "")
                     {
-                        ProcessBTNotification(btBuffer);
+                        ProcessBTNotification(_btBuffer);
                     }
-                    btBuffer = "";
+                    _btBuffer = "";
                 }
                 else
                 {
-                    btBuffer += c;
+                    _btBuffer += c;
                 }
             }
         }
@@ -512,12 +513,12 @@ namespace imBMW.Multimedia
                     break;
                 case "MG1":
                     Logger.Info("HFP waiting", "BT");
-                    connected = false;
+                    _connected = false;
                     SendCommand("CC"); // conn hfp
                     break;
                 case "MG3":
                     Logger.Info("HFP connected", "BT");
-                    connected = true;
+                    _connected = true;
                     SendCommand("MI"); // conn av
                     break;
                 case "MF01":
@@ -526,13 +527,13 @@ namespace imBMW.Multimedia
                     break;
                 case "MY":
                     Logger.Info("AV disconnected", "BT");
-                    if (lastCommand == "MJ")
+                    if (_lastCommand == "MJ")
                     {
                         SendCommand("CD");   // disconn hfp
                     }
                     break;
                 case "MR":
-                    if (!IsEnabled && lastCommand != CmdStop)
+                    if (!IsEnabled && _lastCommand != CmdStop)
                     {
                         SendCommand(CmdStop);
                     }
@@ -564,7 +565,7 @@ namespace imBMW.Multimedia
                     Logger.Info("Previous", "BT");
                     break;
                 case "IV":
-                    connected = true;
+                    _connected = true;
                     Logger.Info("Connected", "BT");
                     OnStatusChanged(Localization.Current.Connected, PlayerEvent.Wireless);
                     SendCommand("MI"); // conn av
@@ -577,23 +578,23 @@ namespace imBMW.Multimedia
                     }
                     break;
                 case "II":
-                    connected = false;
+                    _connected = false;
                     IsPlaying = false;
                     Logger.Info("Waiting", "BT");
                     OnStatusChanged(Localization.Current.Waiting, PlayerEvent.Wireless);
                     break;
                 case "IA":
-                    connected = false;
+                    _connected = false;
                     IsPlaying = false;
                     Logger.Info("Disconnected", "BT");
                     OnStatusChanged(Localization.Current.Disconnected, PlayerEvent.Wireless);
-                    if (lastCommand == "CD")
+                    if (_lastCommand == "CD")
                     {
                         Reconnect();
                     }
                     break;
                 case "IJ2":
-                    connected = false;
+                    _connected = false;
                     IsPlaying = false;
                     Logger.Info("Cancel pairing", "BT");
                     OnStatusChanged(Localization.Current.NotPaired, PlayerEvent.Wireless);
@@ -614,7 +615,7 @@ namespace imBMW.Multimedia
 
         void ProcessBTOK()
         {
-            switch (lastCommand)
+            switch (_lastCommand)
             {
                 case "CC":
                     SendCommand("CY"); // query hfp status

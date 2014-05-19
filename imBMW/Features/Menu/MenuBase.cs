@@ -1,5 +1,3 @@
-using System;
-using Microsoft.SPOT;
 using System.Collections;
 using imBMW.Features.Menu.Screens;
 using imBMW.Tools;
@@ -8,15 +6,16 @@ namespace imBMW.Features.Menu
 {
     public class MenuBase
     {
-        bool isEnabled;
-        MenuScreen homeScreen;
-        MenuScreen currentScreen;
-        Stack navigationStack = new Stack();
+        bool _isEnabled;
+
+        readonly MenuScreen _homeScreen;
+        MenuScreen _currentScreen;
+        readonly Stack _navigationStack = new Stack();
 
         public MenuBase()
         {
-            homeScreen = HomeScreen.Instance;
-            CurrentScreen = homeScreen;
+            _homeScreen = HomeScreen.Instance;
+            CurrentScreen = _homeScreen;
         }
 
         protected virtual void DrawScreen() { }
@@ -33,14 +32,14 @@ namespace imBMW.Features.Menu
 
         public bool IsEnabled
         {
-            get { return isEnabled; }
+            get { return _isEnabled; }
             set
             {
-                if (isEnabled == value)
+                if (_isEnabled == value)
                 {
                     return;
                 }
-                isEnabled = value;
+                _isEnabled = value;
                 if (value)
                 {
                     ScreenWakeup();
@@ -73,15 +72,15 @@ namespace imBMW.Features.Menu
             {
                 return;
             }
-            navigationStack.Push(CurrentScreen);
+            _navigationStack.Push(CurrentScreen);
             CurrentScreen = screen;
         }
 
         public void NavigateBack()
         {
-            if (navigationStack.Count > 0)
+            if (_navigationStack.Count > 0)
             {
-                CurrentScreen = navigationStack.Pop() as MenuScreen;
+                CurrentScreen = _navigationStack.Pop() as MenuScreen;
             }
             else
             {
@@ -91,14 +90,14 @@ namespace imBMW.Features.Menu
 
         public void NavigateHome()
         {
-            CurrentScreen = homeScreen;
-            navigationStack.Clear();
+            CurrentScreen = _homeScreen;
+            _navigationStack.Clear();
         }
 
         public void NavigateAfterHome(MenuScreen screen)
         {
-            navigationStack.Clear();
-            navigationStack.Push(homeScreen);
+            _navigationStack.Clear();
+            _navigationStack.Push(_homeScreen);
             CurrentScreen = screen;
         }
 
@@ -106,17 +105,17 @@ namespace imBMW.Features.Menu
         {
             get
             {
-                return currentScreen;
+                return _currentScreen;
             }
             set
             {
-                if (currentScreen == value || value == null)
+                if (_currentScreen == value || value == null)
                 {
                     return;
                 }
-                ScreenNavigatedFrom(currentScreen);
-                currentScreen = value;
-                ScreenNavigatedTo(currentScreen);
+                ScreenNavigatedFrom(_currentScreen);
+                _currentScreen = value;
+                ScreenNavigatedTo(_currentScreen);
                 UpdateScreen();
             }
         }

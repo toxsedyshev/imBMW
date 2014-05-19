@@ -35,6 +35,7 @@
   <Import Project="$(NetMfTargetsBaseDir)$(TargetFrameworkVersion)\CSharp.Targets" />
   <ItemGroup>
     <Compile Include="Features\Comfort.cs" />
+    <Compile Include="Features\Gates.cs" />
     <Compile Include="Features\Light.cs" />
     <Compile Include="Features\Localizations\EnglishLocalization.cs" />
     <Compile Include="Features\Localizations\Localization.cs" />
@@ -56,9 +57,12 @@
     <Compile Include="iBus\Devices\Real\Immobiliser.cs" />
     <Compile Include="iBus\Devices\Real\InstrumentClusterElectronics.cs" />
     <Compile Include="iBus\Devices\Real\LightControlModule.cs" />
+    <Compile Include="Tools\Math.cs" />
     <Compile Include="iBus\Devices\Real\MultiFunctionSteeringWheel.cs" />
+    <Compile Include="iBus\Devices\Real\Navigation.cs" />
     <Compile Include="iBus\Devices\Real\Radio.cs" />
     <Compile Include="iBus\Devices\Emulators\CDChanger.cs" />
+    <Compile Include="iBus\Devices\Real\SeatMemory.cs" />
     <Compile Include="iBus\Diagnostics\DBusConverter.cs" />
     <Compile Include="iBus\Diagnostics\DBusMessage.cs" />
     <Compile Include="IO\ISerialPort.cs" />
@@ -90,7 +94,10 @@
     <Compile Include="Tools\DateTimeHelpers.cs" />
     <Compile Include="Tools\ExtensionAttribute.cs" />
     <Compile Include="Tools\Logger.cs" />
+    <Compile Include="Tools\Parse.cs" />
     <Compile Include="Tools\QueueThreadWorker.cs" />
+    <Compile Include="Tools\RCSwitch.cs" />
+    <Compile Include="Tools\StringBuilder.cs" />
     <Compile Include="Tools\StringHelpers.cs" />
   </ItemGroup>
   <ItemGroup>
