@@ -63,7 +63,7 @@ namespace imBMW.Devices.V2
             SettingsScreen.Instance.Status = version;
             Logger.Info(version);
 
-            //var sd = GetRootDirectory();
+            var sd = GetRootDirectory();
 
             // todo get config
 
@@ -152,23 +152,22 @@ namespace imBMW.Devices.V2
 
             // Enable comfort features
             //Features.Comfort.AllFeaturesEnabled = true;
-            Comfort.AutoLockDoors = false;
+            Comfort.AutoLockDoors = true;
             Comfort.AutoUnlockDoors = true;
             Comfort.AutoCloseWindows = true;
             Logger.Info("Comfort features inited");
 
-			var rcSwitch = new RCSwitch(Pin.PC0);
-			Gates.Init(rcSwitch);
-			Gates.AddGatesObserver(54.708527777777782f, 25.289972222222225f, 0.1f, GateToggleMethod.Send433MhzSignal, new[] { "477D33", "477D3C" });
+			//var rcSwitch = new RCSwitch(Pin.PC0);
+			//Gates.Init(rcSwitch);
+			//Gates.AddGatesObserver(54.708527777777782f, 25.289972222222225f, 0.1f, GateToggleMethod.Send433MhzSignal, new[] { "477D33", "477D3C" });
 
             // Set iPod or Bluetooth as AUX or CDC-emulator
-	        _player = new BluetoothOVC3860(Serial.COM2);
-				//sd != null ? sd + @"\contacts.vcf" : null);
+	        _player = new BluetoothOVC3860(Serial.COM2, sd != null ? sd + @"\contacts.vcf" : null);
             //player = new iPodViaHeadset(Pin.PC2);
             
             Radio.Init();
             Logger.Info("Radio inited");
-            //if (Manager.FindDevice(DeviceAddress.OnBoardMonitor))
+            if (Manager.FindDevice(DeviceAddress.OnBoardMonitor))
             {
                 MediaEmulator emulator;
                 emulator = new BordmonitorAUX(_player);
@@ -178,12 +177,12 @@ namespace imBMW.Devices.V2
                 BordmonitorMenu.Init(emulator);
                 Logger.Info("BordmonitorAUX inited");
             }
-			//else
-			//{
-			//	// TODO implement radio menu
-			//	//iBus.Devices.Emulators.CDChanger.Init(player);
-			//	Logger.Info("CDChanger emulator inited");
-			//}
+			else
+			{
+				// TODO implement radio menu
+				//iBus.Devices.Emulators.CDChanger.Init(player);
+				Logger.Info("CDChanger emulator inited");
+			}
             ShieldLED = new OutputPort(Pin.PA7, false);
             _player.IsPlayingChanged += (p, s) =>
             {
