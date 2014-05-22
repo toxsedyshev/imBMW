@@ -23,7 +23,7 @@ namespace imBMW.Features.Menu.Screens
             SetItems();
 
             // TODO subscribe and unsubscribe ZKE and IKE and update voltage on navigation events
-            BodyModule.BatteryVoltageChanged += v => { WithUpdateSuspended(s => Status = ""); if (!UpdateItems()) { OnUpdated(); } };
+            BodyModule.BatteryVoltageChanged += v => { WithUpdateSuspended(s => Status = ""); if (!UpdateItems()) { OnUpdated(MenuScreenUpdateReason.Refresh); } };
             InstrumentClusterElectronics.SpeedRPMChanged += e => UpdateItems();
             InstrumentClusterElectronics.TemperatureChanged += e => UpdateItems();
         }
@@ -47,7 +47,7 @@ namespace imBMW.Features.Menu.Screens
                 return false;
             }
             lastUpdated = now;
-            OnUpdated();
+            OnUpdated(MenuScreenUpdateReason.Refresh);
             return true;
         }
 

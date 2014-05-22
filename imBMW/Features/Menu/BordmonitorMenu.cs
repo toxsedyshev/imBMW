@@ -169,14 +169,14 @@ namespace imBMW.Features.Menu
             disableRadioMenu = true;
         }
 
-        public override void UpdateScreen()
+        public override void UpdateScreen(MenuScreenUpdateEventArgs args)
         {
             if (IsScreenSwitched)
             {
                 return;
             }
 
-            base.UpdateScreen();
+            base.UpdateScreen(args);
         }
 
         protected void ProcessRadioMessage(Message m)
@@ -228,7 +228,7 @@ namespace imBMW.Features.Menu
                 }
 
                 // TODO test "INFO" button
-                UpdateScreen();
+                UpdateScreen(MenuScreenUpdateReason.Refresh);
                 return;
             }
 
@@ -262,7 +262,7 @@ namespace imBMW.Features.Menu
             {
                 IsScreenSwitched = false;
                 disableRadioMenu = true;
-                UpdateScreen();
+                UpdateScreen(MenuScreenUpdateReason.Refresh);
                 return;
             }
         }
@@ -336,7 +336,7 @@ namespace imBMW.Features.Menu
         bool isDrawing;
         Message lastTitle;
 
-        protected override void DrawScreen()
+        protected override void DrawScreen(MenuScreenUpdateEventArgs args)
         {
             if (isDrawing)
             {
@@ -347,7 +347,7 @@ namespace imBMW.Features.Menu
                 isDrawing = true;
                 skipRefreshScreen = true;
                 skipClearTillRefresh = true; // TODO test no screen items lost
-                base.DrawScreen();
+                base.DrawScreen(args);
 
                 Bordmonitor.ShowText(CurrentScreen.Status ?? String.Empty, BordmonitorFields.Status);
                 lastTitle = Bordmonitor.ShowText(CurrentScreen.Title ?? String.Empty, BordmonitorFields.Title);

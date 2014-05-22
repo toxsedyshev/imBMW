@@ -19,7 +19,7 @@ namespace imBMW.Features.Menu
             CurrentScreen = homeScreen;
         }
 
-        protected virtual void DrawScreen() { }
+        protected virtual void DrawScreen(MenuScreenUpdateEventArgs args) { }
 
         protected virtual void ScreenSuspend()
         {
@@ -44,7 +44,7 @@ namespace imBMW.Features.Menu
                 if (value)
                 {
                     ScreenWakeup();
-                    UpdateScreen();
+                    UpdateScreen(MenuScreenUpdateReason.Navigation);
                 }
                 else
                 {
@@ -53,13 +53,18 @@ namespace imBMW.Features.Menu
             }
         }
 
-        public virtual void UpdateScreen()
+        public virtual void UpdateScreen(MenuScreenUpdateReason reason, object item = null)
+        {
+            UpdateScreen(new MenuScreenUpdateEventArgs(reason, item));
+        }
+
+        public virtual void UpdateScreen(MenuScreenUpdateEventArgs args)
         {
             if (!IsEnabled)
             {
                 return;
             }
-            DrawScreen();
+            DrawScreen(args);
         }
 
         public void Navigate(MenuScreen screen)
@@ -81,7 +86,7 @@ namespace imBMW.Features.Menu
         {
             if (navigationStack.Count > 0)
             {
-                CurrentScreen = navigationStack.Pop() as MenuScreen;
+                CurrentScreen = (MenuScreen)navigationStack.Pop();
             }
             else
             {
@@ -117,7 +122,7 @@ namespace imBMW.Features.Menu
                 ScreenNavigatedFrom(currentScreen);
                 currentScreen = value;
                 ScreenNavigatedTo(currentScreen);
-                UpdateScreen();
+                UpdateScreen(MenuScreenUpdateReason.Navigation);
             }
         }
 
@@ -145,9 +150,9 @@ namespace imBMW.Features.Menu
             screen.Updated -= currentScreen_Updated;
         }
 
-        void currentScreen_Updated(MenuScreen screen)
+        void currentScreen_Updated(MenuScreen screen, MenuScreenUpdateEventArgs args)
         {
-            UpdateScreen();
+            UpdateScreen(args);
         }
 
         void currentScreen_ItemClicked(MenuScreen screen, MenuItem item)

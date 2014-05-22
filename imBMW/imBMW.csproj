@@ -76,6 +76,8 @@
     <Compile Include="Shields\ShieldManager.cs" />
     <Compile Include="Shields\ShieldPort.cs" />
     <Compile Include="Tools\ASCIIEncoding.cs" />
+    <Compile Include="Tools\Delegates.cs" />
+    <Compile Include="Tools\FileLogger.cs" />
     <Compile Include="Tools\NumHelpers.cs" />
     <Compile Include="Tools\EnumConverter.cs" />
     <Compile Include="iBus\Manager.cs" />
@@ -91,6 +93,7 @@
     <Compile Include="Tools\ExtensionAttribute.cs" />
     <Compile Include="Tools\Logger.cs" />
     <Compile Include="Tools\QueueThreadWorker.cs" />
+    <Compile Include="Tools\Settings.cs" />
     <Compile Include="Tools\StringHelpers.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -102,5 +105,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="ClassDiagram.cd" />
+    <None Include="imBMW.SampleSettings.ini" />
   </ItemGroup>
 </Project>
