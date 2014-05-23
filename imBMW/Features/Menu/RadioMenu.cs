@@ -206,6 +206,7 @@ namespace imBMW.Features.Menu
                         if (itemScrolled)
                         {
                             showText = showText.Substring(0, separator);
+                            RefreshScreenWithDelay();
                         }
                         else
                         {
