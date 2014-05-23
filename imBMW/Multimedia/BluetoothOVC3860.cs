@@ -153,7 +153,7 @@ namespace imBMW.Multimedia
                                         contacts.Add(contact);
                                         if (contacts.Count == count)
                                         {
-                                            break;
+                                            return contacts;
                                         }
                                     }
                                     found++;
@@ -228,6 +228,7 @@ namespace imBMW.Multimedia
             {
                 offset = 0;
             }
+            contactsScreen.Status = Localization.Current.Refreshing;
             var contacts = GetContacts((uint)offset, (uint)contactsPerPage);
             if (contacts.Count == 0 && offset > 0)
             {
@@ -236,13 +237,19 @@ namespace imBMW.Multimedia
                 return;
             }
 
-            contactsScreen.Status = Localization.Current.Refreshing;
             contactsScreen.IsUpdateSuspended = true;
             var i = 2;
-            foreach (var c in contacts)
+            if (contacts.Count == 0)
             {
-                var contact = (PhoneContact)c;
-                contactsScreen.AddItem(new MenuItem(contact.Name, it => CallPhone(contact.Phones)), i++); // TODO show phones
+                contactsScreen.AddItem(new MenuItem(Localization.Current.NoContacts), i++);
+            }
+            else
+            {
+                foreach (var c in contacts)
+                {
+                    var contact = (PhoneContact)c;
+                    contactsScreen.AddItem(new MenuItem(contact.Name, it => CallPhone(contact.Phones)), i++); // TODO show phones
+                }
             }
             contactsScreen.IsUpdateSuspended = false;
             contactsScreen.Status = "";

@@ -23,7 +23,7 @@ namespace imBMW.Devices.V2
 {
     public class Program
     {
-        const string version = "HW2 FW1.0.1";
+        const string version = "HW2 FW1.0.2";
 
         static OutputPort LED;
         static OutputPort ShieldLED;
@@ -176,7 +176,12 @@ namespace imBMW.Devices.V2
                 if (settings.MenuMode == Tools.MenuMode.BordmonitorCDC)
                 {
                     emulator = new CDChanger(player);
-                    Bordmonitor.MK2Mode = settings.MenuModeMK2;
+                    if (settings.MenuModeMK2)
+                    {
+                        Bordmonitor.MK2Mode = true;
+                        Localization.Current = new RadioLocalization();
+                        SettingsScreen.Instance.CanChangeLanguage = false;
+                    }
                 }
                 else
                 {
@@ -188,9 +193,10 @@ namespace imBMW.Devices.V2
             }
             else
             {
+                Localization.Current = new RadioLocalization();
+                SettingsScreen.Instance.CanChangeLanguage = false;
                 Radio.Init();
-                // TODO implement radio menu
-                //RadioMenu.Init(new CDChanger(player));
+                RadioMenu.Init(new CDChanger(player));
                 Logger.Info("Radio menu inited");
             }
 

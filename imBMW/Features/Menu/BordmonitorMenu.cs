@@ -15,8 +15,6 @@ namespace imBMW.Features.Menu
     {
         static BordmonitorMenu instance;
 
-        MediaEmulator mediaEmulator;
-
         bool skipRefreshScreen;
         bool skipClearScreen;
         bool skipClearTillRefresh;
@@ -25,13 +23,9 @@ namespace imBMW.Features.Menu
         object drawLock = new object();
 
         private BordmonitorMenu(MediaEmulator mediaEmulator)
+            : base(mediaEmulator)
         {
-            this.mediaEmulator = mediaEmulator;
             mediaEmulator.IsEnabledChanged += mediaEmulator_IsEnabledChanged;
-            mediaEmulator.PlayerIsPlayingChanged += ShowPlayerStatus;
-            mediaEmulator.PlayerStatusChanged += ShowPlayerStatus;
-            mediaEmulator.PlayerChanged += mediaEmulator_PlayerChanged;
-            mediaEmulator_PlayerChanged(mediaEmulator.Player);
 
             Manager.AddMessageReceiverForSourceDevice(DeviceAddress.Radio, ProcessRadioMessage);
             Manager.AddMessageReceiverForDestinationDevice(DeviceAddress.Radio, ProcessToRadioMessage);
@@ -50,22 +44,15 @@ namespace imBMW.Features.Menu
 
         #region Player items
 
-        void ShowPlayerStatus(IAudioPlayer player)
-        {
-            ShowPlayerStatus(player, player.IsPlaying);
-        }
+        protected override int StatusTextMaxlen { get { return 11; } }
 
-        void ShowPlayerStatus(IAudioPlayer player, bool isPlaying)
+        protected override void ShowPlayerStatus(IAudioPlayer player, bool isPlaying)
         {
             string s = isPlaying ? Localization.Current.Playing : Localization.Current.Paused;
             ShowPlayerStatus(player, s);
         }
 
-        Timer displayTextDelayTimer;
-        const int displayTextDelay = 2000;
-        const int statusTextMaxlen = 11;
-
-        void ShowPlayerStatus(IAudioPlayer player, string status, PlayerEvent playerEvent)
+        protected override void ShowPlayerStatus(IAudioPlayer player, string status, PlayerEvent playerEvent)
         {
             if (!IsEnabled)
             {
@@ -89,7 +76,7 @@ namespace imBMW.Features.Menu
                     status = TextWithIcon("\x07", status);
                     break;
                 case PlayerEvent.Voice:
-                    status = TextWithIcon("* ", status);
+                    status = TextWithIcon("*", status);
                     break;
             }
             ShowPlayerStatus(player, status);
@@ -99,59 +86,8 @@ namespace imBMW.Features.Menu
             }
         }
 
-        string TextWithIcon(string icon, string text = null)
-        {
-            if (text == null)
-            {
-                text = "";
-            }
-            if (icon.Length + text.Length < statusTextMaxlen)
-            {
-                return icon + " " + text;
-            }
-            else
-            {
-                return icon + text;
-            }
-        }
-
-        void ShowPlayerStatus(IAudioPlayer player, string status)
-        {
-            if (!IsEnabled)
-            {
-                return;
-            }
-            if (displayTextDelayTimer != null)
-            {
-                displayTextDelayTimer.Dispose();
-                displayTextDelayTimer = null;
-            }
-
-            player.Menu.Status = status;
-        }
-
-        public void ShowPlayerStatusWithDelay(IAudioPlayer player)
-        {
-            if (displayTextDelayTimer != null)
-            {
-                displayTextDelayTimer.Dispose();
-                displayTextDelayTimer = null;
-            }
-
-            displayTextDelayTimer = new Timer(delegate
-            {
-                ShowPlayerStatus(player);
-            }, null, displayTextDelay, 0);
-        }
-
-        void mediaEmulator_PlayerChanged(IAudioPlayer player)
-        {
-            HomeScreen.Instance.PlayerScreen = player.Menu;
-        }
-
         void mediaEmulator_IsEnabledChanged(MediaEmulator emulator, bool isEnabled)
         {
-            IsEnabled = isEnabled;
             if (!isEnabled)
             {
                 Bordmonitor.EnableRadioMenu();

@@ -62,7 +62,7 @@ namespace imBMW.iBus.Devices.Real
                     data = new byte[] { 0xA5, 0x62, 0x01, 0x06 };
                     break;
                 case BordmonitorFields.Item:
-                    if (check) // TODO test MK2 length
+                    if (check || MK2Mode)
                     {
                         len = 14;
                     }

@@ -204,5 +204,10 @@ namespace imBMW.Features.Localizations
         {
             get { return "Previous"; }
         }
+
+        public override string NoContacts
+        {
+            get { return "No contacts"; }
+        }
     }
 }

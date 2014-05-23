@@ -101,6 +101,8 @@ namespace imBMW.Features.Localizations
         public abstract string Next { get; }
 
         public abstract string Previous { get; }
+        
+        public abstract string NoContacts { get; }
 
         /*
         

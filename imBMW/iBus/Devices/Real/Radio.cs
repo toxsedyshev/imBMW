@@ -28,14 +28,20 @@ namespace imBMW.iBus.Devices.Real
             }
         }
 
+
         public static void DisplayTextWithDelay(string s, TextAlign align = TextAlign.Left)
+        {
+            DisplayTextWithDelay(s, displayTextDelay, align);
+        }
+
+        public static void DisplayTextWithDelay(string s, int delay, TextAlign align = TextAlign.Left)
         {
             ClearTimer();
 
             displayTextDelayTimer = new Timer(delegate
             {
                 DisplayText(s, align);
-            }, null, displayTextDelay, 0);
+            }, null, delay, 0);
         }
 
         public static void DisplayText(string s, TextAlign align = TextAlign.Left)

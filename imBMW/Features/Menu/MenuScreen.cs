@@ -122,7 +122,7 @@ namespace imBMW.Features.Menu
         {
             if (index >= 0 && index < Items.Count)
             {
-                return Items[index] as MenuItem;
+                return (MenuItem)Items[index];
             }
             return null;
         }

@@ -38,6 +38,7 @@
     <Compile Include="Features\Light.cs" />
     <Compile Include="Features\Localizations\EnglishLocalization.cs" />
     <Compile Include="Features\Localizations\Localization.cs" />
+    <Compile Include="Features\Localizations\RadioLocalization.cs" />
     <Compile Include="Features\Localizations\RussianLocalization.cs" />
     <Compile Include="Features\Menu\MenuHelpers.cs" />
     <Compile Include="Features\Menu\Screens\BordcomputerScreen.cs" />
