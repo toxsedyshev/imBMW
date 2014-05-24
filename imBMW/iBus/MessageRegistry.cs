@@ -1,5 +1,6 @@
 using imBMW.Tools;
 using System.Collections;
+using System.Text;
 
 namespace imBMW.iBus
 {
@@ -284,10 +285,14 @@ namespace imBMW.iBus
 
         #endregion
 
-        public static string ToPrettyString(this Message message, bool withPerformanceInfo = false)
+        public static string ToPrettyString(this Message message, bool withPerformanceInfo = false, bool withBytesAsAscii = false)
         {
             string description = message.Describe() ?? message.DataDump;
             description = message.SourceDevice.ToStringValue() + " > " + message.DestinationDevice.ToStringValue() + ": " + description;
+            if (withBytesAsAscii)
+            {
+                description += " (" + ASCIIEncoding.GetString(message.Data) + ")";
+            }
             if (withPerformanceInfo)
             {
                 description += " (" + message.PerformanceInfo + ")";

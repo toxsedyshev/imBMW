@@ -39,6 +39,7 @@
     <Compile Include="Features\Light.cs" />
     <Compile Include="Features\Localizations\EnglishLocalization.cs" />
     <Compile Include="Features\Localizations\Localization.cs" />
+    <Compile Include="Features\Localizations\RadioLocalization.cs" />
     <Compile Include="Features\Localizations\RussianLocalization.cs" />
     <Compile Include="Features\Menu\MenuHelpers.cs" />
     <Compile Include="Features\Menu\Screens\BordcomputerScreen.cs" />
@@ -80,6 +81,8 @@
     <Compile Include="Shields\ShieldManager.cs" />
     <Compile Include="Shields\ShieldPort.cs" />
     <Compile Include="Tools\ASCIIEncoding.cs" />
+    <Compile Include="Tools\Delegates.cs" />
+    <Compile Include="Tools\FileLogger.cs" />
     <Compile Include="Tools\NumHelpers.cs" />
     <Compile Include="Tools\EnumConverter.cs" />
     <Compile Include="iBus\Manager.cs" />
@@ -98,6 +101,7 @@
     <Compile Include="Tools\QueueThreadWorker.cs" />
     <Compile Include="Tools\RCSwitch.cs" />
     <Compile Include="Tools\StringBuilder.cs" />
+    <Compile Include="Tools\Settings.cs" />
     <Compile Include="Tools\StringHelpers.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -109,5 +113,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="ClassDiagram.cd" />
+    <None Include="imBMW.SampleSettings.ini" />
   </ItemGroup>
 </Project>
