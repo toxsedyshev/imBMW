@@ -1,10 +1,13 @@
 using System.Collections;
 using imBMW.Features.Menu.Screens;
 using imBMW.Tools;
+using imBMW.iBus.Devices.Emulators;
+using imBMW.Multimedia;
+using System.Threading;
 
 namespace imBMW.Features.Menu
 {
-    public class MenuBase
+    public abstract class MenuBase
     {
         bool _isEnabled;
 
@@ -12,13 +15,94 @@ namespace imBMW.Features.Menu
         MenuScreen _currentScreen;
         readonly Stack _navigationStack = new Stack();
 
-        public MenuBase()
+        protected MediaEmulator _mediaEmulator;
+
+        protected MenuBase(MediaEmulator mediaEmulator)
         {
-            _homeScreen = HomeScreen.Instance;
+           _homeScreen = HomeScreen.Instance;
             CurrentScreen = _homeScreen;
+
+            _mediaEmulator = mediaEmulator;
+            mediaEmulator.IsEnabledChanged += mediaEmulator_IsEnabledChanged;
+            mediaEmulator.PlayerIsPlayingChanged += ShowPlayerStatus;
+            mediaEmulator.PlayerStatusChanged += ShowPlayerStatus;
+            mediaEmulator.PlayerChanged += mediaEmulator_PlayerChanged;
+            mediaEmulator_PlayerChanged(mediaEmulator.Player);
         }
 
-        protected virtual void DrawScreen() { }
+        #region MediaEmulator members
+
+        Timer displayStatusDelayTimer;
+        protected const int displayStatusDelay = 2000; // TODO make abstract
+
+        protected abstract int StatusTextMaxlen { get; }
+
+        protected abstract void ShowPlayerStatus(IAudioPlayer player, string status, PlayerEvent playerEvent);
+
+        protected abstract void ShowPlayerStatus(IAudioPlayer player, bool isPlaying);
+
+        protected void ShowPlayerStatus(IAudioPlayer player)
+        {
+            ShowPlayerStatus(player, player.IsPlaying);
+        }
+
+        protected void ShowPlayerStatus(IAudioPlayer player, string status)
+        {
+            if (!IsEnabled)
+            {
+                return;
+            }
+            if (displayStatusDelayTimer != null)
+            {
+                displayStatusDelayTimer.Dispose();
+                displayStatusDelayTimer = null;
+            }
+
+            player.Menu.Status = status;
+        }
+
+        protected void ShowPlayerStatusWithDelay(IAudioPlayer player)
+        {
+            if (displayStatusDelayTimer != null)
+            {
+                displayStatusDelayTimer.Dispose();
+                displayStatusDelayTimer = null;
+            }
+
+            displayStatusDelayTimer = new Timer(delegate
+            {
+                ShowPlayerStatus(player);
+            }, null, displayStatusDelay, 0);
+        }
+
+        protected string TextWithIcon(string icon, string text = null)
+        {
+            if (StringHelpers.IsNullOrEmpty(text))
+            {
+                return icon;
+            }
+            if (icon.Length + text.Length < StatusTextMaxlen)
+            {
+                return icon + " " + text;
+            }
+            return icon + text;
+        }
+
+        void mediaEmulator_PlayerChanged(IAudioPlayer player)
+        {
+            HomeScreen.Instance.PlayerScreen = player.Menu;
+        }
+
+        void mediaEmulator_IsEnabledChanged(MediaEmulator emulator, bool isEnabled)
+        {
+            IsEnabled = isEnabled;
+        }
+
+        #endregion
+
+        #region Drawing members
+
+        protected virtual void DrawScreen(MenuScreenUpdateEventArgs args) { }
 
         protected virtual void ScreenSuspend()
         {
@@ -29,6 +113,29 @@ namespace imBMW.Features.Menu
         {
             ScreenNavigatedTo(CurrentScreen);
         }
+
+        public virtual void UpdateScreen(MenuScreenUpdateReason reason, object item = null)
+        {
+            UpdateScreen(new MenuScreenUpdateEventArgs(reason, item));
+        }
+
+        public virtual void UpdateScreen(MenuScreenUpdateEventArgs args)
+        {
+            if (!IsEnabled)
+            {
+                return;
+            }
+            DrawScreen(args);
+        }
+
+        void currentScreen_Updated(MenuScreen screen, MenuScreenUpdateEventArgs args)
+        {
+            UpdateScreen(args);
+        }
+
+        #endregion
+
+        #region Navigation members
 
         public bool IsEnabled
         {
@@ -43,22 +150,13 @@ namespace imBMW.Features.Menu
                 if (value)
                 {
                     ScreenWakeup();
-                    UpdateScreen();
+                    UpdateScreen(MenuScreenUpdateReason.Navigation);
                 }
                 else
                 {
                     ScreenSuspend();
                 }
             }
-        }
-
-        public virtual void UpdateScreen()
-        {
-            if (!IsEnabled)
-            {
-                return;
-            }
-            DrawScreen();
         }
 
         public void Navigate(MenuScreen screen)
@@ -80,7 +178,7 @@ namespace imBMW.Features.Menu
         {
             if (_navigationStack.Count > 0)
             {
-                CurrentScreen = _navigationStack.Pop() as MenuScreen;
+                CurrentScreen = (MenuScreen)_navigationStack.Pop();
             }
             else
             {
@@ -116,11 +214,11 @@ namespace imBMW.Features.Menu
                 ScreenNavigatedFrom(_currentScreen);
                 _currentScreen = value;
                 ScreenNavigatedTo(_currentScreen);
-                UpdateScreen();
+                UpdateScreen(MenuScreenUpdateReason.Navigation);
             }
         }
 
-        void ScreenNavigatedTo(MenuScreen screen)
+        protected virtual void ScreenNavigatedTo(MenuScreen screen)
         {
             if (screen == null || !screen.OnNavigatedTo(this))
             {
@@ -131,7 +229,7 @@ namespace imBMW.Features.Menu
             screen.Updated += currentScreen_Updated;
         }
 
-        void ScreenNavigatedFrom(MenuScreen screen)
+        protected virtual void ScreenNavigatedFrom(MenuScreen screen)
         {
             if (screen == null)
             {
@@ -142,11 +240,6 @@ namespace imBMW.Features.Menu
 
             screen.ItemClicked -= currentScreen_ItemClicked;
             screen.Updated -= currentScreen_Updated;
-        }
-
-        void currentScreen_Updated(MenuScreen screen)
-        {
-            UpdateScreen();
         }
 
         void currentScreen_ItemClicked(MenuScreen screen, MenuItem item)
@@ -164,5 +257,7 @@ namespace imBMW.Features.Menu
                     break;
             }
         }
+
+        #endregion
     }
 }

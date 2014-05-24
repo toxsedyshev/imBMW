@@ -18,8 +18,6 @@ namespace imBMW.Tools
         public readonly String Message;
         public readonly String LogString;
         public readonly LogPriority Priority;
-        //public readonly Exception Exception;
-        //public readonly Message iBusMessage;
         public readonly String PriorityTitle;
 
         public LoggerArgs(LogPriority priority, string message, string priorityTitle = null)

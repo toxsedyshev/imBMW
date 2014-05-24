@@ -42,6 +42,7 @@ namespace imBMW.Multimedia
 
         public PhoneContact()
         {
+            Name = String.Empty;
             Phones = String.Empty;
         }
 
@@ -126,85 +127,63 @@ namespace imBMW.Multimedia
                     return contacts;
                 }
 
-                var handle = new FileStream(_contactsPath, FileMode.Open, FileAccess.Read);
-                var data = new byte[1000];
-                int read;
-                uint found = 0;
-                bool skip = true;
-                bool parse = false;
-                var contact = new PhoneContact();
-                for (int i = 0; i < handle.Length; i += read)
+                using (var sr = new StreamReader(_contactsPath))
                 {
-                    handle.Seek(i, SeekOrigin.Begin);
-                    read = handle.Read(data, 0, data.Length);
-                    int nextLine = 0;
-                    int len = 0;
-                    for (int j = 0; j < read; j++)
+                    uint found = 0;
+                    bool hasPhone = false;
+                    PhoneContact contact = null;
+
+                    string s;
+                    while ((s = sr.ReadLine()) != null)
                     {
-                        var b = data[j];
-                        if (b == '\n' || b == '\r')
+                        if (s == string.Empty)
                         {
-                            if (len > 0)
-                            {
-                                var s = Encoding.UTF8.GetString(data, nextLine, len);
-                                if (s == "BEGIN:VCARD")
+                            continue;
+                        }
+                        switch (s)
+                        {
+                            case "BEGIN:VCARD":
+                                Debug.GC(true); // Logger.Info("Free memory = " + Debug.GC(true), "MEM");
+                                hasPhone = false;
+                                if (found >= offset)
                                 {
-                                    skip = true;
-                                    parse = found >= offset;
+                                    contact = new PhoneContact();
                                 }
-                                else if (s == "END:VCARD")
+                                break;
+                            case "END:VCARD":
+                                if (hasPhone)
                                 {
-                                    if (parse)
+                                    if (contact != null)
                                     {
-                                        if (!skip)
+                                        contacts.Add(contact);
+                                        if (contacts.Count == count)
                                         {
-                                            //Logger.Info(contact.Name + " " + contact.Phones, "PH");
-                                            contacts.Add(contact);
-                                            if (contacts.Count == count)
-                                            {
-                                                return contacts;
-                                            }
-                                            contact = new PhoneContact();
-                                        }
-                                        else
-                                        {
-                                            contact.Name = String.Empty;
-                                            contact.Phones = String.Empty;
+                                            return contacts;
                                         }
                                     }
-                                    if (!skip)
-                                    {
-                                        found++;
-                                    }
+                                    found++;
                                 }
-                                else if (s.Substring(0, 2) == "FN")
+                                break;
+                            default:
+                                if (s.Substring(0, 2) == "FN")
                                 {
-                                    if (parse)
+                                    if (contact != null)
                                     {
-                                        contact.Name = s.Substring(s.LastIndexOf(':') + 1);
+                                        contact.Name = s.Split(':')[1];
                                     }
                                 }
                                 else if (s.Substring(0, 3) == "TEL")
                                 {
-                                    if (parse)
+                                    if (contact != null)
                                     {
-                                        contact.AddPhone(s.Substring(s.LastIndexOf(':') + 1));
+                                        contact.AddPhone(s.Split(':')[1]);
                                     }
-                                    skip = false;
+                                    hasPhone = true;
                                 }
-                            }
-                            nextLine = j + 1;
-                            len = 0;
-                        }
-                        else
-                        {
-                            len++;
+                                break;
                         }
                     }
-                    read = nextLine;
-                    Debug.GC(true); // Logger.Info("Free memory = " + Debug.GC(true), "MEM");
                 }
-                handle.Close();
             }
             catch (Exception ex)
             {
@@ -250,6 +229,7 @@ namespace imBMW.Multimedia
             {
                 _offset = 0;
             }
+            _contactsScreen.Status = Localization.Current.Refreshing;
             var contacts = GetContacts((uint)_offset, (uint)_contactsPerPage);
             if (contacts.Count == 0 && _offset > 0)
             {
@@ -258,14 +238,19 @@ namespace imBMW.Multimedia
                 return;
             }
 
-            _contactsScreen.Status = Localization.Current.Refreshing;
             _contactsScreen.IsUpdateSuspended = true;
             var i = 2;
-            foreach (var c in contacts)
+            if (contacts.Count == 0)
             {
-                var contact = c as PhoneContact;
-                if (contact == null) continue;
-                _contactsScreen.AddItem(new MenuItem(contact.Name, it => CallPhone(contact.Phones)), i++); // TODO show phones
+                _contactsScreen.AddItem(new MenuItem(Localization.Current.NoContacts), i++);
+            }
+            else
+            {
+                foreach (var c in contacts)
+                {
+                    var contact = (PhoneContact)c;
+                    _contactsScreen.AddItem(new MenuItem(contact.Name, it => CallPhone(contact.Phones)), i++); // TODO show phones
+                }
             }
             _contactsScreen.IsUpdateSuspended = false;
             _contactsScreen.Status = "";
@@ -387,7 +372,7 @@ namespace imBMW.Multimedia
                     _menu.AddItem(new MenuItem(i => Localization.Current.PrevTrack, i => Prev()));
                     _menu.AddItem(new MenuItem(i => Localization.Current.Settings, MenuItemType.Button, MenuItemAction.GoToScreen) { GoToScreen = playerSettings });
                     _menu.AddBackButton();
-                    _menu.Updated += m => playerSettings.Status = m.Status;
+                    _menu.Updated += (m, a) => { if (a.Reason == MenuScreenUpdateReason.StatusChanged) { playerSettings.Status = m.Status; } };
                 }
                 return _menu;
             }

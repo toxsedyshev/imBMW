@@ -6,6 +6,8 @@ namespace imBMW.Features.Menu.Screens
     {
         protected static SettingsScreen _instance;
 
+        private bool canChangeLanguage = true;
+
         protected SettingsScreen()
         {
             TitleCallback = s => Localization.Current.Settings;
@@ -16,7 +18,10 @@ namespace imBMW.Features.Menu.Screens
         protected virtual void SetItems()
         {
             ClearItems();
-            AddItem(new MenuItem(i => Localization.Current.Language + ": " + Localization.Current.LanguageName, i => SwitchLanguage(), MenuItemType.Button, MenuItemAction.Refresh));
+            if (CanChangeLanguage)
+            {
+                AddItem(new MenuItem(i => Localization.Current.Language + ": " + Localization.Current.LanguageName, i => SwitchLanguage(), MenuItemType.Button, MenuItemAction.Refresh));
+            }
             AddItem(new MenuItem(i => Localization.Current.ComfortWindows, i => Comfort.AutoCloseWindows = i.IsChecked, MenuItemType.Checkbox)
             {
                 IsChecked = Comfort.AutoCloseWindows
@@ -34,6 +39,20 @@ namespace imBMW.Features.Menu.Screens
                 IsChecked = Comfort.AutoUnlockDoors
             });
             this.AddBackButton();
+        }
+
+        public bool CanChangeLanguage
+        {
+            get { return canChangeLanguage; }
+            set
+            {
+                if (canChangeLanguage == value)
+                {
+                    return;
+                }
+                canChangeLanguage = value;
+                SetItems();
+            }
         }
 
         void SwitchLanguage()

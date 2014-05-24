@@ -1,10 +1,34 @@
 using System;
 using System.Collections;
 using imBMW.Tools;
+using Microsoft.SPOT;
 
 namespace imBMW.Features.Menu
 {
+    public enum MenuScreenUpdateReason
+    {
+        Navigation,
+        StatusChanged,
+        ItemChanged,
+        Refresh
+    }
+
+    public class MenuScreenUpdateEventArgs : EventArgs
+    {
+        public object Item { get; protected set; }
+
+        public MenuScreenUpdateReason Reason { get; set; }
+
+        public MenuScreenUpdateEventArgs(MenuScreenUpdateReason reason, object item = null)
+        {
+            Reason = reason;
+            Item = item;
+        }
+    }
+
     public delegate void MenuScreenEventHandler(MenuScreen screen);
+
+    public delegate void MenuScreenUpdateEventHandler(MenuScreen screen, MenuScreenUpdateEventArgs args);
 
     public delegate void MenuScreenItemEventHandler(MenuScreen screen, MenuItem item);
 
@@ -63,7 +87,7 @@ namespace imBMW.Features.Menu
                     return;
                 }
                 _title = value;
-                OnUpdated();
+                OnUpdated(MenuScreenUpdateReason.Refresh);
             }
         }
 
@@ -80,7 +104,7 @@ namespace imBMW.Features.Menu
                     return;
                 }
                 _status = value;
-                OnUpdated();
+                OnUpdated(MenuScreenUpdateReason.StatusChanged);
             }
         }
 
@@ -98,7 +122,7 @@ namespace imBMW.Features.Menu
         {
             if (index >= 0 && index < Items.Count)
             {
-                return Items[index] as MenuItem;
+                return (MenuItem)Items[index];
             }
             return null;
         }
@@ -129,7 +153,7 @@ namespace imBMW.Features.Menu
             }
             menuItem.Changed += menuItem_Changed;
             menuItem.Clicked += menuItem_Clicked;
-            OnUpdated();
+            OnUpdated(MenuScreenUpdateReason.Refresh);
         }
 
         public void ClearItems()
@@ -142,7 +166,7 @@ namespace imBMW.Features.Menu
                 }
             }
             Items.Clear();
-            OnUpdated();
+            OnUpdated(MenuScreenUpdateReason.Refresh);
         }
 
         public virtual bool OnNavigatedTo(MenuBase menu)
@@ -227,7 +251,7 @@ namespace imBMW.Features.Menu
 
         public event MenuScreenItemEventHandler ItemClicked;
 
-        public event MenuScreenEventHandler Updated;
+        public event MenuScreenUpdateEventHandler Updated;
 
         public event MenuScreenEventHandler NavigatedTo;
 
@@ -250,10 +274,10 @@ namespace imBMW.Features.Menu
 
         protected void menuItem_Changed(MenuItem item)
         {
-            OnUpdated();
+            OnUpdated(MenuScreenUpdateReason.ItemChanged, item);
         }
 
-        protected void OnUpdated()
+        protected void OnUpdated(MenuScreenUpdateReason reason, object item = null)
         {
             if (_updateSuspended)
             {
@@ -262,7 +286,7 @@ namespace imBMW.Features.Menu
             var e = Updated;
             if (e != null)
             {
-                e(this);
+                e(this, new MenuScreenUpdateEventArgs(reason, item));
             }
         }
 
