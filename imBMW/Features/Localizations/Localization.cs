@@ -1,23 +1,20 @@
-using System;
-using Microsoft.SPOT;
-
 namespace imBMW.Features.Localizations
 {
     public abstract class Localization
     {
-        protected static Localization current;
+        protected static Localization _current;
 
         public static Localization Current
         {
             get
             {
-                if (current == null)
+                if (_current == null)
                 {
-                    current = new EnglishLocalization();
+                    _current = new EnglishLocalization();
                 } 
-                return Localization.current;
+                return _current;
             }
-            set { Localization.current = value; }
+            set { _current = value; }
         }
 
         #region Keys

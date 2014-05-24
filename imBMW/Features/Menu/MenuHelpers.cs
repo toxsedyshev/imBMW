@@ -1,5 +1,3 @@
-using System;
-using Microsoft.SPOT;
 using imBMW.Features.Localizations;
 
 namespace imBMW.Features.Menu

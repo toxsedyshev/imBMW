@@ -1,6 +1,3 @@
-using System;
-using Microsoft.SPOT;
-
 namespace imBMW.Features.Localizations
 {
     public class EnglishLocalization : Localization

@@ -1,5 +1,3 @@
-using System;
-using Microsoft.SPOT;
 using imBMW.iBus.Devices.Real;
 using imBMW.Tools;
 using imBMW.iBus;

@@ -1,5 +1,3 @@
-using System;
-using Microsoft.SPOT;
 using imBMW.Features.Menu;
 
 namespace imBMW.Multimedia

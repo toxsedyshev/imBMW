@@ -1,4 +1,3 @@
-using System;
 using Microsoft.SPOT;
 using imBMW.Tools;
 
@@ -29,45 +28,62 @@ namespace imBMW.iBus.Devices.Real
 
     #endregion
 
-
     public static class BodyModule
     {
         #region Messages
 
-        static Message MessageOpenTrunk = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Open trunk", 0x0C, 0x95, 0x01);
+        static readonly Message MessageOpenTrunk = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Open trunk", 0x0C, 0x95, 0x01);
 
-        static Message MessageLockDoors = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Lock doors", 0x0C, 0x4F, 0x01); // 0x0C, 0x97, 0x01
-        static Message MessageLockDriverDoor = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Lock driver door", 0x0C, 0x47, 0x01);
-        static Message MessageUnlockDoors = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Unlock doors", 0x0C, 0x45, 0x01); // 0x0C, 0x03, 0x01
+        static readonly Message MessageLockDoors = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Lock doors", 0x0C, 0x4F, 0x01); // 0x0C, 0x97, 0x01
+        static readonly Message MessageLockDriverDoor = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Lock driver door", 0x0C, 0x47, 0x01);
+        static readonly Message MessageUnlockDoors = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Unlock doors", 0x0C, 0x45, 0x01); // 0x0C, 0x03, 0x01
 
         //static Message MessageOpenWindows = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, 0x0C, 0x00, 0x65);
         
-        static Message MessageOpenWindowDriverFront = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Open driver front window", 0x0C, 0x52, 0x01);
-        static Message MessageOpenWindowDriverRear = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Open driver rear window", 0x0C, 0x41, 0x01);
-        static Message MessageOpenWindowPassengerFront = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Open passenger front window", 0x0C, 0x54, 0x01);
-        static Message MessageOpenWindowPassengerRear = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Open passenger rear window", 0x0C, 0x44, 0x01);
+        static readonly Message MessageOpenWindowDriverFront = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Open driver front window", 0x0C, 0x52, 0x01);
+        static readonly Message MessageOpenWindowDriverRear = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Open driver rear window", 0x0C, 0x41, 0x01);
+        static readonly Message MessageOpenWindowPassengerFront = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Open passenger front window", 0x0C, 0x54, 0x01);
+        static readonly Message MessageOpenWindowPassengerRear = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Open passenger rear window", 0x0C, 0x44, 0x01);
 
-        static Message MessageCloseWindowDriverFront = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Close driver front window", 0x0C, 0x53, 0x01);
-        static Message MessageCloseWindowDriverRear = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Close driver rear window", 0x0C, 0x42, 0x01);
-        static Message MessageCloseWindowPassengerFront = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Close passenger front window", 0x0C, 0x55, 0x01);
-        static Message MessageCloseWindowPassengerRear = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Close passenger rear window", 0x0C, 0x43, 0x01);
+        static readonly Message MessageCloseWindowDriverFront = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Close driver front window", 0x0C, 0x53, 0x01);
+        static readonly Message MessageCloseWindowDriverRear = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Close driver rear window", 0x0C, 0x42, 0x01);
+        static readonly Message MessageCloseWindowPassengerFront = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Close passenger front window", 0x0C, 0x55, 0x01);
+        static readonly Message MessageCloseWindowPassengerRear = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Close passenger rear window", 0x0C, 0x43, 0x01);
 
-        static Message MessageOpenSunroof = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Open sunroof", 0x0C, 0x7E, 0x01);
-        static Message MessageCloseSunroof = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Close sunroof", 0x0C, 0x7F, 0x01);
+        static readonly Message MessageOpenSunroof = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Open sunroof", 0x0C, 0x7E, 0x01);
+        static readonly Message MessageCloseSunroof = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Close sunroof", 0x0C, 0x7F, 0x01);
 
-        static Message MessageFoldDriverMirrorE39 = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Fold driver mirror", 0x0C, 0x01, 0x31, 0x01);
-        static Message MessageFoldPassengerMirrorE39 = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Fold passenger mirror", 0x0C, 0x02, 0x31, 0x01);
-        static Message MessageUnfoldDriverMirrorE39 = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Unfold driver mirror", 0x0C, 0x01, 0x30, 0x01);
-        static Message MessageUnfoldPassengerMirrorE39 = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Unfold passenger mirror", 0x0C, 0x02, 0x30, 0x01);
+        static readonly Message MessageFoldDriverMirrorE39 = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Fold driver mirror", 0x0C, 0x01, 0x31, 0x01);
+        static readonly Message MessageFoldPassengerMirrorE39 = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Fold passenger mirror", 0x0C, 0x02, 0x31, 0x01);
+        static readonly Message MessageUnfoldDriverMirrorE39 = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Unfold driver mirror", 0x0C, 0x01, 0x30, 0x01);
+        static readonly Message MessageUnfoldPassengerMirrorE39 = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Unfold passenger mirror", 0x0C, 0x02, 0x30, 0x01);
 
-        static Message MessageFoldMirrorsE46 = new Message(DeviceAddress.MirrorMemorySecond, DeviceAddress.MirrorMemory, "Fold mirrors", 0x6D, 0x90);
-        static Message MessageUnfoldMirrorsE46 = new Message(DeviceAddress.MirrorMemorySecond, DeviceAddress.MirrorMemory, "Unfold mirrors", 0x6D, 0xA0);
+        static readonly Message MessageFoldMirrorsE46 = new Message(DeviceAddress.MirrorMemorySecond, DeviceAddress.MirrorMemory, "Fold mirrors", 0x6D, 0x90);
+        static readonly Message MessageUnfoldMirrorsE46 = new Message(DeviceAddress.MirrorMemorySecond, DeviceAddress.MirrorMemory, "Unfold mirrors", 0x6D, 0xA0);
 
-        static Message MessageGetAnalogValues = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Get analog values", 0x0B, 0x01);
+        static readonly Message MessageGetAnalogValues = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Get analog values", 0x0B, 0x01);
+
+        private static readonly Message MessageTurnOffAllExteriorLights = new Message(DeviceAddress.BodyModule, DeviceAddress.GlobalBroadcastAddress, "Turn off all exterior lights", 0x76, 0x00);
+        private static readonly Message MessageTurnOffInteriorLights = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Turn off all interior lights", 0x0C, 0x01, 0x01);
+
+        private static readonly Message MessageTurnOnClownNose = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Turn on clown nose for 3 seconds", 0x0C, 0x4E, 0x01);
+        private static readonly Message MessageTurnOnInterorLights = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Turn on interior lights for 3 seconds", 0x0C, 0x60, 0x01);
+
+        private static readonly Message MessageFlashWarningLigths = new Message(DeviceAddress.BodyModule, DeviceAddress.GlobalBroadcastAddress, "Flash warning lights", 0x76, 0x02);
+        private static readonly Message MessageFlashLowbeams = new Message(DeviceAddress.BodyModule, DeviceAddress.GlobalBroadcastAddress, "Flash lowbeams", 0x76, 0x04);
+        private static readonly Message MessageFlashLowbeamsAndWarningLights = new Message(DeviceAddress.BodyModule, DeviceAddress.GlobalBroadcastAddress, "Flash lowbeams and warning lights", 0x76, 0x06);
+        private static readonly Message MessageFlashHighbeams = new Message(DeviceAddress.BodyModule, DeviceAddress.GlobalBroadcastAddress, "Flash highbeams", 0x76, 0x08);
+        private static readonly Message MessageFlashHighbeamsAndWarningLights = new Message(DeviceAddress.BodyModule, DeviceAddress.GlobalBroadcastAddress, "Flash highbeams and warning lights", 0x76, 0x0A);
+        private static readonly Message MessageFlashHighbeamsAndLowbeams = new Message(DeviceAddress.BodyModule, DeviceAddress.GlobalBroadcastAddress, "Flash highbeams and lowbeams", 0x76, 0x0C);
+        private static readonly Message MessageFlashHighbeamsAndLowbeamsAndWarningLights = new Message(DeviceAddress.BodyModule, DeviceAddress.GlobalBroadcastAddress, "Flash highbeams, lowbeams and warning lights", 0x76, 0x0E);
+        private static readonly Message MessageFlashDashBlinkers = new Message(DeviceAddress.LightControlModule, DeviceAddress.GlobalBroadcastAddress, "Flash dash blinkers", 0x5B, 0x60, 0x00, 0x04, 0x00);
+        private static readonly Message MessageFlashDashBlinkersFastSlowIntermitent = new Message(DeviceAddress.LightControlModule, DeviceAddress.GlobalBroadcastAddress, "Flash dash blinkers fast/slow intermittent", 0x5B, 0x60, 0x00, 0x80, 0x00);
+
+        private static readonly Message MessageCycleExteriorLightning = new Message(DeviceAddress.Diagnostic, DeviceAddress.GlobalBroadcastAddress, "Cycle through exterior lighting patterns", 0x0C, 0x01, 0x01);
 
         #endregion
 
-        static double batteryVoltage;
+        static double _batteryVoltage;
 
         static BodyModule()
         {
@@ -114,7 +130,7 @@ namespace imBMW.iBus.Devices.Real
 
         public static double BatteryVoltage
         {
-            get { return batteryVoltage; }
+            get { return _batteryVoltage; }
             private set
             {
                 // always notify to know that message was received
@@ -122,7 +138,7 @@ namespace imBMW.iBus.Devices.Real
                 {
                     return;
                 }*/
-                batteryVoltage = value;
+                _batteryVoltage = value;
 
                 var e = BatteryVoltageChanged;
                 if (e != null)

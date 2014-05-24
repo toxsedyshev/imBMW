@@ -1,8 +1,4 @@
-using System;
-using System.Text;
 using System.Threading;
-using System.Runtime.CompilerServices;
-using Microsoft.SPOT;
 using Microsoft.SPOT.Hardware;
 
 namespace System.IO.Ports
@@ -10,7 +6,7 @@ namespace System.IO.Ports
     /// <summary>
     /// Provides a connection to a serial communications port that supports line delimited reading and interruptable writing, including timeouts and DataReceived event implementation.
     /// </summary>
-    public class SerialInterruptPort : SerialInterruptPortBase, ISerialPort, IDisposable
+    public class SerialInterruptPort : SerialInterruptPortBase
     {
         /// <summary>
         /// The value of input pin when pauding the data output is requested. Default is true, that is, the input is of active high type.
@@ -35,7 +31,7 @@ namespace System.IO.Ports
             else
             {                                           // start monitoring the flow control pin for both edges
                 _busy = new InterruptPort(busySignal, false, Port.ResistorMode.PullDown, Port.InterruptMode.InterruptEdgeBoth);
-                _busy.OnInterrupt += new NativeEventHandler(OnBusyChanged);
+                _busy.OnInterrupt += OnBusyChanged;
             }
         }
 

@@ -1,7 +1,5 @@
 using imBMW.Features.Menu;
-using imBMW.iBus.Devices.Real;
 using imBMW.Tools;
-using Microsoft.SPOT;
 using Microsoft.SPOT.Hardware;
 using System;
 using System.Threading;
@@ -25,36 +23,36 @@ namespace imBMW.Multimedia
 
         const int VoiceOverMenuTimeoutSeconds = 60;
 
-        OutputPort iPod;
-        OutputPort iPodVolumeUp;
-        OutputPort iPodVolumeDown;
-        QueueThreadWorker iPodCommands;
+        readonly OutputPort _iPod;
+        readonly OutputPort _iPodVolumeUp;
+        readonly OutputPort _iPodVolumeDown;
+        readonly QueueThreadWorker _iPodCommands;
 
-        bool canControlVolume;
-        bool isInVoiceOverMenu;
-        DateTime voiceOverMenuStarted;
+        readonly bool _canControlVolume;
+        bool _isInVoiceOverMenu;
+        DateTime _voiceOverMenuStarted;
 
         public iPodViaHeadset(Cpu.Pin headsetControl, Cpu.Pin volumeUp = Cpu.Pin.GPIO_NONE, Cpu.Pin volumeDown = Cpu.Pin.GPIO_NONE)
         {
             Name = "iPod";
-            iPod = new OutputPort(headsetControl, false);
-            canControlVolume = volumeUp != Cpu.Pin.GPIO_NONE && volumeDown != Cpu.Pin.GPIO_NONE;
-            if (canControlVolume)
+            _iPod = new OutputPort(headsetControl, false);
+            _canControlVolume = volumeUp != Cpu.Pin.GPIO_NONE && volumeDown != Cpu.Pin.GPIO_NONE;
+            if (_canControlVolume)
             {
-                iPodVolumeUp = new OutputPort(volumeUp, false);
-                iPodVolumeDown = new OutputPort(volumeDown, false);
+                _iPodVolumeUp = new OutputPort(volumeUp, false);
+                _iPodVolumeDown = new OutputPort(volumeDown, false);
             }
 
-            iPodCommands = new QueueThreadWorker(ExecuteIPodCommand);
+            _iPodCommands = new QueueThreadWorker(ExecuteIPodCommand);
         }
 
         void DisposePorts()
         {
-            iPod.Dispose();
-            if (canControlVolume)
+            _iPod.Dispose();
+            if (_canControlVolume)
             {
-                iPodVolumeUp.Dispose();
-                iPodVolumeDown.Dispose();
+                _iPodVolumeUp.Dispose();
+                _iPodVolumeDown.Dispose();
             }
         }
 
@@ -73,9 +71,9 @@ namespace imBMW.Multimedia
 
         void PressIPodButton(bool longPause = false, int milliseconds = 50)
         {
-            iPod.Write(true);
+            _iPod.Write(true);
             Thread.Sleep(milliseconds);
-            iPod.Write(false);
+            _iPod.Write(false);
             Thread.Sleep(longPause ? 300 : 25); // Let iPod understand the command
         }
 
@@ -135,16 +133,16 @@ namespace imBMW.Multimedia
                     break;
 
                 case iPodCommand.VolumeUp:
-                    iPodVolumeUp.Write(true);
+                    _iPodVolumeUp.Write(true);
                     Thread.Sleep(50);
-                    iPodVolumeUp.Write(false);
+                    _iPodVolumeUp.Write(false);
                     Thread.Sleep(25);
                     break;
 
                 case iPodCommand.VolumeDown:
-                    iPodVolumeDown.Write(true);
+                    _iPodVolumeDown.Write(true);
                     Thread.Sleep(50);
-                    iPodVolumeDown.Write(false);
+                    _iPodVolumeDown.Write(false);
                     Thread.Sleep(25);
                     break;
             }
@@ -153,7 +151,7 @@ namespace imBMW.Multimedia
 
         void EnqueueIPodCommand(iPodCommand command)
         {
-            iPodCommands.Enqueue(command);
+            _iPodCommands.Enqueue(command);
         }
 
         #endregion
@@ -203,14 +201,14 @@ namespace imBMW.Multimedia
         public override bool RandomToggle()
         {
             // Fixing IsPlaying flag, when playing iPod was connected to paused CDC
-            isPlaying = !isPlaying;
+            _isPlaying = !_isPlaying;
             OnIsPlayingChanged(IsPlaying);
             return false; // Real status of iPod's shuffle-mode is unknown
         }
 
         public override void VolumeUp()
         {
-            if (canControlVolume)
+            if (_canControlVolume)
             {
                 EnqueueIPodCommand(iPodCommand.VolumeUp);
             }
@@ -218,7 +216,7 @@ namespace imBMW.Multimedia
 
         public override void VolumeDown()
         {
-            if (canControlVolume)
+            if (_canControlVolume)
             {
                 EnqueueIPodCommand(iPodCommand.VolumeDown);
             }
@@ -228,11 +226,11 @@ namespace imBMW.Multimedia
         {
             get
             {
-                return isPlaying;
+                return _isPlaying;
             }
             protected set
             {
-                if (isPlaying == value)
+                if (_isPlaying == value)
                 {
                     return;
                 }
@@ -249,7 +247,7 @@ namespace imBMW.Multimedia
                     return;
                 }
                 PressIPodButton(true);
-                isPlaying = value;
+                _isPlaying = value;
                 IsInVoiceOverMenu = false;
                 OnIsPlayingChanged(value);
             }
@@ -269,21 +267,21 @@ namespace imBMW.Multimedia
         {
             get
             {
-                if (isInVoiceOverMenu && (DateTime.Now - voiceOverMenuStarted).GetTotalSeconds() >= VoiceOverMenuTimeoutSeconds)
+                if (_isInVoiceOverMenu && (DateTime.Now - _voiceOverMenuStarted).GetTotalSeconds() >= VoiceOverMenuTimeoutSeconds)
                 {
                     IsInVoiceOverMenu = false;
                 }
-                return isInVoiceOverMenu;
+                return _isInVoiceOverMenu;
             }
             private set
             {
                 if (value)
                 {
                     OnStatusChanged("VoiceOver", PlayerEvent.Current);
-                    voiceOverMenuStarted = DateTime.Now;
+                    _voiceOverMenuStarted = DateTime.Now;
                     PressIPodButton(false, 5000);
                 }
-                isInVoiceOverMenu = value;
+                _isInVoiceOverMenu = value;
             }
         }
 

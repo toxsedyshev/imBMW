@@ -1,5 +1,3 @@
-using System;
-using Microsoft.SPOT;
 using Microsoft.SPOT.Hardware;
 
 namespace System.IO.Ports

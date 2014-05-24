@@ -1,5 +1,4 @@
 using System;
-using Microsoft.SPOT;
 
 namespace imBMW.Features.Menu
 {
@@ -25,10 +24,10 @@ namespace imBMW.Features.Menu
 
     public class MenuItem
     {
-        private string text;
-        private bool isChecked;
+        private string _text;
+        private bool _isChecked;
 
-        private GetTextHandler getTextCallback;
+        private readonly GetTextHandler _getTextCallback;
 
         public MenuItem(string text, MenuItemType type = MenuItemType.Text, MenuItemAction action = MenuItemAction.None)
         {
@@ -51,7 +50,7 @@ namespace imBMW.Features.Menu
         public MenuItem(GetTextHandler getTextCallback, MenuItemType type = MenuItemType.Text, MenuItemAction action = MenuItemAction.None)
             : this(String.Empty, type, action)
         {
-            this.getTextCallback = getTextCallback;
+            _getTextCallback = getTextCallback;
         }
 
         public MenuItem(GetTextHandler getTextCallback, MenuItemEventHandler callback, MenuItemType type = MenuItemType.Button, MenuItemAction action = MenuItemAction.None)
@@ -64,33 +63,33 @@ namespace imBMW.Features.Menu
         {
             get
             {
-                if (getTextCallback != null)
+                if (_getTextCallback != null)
                 {
-                    Text = getTextCallback(this);
+                    Text = _getTextCallback(this);
                 }
-                return text;
+                return _text;
             }
             set
             {
-                if (text == value)
+                if (_text == value)
                 {
                     return;
                 }
-                text = value;
+                _text = value;
                 Refresh();
             }
         }
 
         public bool IsChecked
         {
-            get { return isChecked; }
+            get { return _isChecked; }
             set
             {
-                if (isChecked == value)
+                if (_isChecked == value)
                 {
                     return;
                 }
-                isChecked = value;
+                _isChecked = value;
                 OnCheckedChanged();
             }
         }

@@ -1,6 +1,3 @@
-using System;
-using System.Reflection;
-
 namespace imBMW.iBus
 {
     public enum DeviceAddress : short
@@ -48,5 +45,4 @@ namespace imBMW.iBus
         Unset = 0x100,
         Unknown = 0x101
     }
-
 }

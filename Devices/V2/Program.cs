@@ -1,4 +1,5 @@
 ﻿using GHI.OSHW.Hardware;
+using imBMW.Features;
 using imBMW.iBus;
 using imBMW.iBus.Devices.Real;
 using imBMW.Tools;
@@ -10,65 +11,63 @@ using System.Threading;
 using GHI.Hardware.FEZCerb;
 using imBMW.Multimedia;
 using System.Collections;
-using System.Text;
-using imBMW.Tools;
 using Microsoft.SPOT.IO;
-using System.IO;
 using imBMW.Features.Menu;
 using imBMW.iBus.Devices.Emulators;
 using imBMW.Features.Menu.Screens;
-using imBMW.Features.Localizations;
 
 namespace imBMW.Devices.V2
 {
     public class Program
     {
-        const string version = "HW2 FW1.0.2";
-
         static OutputPort LED;
         static OutputPort ShieldLED;
 
-        static IAudioPlayer player;
+        static void Init2()
+        {
+            LED = new OutputPort(Pin.PA8, false);
 
-        static Timer fakeLogsTimer;
+            var player = new BluetoothOVC3860(Serial.COM2);
+            player.IsCurrentPlayer = true;
+            player.PlayerHostState = PlayerHostState.On;
+            player.IsPlayingChanged += (p, value) => LED.Write(value);
+            
+            //Button.OnPress(Pin.PC1, player.PlayPauseToggle);
+            //Button.OnPress(Pin.PC2, player.Next);
+            //Button.OnPress(Pin.PC3, player.Prev);
+
+            LED.Write(true);
+        }
+
+        class Button
+        {
+            static ArrayList buttons = new ArrayList();
+
+            public delegate void Action();
+
+            public static void OnPress(Cpu.Pin pin, Action callback)
+            {
+                InterruptPort btn = new InterruptPort(pin, true, Port.ResistorMode.PullUp, Port.InterruptMode.InterruptEdgeLow);
+                btn.OnInterrupt += (s, e, t) => callback();
+                buttons.Add(btn);
+            }
+        }
+
+        static IAudioPlayer _player;
 
         static void Init()
         {
             LED = new OutputPort(Pin.PA8, false);
 
+            const string version = "HW V2, FW V1.0";
+            SettingsScreen.Instance.Status = version;
+            Logger.Info(version);
+
             var sd = GetRootDirectory();
 
-            var settings = Settings.Init(sd != null ? sd + @"\imBMW.ini" : null);
-            var log = settings.Log || settings.LogToSD;
+            // todo get config
 
-            // TODO move to settings
-            Localization.Current = new EnglishLocalization();
-            Features.Comfort.AutoLockDoors = true;
-            Features.Comfort.AutoUnlockDoors = true;
-            Features.Comfort.AutoCloseWindows = true;
-            Logger.Info("Preferences inited");
-
-            #if DEBUG
-            log = true;
-            #else
-            // already inited in debug mode
-            if (settings.Log)
-            {
-                Logger.Logged += Logger_Logged;
-                Logger.Info("Logger inited");
-            }
-            #endif
-
-            if (settings.LogToSD && sd != null)
-            {
-                FileLogger.Init(sd + @"\Logs", () =>
-                {
-                    VolumeInfo.GetVolumes()[0].FlushAll();
-                });
-            }
-
-            Logger.Info(version);
-            SettingsScreen.Instance.Status = version;
+            // todo log to sd if logging turned on
 
             // Create serial port to work with Melexis TH3122
             ISerialPort iBusPort = new SerialPortTH3122(Serial.COM3, Pin.PC2, true);
@@ -86,26 +85,21 @@ namespace imBMW.Devices.V2
             }*/
 
             // Enable iBus Manager
-            iBus.Manager.Init(iBusPort);
+            Manager.Init(iBusPort);
             Logger.Info("iBus manager inited");
 
             Message sent1 = null, sent2 = null; // light "buffer" for last 2 messages
             bool isSent1 = false;
-            iBus.Manager.BeforeMessageReceived += (e) =>
+            Manager.BeforeMessageReceived += (e) =>
             {
                 LED.Write(Busy(true, 1));
             };
-            iBus.Manager.AfterMessageReceived += (e) =>
+            Manager.AfterMessageReceived += (e) =>
             {
                 LED.Write(Busy(false, 1));
-
-                if (!log)
-                {
-                    return;
-                }
-
+#if DEBUG
                 // Show only messages which are described
-                if (e.Message.Describe() == null) { return; }
+                //if (e.Message.Describe() == null) { return; }
                 // Filter CDC emulator messages echoed by iBus
                 //if (e.Message.SourceDevice == iBus.DeviceAddress.CDChanger) { return; }
                 if (e.Message.SourceDevice != DeviceAddress.Radio
@@ -126,33 +120,22 @@ namespace imBMW.Devices.V2
                         e.Message.ReceiverDescription = sent2.ReceiverDescription;
                     }
                 }
-                if (settings.LogMessageToASCII)
-                {
-                    Logger.Info(e.Message.ToPrettyString(true, true), "< ");
-                }
-                else
-                {
-                    Logger.Info(e.Message, "< ");
-                }
+                Logger.Info(e.Message, "< ");
                 /*if (e.Message.ReceiverDescription == null)
                 {
                     Logger.Info(ASCIIEncoding.GetString(e.Message.Data));
                 }*/
                 //Logger.Info(e.Message.PacketDump);
+#endif
             };
-            iBus.Manager.BeforeMessageSent += (e) =>
+            Manager.BeforeMessageSent += e =>
             {
                 LED.Write(Busy(true, 2));
             };
-            iBus.Manager.AfterMessageSent += (e) =>
+            Manager.AfterMessageSent += e =>
             {
                 LED.Write(Busy(false, 2));
-
-                if (!log)
-                {
-                    return;
-                }
-
+#if DEBUG
                 Logger.Info(e.Message, " >");
                 if (isSent1)
                 {
@@ -163,50 +146,50 @@ namespace imBMW.Devices.V2
                     sent2 = e.Message;
                 }
                 isSent1 = !isSent1;
+#endif
             };
             Logger.Info("iBus manager events subscribed");
 
-            // Set iPod or Bluetooth as AUX or CDC-emulator for Bordmonitor or Radio
-            player = new BluetoothOVC3860(Serial.COM2, sd != null ? sd + @"\contacts.vcf" : null);
+            // Enable comfort features
+            //Features.Comfort.AllFeaturesEnabled = true;
+            Comfort.AutoLockDoors = true;
+            Comfort.AutoUnlockDoors = true;
+            Comfort.AutoCloseWindows = true;
+            Logger.Info("Comfort features inited");
+
+			//var rcSwitch = new RCSwitch(Pin.PC0);
+			//Gates.Init(rcSwitch);
+			//Gates.AddGatesObserver(54.708527777777782f, 25.289972222222225f, 0.1f, GateToggleMethod.Send433MhzSignal, new[] { "477D33", "477D3C" });
+
+            // Set iPod or Bluetooth as AUX or CDC-emulator
+	        _player = new BluetoothOVC3860(Serial.COM2, sd != null ? sd + @"\contacts.vcf" : null);
             //player = new iPodViaHeadset(Pin.PC2);
             
-            if (settings.MenuMode != Tools.MenuMode.RadioCDC || Manager.FindDevice(DeviceAddress.OnBoardMonitor))
+            Radio.Init();
+            Logger.Info("Radio inited");
+            if (Manager.FindDevice(DeviceAddress.OnBoardMonitor))
             {
                 MediaEmulator emulator;
-                if (settings.MenuMode == Tools.MenuMode.BordmonitorCDC)
-                {
-                    emulator = new CDChanger(player);
-                    if (settings.MenuModeMK2)
-                    {
-                        Bordmonitor.MK2Mode = true;
-                        Localization.Current = new RadioLocalization();
-                        SettingsScreen.Instance.CanChangeLanguage = false;
-                    }
-                }
-                else
-                {
-                    emulator = new BordmonitorAUX(player);
-                }
+                emulator = new BordmonitorAUX(_player);
+                //emulator = new CDChanger(player);
                 //MenuScreen.MaxItemsCount = 6;
+                //Bordmonitor.MK2Mode = true;
                 BordmonitorMenu.Init(emulator);
-                Logger.Info("Bordmonitor menu inited");
+                Logger.Info("BordmonitorAUX inited");
             }
-            else
-            {
-                Localization.Current = new RadioLocalization();
-                SettingsScreen.Instance.CanChangeLanguage = false;
-                Radio.Init();
-                RadioMenu.Init(new CDChanger(player));
-                Logger.Info("Radio menu inited");
-            }
-
+			else
+			{
+				// TODO implement radio menu
+				//iBus.Devices.Emulators.CDChanger.Init(player);
+				Logger.Info("CDChanger emulator inited");
+			}
             ShieldLED = new OutputPort(Pin.PA7, false);
-            player.IsPlayingChanged += (p, s) =>
+            _player.IsPlayingChanged += (p, s) =>
             {
                 ShieldLED.Write(s);
                 RefreshLEDs();
             };
-            player.StatusChanged += (p, s, e) =>
+            _player.StatusChanged += (p, s, e) =>
             {
                 if (e == PlayerEvent.IncomingCall && !p.IsEnabled)
                 {
@@ -237,7 +220,7 @@ namespace imBMW.Devices.V2
         static void RefreshLEDs()
         {
             byte b = 0;
-            if (error)
+            if (_error)
             {
                 b = b.AddBit(0);
             }
@@ -245,7 +228,7 @@ namespace imBMW.Devices.V2
             {
                 //b = b.AddBit(2);
             }
-            if (player.IsPlaying)
+            if (_player.IsPlaying)
             {
                 b = b.AddBit(4);
             }
@@ -257,7 +240,7 @@ namespace imBMW.Devices.V2
             try
             {
                 Logger.Info("Mount", "SD");
-                GHI.OSHW.Hardware.StorageDev.MountSD();
+                StorageDev.MountSD();
                 Logger.Info("Mounted", "SD");
             }
             catch
@@ -283,10 +266,7 @@ namespace imBMW.Devices.V2
                         Logger.Info(folders[i]);*/
                     return rootDirectory;
                 }
-                else
-                {
-                    Logger.Error("Card not formatted!", "SD");
-                }
+                Logger.Error("Card not formatted!", "SD");
             }
             catch (Exception ex)
             {
@@ -298,20 +278,13 @@ namespace imBMW.Devices.V2
         static Timer blinkerTimer;
         static bool blinkerOn = true;
 
-        static byte busy = 0;
-        static bool error = false;
+        static byte _busy;
+        static bool _error;
 
         static bool Busy(bool busy, byte type)
         {
-            if (busy)
-            {
-                Program.busy = Program.busy.AddBit(type);
-            }
-            else
-            {
-                Program.busy = Program.busy.RemoveBit(type);
-            }
-            return Program.busy > 0;
+            _busy = busy ? _busy.AddBit(type) : _busy.RemoveBit(type);
+            return _busy > 0;
         }
 
         public static void Main()
@@ -328,14 +301,6 @@ namespace imBMW.Devices.V2
                 Init();
                 Debug.EnableGCMessages(false);
                 Logger.Info("Started!");
-
-                /*fakeLogsTimer = new Timer(s =>
-                {
-                    var m = Bordmonitor.ShowText("Hello world!", BordmonitorFields.Item, 1, true);
-                    //m.ReceiverDescription = null;
-                    Manager.ProcessMessage(m);
-                }, null, 0, 500);*/
-
                 Thread.Sleep(Timeout.Infinite);
             }
             catch (Exception ex)
@@ -347,43 +312,13 @@ namespace imBMW.Devices.V2
 
         static void Logger_Logged(LoggerArgs args)
         {
-            if (args.Priority == Tools.LogPriority.Error)
+            if (args.Priority == LogPriority.Error)
             {
                 // store errors to arraylist
-                error = true;
+                _error = true;
                 RefreshLEDs();
             }
             Debug.Print(args.LogString);
         }
-
-        /*static void Init2()
-       {
-           LED = new OutputPort(Pin.PA8, false);
-
-           var player = new BluetoothOVC3860(Serial.COM2);
-           player.IsCurrentPlayer = true;
-           player.PlayerHostState = PlayerHostState.On;
-           player.IsPlayingChanged += (p, value) => LED.Write(value);
-            
-           //Button.OnPress(Pin.PC1, player.PlayPauseToggle);
-           //Button.OnPress(Pin.PC2, player.Next);
-           //Button.OnPress(Pin.PC3, player.Prev);
-
-           LED.Write(true);
-       }
-
-       class Button
-       {
-           static ArrayList buttons = new ArrayList();
-
-           public delegate void Action();
-
-           public static void OnPress(Cpu.Pin pin, Action callback)
-           {
-               InterruptPort btn = new InterruptPort(pin, true, Port.ResistorMode.PullUp, Port.InterruptMode.InterruptEdgeLow);
-               btn.OnInterrupt += (s, e, t) => callback();
-               buttons.Add(btn);
-           }
-       }*/
     }
 }

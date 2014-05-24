@@ -7,14 +7,14 @@ namespace imBMW.Features.Menu.Screens
 {
     public class BordcomputerScreen : MenuScreen
     {
-        protected static BordcomputerScreen instance;
+        protected static BordcomputerScreen _instance;
 
-        protected MenuItem itemPlayer;
-        protected MenuItem itemFav;
-        protected MenuItem itemBC;
-        protected MenuItem itemSettings;
+        protected MenuItem _itemPlayer;
+        protected MenuItem _itemFav;
+        protected MenuItem _itemBc;
+        protected MenuItem _itemSettings;
 
-        protected DateTime lastUpdated;
+        protected DateTime _lastUpdated;
 
         protected BordcomputerScreen()
         {
@@ -41,11 +41,11 @@ namespace imBMW.Features.Menu.Screens
         {
             //BodyModule.UpdateBatteryVoltage(); // TODO solve mem leak
             var now = DateTime.Now;
-            if (lastUpdated != DateTime.MinValue && (now - lastUpdated).GetTotalSeconds() < 4)
+            if (_lastUpdated != DateTime.MinValue && (now - _lastUpdated).GetTotalSeconds() < 4)
             {
                 return false;
             }
-            lastUpdated = now;
+            _lastUpdated = now;
             OnUpdated(MenuScreenUpdateReason.Refresh);
             return true;
         }
@@ -54,10 +54,10 @@ namespace imBMW.Features.Menu.Screens
         {
             get
             {
-                var l = Math.Max(Localization.Current.Speed.Length, Localization.Current.Revs.Length);
-                l = Math.Max(l, Localization.Current.Voltage.Length);
-                l = Math.Max(l, Localization.Current.Engine.Length);
-                l = Math.Max(l, Localization.Current.Outside.Length);
+                var l = System.Math.Max(Localization.Current.Speed.Length, Localization.Current.Revs.Length);
+                l = System.Math.Max(l, Localization.Current.Voltage.Length);
+                l = System.Math.Max(l, Localization.Current.Engine.Length);
+                l = System.Math.Max(l, Localization.Current.Outside.Length);
                 return (uint)(l + 3);
             }
         }
@@ -89,14 +89,7 @@ namespace imBMW.Features.Menu.Screens
 
         public static BordcomputerScreen Instance
         {
-            get
-            {
-                if (instance == null)
-                {
-                    instance = new BordcomputerScreen();
-                }
-                return instance;
-            }
+            get { return _instance ?? (_instance = new BordcomputerScreen()); }
         }
     }
 }

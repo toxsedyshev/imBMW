@@ -1,15 +1,14 @@
 using System;
-using Microsoft.SPOT;
 
 namespace imBMW.Tools
 {
     public static class NumHelpers
     {
-        const string hexChars = "0123456789ABCDEF";
+        const string HexChars = "0123456789ABCDEF";
 
         public static String ToHex(this byte b)
         {
-            return hexChars[b >> 4].ToString() + hexChars[b & 0x0F].ToString();
+            return HexChars[b >> 4] + HexChars[b & 0x0F].ToString();
         }
 
         public static byte Invert(this byte b)
@@ -24,7 +23,7 @@ namespace imBMW.Tools
 
         public static bool HasBit(this byte b, byte bitIndex)
         {
-            checkByteBitIndex(bitIndex);
+            CheckByteBitIndex(bitIndex);
             return b.HasBits((byte)(1 << bitIndex));
         }
 
@@ -35,7 +34,7 @@ namespace imBMW.Tools
 
         public static byte RemoveBit(this byte b, byte bitIndex)
         {
-            checkByteBitIndex(bitIndex);
+            CheckByteBitIndex(bitIndex);
             return b.RemoveBits((byte)(1 << bitIndex));
         }
 
@@ -46,13 +45,13 @@ namespace imBMW.Tools
 
         public static byte AddBit(this byte b, byte bitIndex)
         {
-            checkByteBitIndex(bitIndex);
+            CheckByteBitIndex(bitIndex);
             return b.AddBits((byte)(1 << bitIndex));
         }
 
-        static void checkByteBitIndex(byte bitIndex)
+        static void CheckByteBitIndex(byte bitIndex)
         {
-            if (bitIndex < 0 || bitIndex > 7)
+            if (bitIndex > 7)
             {
                 throw new ArgumentException("bitIndex");
             }

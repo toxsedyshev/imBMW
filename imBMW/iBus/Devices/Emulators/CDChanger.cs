@@ -1,9 +1,5 @@
-using System;
-using Microsoft.SPOT;
-using Microsoft.SPOT.Hardware;
 using System.Threading;
 using imBMW.Tools;
-using imBMW.iBus.Devices.Real;
 using imBMW.Multimedia;
 
 namespace imBMW.iBus.Devices.Emulators
@@ -12,22 +8,22 @@ namespace imBMW.iBus.Devices.Emulators
     {
         const int StopDelayMilliseconds = 1000;
 
-        Thread announceThread;
-        Timer stopDelay;
+        readonly Thread _announceThread;
+        Timer _stopDelay;
 
         #region Messages
 
-        static Message MessagePollResponse = new Message(DeviceAddress.CDChanger, DeviceAddress.Broadcast, 0x02, 0x00);
-        static Message MessageAnnounce = new Message(DeviceAddress.CDChanger, DeviceAddress.Broadcast, 0x02, 0x01);
-        static Message MessagePlayingDisk1Track1 = new Message(DeviceAddress.CDChanger, DeviceAddress.Radio, "Playing D1 T1", 0x39, 0x02, 0x09, 0x00, 0x3F, 0x00, 0x01, 0x01); // was 39 00 09
-        static Message MessageStoppedDisk1Track1 = new Message(DeviceAddress.CDChanger, DeviceAddress.Radio, "Stopped D1 T1", 0x39, 0x00, 0x02, 0x00, 0x3F, 0x00, 0x01, 0x01); // try 39 00 0C ?
-        static Message MessagePausedDisk1Track1  = new Message(DeviceAddress.CDChanger, DeviceAddress.Radio, "Paused D1 T1",  0x39, 0x01, 0x0C, 0x00, 0x3F, 0x00, 0x01, 0x01);
+        static readonly Message MessagePollResponse = new Message(DeviceAddress.CDChanger, DeviceAddress.Broadcast, 0x02, 0x00);
+        static readonly Message MessageAnnounce = new Message(DeviceAddress.CDChanger, DeviceAddress.Broadcast, 0x02, 0x01);
+        static readonly Message MessagePlayingDisk1Track1 = new Message(DeviceAddress.CDChanger, DeviceAddress.Radio, "Playing D1 T1", 0x39, 0x02, 0x09, 0x00, 0x3F, 0x00, 0x01, 0x01); // was 39 00 09
+        static readonly Message MessageStoppedDisk1Track1 = new Message(DeviceAddress.CDChanger, DeviceAddress.Radio, "Stopped D1 T1", 0x39, 0x00, 0x02, 0x00, 0x3F, 0x00, 0x01, 0x01); // try 39 00 0C ?
+        static readonly Message MessagePausedDisk1Track1  = new Message(DeviceAddress.CDChanger, DeviceAddress.Radio, "Paused D1 T1",  0x39, 0x01, 0x0C, 0x00, 0x3F, 0x00, 0x01, 0x01);
 
-        static byte[] DataCurrentDiskTrackRequest = new byte[] { 0x38, 0x00, 0x00 };
-        static byte[] DataStop  = new byte[] { 0x38, 0x01, 0x00 };
-        static byte[] DataPause = new byte[] { 0x38, 0x02, 0x00 };
-        static byte[] DataPlay  = new byte[] { 0x38, 0x03, 0x00 };
-        static byte[] DataRandomPlay   = new byte[] { 0x38, 0x08, 0x01 };
+        static readonly byte[] DataCurrentDiskTrackRequest = { 0x38, 0x00, 0x00 };
+        static readonly byte[] DataStop  = { 0x38, 0x01, 0x00 };
+        static readonly byte[] DataPause = { 0x38, 0x02, 0x00 };
+        static readonly byte[] DataPlay  = { 0x38, 0x03, 0x00 };
+        static readonly byte[] DataRandomPlay   = { 0x38, 0x08, 0x01 };
 
         #endregion
 
@@ -36,8 +32,8 @@ namespace imBMW.iBus.Devices.Emulators
         {
             Manager.AddMessageReceiverForDestinationDevice(DeviceAddress.CDChanger, ProcessCDCMessage);
 
-            announceThread = new Thread(announce);
-            announceThread.Start();
+            _announceThread = new Thread(Announce);
+            _announceThread.Start();
         }
 
         #region Player control
@@ -139,10 +135,10 @@ namespace imBMW.iBus.Devices.Emulators
 
         void CancelStopDelay()
         {
-            if (stopDelay != null)
+            if (_stopDelay != null)
             {
-                stopDelay.Dispose();
-                stopDelay = null;
+                _stopDelay.Dispose();
+                _stopDelay = null;
             }
         }
 
@@ -162,9 +158,9 @@ namespace imBMW.iBus.Devices.Emulators
                     Play();
                 }
 
-                if (announceThread.ThreadState != ThreadState.Suspended)
+                if (_announceThread.ThreadState != ThreadState.Suspended)
                 {
-                    announceThread.Suspend();
+                    _announceThread.Suspend();
                 }
             }
 
@@ -174,14 +170,14 @@ namespace imBMW.iBus.Devices.Emulators
             {
                 CancelStopDelay();
                 // Don't pause immediately - the radio can send "start play" command soon
-                stopDelay = new Timer(delegate
+                _stopDelay = new Timer(delegate
                 {
                     FireIsEnabledChanged();
                     Pause();
 
-                    if (announceThread.ThreadState == ThreadState.Suspended)
+                    if (_announceThread.ThreadState == ThreadState.Suspended)
                     {
-                        announceThread.Resume();
+                        _announceThread.Resume();
                     }
                 }, null, StopDelayMilliseconds, 0);
             }
@@ -191,14 +187,7 @@ namespace imBMW.iBus.Devices.Emulators
         {
             if (m.Data.Compare(DataCurrentDiskTrackRequest))
             {
-                if (Player.IsPlaying)
-                {
-                    Manager.EnqueueMessage(MessagePlayingDisk1Track1);
-                }
-                else
-                {
-                    Manager.EnqueueMessage(MessagePausedDisk1Track1);
-                }
+                Manager.EnqueueMessage(Player.IsPlaying ? MessagePlayingDisk1Track1 : MessagePausedDisk1Track1);
                 m.ReceiverDescription = "CD status request";
             }
             else if (m.Data.Compare(DataPlay))
@@ -216,14 +205,7 @@ namespace imBMW.iBus.Devices.Emulators
             else if (m.Data.Compare(MessageRegistry.DataPollRequest))
             {
                 Manager.EnqueueMessage(MessagePollResponse);
-                if (Player.IsPlaying)
-                {
-                    Manager.EnqueueMessage(MessagePlayingDisk1Track1);
-                }
-                else
-                {
-                    Manager.EnqueueMessage(MessagePausedDisk1Track1);
-                }
+                Manager.EnqueueMessage(Player.IsPlaying ? MessagePlayingDisk1Track1 : MessagePausedDisk1Track1);
             }
             else if (m.Data.Compare(DataRandomPlay))
             {
@@ -246,7 +228,7 @@ namespace imBMW.iBus.Devices.Emulators
             }
         }
 
-        static void announce()
+        static void Announce()
         {
             while (true)
             {

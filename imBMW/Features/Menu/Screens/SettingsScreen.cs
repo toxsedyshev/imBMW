@@ -1,12 +1,10 @@
-using System;
-using Microsoft.SPOT;
 using imBMW.Features.Localizations;
 
 namespace imBMW.Features.Menu.Screens
 {
     public class SettingsScreen : MenuScreen
     {
-        protected static SettingsScreen instance;
+        protected static SettingsScreen _instance;
 
         private bool canChangeLanguage = true;
 
@@ -71,14 +69,7 @@ namespace imBMW.Features.Menu.Screens
 
         public static SettingsScreen Instance
         {
-            get
-            {
-                if (instance == null)
-                {
-                    instance = new SettingsScreen();
-                }
-                return instance;
-            }
+            get { return _instance ?? (_instance = new SettingsScreen()); }
         }
     }
 }

@@ -1,5 +1,4 @@
 using System;
-using Microsoft.SPOT;
 
 namespace imBMW.Tools
 {
@@ -22,7 +21,7 @@ namespace imBMW.Tools
             {
                 take = array.Length;
             }
-            byte[] result = new byte[take];
+            var result = new byte[take];
             if (extend && take > array.Length)
             {
                 take = array.Length;
@@ -163,9 +162,9 @@ namespace imBMW.Tools
                 alignOffset = (byte)(limit - len);
             }
             char[] chars = s.ToCharArray();
-            byte c;
             for (byte i = 0; i < len; i++)
             {
+                byte c;
                 if (chars[i] > 0xff)
                 {
                     c = 0x19;

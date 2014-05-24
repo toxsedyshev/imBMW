@@ -1,5 +1,4 @@
 using System;
-using Microsoft.SPOT;
 using imBMW.iBus.Devices.Real;
 using imBMW.Multimedia;
 
@@ -11,10 +10,10 @@ namespace imBMW.iBus.Devices.Emulators
 
     public abstract class MediaEmulator
     {
-        private bool isEnabled;
-        private IAudioPlayer player;
+        private bool _isEnabled;
+        private IAudioPlayer _player;
 
-        public MediaEmulator(IAudioPlayer player)
+        protected MediaEmulator(IAudioPlayer player)
         {
             Player = player;
 
@@ -23,14 +22,14 @@ namespace imBMW.iBus.Devices.Emulators
 
         public bool IsEnabled
         {
-            get { return isEnabled; }
+            get { return _isEnabled; }
             protected set
             {
-                if (isEnabled == value)
+                if (_isEnabled == value)
                 {
                     return;
                 }
-                isEnabled = value;
+                _isEnabled = value;
                 OnIsEnabledChanged(value);
             }
         }
@@ -63,7 +62,7 @@ namespace imBMW.iBus.Devices.Emulators
         {
             get
             {
-                return player;
+                return _player;
             }
             set
             {
@@ -71,11 +70,11 @@ namespace imBMW.iBus.Devices.Emulators
                 {
                     throw new ArgumentNullException();
                 }
-                if (player != null)
+                if (_player != null)
                 {
-                    UnsetPlayer(player);
+                    UnsetPlayer(_player);
                 }
-                player = value;
+                _player = value;
                 SetupPlayer(value);
             }
         }

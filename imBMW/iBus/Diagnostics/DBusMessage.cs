@@ -1,5 +1,3 @@
-using System;
-using Microsoft.SPOT;
 using imBMW.Tools;
 
 namespace imBMW.iBus.Diagnostics
@@ -46,7 +44,7 @@ namespace imBMW.iBus.Diagnostics
                 return false;
             }
 
-            byte packetLength = (byte)(packet[1] + 2);
+            var packetLength = (byte)(packet[1] + 2);
             if (length < packetLength)
             {
                 return false;
@@ -67,7 +65,7 @@ namespace imBMW.iBus.Diagnostics
                 return true;
             }
 
-            byte packetLength = (byte)(packet[1] + 2);
+            var packetLength = (byte)(packet[1] + 2);
             if (packetLength < PacketLengthMin
                 || packetLength > PacketLengthMax)
             {

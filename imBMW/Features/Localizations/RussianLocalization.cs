@@ -1,7 +1,4 @@
-﻿using System;
-using Microsoft.SPOT;
-
-namespace imBMW.Features.Localizations
+﻿namespace imBMW.Features.Localizations
 {
     public class RussianLocalization : Localization
     {

@@ -1,5 +1,3 @@
-using System;
-using Microsoft.SPOT;
 using imBMW.Tools;
 using System.Threading;
 
@@ -20,9 +18,8 @@ namespace System.IO.Ports
         /// </summary>
         public bool IsWriteEchoed = false;
 
-        DateTime LastRead = DateTime.Now;
-
-        Timer resumeTimer;
+        DateTime _lastRead = DateTime.Now;
+        Timer _resumeTimer;
 
         /// <summary>
         /// Creates a new instance of SerialInterruptPort class, allowing to specify buffer sizes and blocking input port.
@@ -58,7 +55,7 @@ namespace System.IO.Ports
             if (busy)
             {
                 DisposeResumeTimer();
-                resumeTimer = new Timer((s) =>
+                _resumeTimer = new Timer((s) =>
                 {
                     OnBusyChanged(false);
                     DisposeResumeTimer();
@@ -68,10 +65,10 @@ namespace System.IO.Ports
 
         void DisposeResumeTimer()
         {
-            if (resumeTimer != null)
+            if (_resumeTimer != null)
             {
-                resumeTimer.Dispose();
-                resumeTimer = null;
+                _resumeTimer.Dispose();
+                _resumeTimer = null;
             }
         }
 
@@ -79,7 +76,7 @@ namespace System.IO.Ports
         {
             get
             {
-                return (DateTime.Now - LastRead).GetTotalMilliseconds() >= AfterReadDelay;
+                return (DateTime.Now - _lastRead).GetTotalMilliseconds() >= AfterReadDelay;
             }
         }
 
@@ -88,7 +85,7 @@ namespace System.IO.Ports
             int res = base.ReadDirect(data, offset, length);
             if (res > 0 && (!IsWriteEchoed || _writeThread == null))
             {
-                LastRead = DateTime.Now;
+                _lastRead = DateTime.Now;
                 OnBusyChanged();
             }
             return res;

@@ -1,4 +1,3 @@
-using System;
 using Microsoft.SPOT;
 using imBMW.Tools;
 
@@ -21,7 +20,6 @@ namespace imBMW.iBus.Devices.Real
     public delegate void KeyRemovedEventHandler(KeyEventArgs e);
 
     #endregion
-
 
     public static class Immobiliser
     {

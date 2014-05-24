@@ -4,7 +4,7 @@ using System.Threading;
 
 namespace System.IO.Ports
 {
-    public abstract class SerialInterruptPortBase : SerialPortBase, ISerialPort, IDisposable
+    public abstract class SerialInterruptPortBase : SerialPortBase, IDisposable
     {
         protected SerialPort _port; // The actual serial port we are wrapping.
         
@@ -15,7 +15,7 @@ namespace System.IO.Ports
         /// <param name="writeBufferSize">The size of output buffer in bytes. Data output is paused for <see cref="AfterWriteDelay"/> milliseconds every time this amount of data is sent. Can be zero to disable pausing.</param>
         /// <param name="readBufferSize">The size of input buffer in bytes. DataReceived event will fire only after this amount of data is received. Default is 1.</param>
         /// <param name="readTimeout">Timeout of port reading.</param>
-        public SerialInterruptPortBase(SerialPortConfiguration config, int writeBufferSize, int readBufferSize, int readTimeout = Timeout.Infinite)
+        protected SerialInterruptPortBase(SerialPortConfiguration config, int writeBufferSize, int readBufferSize, int readTimeout = Timeout.Infinite)
             : base(writeBufferSize, readBufferSize)
         {
             _port = new SerialPort(config.PortName, (int)config.BaudRate, config.Parity, config.DataBits, config.StopBits); // creating the serial port
@@ -30,7 +30,7 @@ namespace System.IO.Ports
         /// Creates a new instance of SerialInterruptPort class, with hardware flow control and output pausing disabled. This corresponds to standard <see cref="SerialPort"/> class behavior.
         /// </summary>
         /// <param name="config">An object that contains the configuration information for the serial port.</param>
-        public SerialInterruptPortBase(SerialPortConfiguration config) : this(config, 0, 1) { }
+        protected SerialInterruptPortBase(SerialPortConfiguration config) : this(config, 0, 1) { }
 
         /// <summary>
         /// Releases resources used by a serial port.

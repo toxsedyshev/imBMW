@@ -1,5 +1,4 @@
 using System;
-using Microsoft.SPOT;
 using System.Collections;
 using System.Threading;
 
@@ -9,9 +8,9 @@ namespace imBMW.Tools
     {
         public delegate void ProcessItem(object item);
 
-        Thread queueThread;
-        ProcessItem processItem;
-        object lockObj = new object();
+        readonly Thread _queueThread;
+        readonly ProcessItem _processItem;
+        readonly object _lockObj = new object();
 
         public QueueThreadWorker(ProcessItem processItem)
         {
@@ -19,27 +18,19 @@ namespace imBMW.Tools
             {
                 throw new ArgumentException("processItem is null");
             }
-            this.processItem = processItem;
-            queueThread = new Thread(queueWorker);
-            queueThread.Priority = ThreadPriority.AboveNormal;
-            queueThread.Start();
+            _processItem = processItem;
+            _queueThread = new Thread(QueueWorker) {Priority = ThreadPriority.AboveNormal};
+            _queueThread.Start();
         }
 
-        void queueWorker()
+        void QueueWorker()
         {
-            object m;
             while (true)
             {
-                lock (lockObj)
+                object m;
+                lock (_lockObj)
                 {
-                    if (Count > 0)
-                    {
-                        m = Dequeue();
-                    }
-                    else
-                    {
-                        m = null;
-                    }
+                    m = Count > 0 ? Dequeue() : null;
                 }
                 if (m == null)
                 {
@@ -48,11 +39,11 @@ namespace imBMW.Tools
                 }
                 try
                 {
-                    processItem(m);
+                    _processItem(m);
                 }
                 catch (Exception ex)
                 {
-                    Logger.Error(ex, "while processing QueueThreadWorker item '" + m.ToString() + "'");
+                    Logger.Error(ex, "while processing QueueThreadWorker item '" + m + "'");
                 }
             }
         }
@@ -63,7 +54,7 @@ namespace imBMW.Tools
             {
                 throw new ArgumentException("item is null");
             }
-            lock (lockObj)
+            lock (_lockObj)
             {
                 base.Enqueue(item);
                 CheckRunning();
@@ -76,7 +67,7 @@ namespace imBMW.Tools
             {
                 throw new ArgumentException("items is null");
             }
-            lock (lockObj)
+            lock (_lockObj)
             {
                 foreach (object item in items)
                 {
@@ -97,9 +88,9 @@ namespace imBMW.Tools
              * Tried AutoResetEvent instead of Suspend/Resume but no success because of strange slowness.
              */
             // TODO Check ResetEvent on LDR and LED
-            if (queueThread.ThreadState == ThreadState.Suspended || queueThread.ThreadState == ThreadState.SuspendRequested)
+            if (_queueThread.ThreadState == ThreadState.Suspended || _queueThread.ThreadState == ThreadState.SuspendRequested)
             {
-                queueThread.Resume();
+                _queueThread.Resume();
             }
         }
     }

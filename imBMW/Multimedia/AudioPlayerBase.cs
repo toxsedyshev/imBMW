@@ -1,16 +1,15 @@
 using System;
-using Microsoft.SPOT;
-using imBMW.iBus.Devices.Real;
 using imBMW.Features.Menu;
 
 namespace imBMW.Multimedia
 {
     public abstract class AudioPlayerBase : IAudioPlayer
     {
-        bool isCurrentPlayer;
-        PlayerHostState playerHostState;
-        bool isEnabled;
-        protected bool isPlaying;
+        bool _isCurrentPlayer;
+        PlayerHostState _playerHostState;
+        bool _isEnabled;
+
+        protected bool _isPlaying;
 
         public virtual void Play()
         {
@@ -62,15 +61,15 @@ namespace imBMW.Multimedia
         {
             get
             {
-                return isEnabled;
+                return _isEnabled;
             }
             private set
             {
-                if (isEnabled == value)
+                if (_isEnabled == value)
                 {
                     return;
                 }
-                isEnabled = value;
+                _isEnabled = value;
                 OnIsEnabledChanged(value);
             }
         }
@@ -79,15 +78,15 @@ namespace imBMW.Multimedia
         {
             get
             {
-                return playerHostState;
+                return _playerHostState;
             }
             set
             {
-                if (playerHostState == value)
+                if (_playerHostState == value)
                 {
                     return;
                 }
-                playerHostState = value;
+                _playerHostState = value;
                 OnPlayerHostStateChanged(value);
             }
         }
@@ -96,15 +95,15 @@ namespace imBMW.Multimedia
         {
             get
             {
-                return isCurrentPlayer;
+                return _isCurrentPlayer;
             }
             set
             {
-                if (isCurrentPlayer == value)
+                if (_isCurrentPlayer == value)
                 {
                     return;
                 }
-                isCurrentPlayer = value;
+                _isCurrentPlayer = value;
                 OnIsCurrentPlayerChanged(value);
             }
         }
@@ -120,7 +119,7 @@ namespace imBMW.Multimedia
             {
                 Pause();
             }
-            else if (PlayerHostState == Multimedia.PlayerHostState.On)
+            else if (PlayerHostState == PlayerHostState.On)
             {
                 Play();
             }
@@ -133,7 +132,7 @@ namespace imBMW.Multimedia
 
         void CheckIsEnabled()
         {
-            IsEnabled = PlayerHostState == Multimedia.PlayerHostState.On && IsCurrentPlayer;
+            IsEnabled = PlayerHostState == PlayerHostState.On && IsCurrentPlayer;
         }
 
         public event IsPlayingHandler IsPlayingChanged;
