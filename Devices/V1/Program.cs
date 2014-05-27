@@ -16,6 +16,7 @@ using System.Threading;
 
 namespace imBMW.Devices.V1
 {
+    // TODO make abstract imBMW.Device class
     public class Program
     {
         /**
@@ -171,9 +172,9 @@ namespace imBMW.Devices.V1
             {
                 Localization.Current = new RadioLocalization();
                 SettingsScreen.Instance.CanChangeLanguage = false;
-                Radio.Init();
+                Radio.HasMID = Manager.FindDevice(DeviceAddress.MultiInfoDisplay);
                 RadioMenu.Init(new CDChanger(player));
-                Logger.Info("Radio menu inited");
+                Logger.Info("Radio menu inited" + (Radio.HasMID ? " with MID" : ""));
             }
 
             LED.Write(true);

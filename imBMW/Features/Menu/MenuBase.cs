@@ -35,7 +35,7 @@ namespace imBMW.Features.Menu
         #region MediaEmulator members
 
         Timer displayStatusDelayTimer;
-        protected const int displayStatusDelay = 2000; // TODO make abstract
+        protected const int displayStatusDelay = 900; // TODO make abstract
 
         protected abstract int StatusTextMaxlen { get; }
 

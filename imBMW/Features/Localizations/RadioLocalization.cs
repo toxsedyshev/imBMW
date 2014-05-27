@@ -34,5 +34,10 @@ namespace imBMW.Features.Localizations
         {
             get { return "BC"; }
         }
+
+        public override string DegreeCelsius
+        {
+            get { return " C"; }
+        }
     }
 }

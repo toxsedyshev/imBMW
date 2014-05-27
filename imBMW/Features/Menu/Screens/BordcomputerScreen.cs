@@ -22,7 +22,7 @@ namespace imBMW.Features.Menu.Screens
             SetItems();
 
             // TODO subscribe and unsubscribe ZKE and IKE and update voltage on navigation events
-            BodyModule.BatteryVoltageChanged += v => { WithUpdateSuspended(s => Status = ""); if (!UpdateItems()) { OnUpdated(MenuScreenUpdateReason.Refresh); } };
+            BodyModule.BatteryVoltageChanged += v => { WithUpdateSuspended(s => Status = ""); UpdateItems(true); };
             InstrumentClusterElectronics.SpeedRPMChanged += e => UpdateItems();
             InstrumentClusterElectronics.TemperatureChanged += e => UpdateItems();
         }
@@ -37,11 +37,11 @@ namespace imBMW.Features.Menu.Screens
             return nav;
         }
 
-        protected bool UpdateItems()
+        protected bool UpdateItems(bool force = false)
         {
             //BodyModule.UpdateBatteryVoltage(); // TODO solve mem leak
             var now = DateTime.Now;
-            if (lastUpdated != DateTime.MinValue && (now - lastUpdated).GetTotalSeconds() < 4)
+            if (!force && lastUpdated != DateTime.MinValue && (now - lastUpdated).GetTotalSeconds() < 4)
             {
                 return false;
             }
@@ -65,18 +65,18 @@ namespace imBMW.Features.Menu.Screens
         protected virtual void SetItems()
         {
             ClearItems();
-            AddItem(new MenuItem(i => (Localization.Current.Speed + ":").AppendToLength(FirstColumnLength) + InstrumentClusterElectronics.CurrentSpeed + Localization.Current.KMH));
-            AddItem(new MenuItem(i => (Localization.Current.Revs + ":").AppendToLength(FirstColumnLength) + InstrumentClusterElectronics.CurrentRPM));
-            AddItem(new MenuItem(i => (Localization.Current.Voltage + ":").AppendToLength(FirstColumnLength) + BodyModule.BatteryVoltage.ToString("F1") + " " + Localization.Current.VoltageShort, i => UpdateVoltage()));
+            AddItem(new MenuItem(i => Localization.Current.Speed + ": " + InstrumentClusterElectronics.CurrentSpeed + Localization.Current.KMH));
+            AddItem(new MenuItem(i => Localization.Current.Revs + ": " + InstrumentClusterElectronics.CurrentRPM));
+            AddItem(new MenuItem(i => Localization.Current.Voltage + ": " + BodyModule.BatteryVoltage.ToString("F1") + " " + Localization.Current.VoltageShort, i => UpdateVoltage()));
             AddItem(new MenuItem(i =>
             {
                 var coolant = InstrumentClusterElectronics.TemperatureCoolant == sbyte.MinValue ? "-" : InstrumentClusterElectronics.TemperatureCoolant.ToString();
-                return (Localization.Current.Engine + ":").AppendToLength(FirstColumnLength) + coolant + "°C";
+                return Localization.Current.Engine + ": " + coolant + Localization.Current.DegreeCelsius;
             }));
             AddItem(new MenuItem(i =>
             {
                 var outside = InstrumentClusterElectronics.TemperatureOutside == sbyte.MinValue ? "-" : InstrumentClusterElectronics.TemperatureOutside.ToString();
-                return (Localization.Current.Outside + ":").AppendToLength(FirstColumnLength) + outside + "°C";
+                return Localization.Current.Outside + ": " + outside + Localization.Current.DegreeCelsius;
             }));
             this.AddBackButton();
         }

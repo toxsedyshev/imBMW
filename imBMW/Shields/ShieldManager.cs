@@ -19,9 +19,9 @@ namespace imBMW.Shields
             return (Cpu.Pin)Ports[port];
         }
 
-        public static Cpu.AnalogChannel GetAnalogChannel(this ShieldPort port)
+        /*public static Cpu.AnalogChannel GetAnalogChannel(this ShieldPort port)
         {
-            return (Cpu.AnalogChannel)Ports[port];
+            return null;// TODO 4.1 (Cpu.AnalogChannel)Ports[port];
         }
 
         public static ArrayList InitShields(ShieldPort detectPort)
@@ -39,6 +39,6 @@ namespace imBMW.Shields
                 shields.Add(new BluetoothOVC3860Shield());
             }
             return shields;
-        }
+        }*/
     }
 }

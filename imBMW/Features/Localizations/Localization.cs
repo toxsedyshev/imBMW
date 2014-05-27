@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Microsoft.SPOT;
 
 namespace imBMW.Features.Localizations
@@ -103,6 +103,8 @@ namespace imBMW.Features.Localizations
         public abstract string Previous { get; }
         
         public abstract string NoContacts { get; }
+
+        public virtual string DegreeCelsius { get { return "°C"; } }
 
         /*
         

@@ -12,12 +12,8 @@ namespace imBMW.iBus.Devices.Real
         const int displayTextDelay = 150;
 
         static Timer displayTextDelayTimer;
-        static bool hasMID = false;
 
-        public static void Init()
-        {
-            hasMID = Manager.FindDevice(DeviceAddress.MultiInfoDisplay);
-        }
+        public static bool HasMID { get; set; }
 
         static void ClearTimer()
         {
@@ -48,7 +44,7 @@ namespace imBMW.iBus.Devices.Real
         {
             ClearTimer();
 
-            if (hasMID)
+            if (HasMID)
             {
                 DisplayTextMID(s, align);
             }

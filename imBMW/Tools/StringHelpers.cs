@@ -81,6 +81,17 @@ namespace imBMW.Tools
             return new string(encoding.GetChars(bytes, offset, length));
         }
 
+        #if MF_FRAMEWORK_VERSION_V4_1
+        public static char[] GetChars(this Encoding encoding, byte[] bytes, int offset, int length)
+        {
+            if (offset != 0 || length != bytes.Length)
+            {
+                bytes = bytes.SkipAndTake(offset, length);
+            }
+            return encoding.GetChars(bytes);
+        }
+        #endif
+
         public static bool IsNullOrEmpty(string str)
         {
             return str == null || str.Length == 0;

@@ -96,7 +96,7 @@ namespace imBMW.Features.Menu
                     shownItemIndex = 0;
                 }
                 var item = CurrentScreen.GetItem(shownItemIndex);
-                if (CurrentScreen.ItemsCount > 1 && item != null && item.Action == MenuItemAction.GoBackScreen)
+                if (CurrentScreen.ItemsCount > 1 && (item == null || item.Action == MenuItemAction.GoBackScreen))
                 {
                     shownItemIndex++;
                     return ShownItemIndex;
@@ -164,6 +164,7 @@ namespace imBMW.Features.Menu
                         break;
                 }
             }
+            // TODO bind switch tracks, rnd, scan
         }
 
         protected override void ScreenNavigatedTo(MenuScreen screen)
@@ -194,18 +195,23 @@ namespace imBMW.Features.Menu
                     RefreshScreenWithDelay();
                     break;
                 case MenuScreenUpdateReason.StatusChanged:
+                    if (CurrentScreen.Status == String.Empty)
+                    {
+                        UpdateScreen(MenuScreenUpdateReason.Refresh);
+                        return;
+                    }
                     showText = CurrentScreen.Status;
                     align = TextAlign.Center;
                     RefreshScreenWithDelay();
                     break;
                 default:
                     showText = GetShownItemString();
-                    var separator = showText.IndexOf("  ");
+                    var separator = showText.IndexOf(": ");
                     if (separator >= 0)
                     {
                         if (itemScrolled)
                         {
-                            showText = showText.Substring(0, separator);
+                            showText = showText.Substring(0, separator + 1);
                             RefreshScreenWithDelay();
                         }
                         else
@@ -215,7 +221,7 @@ namespace imBMW.Features.Menu
                     }
                     break;
             }
-            if (delayUpdateScreen)
+            if (true) //(delayUpdateScreen)
             {
                 Radio.DisplayTextWithDelay(showText, align);
             }

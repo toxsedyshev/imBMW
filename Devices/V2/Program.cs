@@ -195,9 +195,9 @@ namespace imBMW.Devices.V2
             {
                 Localization.Current = new RadioLocalization();
                 SettingsScreen.Instance.CanChangeLanguage = false;
-                Radio.Init();
+                Radio.HasMID = Manager.FindDevice(DeviceAddress.MultiInfoDisplay);
                 RadioMenu.Init(new CDChanger(player));
-                Logger.Info("Radio menu inited");
+                Logger.Info("Radio menu inited" + (Radio.HasMID ? " with MID" : ""));
             }
 
             ShieldLED = new OutputPort(Pin.PA7, false);
