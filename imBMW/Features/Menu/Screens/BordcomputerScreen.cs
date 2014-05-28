@@ -16,33 +16,65 @@ namespace imBMW.Features.Menu.Screens
 
         protected DateTime lastUpdated;
 
+        const int updateLimitSeconds = 3;
+
         protected BordcomputerScreen()
         {
             TitleCallback = s => Localization.Current.BordcomputerShort;
             SetItems();
-
-            // TODO subscribe and unsubscribe ZKE and IKE and update voltage on navigation events
-            BodyModule.BatteryVoltageChanged += v => { WithUpdateSuspended(s => Status = ""); UpdateItems(true); };
-            InstrumentClusterElectronics.SpeedRPMChanged += e => UpdateItems();
-            InstrumentClusterElectronics.TemperatureChanged += e => UpdateItems();
         }
 
         public override bool OnNavigatedTo(MenuBase menu)
         {
-            var nav = base.OnNavigatedTo(menu);
-            if (nav)
+            if (base.OnNavigatedTo(menu))
             {
+                BodyModule.BatteryVoltageChanged += BodyModule_BatteryVoltageChanged;
+                InstrumentClusterElectronics.SpeedRPMChanged += InstrumentClusterElectronics_SpeedRPMChanged;
+                InstrumentClusterElectronics.TemperatureChanged += InstrumentClusterElectronics_TemperatureChanged;
+
                 UpdateVoltage();
+                return true;
             }
-            return nav;
+            return false;
+        }
+
+        public override bool OnNavigatedFrom(MenuBase menu)
+        {
+            if (base.OnNavigatedFrom(menu))
+            {
+                BodyModule.BatteryVoltageChanged -= BodyModule_BatteryVoltageChanged;
+                InstrumentClusterElectronics.SpeedRPMChanged -= InstrumentClusterElectronics_SpeedRPMChanged;
+                InstrumentClusterElectronics.TemperatureChanged -= InstrumentClusterElectronics_TemperatureChanged;
+                return true;
+            }
+            return false;
+        }
+
+        void InstrumentClusterElectronics_TemperatureChanged(TemperatureEventArgs e)
+        {
+            UpdateItems();
+        }
+
+        void InstrumentClusterElectronics_SpeedRPMChanged(SpeedRPMEventArgs e)
+        {
+            UpdateItems();
+        }
+
+        void BodyModule_BatteryVoltageChanged(double voltage)
+        {
+            UpdateItems();
         }
 
         protected bool UpdateItems(bool force = false)
         {
-            //BodyModule.UpdateBatteryVoltage(); // TODO solve mem leak
             var now = DateTime.Now;
-            if (!force && lastUpdated != DateTime.MinValue && (now - lastUpdated).GetTotalSeconds() < 4)
+            int span;
+            if (!force && lastUpdated != DateTime.MinValue && (span = (now - lastUpdated).GetTotalSeconds()) < updateLimitSeconds)
             {
+                if (span > updateLimitSeconds / 2)
+                {
+                    BodyModule.UpdateBatteryVoltage();
+                }
                 return false;
             }
             lastUpdated = now;
@@ -83,7 +115,6 @@ namespace imBMW.Features.Menu.Screens
 
         protected void UpdateVoltage()
         {
-            Status = Localization.Current.Refreshing; 
             BodyModule.UpdateBatteryVoltage();
         }
 
