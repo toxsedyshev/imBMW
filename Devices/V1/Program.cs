@@ -28,7 +28,7 @@ namespace imBMW.Devices.V1
          *
          */
 
-        const string version = "HW2 FW1.0.2";
+        const string version = "HW1 FW1.0.3";
 
         static OutputPort LED;
         static IAudioPlayer player;
@@ -65,6 +65,10 @@ namespace imBMW.Devices.V1
                 iBusPort = new SerialPortHub(iBusPort, cdc);
                 Logger.Info("Serial port hub started");
             }
+
+            // Enable iBus Manager
+            iBus.Manager.Init(iBusPort);
+            Logger.Info("iBus manager inited");
 
             Message sent1 = null, sent2 = null; // light "buffer" for last 2 messages
             bool isSent1 = false;
