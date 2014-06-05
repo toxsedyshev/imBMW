@@ -85,7 +85,7 @@ namespace imBMW.Features.Menu
         #region Menu control
 
         int shownItemIndex;
-        bool itemScrolled;
+        //bool itemScrolled;
 
         public int ShownItemIndex
         {
@@ -118,7 +118,7 @@ namespace imBMW.Features.Menu
         {
             if (m.Data.Length == 3 && m.Data[0] == 0x38 && m.Data[1] == 0x06)
             {
-                delayUpdateScreen = true;
+                //delayUpdateScreen = true;
                 // switch cd buttons:
                 //   2 - select
                 //
@@ -131,22 +131,22 @@ namespace imBMW.Features.Menu
                 switch (cdNumber)
                 {
                     case 0x02:
+                        UpdateScreen(MenuScreenUpdateReason.Refresh);
                         var item = ShownItem;
                         if (item != null)
                         {
-                            UpdateScreen(MenuScreenUpdateReason.Refresh);
                             item.Click();
                         }
                         break;
                     case 0x03:
                         ShownItemIndex--;
-                        itemScrolled = true;
-                        UpdateScreen(MenuScreenUpdateReason.Refresh);
+                        //itemScrolled = true;
+                        UpdateScreen(MenuScreenUpdateReason.Scroll);
                         break;
                     case 0x04:
                         ShownItemIndex++;
-                        itemScrolled = true;
-                        UpdateScreen(MenuScreenUpdateReason.Refresh);
+                        //itemScrolled = true;
+                        UpdateScreen(MenuScreenUpdateReason.Scroll);
                         break;
                     case 0x05:
                         NavigateBack();
@@ -164,7 +164,20 @@ namespace imBMW.Features.Menu
                         break;
                 }
             }
-            // TODO bind switch tracks, rnd, scan
+            else if (m.Data.Length == 3 && m.Data[0] == 0x38 && m.Data[1] == 0x0A)
+            {
+                //delayUpdateScreen = true;
+                switch (m.Data[2])
+                {
+                    case 0x00:
+                        mediaEmulator.Player.Next();
+                        break;
+                    case 0x01:
+                        mediaEmulator.Player.Prev();
+                        break;
+                }
+            }
+            // TODO bind rnd, scan
         }
 
         protected override void ScreenNavigatedTo(MenuScreen screen)
@@ -178,7 +191,7 @@ namespace imBMW.Features.Menu
 
         #region Drawing members
 
-        bool delayUpdateScreen;
+        //bool delayUpdateScreen;
         Timer refreshScreenDelayTimer;
         const int refreshScreenDelay = 1000;
 
@@ -209,7 +222,7 @@ namespace imBMW.Features.Menu
                     var separator = showText.IndexOf(": ");
                     if (separator >= 0)
                     {
-                        if (itemScrolled)
+                        if (args.Reason == MenuScreenUpdateReason.Scroll)
                         {
                             showText = showText.Substring(0, separator + 1);
                             RefreshScreenWithDelay();
@@ -221,16 +234,16 @@ namespace imBMW.Features.Menu
                     }
                     break;
             }
-            if (true) //(delayUpdateScreen)
-            {
+            //if (delayUpdateScreen)
+            //{
                 Radio.DisplayTextWithDelay(showText, align);
-            }
-            else
-            {
-                Radio.DisplayText(showText, align);
-            }
-            delayUpdateScreen = false;
-            itemScrolled = false;
+            //}
+            //else
+            //{
+            //    Radio.DisplayText(showText, align);
+            //}
+            //delayUpdateScreen = false;
+            //itemScrolled = false;
         }
 
         protected void CancelRefreshScreenWithDelay()

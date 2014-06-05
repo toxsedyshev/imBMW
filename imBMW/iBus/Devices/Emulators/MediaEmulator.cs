@@ -124,7 +124,7 @@ namespace imBMW.iBus.Devices.Emulators
             }
         }
 
-        void MultiFunctionSteeringWheel_ButtonPressed(MFLButton button)
+        protected virtual void MultiFunctionSteeringWheel_ButtonPressed(MFLButton button)
         {
             if (!IsEnabled)
             {
@@ -132,15 +132,6 @@ namespace imBMW.iBus.Devices.Emulators
             }
             switch (button)
             {
-                case MFLButton.Next:
-                    Next();
-                    break;
-                case MFLButton.Prev:
-                    Prev();
-                    break;
-                case MFLButton.RT:
-                    MFLRT();
-                    break;
                 case MFLButton.Dial:
                     MFLDial();
                     break;

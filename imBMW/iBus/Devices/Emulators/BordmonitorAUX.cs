@@ -32,6 +32,25 @@ namespace imBMW.iBus.Devices.Emulators
             Manager.AddMessageReceiverForSourceDevice(DeviceAddress.Radio, ProcessRadioMessage);
         }
 
+        protected override void MultiFunctionSteeringWheel_ButtonPressed(MFLButton button)
+        {
+            if (!IsEnabled)
+            {
+                return;
+            }
+            switch (button)
+            {
+                case MFLButton.Next:
+                    Next();
+                    break;
+                case MFLButton.Prev:
+                    Prev();
+                    break;
+            }
+
+            base.MultiFunctionSteeringWheel_ButtonPressed(button);
+        }
+
         #region AUX
 
         void ProcessRadioMessage(Message m)

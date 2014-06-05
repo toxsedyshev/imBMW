@@ -9,7 +9,7 @@ namespace imBMW.iBus.Devices.Real
     {
         public const byte DisplayTextMaxLen = 11;
 
-        const int displayTextDelay = 150;
+        const int displayTextDelay = 200;
 
         static Timer displayTextDelayTimer;
 

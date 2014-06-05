@@ -10,7 +10,8 @@ namespace imBMW.Features.Menu
         Navigation,
         StatusChanged,
         ItemChanged,
-        Refresh
+        Refresh,
+        Scroll
     }
 
     public class MenuScreenUpdateEventArgs : EventArgs

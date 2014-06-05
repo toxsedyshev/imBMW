@@ -27,7 +27,7 @@ namespace imBMW.iBus.Devices.Emulators
         static byte[] DataStop  = new byte[] { 0x38, 0x01, 0x00 };
         static byte[] DataPause = new byte[] { 0x38, 0x02, 0x00 };
         static byte[] DataPlay  = new byte[] { 0x38, 0x03, 0x00 };
-        static byte[] DataRandomPlay   = new byte[] { 0x38, 0x08, 0x01 };
+        static byte[] DataRandomPlay = new byte[] { 0x38, 0x08, 0x01 };
 
         #endregion
 
@@ -239,11 +239,11 @@ namespace imBMW.iBus.Devices.Emulators
                 //Radio.DisplayText("imBMW", TextAlign.Center);
                 m.ReceiverDescription = "Pause";
             }
-            else if (m.Data[0] == 0x38)
+            /*else if (m.Data[0] == 0x38)
             {
                 // TODO remove
                 Logger.Warning("Need response!!!");
-            }
+            }*/
         }
 
         static void announce()
