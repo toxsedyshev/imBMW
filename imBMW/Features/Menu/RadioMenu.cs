@@ -170,9 +170,17 @@ namespace imBMW.Features.Menu
                 switch (m.Data[2])
                 {
                     case 0x00:
+                        if (CurrentScreen != mediaEmulator.Player.Menu)
+                        {
+                            UpdateScreen(MenuScreenUpdateReason.Refresh);
+                        }
                         mediaEmulator.Player.Next();
                         break;
                     case 0x01:
+                        if (CurrentScreen != mediaEmulator.Player.Menu)
+                        {
+                            UpdateScreen(MenuScreenUpdateReason.Refresh);
+                        }
                         mediaEmulator.Player.Prev();
                         break;
                 }
