@@ -24,10 +24,12 @@ Visit [imBMW YouTube playlist](http://www.youtube.com/playlist?list=PLDuwqawzvaz
 Stay in touch with [imBMW in vk.com](http://vk.com/imbmw) social network.  
 Photos, videos and creation process of imBMW V1 and V2 devices are located on [e46club.ru forum](http://bmwfanatics.ru/forumvb/viewtopic.php?f=32&t=92399) (for now, only in Russian).
 
-![imBMW V2 + Bluetooth DIY](./Images/v2_proto.jpg "imBMW V2 + Bluetooth DIY")
+![imBMW V2 + Bluetooth first batch](./Images/v2_some_items.jpg "imBMW V2 + Bluetooth first batch")
 
-One screen for example. Playing Bluetooth music, custom bordcomputer, russian UI:  
-![imBMW UI](./Images/screen1.jpg "imBMW UI")
+Some screens for example. Playing Bluetooth music, custom bordcomputer, additional features, russian UI:  
+![imBMW Bluetooth](./Images/screen_bt.jpg "imBMW Bluetooth")  
+![imBMW Bordcomputer](./Images/screen_bc.jpg "imBMW Bordcomputer")  
+![imBMW Features Settings](./Images/screen_set.jpg "imBMW Features Settings")
 
 imBMW compatability
 ------------------
