@@ -7,6 +7,7 @@ using imBMW.Tools;
 using imBMW.Features.Menu.Screens;
 using imBMW.Features.Menu;
 using imBMW.Features.Localizations;
+using System.Text;
 
 namespace imBMW.iBus.Devices.Emulators
 {
@@ -21,8 +22,8 @@ namespace imBMW.iBus.Devices.Emulators
 
         static byte[] DataCD = new byte[] { 0x23, 0x62, 0x10, 0x43, 0x44 };
         static byte[] DataCDStartPlaying = new byte[] { 0x38, 0x03, 0x00 };
-        static byte[] DataFM = new byte[] { 0xA5, 0x62, 0x01, 0x41, 0x20, 0x20, 0x46, 0x4D, 0x20 };
-        static byte[] DataAM = new byte[] { 0xA5, 0x62, 0x01, 0x41, 0x20, 0x20, 0x41, 0x4D, 0x20 };
+        static byte[] DataBand = new byte[] { 0xA5, 0x62, 0x01, 0x41 };
+        static string[] RadioBands = new string[] { "  FM ", " FMD ", " FM1 ", " FM2 ", " LW  ", " LWA ", " MW  ", " MWA ", " SW  ", " SWA " };
 
         #endregion
 
@@ -65,13 +66,21 @@ namespace imBMW.iBus.Devices.Emulators
                 IsRadioActive = false;
                 m.ReceiverDescription = "Radio Off";
             }
-            else if (m.Data.Compare(Bordmonitor.DataAUX))
+            else if (!IsAUXSelected && m.Data.Compare(Bordmonitor.DataAUX))
             {
                 IsAUXSelected = true;
             }
-            else if (m.Data.Compare(DataFM) || m.Data.Compare(DataAM) || m.Data.StartsWith(DataCDStartPlaying))
+            else if (IsAUXSelected && m.Data.StartsWith(DataCDStartPlaying))
             {
                 IsAUXSelected = false;
+            }
+            else if (IsAUXSelected && m.Data.StartsWith(DataBand))
+            {
+                var band = ASCIIEncoding.GetString(m.Data.Skip(DataBand.Length));
+                if (RadioBands.Contains(band))
+                {
+                    IsAUXSelected = false;
+                }
             }
         }
 

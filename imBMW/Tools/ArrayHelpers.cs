@@ -38,6 +38,11 @@ namespace imBMW.Tools
             return result;
         }
 
+        public static byte[] Skip(this byte[] array, int skip)
+        {
+            return array.SkipAndTake(skip, array.Length - skip);
+        }
+
         public static bool Compare(this byte[] array1, params byte[] array2)
         {
             return array1.Compare(false, array2);
@@ -176,6 +181,18 @@ namespace imBMW.Tools
                 }
                 data[i + alignOffset + offset] = c;
             }
+        }
+
+        public static bool Contains(this string[] array, string s)
+        {
+            foreach (var a in array)
+            {
+                if (a == s)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }

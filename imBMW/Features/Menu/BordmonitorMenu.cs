@@ -250,10 +250,12 @@ namespace imBMW.Features.Menu
                         break;
                     case 0x23:
                         m.ReceiverDescription = "BM button Mode";
+                        IsEnabled = false;
                         Bordmonitor.EnableRadioMenu(); // TODO test [and remove]
                         break;
                     case 0x04:
                         m.ReceiverDescription = "BM button Tone";
+                        // TODO fix Tone
                         Bordmonitor.EnableRadioMenu(); // TODO test [and remove]
                         break;
                     case 0x10:

@@ -213,7 +213,7 @@ namespace imBMW.Features.Menu
                 case MenuScreenUpdateReason.Navigation:
                     showText = CurrentScreen.Title;
                     align = TextAlign.Center;
-                    RefreshScreenWithDelay();
+                    RefreshScreenWithDelay(MenuScreenUpdateReason.Scroll);
                     break;
                 case MenuScreenUpdateReason.StatusChanged:
                     if (CurrentScreen.Status == String.Empty)
@@ -263,12 +263,12 @@ namespace imBMW.Features.Menu
             }
         }
 
-        protected void RefreshScreenWithDelay()
+        protected void RefreshScreenWithDelay(MenuScreenUpdateReason reason = MenuScreenUpdateReason.Refresh)
         {
             CancelRefreshScreenWithDelay();
             refreshScreenDelayTimer = new Timer(delegate
             {
-                UpdateScreen(MenuScreenUpdateReason.Refresh);
+                UpdateScreen(reason);
             }, null, refreshScreenDelay, 0);
         }
 
