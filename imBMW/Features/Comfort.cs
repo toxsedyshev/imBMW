@@ -12,8 +12,7 @@ namespace imBMW.Features
         enum Command
         {
             FullCloseWindows,
-            FullOpenWindows,
-            UnlockDoors
+            FullOpenWindows
         }
         #endregion
 
@@ -40,8 +39,7 @@ namespace imBMW.Features
                 }
                 if (e.Speed == 0)
                 {
-                    // TODO lock after doors opening, not after car stops
-                    //needLockDoors = true;
+                    needLockDoors = true;
                 }
             };
             InstrumentClusterElectronics.IgnitionStateChanged += (e) =>
@@ -56,7 +54,7 @@ namespace imBMW.Features
                 {
                     if (AutoUnlockDoors)
                     {
-                        commands.Enqueue(Command.UnlockDoors);
+                        BodyModule.UnlockDoors();
                     }
                     needUnlockDoors = false;
                     needLockDoors = true;
@@ -109,11 +107,6 @@ namespace imBMW.Features
                     BodyModule.OpenWindows();
                     Thread.Sleep(3000);
                     BodyModule.OpenWindows();
-                    break;
-                case Command.UnlockDoors:
-                    BodyModule.UnlockDoors();
-                    Thread.Sleep(500);
-                    BodyModule.UnlockDoors();
                     break;
             }
         }

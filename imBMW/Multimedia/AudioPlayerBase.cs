@@ -38,9 +38,9 @@ namespace imBMW.Multimedia
 
         public abstract void MFLRT();
 
-        public abstract void MFLDial();
+        public abstract void VoiceButtonPress();
 
-        public abstract void MFLDialLong();
+        public abstract void VoiceButtonLongPress();
 
         public abstract bool RandomToggle();
 

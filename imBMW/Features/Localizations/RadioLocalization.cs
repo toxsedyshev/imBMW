@@ -1,5 +1,6 @@
 using System;
 using Microsoft.SPOT;
+using imBMW.Tools;
 
 namespace imBMW.Features.Localizations
 {
@@ -37,7 +38,7 @@ namespace imBMW.Features.Localizations
 
         public override string DegreeCelsius
         {
-            get { return " C"; }
+            get { return CharIcons.Degree + "C"; }
         }
     }
 }

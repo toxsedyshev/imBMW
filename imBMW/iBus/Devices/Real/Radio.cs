@@ -65,7 +65,7 @@ namespace imBMW.iBus.Devices.Real
         private static void DisplayTextRadio(string s, TextAlign align)
         {
             byte[] data = new byte[] { 0x23, 0x42, 0x30 };
-            data = data.PadRight(0x19, DisplayTextMaxLen);
+            data = data.PadRight(0xFF, DisplayTextMaxLen);
             data.PasteASCII(s, 3, DisplayTextMaxLen, align);
             Manager.EnqueueMessage(new Message(DeviceAddress.Telephone, DeviceAddress.InstrumentClusterElectronics, "Show text \"" + s + "\" on the radio", data));
         }

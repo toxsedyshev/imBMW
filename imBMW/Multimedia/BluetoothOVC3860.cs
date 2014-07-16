@@ -241,7 +241,7 @@ namespace imBMW.Multimedia
             var i = 2;
             if (contacts.Count == 0)
             {
-                contactsScreen.AddItem(new MenuItem(Localization.Current.NoContacts), i++);
+                contactsScreen.AddItem(new MenuItem(mi => Localization.Current.NoContacts), i++);
             }
             else
             {
@@ -293,13 +293,13 @@ namespace imBMW.Multimedia
             PlayPauseToggle();
         }
 
-        public override void MFLDial()
+        public override void VoiceButtonPress()
         {
             SendCommand(CmdAnswer);
             OnStatusChanged("AnswerCall", PlayerEvent.Voice); // TODO call status and reject
         }
 
-        public override void MFLDialLong()
+        public override void VoiceButtonLongPress()
         {
             SendCommand(CmdVoiceCall);
             OnStatusChanged("VoiceCall", PlayerEvent.Voice);
@@ -583,6 +583,12 @@ namespace imBMW.Multimedia
                     IsPlaying = false;
                     Logger.Info("Cancel pairing", "BT");
                     OnStatusChanged(Localization.Current.NotPaired, PlayerEvent.Wireless);
+                    break;
+                case "IF":
+                    if (!IsEnabled)
+                    {
+                        SendCommand("CO");
+                    }
                     break;
                 default:
                     if (s.IsNumeric())

@@ -90,6 +90,19 @@ namespace imBMW.Features.Menu
             return icon + text;
         }
 
+        protected string TextWithIcon(char icon, string text = null)
+        {
+            if (StringHelpers.IsNullOrEmpty(text))
+            {
+                return icon + "";
+            }
+            if (text.Length + 1 < StatusTextMaxlen)
+            {
+                return icon + " " + text;
+            }
+            return icon + text;
+        }
+
         void mediaEmulator_PlayerChanged(IAudioPlayer player)
         {
             HomeScreen.Instance.PlayerScreen = player.Menu;

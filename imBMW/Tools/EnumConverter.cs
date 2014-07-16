@@ -35,6 +35,8 @@ namespace imBMW.Tools
                 case MFLButton.Next: return "Next";
                 case MFLButton.Prev: return "Prev";
                 case MFLButton.RT: return "RT";
+                case MFLButton.ModeRadio: return "ModeRadio";
+                case MFLButton.ModeTelephone: return "ModeTelephone";
                 case MFLButton.Dial: return "Dial";
                 case MFLButton.DialLong: return "DialLong";
             }

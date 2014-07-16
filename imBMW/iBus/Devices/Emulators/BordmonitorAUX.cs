@@ -35,18 +35,17 @@ namespace imBMW.iBus.Devices.Emulators
 
         protected override void MultiFunctionSteeringWheel_ButtonPressed(MFLButton button)
         {
-            if (!IsEnabled)
+            if (IsEnabled && !mflModeTelephone)
             {
-                return;
-            }
-            switch (button)
-            {
-                case MFLButton.Next:
-                    Next();
-                    break;
-                case MFLButton.Prev:
-                    Prev();
-                    break;
+                switch (button)
+                {
+                    case MFLButton.Next:
+                        Next();
+                        break;
+                    case MFLButton.Prev:
+                        Prev();
+                        break;
+                }
             }
 
             base.MultiFunctionSteeringWheel_ButtonPressed(button);

@@ -11,6 +11,8 @@ namespace imBMW.iBus.Devices.Real
         Next,
         Prev,
         RT,
+        ModeRadio,
+        ModeTelephone,
         Dial,
         DialLong
     }
@@ -27,15 +29,18 @@ namespace imBMW.iBus.Devices.Real
 
         static Message MessagePhoneResponse = new Message(DeviceAddress.Telephone, DeviceAddress.Broadcast, 0x02, 0x00);
 
-        /**
-         * For right RT button commands
-         */
+        /// <summary> 
+        /// Emulate phone for right RT button commands
+        /// </summary>
         public static bool EmulatePhone { get; set; }
+
+        /// <summary>
+        /// Use RT as button, not as radio/telephone modes toggle
+        /// </summary>
+        public static bool RTAsButton { get; set; }
 
         static MultiFunctionSteeringWheel()
         {
-            EmulatePhone = true;
-
             // TODO receive BM volume commands
             Manager.AddMessageReceiverForSourceDevice(DeviceAddress.MultiFunctionSteeringWheel, ProcessMFLMessage);
             InstrumentClusterElectronics.IgnitionStateChanged += InstrumentClusterElectronics_IgnitionStateChanged;
@@ -74,13 +79,20 @@ namespace imBMW.iBus.Devices.Real
 
                     case 0x40:
                     case 0x00:
-                        if (!needSkipRT || btn == 0x40)
+                        if (RTAsButton)
                         {
-                            OnButtonPressed(m, MFLButton.RT);
+                            if (!needSkipRT || btn == 0x40)
+                            {
+                                OnButtonPressed(m, MFLButton.RT);
+                            }
+                            else
+                            {
+                                m.ReceiverDescription = "RT (skipped)";
+                            }
                         }
                         else
                         {
-                            m.ReceiverDescription = "RT (skipped)";
+                            OnButtonPressed(m, btn == 0x00 ? MFLButton.ModeRadio : MFLButton.ModeTelephone);
                         }
                         needSkipRT = false;
                         break;

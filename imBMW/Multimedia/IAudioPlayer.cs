@@ -39,11 +39,9 @@ namespace imBMW.Multimedia
 
         void PlayPauseToggle();
 
-        void MFLRT();
+        void VoiceButtonPress();
 
-        void MFLDial();
-
-        void MFLDialLong();
+        void VoiceButtonLongPress();
 
         bool RandomToggle();
 

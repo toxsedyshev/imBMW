@@ -29,7 +29,9 @@ namespace imBMW.iBus.Devices.Real
 
     #endregion
 
-
+    /// <summary>
+    /// Body Module class. Aka General Module 5 (GM5) or ZKE5.
+    /// </summary>
     public static class BodyModule
     {
         #region Messages
@@ -39,6 +41,7 @@ namespace imBMW.iBus.Devices.Real
         static Message MessageLockDoors = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Lock doors", 0x0C, 0x4F, 0x01); // 0x0C, 0x97, 0x01
         static Message MessageLockDriverDoor = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Lock driver door", 0x0C, 0x47, 0x01);
         static Message MessageUnlockDoors = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Unlock doors", 0x0C, 0x45, 0x01); // 0x0C, 0x03, 0x01
+        static Message MessageToggleLockDoors = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Toggle lock doors", 0x0C, 0x03, 0x01);
 
         //static Message MessageOpenWindows = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, 0x0C, 0x00, 0x65);
         
@@ -68,6 +71,8 @@ namespace imBMW.iBus.Devices.Real
         #endregion
 
         static double batteryVoltage;
+        static bool isCarLocked;
+        static bool wasDriverDoorOpened;
 
         static BodyModule()
         {
@@ -92,6 +97,22 @@ namespace imBMW.iBus.Devices.Real
                     OnRemoteKeyButton(m, RemoteKeyButton.Trunk);
                 }
             }
+            else if (m.Data.Length == 3 && m.Data[0] == 0x7A)
+            {
+                // Data[1] = 7654 3210. 7 = ??, 6 = light, 5 = lock, 4 = unlock, 5+4 = hard lock,
+                //      doors statuses: 0 = left front (driver), 1 = right front, 2 = left rear, 3 = right rear.
+                // Car could have locked status even after doors are opened!
+                // Data[2] = 7654 3210. 5 = trunk.
+                isCarLocked = m.Data[1].HasBit(5);
+                if (isCarLocked && m.Data[1].HasBit(0))
+                {
+                    wasDriverDoorOpened = true;
+                }
+                if (!isCarLocked)
+                {
+                    wasDriverDoorOpened = false;
+                }
+            }
             else if (m.Data.Length > 3 && m.Data[0] == 0xA0)
             {
                 var voltage = ((double)m.Data[1]) / 10 + ((double)m.Data[2]) / 1000;
@@ -110,6 +131,11 @@ namespace imBMW.iBus.Devices.Real
             }
             m.ReceiverDescription = "Remote key press " + button.ToStringValue() + " button";
             Logger.Info(m.ReceiverDescription);
+        }
+
+        public static bool IsCarLocked
+        {
+            get { return isCarLocked; }
         }
 
         public static double BatteryVoltage
@@ -144,13 +170,21 @@ namespace imBMW.iBus.Devices.Real
 
         public static void LockDoors()
         {
-            Manager.EnqueueMessage(MessageLockDoors);
-            Manager.EnqueueMessage(MessageLockDriverDoor);
+            if (!isCarLocked || wasDriverDoorOpened)
+            {
+                Manager.EnqueueMessage(MessageToggleLockDoors);
+                wasDriverDoorOpened = false;
+            }
         }
 
-        public static void UnlockDoors()
+        public static bool UnlockDoors()
         {
-            Manager.EnqueueMessage(MessageUnlockDoors);
+            if (!isCarLocked)
+            {
+                return true;
+            }
+            Manager.EnqueueMessage(MessageToggleLockDoors);
+            return !wasDriverDoorOpened;
         }
 
         /// <summary>

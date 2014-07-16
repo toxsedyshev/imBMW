@@ -23,7 +23,7 @@ namespace imBMW.Devices.V2
 {
     public class Program
     {
-        const string version = "HW2 FW1.0.6";
+        const string version = "HW2 FW1.0.7";
 
         static OutputPort LED;
         static OutputPort ShieldLED;
@@ -113,7 +113,7 @@ namespace imBMW.Devices.V2
                     && e.Message.SourceDevice != DeviceAddress.GraphicsNavigationDriver
                     && e.Message.SourceDevice != DeviceAddress.Diagnostic && e.Message.DestinationDevice != DeviceAddress.Diagnostic)
                 {
-                    return;
+                    //return;
                 }
                 if (e.Message.ReceiverDescription == null)
                 {

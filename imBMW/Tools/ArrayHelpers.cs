@@ -171,9 +171,9 @@ namespace imBMW.Tools
             byte c;
             for (byte i = 0; i < len; i++)
             {
-                if (chars[i] > 0xff)
+                if (chars[i] > 0xFF)
                 {
-                    c = 0x19;
+                    c = 0xFF;
                 }
                 else
                 {

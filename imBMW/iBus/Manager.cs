@@ -397,8 +397,7 @@ namespace imBMW.iBus
             lock (foundDevices)
             {
                 AfterMessageReceived += SaveFoundDevice;
-                // TODO check broadcast poll request              // device
-                EnqueueMessage(new Message(DeviceAddress.Diagnostic, DeviceAddress.Broadcast, MessageRegistry.DataPollRequest));
+                EnqueueMessage(new Message(DeviceAddress.Diagnostic, device, MessageRegistry.DataPollRequest));
                 Thread.Sleep(timeout);
                 AfterMessageReceived -= SaveFoundDevice;
                 return foundDevices.Contains(device);

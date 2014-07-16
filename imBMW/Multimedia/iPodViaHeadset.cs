@@ -190,12 +190,12 @@ namespace imBMW.Multimedia
             PlayPauseToggle();
         }
 
-        public override void MFLDial()
+        public override void VoiceButtonPress()
         {
             VoiceOverCurrent();
         }
 
-        public override void MFLDialLong()
+        public override void VoiceButtonLongPress()
         {
             VoiceOverMenu();
         }

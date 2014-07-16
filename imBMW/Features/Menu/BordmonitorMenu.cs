@@ -255,8 +255,9 @@ namespace imBMW.Features.Menu
                         break;
                     case 0x04:
                         m.ReceiverDescription = "BM button Tone";
-                        // TODO fix Tone
-                        Bordmonitor.EnableRadioMenu(); // TODO test [and remove]
+                        // TODO fix Tone - skip clear till aux title
+                        IsEnabled = false;
+                        //Bordmonitor.EnableRadioMenu(); // TODO test [and remove]
                         break;
                     case 0x10:
                         m.ReceiverDescription = "BM Button < prev track";

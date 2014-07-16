@@ -14,6 +14,8 @@ namespace imBMW.iBus.Devices.Emulators
         private bool isEnabled;
         private IAudioPlayer player;
 
+        protected bool mflModeTelephone;
+
         public MediaEmulator(IAudioPlayer player)
         {
             Player = player;
@@ -126,18 +128,26 @@ namespace imBMW.iBus.Devices.Emulators
 
         protected virtual void MultiFunctionSteeringWheel_ButtonPressed(MFLButton button)
         {
-            if (!IsEnabled)
-            {
-                return;
-            }
             switch (button)
             {
-                case MFLButton.Dial:
-                    MFLDial();
-                    break;
-                case MFLButton.DialLong:
-                    MFLDialLong();
-                    break;
+                case MFLButton.ModeRadio:
+                    mflModeTelephone = false;
+                    return;
+                case MFLButton.ModeTelephone:
+                    mflModeTelephone = true;
+                    return;
+            }
+            if (IsEnabled && !mflModeTelephone)
+            {
+                switch (button)
+                {
+                    case MFLButton.Dial:
+                        VoiceButtonPress();
+                        break;
+                    case MFLButton.DialLong:
+                        VoiceButtonLongPress();
+                        break;
+                }
             }
         }
 
@@ -166,19 +176,14 @@ namespace imBMW.iBus.Devices.Emulators
             Player.Prev();
         }
 
-        protected virtual void MFLRT()
+        protected virtual void VoiceButtonPress()
         {
-            //Player.MFLRT();
+            Player.VoiceButtonPress();
         }
 
-        protected virtual void MFLDial()
+        protected virtual void VoiceButtonLongPress()
         {
-            Player.MFLDial();
-        }
-
-        protected virtual void MFLDialLong()
-        {
-            Player.MFLDialLong();
+            Player.VoiceButtonLongPress();
         }
 
         protected virtual void RandomToggle()

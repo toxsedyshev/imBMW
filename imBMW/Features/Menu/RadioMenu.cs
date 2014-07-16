@@ -15,10 +15,15 @@ namespace imBMW.Features.Menu
     {
         static RadioMenu instance;
 
+        private bool mflModeTelephone;
+
+        public bool TelephoneModeForNavigation { get; set; }
+
         private RadioMenu(MediaEmulator mediaEmulator)
             : base(mediaEmulator)
         {
             Manager.AddMessageReceiverForSourceDevice(DeviceAddress.Radio, ProcessRadioMessage);
+            MultiFunctionSteeringWheel.ButtonPressed += MultiFunctionSteeringWheel_ButtonPressed;
         }
 
         public static RadioMenu Init(MediaEmulator mediaEmulator)
@@ -85,7 +90,6 @@ namespace imBMW.Features.Menu
         #region Menu control
 
         int shownItemIndex;
-        //bool itemScrolled;
 
         public int ShownItemIndex
         {
@@ -114,6 +118,55 @@ namespace imBMW.Features.Menu
             }
         }
 
+        private bool MflModeTelephone
+        {
+            set
+            {
+                if (mflModeTelephone == value)
+                {
+                    return;
+                }
+                mflModeTelephone = value;
+                Radio.DisplayText(CharIcons.SelectedArrow + (value ? "Navigation" : "Playback"), TextAlign.Center);
+                RefreshScreenWithDelay(MenuScreenUpdateReason.Scroll);
+            }
+            get
+            {
+                return mflModeTelephone;
+            }
+        }
+
+        void MultiFunctionSteeringWheel_ButtonPressed(MFLButton button)
+        {
+            switch (button)
+            {
+                case MFLButton.ModeRadio:
+                    MflModeTelephone = false;
+                    return;
+                case MFLButton.ModeTelephone:
+                    MflModeTelephone = true;
+                    return;
+            }
+            if (MflModeTelephone)
+            {
+                switch (button)
+                {
+                    case MFLButton.Next:
+                        ScrollNext();
+                        break;
+                    case MFLButton.Prev:
+                        ScrollPrev();
+                        break;
+                    case MFLButton.Dial:
+                        PressedSelect();
+                        break;
+                    case MFLButton.DialLong:
+                        PressedBack();
+                        break;
+                }
+            }
+        }
+
         void ProcessRadioMessage(Message m)
         {
             if (m.Data.Length == 3 && m.Data[0] == 0x38 && m.Data[1] == 0x06)
@@ -131,29 +184,16 @@ namespace imBMW.Features.Menu
                 switch (cdNumber)
                 {
                     case 0x02:
-                        UpdateScreen(MenuScreenUpdateReason.Refresh);
-                        var item = ShownItem;
-                        if (item != null)
-                        {
-                            item.Click();
-                        }
+                        PressedSelect();
                         break;
                     case 0x03:
-                        ShownItemIndex--;
-                        //itemScrolled = true;
-                        UpdateScreen(MenuScreenUpdateReason.Scroll);
+                        ScrollPrev();
                         break;
                     case 0x04:
-                        ShownItemIndex++;
-                        //itemScrolled = true;
-                        UpdateScreen(MenuScreenUpdateReason.Scroll);
+                        ScrollNext();
                         break;
                     case 0x05:
-                        NavigateBack();
-                        if (CurrentScreen == HomeScreen.Instance)
-                        {
-                            UpdateScreen(MenuScreenUpdateReason.Refresh);
-                        }
+                        PressedBack();
                         break;
                     case 0x06:
                         NavigateHome();
@@ -188,6 +228,37 @@ namespace imBMW.Features.Menu
             // TODO bind rnd, scan
         }
 
+        protected void ScrollNext()
+        {
+            ShownItemIndex++;
+            UpdateScreen(MenuScreenUpdateReason.Scroll);
+        }
+
+        protected void ScrollPrev()
+        {
+            ShownItemIndex--;
+            UpdateScreen(MenuScreenUpdateReason.Scroll);
+        }
+
+        protected void PressedSelect()
+        {
+            UpdateScreen(MenuScreenUpdateReason.Refresh);
+            var item = ShownItem;
+            if (item != null)
+            {
+                item.Click();
+            }
+        }
+
+        protected void PressedBack()
+        {
+            NavigateBack();
+            if (CurrentScreen == HomeScreen.Instance)
+            {
+                UpdateScreen(MenuScreenUpdateReason.Refresh);
+            }
+        }
+
         protected override void ScreenNavigatedTo(MenuScreen screen)
         {
             ShownItemIndex = 0;
@@ -212,6 +283,14 @@ namespace imBMW.Features.Menu
             {
                 case MenuScreenUpdateReason.Navigation:
                     showText = CurrentScreen.Title;
+                    if (showText.Length < Radio.DisplayTextMaxLen)
+                    {
+                        showText = CharIcons.NetRect + showText;
+                    }
+                    if (showText.Length < Radio.DisplayTextMaxLen)
+                    {
+                        showText += CharIcons.NetRect;
+                    }
                     align = TextAlign.Center;
                     RefreshScreenWithDelay(MenuScreenUpdateReason.Scroll);
                     break;
@@ -282,7 +361,7 @@ namespace imBMW.Features.Menu
             var s = item.Text;
             if (item.Type == MenuItemType.Checkbox)
             {
-                s = (item.IsChecked ? '*' : '\x19') + s;
+                s = (item.IsChecked ? '*' : CharIcons.Bull) + s;
             }
             return s;
         }
