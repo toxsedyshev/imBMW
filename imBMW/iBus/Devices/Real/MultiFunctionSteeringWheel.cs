@@ -22,7 +22,7 @@ namespace imBMW.iBus.Devices.Real
     #endregion
 
 
-    class MultiFunctionSteeringWheel
+    public class MultiFunctionSteeringWheel
     {
         static bool wasDialLongPressed;
         static bool needSkipRT;

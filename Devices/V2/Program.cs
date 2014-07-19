@@ -7,23 +7,23 @@ using Microsoft.SPOT.Hardware;
 using System;
 using System.IO.Ports;
 using System.Threading;
-using GHI.Hardware.FEZCerb;
 using imBMW.Multimedia;
 using System.Collections;
 using System.Text;
-using imBMW.Tools;
 using Microsoft.SPOT.IO;
 using System.IO;
 using imBMW.Features.Menu;
 using imBMW.iBus.Devices.Emulators;
 using imBMW.Features.Menu.Screens;
 using imBMW.Features.Localizations;
+using imBMW.Devices.V2.Hardware;
+using FEZPin = GHI.Hardware.FEZCerb.Pin;
 
 namespace imBMW.Devices.V2
 {
     public class Program
     {
-        const string version = "HW2 FW1.0.7";
+        const string version = "HW2 FW1.0.8";
 
         static OutputPort LED;
         static OutputPort ShieldLED;
@@ -34,7 +34,7 @@ namespace imBMW.Devices.V2
 
         static void Init()
         {
-            LED = new OutputPort(Pin.PA8, false);
+            LED = new OutputPort(FEZPin.PA8, false);
 
             var sd = GetRootDirectory();
 
@@ -71,7 +71,7 @@ namespace imBMW.Devices.V2
             SettingsScreen.Instance.Status = version;
 
             // Create serial port to work with Melexis TH3122
-            ISerialPort iBusPort = new SerialPortTH3122(Serial.COM3, Pin.PC2, true);
+            ISerialPort iBusPort = new SerialPortTH3122(Serial.COM3, FEZPin.PC2, true);
             Logger.Info("TH3122 serial port inited");
 
             /*InputPort jumper = new InputPort((Cpu.Pin)FEZ_Pin.Digital.An7, false, Port.ResistorMode.PullUp);
@@ -115,24 +115,27 @@ namespace imBMW.Devices.V2
                 {
                     //return;
                 }
+                var logIco = "< ";
                 if (e.Message.ReceiverDescription == null)
                 {
                     if (sent1 != null && sent1.Data.Compare(e.Message.Data))
                     {
                         e.Message.ReceiverDescription = sent1.ReceiverDescription;
+                        logIco = "<E";
                     }
                     else if (sent2 != null && sent2.Data.Compare(e.Message.Data))
                     {
                         e.Message.ReceiverDescription = sent2.ReceiverDescription;
+                        logIco = "<E";
                     }
                 }
                 if (settings.LogMessageToASCII)
                 {
-                    Logger.Info(e.Message.ToPrettyString(true, true), "< ");
+                    Logger.Info(e.Message.ToPrettyString(true, true), logIco);
                 }
                 else
                 {
-                    Logger.Info(e.Message, "< ");
+                    Logger.Info(e.Message, logIco);
                 }
                 /*if (e.Message.ReceiverDescription == null)
                 {
@@ -195,12 +198,13 @@ namespace imBMW.Devices.V2
             {
                 Localization.Current = new RadioLocalization();
                 SettingsScreen.Instance.CanChangeLanguage = false;
+                MultiFunctionSteeringWheel.EmulatePhone = true;
                 Radio.HasMID = Manager.FindDevice(DeviceAddress.MultiInfoDisplay);
                 RadioMenu.Init(new CDChanger(player));
                 Logger.Info("Radio menu inited" + (Radio.HasMID ? " with MID" : ""));
             }
 
-            ShieldLED = new OutputPort(Pin.PA7, false);
+            ShieldLED = new OutputPort(FEZPin.PA7, false);
             player.IsPlayingChanged += (p, s) =>
             {
                 ShieldLED.Write(s);
@@ -232,6 +236,17 @@ namespace imBMW.Devices.V2
             Thread.Sleep(50);
             LED.Write(false);
             Logger.Info("LED blinked - inited");
+        }
+
+        static bool mflPhone = false;
+
+        static void InitTest()
+        {
+            /*
+            Manager.EnqueueMessage(new Message(DeviceAddress.InstrumentClusterElectronics, DeviceAddress.Broadcast, 0x11, 0x01));
+            Button.OnPress(Pin.Di14, () => { Manager.EnqueueMessage(new Message(DeviceAddress.MultiFunctionSteeringWheel, DeviceAddress.Broadcast, 0x3B, (byte)((mflPhone = !mflPhone) ? 0x40 : 0x00))); });
+            Button.OnPress(Pin.Di15, () => { Manager.EnqueueMessage(new Message(DeviceAddress.MultiFunctionSteeringWheel, DeviceAddress.Radio, 0x3B, 0x01)); });
+            */
         }
 
         static void RefreshLEDs()
@@ -326,6 +341,10 @@ namespace imBMW.Devices.V2
             try
             {
                 Init();
+                #if DEBUG
+                Logger.Info("Init test..");
+                InitTest();
+                #endif
                 Debug.EnableGCMessages(false);
                 Logger.Info("Started!");
 
@@ -370,7 +389,7 @@ namespace imBMW.Devices.V2
            //Button.OnPress(Pin.PC3, player.Prev);
 
            LED.Write(true);
-       }
+       }*/
 
        class Button
        {
@@ -384,6 +403,6 @@ namespace imBMW.Devices.V2
                btn.OnInterrupt += (s, e, t) => callback();
                buttons.Add(btn);
            }
-       }*/
+       }
     }
 }
