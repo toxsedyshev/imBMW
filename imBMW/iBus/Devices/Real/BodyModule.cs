@@ -42,6 +42,7 @@ namespace imBMW.iBus.Devices.Real
         static Message MessageLockDriverDoor = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Lock driver door", 0x0C, 0x47, 0x01);
         static Message MessageUnlockDoors = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Unlock doors", 0x0C, 0x45, 0x01); // 0x0C, 0x03, 0x01
         static Message MessageToggleLockDoors = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Toggle lock doors", 0x0C, 0x03, 0x01);
+        static Message MessageRequestDoorsStatus = new Message(DeviceAddress.InstrumentClusterElectronics, DeviceAddress.BodyModule, "Request doors status", 0x79);
 
         //static Message MessageOpenWindows = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, 0x0C, 0x00, 0x65);
         
@@ -73,6 +74,7 @@ namespace imBMW.iBus.Devices.Real
         static double batteryVoltage;
         static bool isCarLocked;
         static bool wasDriverDoorOpened;
+        static bool needUnlock;
 
         static BodyModule()
         {
@@ -104,12 +106,20 @@ namespace imBMW.iBus.Devices.Real
                 // Car could have locked status even after doors are opened!
                 // Data[2] = 7654 3210. 5 = trunk.
                 isCarLocked = m.Data[1].HasBit(5);
-                if (isCarLocked && m.Data[1].HasBit(0))
+                if (isCarLocked)
                 {
-                    wasDriverDoorOpened = true;
+                    if (m.Data[1].HasBit(0))
+                    {
+                        wasDriverDoorOpened = true;
+                    }
+                    if (needUnlock)
+                    {
+                        UnlockDoors();
+                    }
                 }
-                if (!isCarLocked)
+                else
                 {
+                    needUnlock = false;
                     wasDriverDoorOpened = false;
                 }
             }
@@ -172,8 +182,9 @@ namespace imBMW.iBus.Devices.Real
         {
             if (!isCarLocked || wasDriverDoorOpened)
             {
-                Manager.EnqueueMessage(MessageToggleLockDoors);
+                isCarLocked = true;
                 wasDriverDoorOpened = false;
+                Manager.EnqueueMessage(MessageToggleLockDoors, MessageRequestDoorsStatus);
             }
         }
 
@@ -183,8 +194,12 @@ namespace imBMW.iBus.Devices.Real
             {
                 return true;
             }
-            Manager.EnqueueMessage(MessageToggleLockDoors);
-            return !wasDriverDoorOpened;
+            needUnlock = true;
+            isCarLocked = wasDriverDoorOpened;
+            wasDriverDoorOpened = false;
+            // TODO Request status after 500ms - GM5 is sloooow
+            Manager.EnqueueMessage(MessageToggleLockDoors, MessageRequestDoorsStatus);
+            return !isCarLocked;
         }
 
         /// <summary>
