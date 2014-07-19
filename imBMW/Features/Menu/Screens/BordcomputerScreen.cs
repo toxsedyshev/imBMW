@@ -15,6 +15,7 @@ namespace imBMW.Features.Menu.Screens
         protected MenuItem itemSettings;
 
         protected DateTime lastUpdated;
+        protected bool needUpdateVoltage;
 
         const int updateLimitSeconds = 3;
 
@@ -71,14 +72,15 @@ namespace imBMW.Features.Menu.Screens
             int span;
             if (!force && lastUpdated != DateTime.MinValue && (span = (now - lastUpdated).GetTotalSeconds()) < updateLimitSeconds)
             {
-                if (span > updateLimitSeconds / 2)
+                if (needUpdateVoltage) // span > updateLimitSeconds / 2 && 
                 {
-                    BodyModule.UpdateBatteryVoltage();
+                    UpdateVoltage();
                 }
                 return false;
             }
             lastUpdated = now;
             OnUpdated(MenuScreenUpdateReason.Refresh);
+            needUpdateVoltage = true;
             return true;
         }
 
@@ -115,6 +117,7 @@ namespace imBMW.Features.Menu.Screens
 
         protected void UpdateVoltage()
         {
+            needUpdateVoltage = false;
             BodyModule.UpdateBatteryVoltage();
         }
 
