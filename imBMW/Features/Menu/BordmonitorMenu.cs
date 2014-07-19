@@ -288,18 +288,22 @@ namespace imBMW.Features.Menu
                 skipClearTillRefresh = true; // TODO test no screen items lost
                 base.DrawScreen(args);
 
-                Bordmonitor.ShowText(CurrentScreen.Status ?? String.Empty, BordmonitorFields.Status);
-                lastTitle = Bordmonitor.ShowText(CurrentScreen.Title ?? String.Empty, BordmonitorFields.Title);
+                var messages = new Message[13];
+                var n = 0;
+                messages[n++] = Bordmonitor.ShowText(CurrentScreen.Status ?? String.Empty, BordmonitorFields.Status, 0, false, false);
+                lastTitle = Bordmonitor.ShowText(CurrentScreen.Title ?? String.Empty, BordmonitorFields.Title, 0, false, false);
+                messages[n++] = lastTitle;
                 for (byte i = 0; i < 10; i++)
                 {
                     var index = GetItemIndex(i, true);
                     var item = CurrentScreen.GetItem(index);
                     var s = item == null ? String.Empty : item.Text;
-                    Bordmonitor.ShowText(s ?? String.Empty, BordmonitorFields.Item, i, item != null && item.IsChecked);
+                    messages[n++] = Bordmonitor.ShowText(s ?? String.Empty, BordmonitorFields.Item, i, item != null && item.IsChecked, false);
                 }
                 skipRefreshScreen = true;
                 skipClearTillRefresh = true;
-                Bordmonitor.RefreshScreen();
+                messages[n++] = Bordmonitor.MessageRefreshScreen;
+                Manager.EnqueueMessage(messages);
                 isDrawing = false;
             }
         }

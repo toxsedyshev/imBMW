@@ -42,12 +42,12 @@ namespace imBMW.iBus.Devices.Real
 
         public static bool MK2Mode { get; set; }
 
-        public static Message ShowText(string s, BordmonitorFields field, byte index = 0, bool check = false)
+        public static Message ShowText(string s, BordmonitorFields field, byte index = 0, bool isChecked = false, bool send = true)
         {
-            return ShowText(s, TextAlign.Left, field, index, check);
+            return ShowText(s, TextAlign.Left, field, index, isChecked);
         }
 
-        public static Message ShowText(string s, TextAlign align, BordmonitorFields field, byte index = 0, bool check = false)
+        public static Message ShowText(string s, TextAlign align, BordmonitorFields field, byte index = 0, bool isChecked = false, bool send = true)
         {
             int len;
             byte[] data;
@@ -62,7 +62,7 @@ namespace imBMW.iBus.Devices.Real
                     data = new byte[] { 0xA5, 0x62, 0x01, 0x06 };
                     break;
                 case BordmonitorFields.Item:
-                    if (check || MK2Mode)
+                    if (isChecked || MK2Mode)
                     {
                         len = 14;
                     }
@@ -90,12 +90,15 @@ namespace imBMW.iBus.Devices.Real
             var offset = data.Length;
             data = data.PadRight(0x20, len);
             data.PasteASCII(s.UTF8ToASCII(), offset, len);
-            if (check)
+            if (isChecked)
             {
                 data[data.Length - 1] = 0x2A;
             }
             var m = new Message(iBus.DeviceAddress.Radio, iBus.DeviceAddress.GraphicsNavigationDriver, "Show message on BM (" + index.ToHex() + "): " + s, data);
-            Manager.EnqueueMessage(m);
+            if (send)
+            {
+                Manager.EnqueueMessage(m);
+            }
             return m;
         }
 
