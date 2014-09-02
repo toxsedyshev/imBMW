@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.SPOT;
+using imBMW.Tools;
 
 namespace imBMW.Features.Localizations
 {
@@ -113,5 +114,29 @@ namespace imBMW.Features.Localizations
          */
 
         #endregion
+
+        public static void SetCurrent(string language)
+        {
+            Current = Get(language);
+        }
+
+        public static Localization Get(string language)
+        {
+            if (StringHelpers.IsNullOrEmpty(language))
+            {
+                language = EnglishLocalization.SystemName;
+            }
+            switch (language)
+            {
+                case EnglishLocalization.SystemName:
+                    return new EnglishLocalization();
+                case RussianLocalization.SystemName:
+                    return new RussianLocalization();
+                case RadioLocalization.SystemName:
+                    return new RadioLocalization();
+                default:
+                    throw new Exception("Wrong localization name \"" + language + "\"");
+            }
+        }
     }
 }

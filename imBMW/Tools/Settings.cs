@@ -23,9 +23,23 @@ namespace imBMW.Tools
 
         public bool LogMessageToASCII { get; set; }
 
+        public bool AutoLockDoors { get; set; }
+
+        public bool AutoUnlockDoors { get; set; }
+
+        public bool AutoCloseWindows { get; set; }
+
+        public bool AutoCloseSunroof { get; set; }
+
         public bool MenuModeMK2 { get; set; }
 
+        public bool MenuMFLControl { get; set; }
+
+        public bool RadioSpaceCharAlt { get; set; }
+
         public MenuMode MenuMode { get; set; }
+
+        public string Language { get; set; }
 
         public static Settings Init(string path)
         {
@@ -47,6 +61,7 @@ namespace imBMW.Tools
             Log = false;
             LogToSD = false;
             LogMessageToASCII = false;
+            MenuMFLControl = true;
             MenuModeMK2 = false;
             MenuMode = Tools.MenuMode.RadioCDC;
         }
@@ -81,9 +96,21 @@ namespace imBMW.Tools
             try
             {
                 Logger.Info("Setting: " + name + " = " + (value ?? ""));
-                bool isTrue = value == "1";
+                bool isTrue = value == "1" || value == "true" || value == "on" || value == "yes";
                 switch (name)
                 {
+                    case "AutoLockDoors":
+                        AutoLockDoors = isTrue;
+                        break;
+                    case "AutoUnlockDoors":
+                        AutoUnlockDoors = isTrue;
+                        break;
+                    case "AutoCloseWindows":
+                        AutoCloseWindows = isTrue;
+                        break;
+                    case "AutoCloseSunroof":
+                        AutoCloseSunroof = isTrue;
+                        break;
                     case "Log":
                         Log = isTrue;
                         break;
@@ -96,8 +123,17 @@ namespace imBMW.Tools
                     case "MenuModeMK2":
                         MenuModeMK2 = isTrue;
                         break;
+                    case "MenuMFLControl":
+                        MenuMFLControl = isTrue;
+                        break;
+                    case "RadioSpaceCharAlt":
+                        RadioSpaceCharAlt = isTrue;
+                        break;
                     case "MenuMode":
                         MenuMode = (Tools.MenuMode)byte.Parse(value);
+                        break;
+                    case "Language":
+                        Language = value;
                         break;
                     default:
                         Logger.Warning("  Unknown setting");

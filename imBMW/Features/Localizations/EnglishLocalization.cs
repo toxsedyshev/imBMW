@@ -5,6 +5,8 @@ namespace imBMW.Features.Localizations
 {
     public class EnglishLocalization : Localization
     {
+        public const string SystemName = "English";
+
         public override string LanguageName
         {
             get { return "English"; }

@@ -138,6 +138,10 @@ namespace imBMW.Features.Menu
 
         void MultiFunctionSteeringWheel_ButtonPressed(MFLButton button)
         {
+            if (!TelephoneModeForNavigation)
+            {
+                return;
+            }
             switch (button)
             {
                 case MFLButton.ModeRadio:

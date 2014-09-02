@@ -6,6 +6,8 @@ namespace imBMW.Features.Localizations
 {
     public class RadioLocalization : EnglishLocalization
     {
+        public const string SystemName = "Radio";
+
         public override string PrevTrack
         {
             get { return "Prev track"; }

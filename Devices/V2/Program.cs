@@ -41,11 +41,11 @@ namespace imBMW.Devices.V2
             var settings = Settings.Init(sd != null ? sd + @"\imBMW.ini" : null);
             var log = settings.Log || settings.LogToSD;
 
-            // TODO move to settings
-            Localization.Current = new EnglishLocalization();
-            Features.Comfort.AutoLockDoors = true;
-            Features.Comfort.AutoUnlockDoors = true;
-            Features.Comfort.AutoCloseWindows = true;
+            Localization.SetCurrent(settings.Language);
+            Features.Comfort.AutoLockDoors = settings.AutoLockDoors;
+            Features.Comfort.AutoUnlockDoors = settings.AutoUnlockDoors;
+            Features.Comfort.AutoCloseWindows = settings.AutoCloseWindows;
+            Features.Comfort.AutoCloseSunroof = settings.AutoCloseSunroof;
             Logger.Info("Preferences inited");
 
             #if DEBUG
@@ -200,11 +200,12 @@ namespace imBMW.Devices.V2
                 SettingsScreen.Instance.CanChangeLanguage = false;
                 MultiFunctionSteeringWheel.EmulatePhone = true;
                 Radio.HasMID = Manager.FindDevice(DeviceAddress.MultiInfoDisplay);
-                RadioMenu.Init(new CDChanger(player));
+                var menu = RadioMenu.Init(new CDChanger(player));
+                menu.TelephoneModeForNavigation = settings.MenuMFLControl;
                 Logger.Info("Radio menu inited" + (Radio.HasMID ? " with MID" : ""));
             }
 
-            ShieldLED = new OutputPort(FEZPin.PA7, false);
+            ShieldLED = new OutputPort(Pin.Di10, false);
             player.IsPlayingChanged += (p, s) =>
             {
                 ShieldLED.Write(s);
