@@ -228,7 +228,6 @@ namespace imBMW.Multimedia
             {
                 offset = 0;
             }
-            contactsScreen.Status = Localization.Current.Refreshing;
             var contacts = GetContacts((uint)offset, (uint)contactsPerPage);
             if (contacts.Count == 0 && offset > 0)
             {
@@ -252,7 +251,7 @@ namespace imBMW.Multimedia
                 }
             }
             contactsScreen.IsUpdateSuspended = false;
-            contactsScreen.Status = "";
+            contactsScreen.Refresh();
         }
 
         protected override void SetPlaying(bool value)

@@ -224,6 +224,11 @@ namespace imBMW.Features.Menu
             IsUpdateSuspended = false;
         }
 
+        public void Refresh()
+        {
+            OnUpdated(MenuScreenUpdateReason.Refresh);
+        }
+
         /// <summary>
         /// Menu navigated to this screen and screen is not suspended (screen, but not screen update).
         /// </summary>

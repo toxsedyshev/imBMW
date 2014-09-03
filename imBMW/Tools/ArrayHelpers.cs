@@ -194,5 +194,21 @@ namespace imBMW.Tools
             }
             return false;
         }
+
+        public static byte[] Combine(this byte[] array, params byte[] bytes)
+        {
+            if (array == null || array.Length == 0)
+            {
+                return bytes ?? new byte[0];
+            }
+            if (bytes == null || bytes.Length == 0)
+            {
+                return array ?? new byte[0];
+            }
+            var result = new byte[array.Length + bytes.Length];
+            Array.Copy(array, result, array.Length);
+            Array.Copy(bytes, 0, result, array.Length, bytes.Length);
+            return result;
+        }
     }
 }

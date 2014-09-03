@@ -44,7 +44,7 @@ namespace imBMW.iBus.Devices.Real
 
         public static Message ShowText(string s, BordmonitorFields field, byte index = 0, bool isChecked = false, bool send = true)
         {
-            return ShowText(s, TextAlign.Left, field, index, isChecked);
+            return ShowText(s, TextAlign.Left, field, index, isChecked, send);
         }
 
         public static Message ShowText(string s, TextAlign align, BordmonitorFields field, byte index = 0, bool isChecked = false, bool send = true)
@@ -69,6 +69,10 @@ namespace imBMW.iBus.Devices.Real
                     else
                     {
                         len = 23;
+                    }
+                    if (!isChecked)
+                    {
+                        len = System.Math.Min(len, s.Length);
                     }
                     index += 0x40;
                     /*if (index == 0x47)
