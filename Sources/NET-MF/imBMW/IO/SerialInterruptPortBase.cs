@@ -18,7 +18,10 @@ namespace System.IO.Ports
         public SerialInterruptPortBase(SerialPortConfiguration config, int writeBufferSize, int readBufferSize, int readTimeout = Timeout.Infinite)
             : base(writeBufferSize, readBufferSize)
         {
-            _port = new SerialPort(config.PortName, (int)config.BaudRate, config.Parity, config.DataBits, config.StopBits); // creating the serial port
+            _port = new SerialPort(config.PortName, (int)config.BaudRate, config.Parity, config.DataBits, config.StopBits)
+            {
+                Handshake = config.HardwareFlowControl ? Handshake.RequestToSend : Handshake.None
+            };
             
             AfterWriteDelay = 33;
             ReadTimeout = readTimeout;

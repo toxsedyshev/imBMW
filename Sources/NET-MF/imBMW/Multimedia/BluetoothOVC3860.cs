@@ -455,7 +455,7 @@ namespace imBMW.Multimedia
         {
             var s = (string)o;
             port.WriteLine(s);
-            Logger.Info(s, "BT>");
+            Logger.Info(s, "> BT");
         }
 
         string btBuffer = "";
@@ -597,7 +597,7 @@ namespace imBMW.Multimedia
                     }
                     else
                     {
-                        Logger.Info(s, "BT<");
+                        Logger.Info(s, "BT <");
                     }
                     break;
             }

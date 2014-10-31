@@ -27,6 +27,10 @@ namespace imBMW.Tools
             {
                 take = array.Length;
             }
+            if (take == 0)
+            {
+                return result;
+            }
             if (skip == 0)
             {
                 Array.Copy(array, result, take);
@@ -209,6 +213,18 @@ namespace imBMW.Tools
             Array.Copy(array, result, array.Length);
             Array.Copy(bytes, 0, result, array.Length, bytes.Length);
             return result;
+        }
+
+        public static int IndexOf(this byte[] array, byte b)
+        {
+            for (int i = 0; i < array.Length; i++)
+            {
+                if (array[i] == b)
+                {
+                    return i;
+                }
+            }
+            return -1;
         }
     }
 }

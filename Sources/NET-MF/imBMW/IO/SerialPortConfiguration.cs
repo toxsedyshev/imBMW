@@ -5,55 +5,26 @@ namespace System.IO.Ports
 {
     public class SerialPortConfiguration
     {
-        string portName;
-        BaudRate baudRate;
-        Parity parity;
-        int dataBits;
-        StopBits stopBits;
-
-        public SerialPortConfiguration(string portName, BaudRate baudRate, Parity parity, int dataBits, StopBits stopBits)
+        public SerialPortConfiguration(string portName, BaudRate baudRate, Parity parity = Parity.None, int dataBits = 8, StopBits stopBits = StopBits.One, bool hardwareFlowControl = false)
         {
-            this.portName = portName;
-            this.baudRate = baudRate;
-            this.parity = parity;
-            this.dataBits = dataBits;
-            this.stopBits = stopBits;
+            PortName = portName;
+            BaudRate = baudRate;
+            Parity = parity;
+            DataBits = dataBits;
+            StopBits = stopBits;
+            HardwareFlowControl = hardwareFlowControl;
         }
 
-        public SerialPortConfiguration(string portName, BaudRate baudRate, Parity parity, int dataBits) : this(portName, baudRate, parity, dataBits, StopBits.One) { }
+        public StopBits StopBits { get; protected set; }
 
-        public SerialPortConfiguration(string portName, BaudRate baudRate, Parity parity) : this(portName, baudRate, parity, 8) { }
+        public int DataBits { get; protected set; }
 
-        public SerialPortConfiguration(string portName, BaudRate baudRate) : this(portName, baudRate, Parity.None) { }
+        public Parity Parity { get; protected set; }
 
-        public StopBits StopBits
-        {
-            get { return stopBits; }
-            set { stopBits = value; }
-        }
+        public BaudRate BaudRate { get; protected set; }
 
-        public int DataBits
-        {
-            get { return dataBits; }
-            set { dataBits = value; }
-        }
+        public string PortName { get; protected set; }
 
-        public Parity Parity
-        {
-            get { return parity; }
-            set { parity = value; }
-        }
-
-        public BaudRate BaudRate
-        {
-            get { return baudRate; }
-            set { baudRate = value; }
-        }
-
-        public string PortName
-        {
-            get { return portName; }
-            set { portName = value; }
-        }
+        public bool HardwareFlowControl { get; protected set; }
     }
 }
