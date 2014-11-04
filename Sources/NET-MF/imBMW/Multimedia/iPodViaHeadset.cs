@@ -185,11 +185,6 @@ namespace imBMW.Multimedia
             EnqueueIPodCommand(iPodCommand.Prev);
         }
 
-        public override void MFLRT()
-        {
-            PlayPauseToggle();
-        }
-
         public override void VoiceButtonPress()
         {
             VoiceOverCurrent();

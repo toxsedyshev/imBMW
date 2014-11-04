@@ -287,11 +287,6 @@ namespace imBMW.Multimedia
             OnStatusChanged(PlayerEvent.Prev);
         }
 
-        public override void MFLRT()
-        {
-            PlayPauseToggle();
-        }
-
         public override void VoiceButtonPress()
         {
             SendCommand(CmdAnswer);

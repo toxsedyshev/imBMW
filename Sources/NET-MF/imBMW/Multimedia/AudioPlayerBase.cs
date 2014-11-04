@@ -36,8 +36,6 @@ namespace imBMW.Multimedia
 
         public abstract void Prev();
 
-        public abstract void MFLRT();
-
         public abstract void VoiceButtonPress();
 
         public abstract void VoiceButtonLongPress();

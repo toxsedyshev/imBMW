@@ -106,6 +106,8 @@ namespace imBMW.Features.Localizations
         public abstract string NoContacts { get; }
 
         public virtual string DegreeCelsius { get { return "°C"; } }
+        
+        public abstract string Disconnect { get; }
 
         /*
         

@@ -211,5 +211,10 @@ namespace imBMW.Features.Localizations
         {
             get { return "No contacts"; }
         }
+
+        public override string Disconnect
+        {
+            get { return "Disconnect"; }
+        }
     }
 }
