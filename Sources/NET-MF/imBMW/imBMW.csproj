@@ -72,6 +72,8 @@
     <Compile Include="Multimedia\AudioPlayerBase.cs" />
     <Compile Include="Multimedia\BluetoothOVC3860.cs" />
     <Compile Include="Multimedia\BluetoothWT32.cs" />
+    <Compile Include="Multimedia\Models\ModelHelpers.cs" />
+    <Compile Include="Multimedia\Models\TrackInfo.cs" />
     <Compile Include="Multimedia\MultiplexorTDA7313.cs" />
     <Compile Include="Shields\BluetoothOVC3860Shield.cs" />
     <Compile Include="Shields\ShieldBase.cs" />

@@ -1,12 +1,15 @@
 using System;
 using Microsoft.SPOT;
 using imBMW.Features.Menu;
+using imBMW.Multimedia.Models;
 
 namespace imBMW.Multimedia
 {
     public delegate void IsPlayingHandler(IAudioPlayer sender, bool isPlaying);
 
     public delegate void PlayerStatusHandler(IAudioPlayer sender, string status, PlayerEvent playerEvent);
+
+    public delegate void NowPlayingHandler(IAudioPlayer sender, TrackInfo nowPlaying);
 
     public enum PlayerEvent
     {

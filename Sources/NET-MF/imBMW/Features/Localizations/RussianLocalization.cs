@@ -216,5 +216,35 @@ namespace imBMW.Features.Localizations
         {
             get { return "Отключиться"; }
         }
+
+        public override string Connect
+        {
+            get { return "Подключиться"; }
+        }
+
+        public override string NowPlaying
+        {
+            get { return "Сейчас играет"; }
+        }
+
+        public override string TrackTitle
+        {
+            get { return "Трек"; }
+        }
+
+        public override string Artist
+        {
+            get { return "Исполнитель"; }
+        }
+
+        public override string Album
+        {
+            get { return "Альбом"; }
+        }
+
+        public override string Genre
+        {
+            get { return "Жанр"; }
+        }
     }
 }

@@ -109,6 +109,18 @@ namespace imBMW.Features.Localizations
         
         public abstract string Disconnect { get; }
 
+        public abstract string Connect { get; }
+        
+        public abstract string NowPlaying { get; }
+
+        public abstract string TrackTitle { get; }
+
+        public abstract string Artist { get; }
+
+        public abstract string Album { get; }
+
+        public abstract string Genre { get; }
+
         /*
         
         public abstract string  { get; }

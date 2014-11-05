@@ -2,6 +2,7 @@ using System;
 using Microsoft.SPOT;
 using imBMW.iBus.Devices.Real;
 using imBMW.Features.Menu;
+using imBMW.Multimedia.Models;
 
 namespace imBMW.Multimedia
 {
@@ -10,6 +11,7 @@ namespace imBMW.Multimedia
         bool isCurrentPlayer;
         PlayerHostState playerHostState;
         bool isEnabled;
+        TrackInfo nowPlaying;
         protected bool isPlaying;
 
         public virtual void Play()
@@ -54,6 +56,23 @@ namespace imBMW.Multimedia
         {
             get;
             protected set;
+        }
+
+        public TrackInfo NowPlaying
+        {
+            get
+            {
+                if (nowPlaying == null)
+                {
+                    nowPlaying = new TrackInfo();
+                }
+                return nowPlaying;
+            }
+            protected set
+            {
+                nowPlaying = value;
+                OnNowPlayingChanged(value);
+            }
         }
 
         public bool IsEnabled
@@ -138,6 +157,8 @@ namespace imBMW.Multimedia
 
         public event PlayerStatusHandler StatusChanged;
 
+        public event NowPlayingHandler NowPlayingChanged;
+
         protected virtual void OnIsPlayingChanged(bool isPlaying)
         {
             var e = IsPlayingChanged;
@@ -158,6 +179,15 @@ namespace imBMW.Multimedia
             if (e != null)
             {
                 e.Invoke(this, status, playerEvent);
+            }
+        }
+
+        protected virtual void OnNowPlayingChanged(TrackInfo nowPlaying)
+        {
+            var e = NowPlayingChanged;
+            if (e != null)
+            {
+                e.Invoke(this, nowPlaying);
             }
         }
     }

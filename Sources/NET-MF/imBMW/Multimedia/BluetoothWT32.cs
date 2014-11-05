@@ -6,6 +6,7 @@ using System.Text;
 using imBMW.Tools;
 using imBMW.Features.Localizations;
 using imBMW.Features.Menu;
+using imBMW.Multimedia.Models;
 
 namespace imBMW.Multimedia
 {
@@ -29,8 +30,10 @@ namespace imBMW.Multimedia
         byte[] btBuffer;
         string lastCommand = "";
         string connectedAddress;
+        string lastConnectedAddress;
         bool isHFPConnected;
         int initStep = 0;
+        bool isSleeping;
 
         public string ConnectedAddress
         {
@@ -41,6 +44,10 @@ namespace imBMW.Multimedia
                 {
                     return;
                 }
+                if (value == null)
+                {
+                    IsPlaying = false;
+                }
                 connectedAddress = value;
                 if (value == null)
                 {
@@ -48,6 +55,7 @@ namespace imBMW.Multimedia
                 }
                 else
                 {
+                    lastConnectedAddress = value;
                     OnStatusChanged(Localization.Current.Connected, PlayerEvent.Wireless);
                 }
             }
@@ -82,6 +90,11 @@ namespace imBMW.Multimedia
 
         void SendCommand(string command, string param = null)
         {
+            if (isSleeping)
+            {
+                queue.Enqueue(" AT"); // wakes up after SLEEP 
+                isSleeping = false;
+            }
             lastCommand = command;
             if (param != null)
             {
@@ -149,19 +162,19 @@ namespace imBMW.Multimedia
                     {
                         case 0:
                             // init
-                            SendCommand("SET"); // TODO remove
-
+                            //SendCommand("SET");
                             SendCommand("SET PROFILE A2DP", "SINK");
                             SendCommand("SET PROFILE AVRCP", "CONTROLLER");
-                            SendCommand("SET BT CLASS", "240428");
+                            SendCommand("SET BT CLASS", "240408");
                             SendCommand("SET BT SSP 3 0");
                             SendCommand("SET BT AUTH * 0000");
                             SendCommand("SET BT NAME imBMW");
                             SendCommand("RESET");
                             break;
-                        case 1:
+                        default:
                             // inited
-                            //SendCommand("SET");
+                            SendCommand("VOLUME 15");
+                            //Connect();
                             break;
                     }
                     initStep++;
@@ -172,11 +185,7 @@ namespace imBMW.Multimedia
                         switch (p[4])
                         {
                             case "A2DP":
-                                ConnectedAddress = p[2];
-                                if (p[1] == "1")
-                                {
-                                    SendCommand("CALL " + ConnectedAddress + " 17 AVRCP");
-                                }
+                                OnA2DPConnected(p[2], p[1]);
                                 break;
                         }
                     }
@@ -186,13 +195,17 @@ namespace imBMW.Multimedia
                     {
                         switch (p[2])
                         {
+                            case "A2DP":
+                                OnA2DPConnected(lastConnectedAddress, p[1]);
+                                break;
                             case "AVRCP":
                                 //SendCommand("AVRCP PDU 50 0");
-                                SendCommand("AVRCP PDU 20 0");
+                                SendCommand("AVRCP PDU 20 0"); // get now playing
                                 //SendCommand("AVRCP PDU 10 3");
                                 SendCommand("AVRCP PDU 31 1");
                                 SendCommand("AVRCP PDU 31 2");
                                 SendCommand("AVRCP PDU 31 9");
+                                Play();
                                 //SendCommand("AVRCP PDU 31 a");
                                 //SendCommand("AVRCP PDU 31 b");
                                 //SendCommand("AVRCP UP");
@@ -205,7 +218,7 @@ namespace imBMW.Multimedia
                     {
                         var track = p[5]; // TODO find closing quote
                     }
-                    if (plen > 3 && p[1] == "REGISTER_NOTIFICATION_RSP")
+                    else if (plen > 3 && p[1] == "REGISTER_NOTIFICATION_RSP")
                     {
                         switch (p[3])
                         {
@@ -242,12 +255,43 @@ namespace imBMW.Multimedia
             }
         }
 
+        void OnA2DPConnected(string address, string link)
+        {
+            ConnectedAddress = address;
+            if (PlayerHostState == Multimedia.PlayerHostState.Off)
+            {
+                Disconnect();
+                return;
+            }
+            if (link == "1")
+            {
+                SendCommand("CALL " + address + " 17 AVRCP");
+            }
+        }
+
+        public void Connect()
+        {
+            if (!IsConnected)
+            {
+                if (lastConnectedAddress != null)
+                {
+                    SendCommand("CALL " + lastConnectedAddress + " 19 A2DP");
+                }
+                else
+                {
+                    //SendCommand("INQUIRY 4");
+                }
+            }
+        }
+
         public void Disconnect()
         {
             if (IsConnected)
             {
                 // SendCommand("CLOSE 2"); // TODO test all 3 connections are closed by closing 0
                 SendCommand("CLOSE 0");
+                SendCommand("DELAY 0 1000 SLEEP");
+                isSleeping = true;
             }
         }
 
@@ -306,19 +350,40 @@ namespace imBMW.Multimedia
                 {
                     menu = new MenuScreen(Name);
 
-                    var playerSettings = new MenuScreen(s => Localization.Current.Settings);
-                    playerSettings.Status = Name;
-                    playerSettings.AddItem(new MenuItem(i => Localization.Current.Volume + " +", i => VolumeUp()));
-                    playerSettings.AddItem(new MenuItem(i => Localization.Current.Volume + " -", i => VolumeDown()));
-                    playerSettings.AddItem(new MenuItem(i => Localization.Current.Disconnect, i => Disconnect()), 3);
-                    playerSettings.AddBackButton();
+                    var settingsScreen = new MenuScreen(s => Localization.Current.Settings);
+                    settingsScreen.Status = Name;
+                    settingsScreen.AddItem(new MenuItem(i => Localization.Current.Volume + " +", i => VolumeUp()));
+                    settingsScreen.AddItem(new MenuItem(i => Localization.Current.Volume + " -", i => VolumeDown()));
+                    settingsScreen.AddItem(new MenuItem(i => IsConnected ? Localization.Current.Disconnect : Localization.Current.Connect, i => { if (IsConnected) Disconnect(); else Connect(); }), 3);
+                    settingsScreen.AddBackButton();
+
+                    var nowPlayingScreen = new MenuScreen(s => menu.Status);
+                    nowPlayingScreen.AddItem(new MenuItem(i => NowPlaying.GetTitleWithLabel()));
+                    nowPlayingScreen.AddItem(new MenuItem(i => NowPlaying.GetArtistWithLabel()));
+                    nowPlayingScreen.AddItem(new MenuItem(i => NowPlaying.GetAlbumWithLabel()));
+                    nowPlayingScreen.AddItem(new MenuItem(i => NowPlaying.GetGenreWithLabel()));
+                    nowPlayingScreen.AddBackButton();
 
                     menu.AddItem(new MenuItem(i => IsPlaying ? Localization.Current.Pause : Localization.Current.Play, i => PlayPauseToggle()));
+                    menu.AddItem(new MenuItem(i => Localization.Current.NowPlaying, MenuItemType.Button, MenuItemAction.GoToScreen) { GoToScreen = nowPlayingScreen });
                     menu.AddItem(new MenuItem(i => Localization.Current.NextTrack, i => Next()));
                     menu.AddItem(new MenuItem(i => Localization.Current.PrevTrack, i => Prev()));
-                    menu.AddItem(new MenuItem(i => Localization.Current.Settings, MenuItemType.Button, MenuItemAction.GoToScreen) { GoToScreen = playerSettings });
+                    menu.AddItem(new MenuItem(i => Localization.Current.Settings, MenuItemType.Button, MenuItemAction.GoToScreen) { GoToScreen = settingsScreen });
                     menu.AddBackButton();
-                    menu.Updated += (m, a) => { if (a.Reason == MenuScreenUpdateReason.StatusChanged) { playerSettings.Status = m.Status; } };
+                    menu.Updated += (m, a) =>
+                    {
+                        if (a.Reason == MenuScreenUpdateReason.StatusChanged)
+                        {
+                            settingsScreen.Status = m.Status;
+                            nowPlayingScreen.Refresh();
+                        }
+                    };
+
+                    NowPlayingChanged += (p, nowPlaying) =>
+                    {
+                        nowPlayingScreen.WithUpdateSuspended(m => m.Status = nowPlaying.GetTrackPlaylistPosition());
+                        nowPlayingScreen.Refresh();
+                    };
                 }
                 return menu;
             }
@@ -349,7 +414,7 @@ namespace imBMW.Multimedia
             switch (playerHostState)
             {
                 case PlayerHostState.On:
-                    // Connect();
+                    Connect();
                     break;
                 case PlayerHostState.StandBy:
                     // disconn av
@@ -362,6 +427,10 @@ namespace imBMW.Multimedia
 
         protected override void SetPlaying(bool value)
         {
+            if (!IsConnected)
+            {
+                return;
+            }
             if (IsCurrentPlayer && value)
             {
                 // TODO check current status

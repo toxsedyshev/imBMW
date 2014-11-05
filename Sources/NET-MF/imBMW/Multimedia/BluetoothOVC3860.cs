@@ -343,12 +343,12 @@ namespace imBMW.Multimedia
                 {
                     menu = new MenuScreen(Name);
 
-                    var playerSettings = new MenuScreen(s => Localization.Current.Settings);
-                    playerSettings.Status = Name;
-                    playerSettings.AddItem(new MenuItem(i => Localization.Current.Volume + " +", i => VolumeUp()));
-                    playerSettings.AddItem(new MenuItem(i => Localization.Current.Volume + " -", i => VolumeDown()));
-                    playerSettings.AddItem(new MenuItem(i => Localization.Current.Reconnect, i => Reconnect()), 3);
-                    playerSettings.AddItem(new MenuItem(i => Localization.Current.Pair, i =>
+                    var settingsScreen = new MenuScreen(s => Localization.Current.Settings);
+                    settingsScreen.Status = Name;
+                    settingsScreen.AddItem(new MenuItem(i => Localization.Current.Volume + " +", i => VolumeUp()));
+                    settingsScreen.AddItem(new MenuItem(i => Localization.Current.Volume + " -", i => VolumeDown()));
+                    settingsScreen.AddItem(new MenuItem(i => Localization.Current.Reconnect, i => Reconnect()), 3);
+                    settingsScreen.AddItem(new MenuItem(i => Localization.Current.Pair, i =>
                     {
                         if (lastCommand == "CA")
                         {
@@ -359,14 +359,14 @@ namespace imBMW.Multimedia
                             SendCommand("CA"); // pair
                         }
                     }));
-                    playerSettings.AddBackButton();
+                    settingsScreen.AddBackButton();
 
                     menu.AddItem(new MenuItem(i => IsPlaying ? Localization.Current.Pause : Localization.Current.Play, i => PlayPauseToggle()));
                     menu.AddItem(new MenuItem(i => Localization.Current.NextTrack, i => Next()));
                     menu.AddItem(new MenuItem(i => Localization.Current.PrevTrack, i => Prev()));
-                    menu.AddItem(new MenuItem(i => Localization.Current.Settings, MenuItemType.Button, MenuItemAction.GoToScreen) { GoToScreen = playerSettings });
+                    menu.AddItem(new MenuItem(i => Localization.Current.Settings, MenuItemType.Button, MenuItemAction.GoToScreen) { GoToScreen = settingsScreen });
                     menu.AddBackButton();
-                    menu.Updated += (m, a) => { if (a.Reason == MenuScreenUpdateReason.StatusChanged) { playerSettings.Status = m.Status; } };
+                    menu.Updated += (m, a) => { if (a.Reason == MenuScreenUpdateReason.StatusChanged) { settingsScreen.Status = m.Status; } };
                 }
                 return menu;
             }
