@@ -13,7 +13,18 @@ namespace imBMW.Multimedia
     public class BluetoothWT32 : AudioPlayerBase
     {
         SerialPortBase port;
+        QueueThreadWorker queue;
+        MenuScreen menu;
+        byte[] btBuffer;
+        string lastCommand = "";
+        string connectedAddress;
+        string lastConnectedAddress;
+        bool isHFPConnected;
+        int initStep = 0;
+        bool isSleeping;
 
+        static string[] nowPlayingTags = new string[] { "TITLE", "ARTIST", "ALBUM", "GENRE", "TRACK_NUMBER", "TOTAL_TRACK_NUMBER", "PLAYING_TIME" };
+        
         public BluetoothWT32(string port)
         {
             Name = "Bluetooth";
@@ -24,16 +35,6 @@ namespace imBMW.Multimedia
             this.port.NewLine = "\n";
             this.port.DataReceived += port_DataReceived;
         }
-
-        QueueThreadWorker queue;
-        MenuScreen menu;
-        byte[] btBuffer;
-        string lastCommand = "";
-        string connectedAddress;
-        string lastConnectedAddress;
-        bool isHFPConnected;
-        int initStep = 0;
-        bool isSleeping;
 
         public string ConnectedAddress
         {
@@ -187,6 +188,9 @@ namespace imBMW.Multimedia
                             case "A2DP":
                                 OnA2DPConnected(p[2], p[1]);
                                 break;
+                            case "AVRCP":
+                                OnAVRCPConnected();
+                                break;
                         }
                     }
                     break;
@@ -199,16 +203,7 @@ namespace imBMW.Multimedia
                                 OnA2DPConnected(lastConnectedAddress, p[1]);
                                 break;
                             case "AVRCP":
-                                //SendCommand("AVRCP PDU 50 0");
-                                SendCommand("AVRCP PDU 20 0"); // get now playing
-                                //SendCommand("AVRCP PDU 10 3");
-                                SendCommand("AVRCP PDU 31 1");
-                                SendCommand("AVRCP PDU 31 2");
-                                SendCommand("AVRCP PDU 31 9");
-                                Play();
-                                //SendCommand("AVRCP PDU 31 a");
-                                //SendCommand("AVRCP PDU 31 b");
-                                //SendCommand("AVRCP UP");
+                                OnAVRCPConnected();
                                 break;
                         }
                     }
@@ -216,7 +211,7 @@ namespace imBMW.Multimedia
                 case "AVRCP":
                     if (plen > 5 && p[1] == "GET_ELEMENT_ATTRIBUTES_RSP")
                     {
-                        var track = p[5]; // TODO find closing quote
+                        ParseNowPlaying(p);
                     }
                     else if (plen > 3 && p[1] == "REGISTER_NOTIFICATION_RSP")
                     {
@@ -226,21 +221,21 @@ namespace imBMW.Multimedia
                                 IsPlaying = p[4] == "PLAYING";
                                 if (p[2] == "CHANGED")
                                 {
-                                    SendCommand("AVRCP PDU 31 1");
+                                    SendCommand("AVRCP PDU 31 1"); // resubscribe
                                 }
                                 break;
                             case "TRACK_CHANGED":
                                 // [4] and [5] = 0 and 0 ?
                                 if (p[2] == "CHANGED")
                                 {
-                                    SendCommand("AVRCP PDU 20 0");
-                                    SendCommand("AVRCP PDU 31 2");
+                                    SendCommand("AVRCP PDU 20 0"); // get track info
+                                    SendCommand("AVRCP PDU 31 2"); // resubscribe
                                 }
                                 break;
                             case "NOW_PLAYING_CHANGED":
                                 if (p[2] == "CHANGED")
                                 {
-                                    SendCommand("AVRCP PDU 31 9");
+                                    SendCommand("AVRCP PDU 31 9"); // resubscribe
                                 }
                                 break;
                         }
@@ -253,6 +248,75 @@ namespace imBMW.Multimedia
                     }
                     break;
             }
+        }
+
+        void ParseNowPlaying(string[] p)
+        {
+            var i = 0;
+            string tag = null;
+            string value = null;
+            var n = new TrackInfo();
+            foreach (var s in p)
+            {
+                var isLast = i == p.Length - 1;
+                var isTag = nowPlayingTags.Contains(s) && (value == null || value.Length > 0 && value[value.Length - 1] == '"');
+                if (tag != null && !isTag)
+                {
+                    value = (value == null) ? s : value + " " + s;
+                }
+                if (isLast || isTag)
+                {
+                    if (tag != null && value.Length > 2)
+                    {
+                        value = value.Substring(1, value.Length - 2);
+                        switch (tag)
+                        {
+                            case "TITLE":
+                                n.Title = value;
+                                break;
+                            case "ARTIST":
+                                n.Artist = value;
+                                break;
+                            case "ALBUM":
+                                n.Album = value;
+                                break;
+                            case "GENRE":
+                                n.Genre = value;
+                                break;
+                            case "TRACK_NUMBER":
+                                try { n.TrackNumber = int.Parse(value); }
+                                catch { }
+                                break;
+                            case "TOTAL_TRACK_NUMBER":
+                                try { n.TotalTracks = int.Parse(value); }
+                                catch { }
+                                break;
+                            case "PLAYING_TIME":
+                                try { n.TrackLength = int.Parse(value); }
+                                catch { }
+                                break;
+                        }
+                    }
+                    if (isTag)
+                    {
+                        tag = s;
+                        value = null;
+                    }
+                }
+                i++;
+            }
+            NowPlaying = n;
+        }
+
+        void OnAVRCPConnected()
+        {
+            SendCommand("AVRCP PDU 20 0"); // get now playing
+            //SendCommand("AVRCP PDU 10 3"); // get supported events
+            SendCommand("AVRCP PDU 31 1"); // subscribe
+            SendCommand("AVRCP PDU 31 2"); // ..
+            SendCommand("AVRCP PDU 31 9"); // ..
+            // TODO set max volume
+            Play();
         }
 
         void OnA2DPConnected(string address, string link)
