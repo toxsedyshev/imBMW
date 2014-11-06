@@ -19,10 +19,22 @@ namespace imBMW.Tools
         public const char NetRect = '\xCB';
         public const char Net = '\xCC';
         public const char Rect = '\xB2';
+        public const char BordmonitorBull = '\xB7';
+    }
+
+    public enum CharType
+    {
+        None,
+        Upper,
+        Lower,
+        UpperYo,
+        LowerYo
     }
 
     public static class StringHelpers
     {
+        static object[] translitTo = new object[] { 'A', 'B', 'V', 'G', 'D', 'E', 'G', 'Z', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'R', 'S', 'T', 'U', 'F', "Kh", 'C', "Ch", "Sh", "Sh'", '"', 'Y', '\'', "Ye", "Yu", "Ya", "Yo" };
+
         /// <summary>
         /// Prepends chars to string to reach specified length
         /// </summary>
@@ -55,19 +67,113 @@ namespace imBMW.Tools
             return s;
         }
 
+        public static CharType GetRussianCharType(this char c)
+        {
+            if (c >= 0x0410 && c <= 0x042F)
+            {
+                return CharType.Upper;
+            }
+            if (c >= 0x0430 && c <= 0x044F)
+            {
+                return CharType.Lower;
+            }
+            if (c == 0x1025)
+            {
+                return CharType.Upper;
+            }
+            if (c == 0x1105)
+            {
+                return CharType.Lower;
+            }
+            return CharType.None;
+        }
+
+        public static string Translit(this string s)
+        {
+            var found = false;
+            foreach (var c in s)
+            {
+                if (c.GetRussianCharType() != CharType.None)
+                {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found)
+            {
+                return s;
+            }
+
+            var r = "";
+            CharType t;
+            foreach (var c in s)
+            {
+                t = c.GetRussianCharType();
+                if (t == CharType.None)
+                {
+                    r += c;
+                    continue;
+                }
+                int i;
+                switch (t)
+                {
+                    case CharType.Upper:
+                        i = c - 0x0410;
+                        break;
+                    case CharType.Lower:
+                        i = c - 0x0430;
+                        break;
+                    case CharType.UpperYo:
+                    case CharType.LowerYo:
+                        i = 32;
+                        break;
+                    default:
+                        throw new Exception("Unknown char for translit.");
+                }
+                var nc = translitTo[i];
+                if (nc is string)
+                {
+                    if (t == CharType.Lower || t == CharType.LowerYo)
+                    {
+                        nc = ((string)nc).ToLower();
+                    }
+                    r += (string)nc;
+                }
+                else
+                {
+                    if (t == CharType.Lower || t == CharType.LowerYo)
+                    {
+                        nc = ((char)nc).ToLower();
+                    }
+                    r += (char)nc;
+                }
+            }
+            return r;
+        }
+
         public static string UTF8ToASCII(this string s)
         {
-            //   C0 = А, F0 = Я, F1 = а, FF = я - ASCII
-            // 0410 = А,               044F = я - UTF8
-            // TODO 1025 Ё 1105 ё
+            //  C0 = А,  DF = Я,  E0 = а,  FF = я - ASCII
+            // 410 = А, 42F = Я, 430 = а, 44F = я - UTF8
+            // + 1025 = Ё, 1105 = ё
             var res = new byte[s.Length];
             char c;
             for (var i = 0; i < s.Length; i++)
             {
                 c = s[i];
-                if (c >= 0x0410 && c <= 0x044F)
+                var t = c.GetRussianCharType();
+                switch (t)
                 {
-                    c = (char)(c - 0x0350);
+                    case CharType.Upper:
+                    case CharType.Lower:
+                        c = (char)(c - 0x0350);
+                        break;
+                    case CharType.UpperYo:
+                        c = '\xC5';
+                        break;
+                    case CharType.LowerYo:
+                        c = '\xE5';
+                        break;
                 }
                 res[i] = (byte)c;
             }

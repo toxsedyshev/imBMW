@@ -1,6 +1,7 @@
 using System;
 using Microsoft.SPOT;
 using imBMW.Tools;
+using imBMW.Features.Localizations;
 
 namespace imBMW.iBus.Devices.Real
 {
@@ -93,7 +94,8 @@ namespace imBMW.iBus.Devices.Real
             }
             var offset = data.Length;
             data = data.PadRight(0x20, len);
-            data.PasteASCII(s.UTF8ToASCII(), offset, len);
+            var translit = Localization.Current is EnglishLocalization; // sorry for ditry hack, I'm tired
+            data.PasteASCII(translit ? s.Translit() : s.UTF8ToASCII(), offset, len);
             if (isChecked)
             {
                 data[data.Length - 1] = 0x2A;

@@ -58,7 +58,7 @@ namespace imBMW.iBus.Devices.Real
         {
             byte[] data = new byte[] { 0x23, 0x40, 0x20 };
             data = data.PadRight(0x20, DisplayTextMaxLen);
-            data.PasteASCII(s, 3, DisplayTextMaxLen, align);
+            data.PasteASCII(s.Translit(), 3, DisplayTextMaxLen, align);
             Manager.EnqueueMessage(new Message(DeviceAddress.Radio, DeviceAddress.MultiInfoDisplay, "Show text \"" + s + "\" on MID", data));
         }
 
@@ -66,7 +66,7 @@ namespace imBMW.iBus.Devices.Real
         {
             byte[] data = new byte[] { 0x23, 0x42, 0x30 };
             data = data.PadRight(0xFF, DisplayTextMaxLen);
-            data.PasteASCII(s, 3, DisplayTextMaxLen, align);
+            data.PasteASCII(s.Translit(), 3, DisplayTextMaxLen, align);
             Manager.EnqueueMessage(new Message(DeviceAddress.Telephone, DeviceAddress.InstrumentClusterElectronics, "Show text \"" + s + "\" on the radio", data));
         }
     }

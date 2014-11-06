@@ -36,6 +36,8 @@ namespace imBMW.Multimedia
             this.port.DataReceived += port_DataReceived;
         }
 
+        public bool NowPlayingTagsSeparatedRows { get; set; }
+
         public string ConnectedAddress
         {
             get { return connectedAddress; }
@@ -421,12 +423,7 @@ namespace imBMW.Multimedia
                     settingsScreen.AddItem(new MenuItem(i => IsConnected ? Localization.Current.Disconnect : Localization.Current.Connect, i => { if (IsConnected) Disconnect(); else Connect(); }), 3);
                     settingsScreen.AddBackButton();
 
-                    var nowPlayingScreen = new MenuScreen(s => menu.Status);
-                    nowPlayingScreen.AddItem(new MenuItem(i => NowPlaying.GetTitleWithLabel()));
-                    nowPlayingScreen.AddItem(new MenuItem(i => NowPlaying.GetArtistWithLabel()));
-                    nowPlayingScreen.AddItem(new MenuItem(i => NowPlaying.GetAlbumWithLabel()));
-                    nowPlayingScreen.AddItem(new MenuItem(i => NowPlaying.GetGenreWithLabel()));
-                    nowPlayingScreen.AddBackButton();
+                    var nowPlayingScreen = new MenuScreen(s => StringHelpers.IsNullOrEmpty(menu.Status) ? Localization.Current.Paused : menu.Status);
 
                     menu.AddItem(new MenuItem(i => IsPlaying ? Localization.Current.Pause : Localization.Current.Play, i => PlayPauseToggle()));
                     menu.AddItem(new MenuItem(i => Localization.Current.NowPlaying, MenuItemType.Button, MenuItemAction.GoToScreen) { GoToScreen = nowPlayingScreen });
@@ -445,7 +442,56 @@ namespace imBMW.Multimedia
 
                     NowPlayingChanged += (p, nowPlaying) =>
                     {
-                        nowPlayingScreen.WithUpdateSuspended(m => m.Status = nowPlaying.GetTrackPlaylistPosition());
+                        nowPlayingScreen.IsUpdateSuspended = true;
+
+                        nowPlayingScreen.Status = nowPlaying.GetTrackPlaylistPosition();
+
+                        nowPlayingScreen.ClearItems();
+                        if (NowPlayingTagsSeparatedRows)
+                        {
+                            if (!StringHelpers.IsNullOrEmpty(NowPlaying.Title))
+                            {
+                                nowPlayingScreen.AddItem(new MenuItem(i => Localization.Current.TrackTitle + ":"));
+                                nowPlayingScreen.AddItem(new MenuItem(i => NowPlaying.Title));
+                            }
+                            if (!StringHelpers.IsNullOrEmpty(NowPlaying.Artist))
+                            {
+                                nowPlayingScreen.AddItem(new MenuItem(i => Localization.Current.Artist + ":"));
+                                nowPlayingScreen.AddItem(new MenuItem(i => NowPlaying.Artist));
+                            }
+                            if (!StringHelpers.IsNullOrEmpty(NowPlaying.Album))
+                            {
+                                nowPlayingScreen.AddItem(new MenuItem(i => Localization.Current.Album + ":"));
+                                nowPlayingScreen.AddItem(new MenuItem(i => NowPlaying.Album));
+                            }
+                            if (!StringHelpers.IsNullOrEmpty(NowPlaying.Genre))
+                            {
+                                nowPlayingScreen.AddItem(new MenuItem(i => Localization.Current.Genre + ":"));
+                                nowPlayingScreen.AddItem(new MenuItem(i => NowPlaying.Genre));
+                            }
+                        }
+                        else
+                        {
+                            if (!StringHelpers.IsNullOrEmpty(NowPlaying.Title))
+                            {
+                                nowPlayingScreen.AddItem(new MenuItem(i => NowPlaying.GetTitleWithLabel()));
+                            }
+                            if (!StringHelpers.IsNullOrEmpty(NowPlaying.Artist))
+                            {
+                                nowPlayingScreen.AddItem(new MenuItem(i => NowPlaying.GetArtistWithLabel()));
+                            }
+                            if (!StringHelpers.IsNullOrEmpty(NowPlaying.Album))
+                            {
+                                nowPlayingScreen.AddItem(new MenuItem(i => NowPlaying.GetAlbumWithLabel()));
+                            }
+                            if (!StringHelpers.IsNullOrEmpty(NowPlaying.Genre))
+                            {
+                                nowPlayingScreen.AddItem(new MenuItem(i => NowPlaying.GetGenreWithLabel()));
+                            }
+                        }
+                        nowPlayingScreen.AddBackButton();
+                        
+                        nowPlayingScreen.IsUpdateSuspended = false;
                         nowPlayingScreen.Refresh();
                     };
                 }
