@@ -302,7 +302,7 @@ namespace imBMW.Features.Menu
                         itemsBytes = itemsBytes.Combine(0x06);
                         continue;
                     }
-                    var s = item.Text;
+                    var s = item != null ? item.Text : "";
                     var m = Bordmonitor.ShowText(s ?? String.Empty, BordmonitorFields.Item, i, item != null && item.IsChecked, false);
                     if (itemsBytes == null)
                     {

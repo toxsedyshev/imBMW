@@ -52,7 +52,8 @@ namespace imBMW.Features.Menu
         {
             if (!IsEnabled)
             {
-                return;
+                //return;
+                Logger.Warning("Why shouldn't I set player status when menu is disabled?!");
             }
             if (displayStatusDelayTimer != null)
             {

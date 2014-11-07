@@ -52,6 +52,11 @@ namespace imBMW.iBus.Devices.Real
         {
             int len;
             byte[] data;
+            var translit = Localization.Current is EnglishLocalization; // sorry for ditry hack, I'm tired :)
+            if (translit)
+            {
+                s = s.Translit();
+            }
             switch (field)
             {
                 case BordmonitorFields.Title:
@@ -94,8 +99,7 @@ namespace imBMW.iBus.Devices.Real
             }
             var offset = data.Length;
             data = data.PadRight(0x20, len);
-            var translit = Localization.Current is EnglishLocalization; // sorry for ditry hack, I'm tired
-            data.PasteASCII(translit ? s.Translit() : s.UTF8ToASCII(), offset, len);
+            data.PasteASCII(translit ? s : s.UTF8ToASCII(), offset, len);
             if (isChecked)
             {
                 data[data.Length - 1] = 0x2A;

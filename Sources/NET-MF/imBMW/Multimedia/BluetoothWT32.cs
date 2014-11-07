@@ -21,7 +21,7 @@ namespace imBMW.Multimedia
         string lastConnectedAddress;
         bool isHFPConnected;
         int initStep = 0;
-        bool isSleeping;
+        //bool isSleeping;
 
         static string[] nowPlayingTags = new string[] { "TITLE", "ARTIST", "ALBUM", "GENRE", "TRACK_NUMBER", "TOTAL_TRACK_NUMBER", "PLAYING_TIME" };
         
@@ -93,11 +93,11 @@ namespace imBMW.Multimedia
 
         void SendCommand(string command, string param = null)
         {
-            if (isSleeping)
+            /*if (isSleeping)
             {
                 queue.Enqueue(" AT"); // wakes up after SLEEP 
                 isSleeping = false;
-            }
+            }*/
             lastCommand = command;
             if (param != null)
             {
@@ -356,8 +356,8 @@ namespace imBMW.Multimedia
             {
                 // SendCommand("CLOSE 2"); // TODO test all 3 connections are closed by closing 0
                 SendCommand("CLOSE 0");
-                SendCommand("DELAY 0 1000 SLEEP");
-                isSleeping = true;
+                //SendCommand("DELAY 0 1000 SLEEP"); // commented: can't wake up via uart after sleep
+                //isSleeping = true;
             }
         }
 
@@ -404,7 +404,7 @@ namespace imBMW.Multimedia
         {
             if (IsConnected)
             {
-                SendCommand("AVRCP DOWN");
+                SendCommand("AVRCP DN");
             }
         }
 
@@ -423,7 +423,9 @@ namespace imBMW.Multimedia
                     settingsScreen.AddItem(new MenuItem(i => IsConnected ? Localization.Current.Disconnect : Localization.Current.Connect, i => { if (IsConnected) Disconnect(); else Connect(); }), 3);
                     settingsScreen.AddBackButton();
 
-                    var nowPlayingScreen = new MenuScreen(s => StringHelpers.IsNullOrEmpty(menu.Status) ? Localization.Current.Paused : menu.Status);
+                    var nowPlayingScreen = new MenuScreen(s => StringHelpers.IsNullOrEmpty(menu.Status) ? Localization.Current.Disconnected : menu.Status);
+                    NowPlayingChanged += (p, n) => UpdateNowPlayingScreen(nowPlayingScreen, n);
+                    UpdateNowPlayingScreen(nowPlayingScreen, NowPlaying);
 
                     menu.AddItem(new MenuItem(i => IsPlaying ? Localization.Current.Pause : Localization.Current.Play, i => PlayPauseToggle()));
                     menu.AddItem(new MenuItem(i => Localization.Current.NowPlaying, MenuItemType.Button, MenuItemAction.GoToScreen) { GoToScreen = nowPlayingScreen });
@@ -439,64 +441,63 @@ namespace imBMW.Multimedia
                             nowPlayingScreen.Refresh();
                         }
                     };
-
-                    NowPlayingChanged += (p, nowPlaying) =>
-                    {
-                        nowPlayingScreen.IsUpdateSuspended = true;
-
-                        nowPlayingScreen.Status = nowPlaying.GetTrackPlaylistPosition();
-
-                        nowPlayingScreen.ClearItems();
-                        if (NowPlayingTagsSeparatedRows)
-                        {
-                            if (!StringHelpers.IsNullOrEmpty(NowPlaying.Title))
-                            {
-                                nowPlayingScreen.AddItem(new MenuItem(i => Localization.Current.TrackTitle + ":"));
-                                nowPlayingScreen.AddItem(new MenuItem(i => NowPlaying.Title));
-                            }
-                            if (!StringHelpers.IsNullOrEmpty(NowPlaying.Artist))
-                            {
-                                nowPlayingScreen.AddItem(new MenuItem(i => Localization.Current.Artist + ":"));
-                                nowPlayingScreen.AddItem(new MenuItem(i => NowPlaying.Artist));
-                            }
-                            if (!StringHelpers.IsNullOrEmpty(NowPlaying.Album))
-                            {
-                                nowPlayingScreen.AddItem(new MenuItem(i => Localization.Current.Album + ":"));
-                                nowPlayingScreen.AddItem(new MenuItem(i => NowPlaying.Album));
-                            }
-                            if (!StringHelpers.IsNullOrEmpty(NowPlaying.Genre))
-                            {
-                                nowPlayingScreen.AddItem(new MenuItem(i => Localization.Current.Genre + ":"));
-                                nowPlayingScreen.AddItem(new MenuItem(i => NowPlaying.Genre));
-                            }
-                        }
-                        else
-                        {
-                            if (!StringHelpers.IsNullOrEmpty(NowPlaying.Title))
-                            {
-                                nowPlayingScreen.AddItem(new MenuItem(i => NowPlaying.GetTitleWithLabel()));
-                            }
-                            if (!StringHelpers.IsNullOrEmpty(NowPlaying.Artist))
-                            {
-                                nowPlayingScreen.AddItem(new MenuItem(i => NowPlaying.GetArtistWithLabel()));
-                            }
-                            if (!StringHelpers.IsNullOrEmpty(NowPlaying.Album))
-                            {
-                                nowPlayingScreen.AddItem(new MenuItem(i => NowPlaying.GetAlbumWithLabel()));
-                            }
-                            if (!StringHelpers.IsNullOrEmpty(NowPlaying.Genre))
-                            {
-                                nowPlayingScreen.AddItem(new MenuItem(i => NowPlaying.GetGenreWithLabel()));
-                            }
-                        }
-                        nowPlayingScreen.AddBackButton();
-                        
-                        nowPlayingScreen.IsUpdateSuspended = false;
-                        nowPlayingScreen.Refresh();
-                    };
                 }
                 return menu;
             }
+        }
+
+        void UpdateNowPlayingScreen(MenuScreen nowPlayingScreen, TrackInfo nowPlaying)
+        {
+            nowPlayingScreen.IsUpdateSuspended = true;
+
+            nowPlayingScreen.Status = nowPlaying.GetTrackPlaylistPosition();
+
+            nowPlayingScreen.ClearItems();
+            if (NowPlayingTagsSeparatedRows)
+            {
+                if (!StringHelpers.IsNullOrEmpty(nowPlaying.Title))
+                {
+                    nowPlayingScreen.AddItem(new MenuItem(i => nowPlaying.Title));
+                }
+                if (!StringHelpers.IsNullOrEmpty(nowPlaying.Artist))
+                {
+                    nowPlayingScreen.AddItem(new MenuItem(i => CharIcons.BordmonitorBull + " " + Localization.Current.Artist + ":"));
+                    nowPlayingScreen.AddItem(new MenuItem(i => nowPlaying.Artist));
+                }
+                if (!StringHelpers.IsNullOrEmpty(nowPlaying.Album))
+                {
+                    nowPlayingScreen.AddItem(new MenuItem(i => CharIcons.BordmonitorBull + " " + Localization.Current.Album + ":"));
+                    nowPlayingScreen.AddItem(new MenuItem(i => nowPlaying.Album));
+                }
+                if (!StringHelpers.IsNullOrEmpty(nowPlaying.Genre))
+                {
+                    nowPlayingScreen.AddItem(new MenuItem(i => CharIcons.BordmonitorBull + " " + Localization.Current.Genre + ":"));
+                    nowPlayingScreen.AddItem(new MenuItem(i => nowPlaying.Genre));
+                }
+            }
+            else
+            {
+                if (!StringHelpers.IsNullOrEmpty(nowPlaying.Title))
+                {
+                    nowPlayingScreen.AddItem(new MenuItem(i => nowPlaying.GetTitleWithLabel()));
+                }
+                if (!StringHelpers.IsNullOrEmpty(nowPlaying.Artist))
+                {
+                    nowPlayingScreen.AddItem(new MenuItem(i => nowPlaying.GetArtistWithLabel()));
+                }
+                if (!StringHelpers.IsNullOrEmpty(nowPlaying.Album))
+                {
+                    nowPlayingScreen.AddItem(new MenuItem(i => nowPlaying.GetAlbumWithLabel()));
+                }
+                if (!StringHelpers.IsNullOrEmpty(nowPlaying.Genre))
+                {
+                    nowPlayingScreen.AddItem(new MenuItem(i => nowPlaying.GetGenreWithLabel()));
+                }
+            }
+            nowPlayingScreen.AddBackButton();
+
+            nowPlayingScreen.IsUpdateSuspended = false;
+            nowPlayingScreen.Refresh();
         }
 
         public override bool IsPlaying
