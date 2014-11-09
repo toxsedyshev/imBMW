@@ -215,9 +215,13 @@ namespace imBMW.Tools
             return result;
         }
 
-        public static int IndexOf(this byte[] array, byte b)
+        public static int IndexOf(this byte[] array, byte b, int skip = 0, int arrayLength = -1)
         {
-            for (int i = 0; i < array.Length; i++)
+            if (arrayLength < 0)
+            {
+                arrayLength = array.Length;
+            }
+            for (int i = skip; i < arrayLength; i++)
             {
                 if (array[i] == b)
                 {

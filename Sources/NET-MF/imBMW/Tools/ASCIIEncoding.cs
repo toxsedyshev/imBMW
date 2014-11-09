@@ -6,10 +6,14 @@ namespace System.Text
     // TODO
     public class ASCIIEncoding// : Encoding
     {
-        public static string GetString(byte[] bytes, bool eolAsSpace = true)
+        public static string GetString(byte[] bytes, bool eolAsSpace = true, int length = -1)
         {
-            var chars = new char[bytes.Length];
-            for (int i = 0; i < bytes.Length; i++)
+            if (length < 0)
+            {
+                length = bytes.Length;
+            }
+            var chars = new char[length];
+            for (int i = 0; i < length; i++)
             {
                 chars[i] = (char)bytes[i];
                 if (chars[i] == '\0')

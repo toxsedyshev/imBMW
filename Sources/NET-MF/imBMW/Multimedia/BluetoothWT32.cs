@@ -7,6 +7,7 @@ using imBMW.Tools;
 using imBMW.Features.Localizations;
 using imBMW.Features.Menu;
 using imBMW.Multimedia.Models;
+using System.Threading;
 
 namespace imBMW.Multimedia
 {
@@ -16,11 +17,13 @@ namespace imBMW.Multimedia
         QueueThreadWorker queue;
         MenuScreen menu;
         byte[] btBuffer;
-        string lastCommand = "";
+        int btBufferLen;
+        string lastControlCommand = "";
         string connectedAddress;
         string lastConnectedAddress;
         bool isHFPConnected;
         int initStep = 0;
+        bool isMuxMode;
         //bool isSleeping;
 
         static string[] nowPlayingTags = new string[] { "TITLE", "ARTIST", "ALBUM", "GENRE", "TRACK_NUMBER", "TOTAL_TRACK_NUMBER", "PLAYING_TIME" };
@@ -31,12 +34,40 @@ namespace imBMW.Multimedia
 
             queue = new QueueThreadWorker(ProcessSendCommand);
 
-            this.port = new SerialInterruptPort(new SerialPortConfiguration(port, BaudRate.Baudrate115200, Parity.None, 8, StopBits.One, true), Cpu.Pin.GPIO_NONE, 0, 16, 10);
+            this.port = new SerialInterruptPort(new SerialPortConfiguration(port, BaudRate.Baudrate115200, Parity.None, 8, StopBits.One, true), Cpu.Pin.GPIO_NONE, 0, 16, 0);
             this.port.NewLine = "\n";
             this.port.DataReceived += port_DataReceived;
+
+            BTCommandReceived += (s, link, data) =>
+            {
+                if (link == Link.Control) { ProcessBTNotification(Encoding.UTF8.GetString(data)); }
+            };
+
+            IsMuxMode = true;
+            //Thread.Sleep(1000); IsMuxMode = false; throw new Exception("WOW");
+            SendCommand("RESET");
         }
 
         public bool NowPlayingTagsSeparatedRows { get; set; }
+
+        protected bool IsMuxMode
+        {
+            get
+            {
+                return isMuxMode;
+            }
+            set
+            {
+                if (isMuxMode == value)
+                {
+                    return;
+                }
+                SendCommand("SET CONTROL MUX " + (value ? 1 : 0));
+                isMuxMode = value;
+                btBuffer = null;
+                btBufferLen = 0;
+            }
+        }
 
         public string ConnectedAddress
         {
@@ -91,26 +122,139 @@ namespace imBMW.Multimedia
             set { isHFPConnected = value; }
         }
 
-        void SendCommand(string command, string param = null)
+        public delegate void BTCommandHandler(BluetoothWT32 sender, Link link, byte[] command);
+
+        public event BTCommandHandler BTCommandReceived;
+
+        protected void OnBTCommandReceived(Link link, byte[] command)
+        {
+            var e = BTCommandReceived;
+            if (e != null)
+            {
+                try
+                {
+                    e(this, link, command);
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error(ex, "while processing WT32 incoming command");
+                }
+            }
+        }
+
+        public enum Link : byte 
+        {
+            Control = 0xFF,
+            One = 0x00,
+            Two = 0x01,
+            Three = 0x02,
+            Four = 0x03,
+            Five = 0x04,
+            Six = 0x05,
+            Seven =  0x06
+        }
+
+        class MuxCommand
+        {
+            public Link Link { get; protected set; }
+
+            public string Command { get; protected set; }
+
+            public byte[] Data { get; protected set; }
+
+            public bool IsStringCommand { get; protected set; }
+
+            public MuxCommand(string command, Link link)
+            {
+                IsStringCommand = true;
+                Command = command;
+                Link = link;
+            }
+
+            public MuxCommand(byte[] command, Link link, string description = "")
+            {
+                Data = command;
+                Link = link;
+                Command = description;
+            }
+
+            public byte[] GetBytes()
+            {
+                if (IsStringCommand)
+                {
+                    return Encoding.UTF8.GetBytes(Command);
+                }
+                else
+                {
+                    return Data;
+                }
+            }
+        }
+
+        public void SendCommand(string command, Link link = Link.Control)
         {
             /*if (isSleeping)
             {
-                queue.Enqueue(" AT"); // wakes up after SLEEP 
                 isSleeping = false;
+                SendCommand(" AT"); // wakes up after SLEEP 
             }*/
-            lastCommand = command;
-            if (param != null)
+            if (link == Link.Control)
             {
-                command += " " + param;
+                lastControlCommand = command;
             }
-            queue.Enqueue(command);
+            object cmd;
+            if (!IsMuxMode)
+            {
+                cmd = command;
+            }
+            else
+            {
+                cmd = new MuxCommand(command, link);
+            }
+            queue.Enqueue(cmd);
+        }
+
+        public void SendCommand(byte[] command, Link link, string description = "")
+        {
+            if (command.Length > 1023)
+            {
+                throw new Exception("WT32 command length limit is 10 bytes. Can't send: " + description);
+            }
+            var cmd = new MuxCommand(command, link, description);
+            queue.Enqueue(cmd);
         }
 
         void ProcessSendCommand(object o)
         {
-            var s = (string)o;
-            port.WriteLine(s);
-            Logger.Info(s, "> BT");
+            if (o is string)
+            {
+                var s = (string)o;
+                Logger.Info(s, "> BT");
+                port.WriteLine(s);
+            }
+            else
+            {
+                var cmd = (MuxCommand)o;
+                var bytes = cmd.GetBytes();
+                var len = bytes.Length;
+                if (len > 1023)
+                {
+                    throw new Exception("WT32 command length limit is 10 bytes. Can't send: " + cmd.Command);
+                }
+                var buf = new byte[len + 5];
+
+                int pos = 0;
+                buf[pos++] = 0xBF;  // SOF 
+                buf[pos++] = (byte)cmd.Link;
+                buf[pos++] = (byte)(len >> 8);  // Flags (reserved) 6 bits + len 2 bits (256-1023)
+                buf[pos++] = (byte)len;         //                         + len 8 bits (0-255)
+                Array.Copy(bytes, 0, buf, pos, len);
+                pos += len;
+                buf[pos++] = (byte)(((byte)cmd.Link) ^ 0xFF); // nlink
+
+                Logger.Info("MUX " + (cmd.Link == Link.Control ? "CTRL" : cmd.Link.ToString()) + ": " + cmd.Command, "> BT");
+                port.Write(buf);
+            }
         }
 
         private void port_DataReceived(object sender, SerialDataReceivedEventArgs e)
@@ -120,37 +264,117 @@ namespace imBMW.Multimedia
                 return;
             }
             var data = port.ReadAvailable();
-            if (btBuffer == null)
+            if (IsMuxMode)
             {
-                btBuffer = data;
+                if (btBuffer == null || btBuffer.Length != 2000)
+                {
+                    btBuffer = new byte[2000];
+                    btBufferLen = 0;
+                }
+                Array.Copy(data, 0, btBuffer, btBufferLen, data.Length);
+                btBufferLen += data.Length;
             }
             else
             {
-                btBuffer = btBuffer.Combine(data);
-            }
-            int index;
-            while (btBuffer != null && ((index = btBuffer.IndexOf(0x0D)) != -1 || (index = btBuffer.IndexOf(0x0A)) != -1))
-            {
-                var s = index == 0 ? String.Empty : Encoding.UTF8.GetString(btBuffer.SkipAndTake(0, index));
-                if (s != String.Empty)
+                if (btBuffer == null)
                 {
-                    ProcessBTNotification(s);
-                }
-                var skip = btBuffer[index] == 0x0A ? 1 : 2;
-                if (index + skip >= btBuffer.Length)
-                {
-                    btBuffer = null;
+                    btBuffer = data;
                 }
                 else
                 {
-                    btBuffer = btBuffer.Skip(index + skip);
+                    btBuffer = btBuffer.Combine(data);
+                }
+            }
+            int index = -1;
+            int bLen;
+            if (IsMuxMode)
+            {
+                while ((index = btBuffer.IndexOf(0xBF, index + 1, btBufferLen)) != -1)
+                {
+                    bLen = btBufferLen - index;
+                    if (bLen < 5)
+                    {
+                        break;
+                    }
+                    var link = btBuffer[index + 1];
+                    if (link != (byte)Link.Control && link > (byte)Link.Seven)
+                    {
+                        continue;
+                    }
+                    var dataLen = ((btBuffer[index + 2] & 0x11) << 8) + btBuffer[index + 3]; // 10-byte length
+                    var packLen = dataLen + 5;
+                    if (bLen < packLen)
+                    {
+                        break;
+                    }
+                    if (btBuffer[index + packLen - 1] != (link ^ 0xFF))
+                    {
+                        continue;
+                    }
+                    OnBTCommandReceived((Link)link, btBuffer.SkipAndTake(index + 4, dataLen));
+                    if (bLen != packLen)
+                    {
+                        Array.Copy(btBuffer, index + packLen, btBuffer, 0, bLen - packLen);
+                    }
+                    btBufferLen = bLen - packLen;
+                    index = -1;
+                }
+                if (index > 0)
+                {
+                    #if DEBUG
+                    Logger.Warning("Skipping BT data: " + ASCIIEncoding.GetString(btBuffer, true, btBufferLen - index));
+                    #endif
+                    Array.Copy(btBuffer, index, btBuffer, 0, btBufferLen - index);
+                    btBufferLen -= index;
+                }
+            }
+            else
+            {
+                while (btBuffer != null && ((index = btBuffer.IndexOf(0x0D)) != -1 || (index = btBuffer.IndexOf(0x0A)) != -1))
+                {
+                    if (index != 0)
+                    {
+                        try
+                        {
+                            OnBTCommandReceived(Link.Control, btBuffer.SkipAndTake(0, index));
+                        }
+                        catch (Exception ex)
+                        {
+                            Logger.Error(ex, "while parsing WT32 message in command mode");
+                        }
+                    }
+                    var skip = btBuffer[index] == 0x0A ? 1 : 2;
+                    if (index + skip >= btBuffer.Length)
+                    {
+                        btBuffer = null;
+                    }
+                    else
+                    {
+                        btBuffer = btBuffer.Skip(index + skip);
+                    }
                 }
             }
         }
         
         private void ProcessBTNotification(string s)
         {
+            if (s.IndexOf('\r') >= 0)
+            {
+                var messages = s.Split('\r', '\n');
+                foreach (var m in messages)
+                {
+                    if (m.Length > 0)
+                    {
+                        ProcessBTNotification(m);
+                    }
+                }
+                return;
+            }
             s = s.Trim();
+            if (s.Length == 0)
+            {
+                return;
+            }
             Logger.Info(s, "BT <");
             var p = s.IndexOf(' ') > 0 ? s.Split(' ') : null;
             if (p != null)
@@ -166,9 +390,11 @@ namespace imBMW.Multimedia
                         case 0:
                             // init
                             //SendCommand("SET");
-                            SendCommand("SET PROFILE A2DP", "SINK");
-                            SendCommand("SET PROFILE AVRCP", "CONTROLLER");
-                            SendCommand("SET BT CLASS", "240408");
+                            SendCommand("SET PROFILE A2DP SINK");
+                            SendCommand("SET PROFILE AVRCP CONTROLLER");
+                            SendCommand("SET PROFILE SPP ON");
+                            SendCommand("SET BT PAGEMODE 3 2000 1");
+                            SendCommand("SET BT CLASS 240408");
                             SendCommand("SET BT SSP 3 0");
                             SendCommand("SET BT AUTH * 0000");
                             SendCommand("SET BT NAME imBMW");
@@ -312,6 +538,8 @@ namespace imBMW.Multimedia
 
         void OnAVRCPConnected()
         {
+            //SendCommand("CALL " + ConnectedAddress + " 1101 RFCOMM");
+            //SendCommand("SDP " + ConnectedAddress + " 1101");
             SendCommand("AVRCP PDU 20 0"); // get now playing
             //SendCommand("AVRCP PDU 10 3"); // get supported events
             SendCommand("AVRCP PDU 31 1"); // subscribe
