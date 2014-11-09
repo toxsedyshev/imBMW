@@ -7,7 +7,7 @@ namespace imBMW.iBus
     public class Message
     {
         public const int PacketLengthMin = 5;
-        public const int PacketLengthMax = 64;
+        public const int PacketLengthMax = 258;
 
         byte source;
         byte destination;
