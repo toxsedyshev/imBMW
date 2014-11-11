@@ -153,10 +153,24 @@ namespace imBMW.Tools
 
         public static string UTF8ToASCII(this string s)
         {
+            var found = false;
+            foreach (var ch in s)
+            {
+                if (ch > 0xFF)
+                {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found)
+            {
+                return s;
+            }
+
             //  C0 = А,  DF = Я,  E0 = а,  FF = я - ASCII
             // 410 = А, 42F = Я, 430 = а, 44F = я - UTF8
             // + 1025 = Ё, 1105 = ё
-            var res = new byte[s.Length];
+            var res = new char[s.Length];
             char c;
             for (var i = 0; i < s.Length; i++)
             {
@@ -174,10 +188,16 @@ namespace imBMW.Tools
                     case CharType.LowerYo:
                         c = '\xE5';
                         break;
+                    default:
+                        if (c > 0xFF)
+                        {
+                            c = ' ';
+                        }
+                        break;
                 }
-                res[i] = (byte)c;
+                res[i] = c;
             }
-            return ASCIIEncoding.GetString(res);
+            return new string(res);
         }
 
         public static string GetString(this Encoding encoding, params byte[] bytes)
