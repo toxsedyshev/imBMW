@@ -18,12 +18,14 @@ namespace imBMW.Multimedia
         MenuScreen menu;
         byte[] btBuffer;
         int btBufferLen;
+        int btBufferMuxLen = 500;
         string lastControlCommand = "";
         string connectedAddress;
         string lastConnectedAddress;
         bool isHFPConnected;
-        int initStep = 0;
         bool isMuxMode;
+        int initStep = 0;
+
         //bool isSleeping;
 
         static string[] nowPlayingTags = new string[] { "TITLE", "ARTIST", "ALBUM", "GENRE", "TRACK_NUMBER", "TOTAL_TRACK_NUMBER", "PLAYING_TIME" };
@@ -34,7 +36,7 @@ namespace imBMW.Multimedia
 
             queue = new QueueThreadWorker(ProcessSendCommand);
 
-            this.port = new SerialInterruptPort(new SerialPortConfiguration(port, BaudRate.Baudrate115200, Parity.None, 8, StopBits.One, true), Cpu.Pin.GPIO_NONE, 0, 16, 0);
+            this.port = new SerialInterruptPort(new SerialPortConfiguration(port, BaudRate.Baudrate115200, Parity.None, 8, StopBits.One, true), Cpu.Pin.GPIO_NONE, 0, 100, 0);
             this.port.NewLine = "\n";
             this.port.DataReceived += port_DataReceived;
 
@@ -257,26 +259,42 @@ namespace imBMW.Multimedia
             }
         }
 
+        // TODO delete
+        int reads = 0;
+
         private void port_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
             if (port.AvailableBytes == 0)
             {
                 return;
             }
+            reads++;
             var data = port.ReadAvailable();
-            if (IsMuxMode)
+            var mux = IsMuxMode;
+            if (mux)
             {
-                if (btBuffer == null || btBuffer.Length != 2000)
+                if (btBuffer == null || btBuffer.Length != btBufferMuxLen)
                 {
-                    btBuffer = new byte[2000];
+                    btBuffer = new byte[btBufferMuxLen];
                     btBufferLen = 0;
+                }
+                if (btBuffer.Length - btBufferLen < data.Length)
+                {
+                    btBufferMuxLen *= 2;
+                    Logger.Info("Extending buffer to " + btBufferMuxLen, "BT");
+                    var newBuf = new byte[btBufferMuxLen];
+                    if (btBufferLen > 0)
+                    {
+                        Array.Copy(btBuffer, newBuf, btBufferLen);
+                    }
+                    btBuffer = newBuf;
                 }
                 Array.Copy(data, 0, btBuffer, btBufferLen, data.Length);
                 btBufferLen += data.Length;
             }
             else
             {
-                if (btBuffer == null)
+                if (btBuffer == null || btBuffer.Length == btBufferMuxLen)
                 {
                     btBuffer = data;
                 }
@@ -287,7 +305,7 @@ namespace imBMW.Multimedia
             }
             int index = -1;
             int bLen;
-            if (IsMuxMode)
+            if (mux)
             {
                 while ((index = btBuffer.IndexOf(0xBF, index + 1, btBufferLen)) != -1)
                 {
@@ -318,6 +336,9 @@ namespace imBMW.Multimedia
                     }
                     btBufferLen = bLen - packLen;
                     index = -1;
+
+                    Logger.Info("Reads count: " + reads, " BT ");
+                    reads = 0;
                 }
                 if (index > 0)
                 {
@@ -392,8 +413,7 @@ namespace imBMW.Multimedia
                             //SendCommand("SET");
                             SendCommand("SET PROFILE A2DP SINK");
                             SendCommand("SET PROFILE AVRCP CONTROLLER");
-                            SendCommand("SET PROFILE SPP ON");
-                            SendCommand("SET BT PAGEMODE 3 2000 1");
+                            SendCommand("SET BT PAGEMODE 4 2000 1"); // TODO 3 2000 1 for more than 1 connection
                             SendCommand("SET BT CLASS 240408");
                             SendCommand("SET BT SSP 3 0");
                             SendCommand("SET BT AUTH * 0000");
@@ -402,7 +422,8 @@ namespace imBMW.Multimedia
                             break;
                         default:
                             // inited
-                            SendCommand("VOLUME 15");
+                            SendCommand("VOLUME 10");
+                            //SendCommand("RFCOMM CREATE");
                             //Connect();
                             break;
                     }
@@ -432,6 +453,8 @@ namespace imBMW.Multimedia
                                 break;
                             case "AVRCP":
                                 OnAVRCPConnected();
+                                break;
+                            case "RFCOMM":
                                 break;
                         }
                     }
@@ -473,6 +496,12 @@ namespace imBMW.Multimedia
                     if (plen > 2 && p[1] == "CARRIER" && p[2] == "0")
                     {
                         IsConnected = false;
+                    }
+                    break;
+                case "VOLUME":
+                    if (plen > 1)
+                    {
+                        OnStatusChanged((int)(100 * int.Parse(p[1]) / 15) + "%", PlayerEvent.Settings);
                     }
                     break;
             }
@@ -538,7 +567,7 @@ namespace imBMW.Multimedia
 
         void OnAVRCPConnected()
         {
-            //SendCommand("CALL " + ConnectedAddress + " 1101 RFCOMM");
+            SendCommand("CALL " + ConnectedAddress + " 1101 RFCOMM");
             //SendCommand("SDP " + ConnectedAddress + " 1101");
             SendCommand("AVRCP PDU 20 0"); // get now playing
             //SendCommand("AVRCP PDU 10 3"); // get supported events
@@ -551,13 +580,17 @@ namespace imBMW.Multimedia
 
         void OnA2DPConnected(string address, string link)
         {
-            ConnectedAddress = address;
+            // Don't save address of second connected device
+            if (!IsConnected)
+            {
+                ConnectedAddress = address;
+            }
             if (PlayerHostState == Multimedia.PlayerHostState.Off)
             {
                 Disconnect();
                 return;
             }
-            if (link == "1")
+            if (link == "1") // TODO check count of a2dp and avrcp connections
             {
                 SendCommand("CALL " + address + " 17 AVRCP");
             }
@@ -646,9 +679,11 @@ namespace imBMW.Multimedia
 
                     var settingsScreen = new MenuScreen(s => Localization.Current.Settings);
                     settingsScreen.Status = Name;
+                    settingsScreen.AddItem(new MenuItem(i => IsConnected ? Localization.Current.Disconnect : Localization.Current.Connect, i => { if (IsConnected) Disconnect(); else Connect(); }));
+                    settingsScreen.AddItem(new MenuItem(i => "BT " + Localization.Current.Volume + " +", i => SendCommand("VOLUME up")));
+                    settingsScreen.AddItem(new MenuItem(i => "BT " + Localization.Current.Volume + " -", i => SendCommand("VOLUME down")));
                     settingsScreen.AddItem(new MenuItem(i => Localization.Current.Volume + " +", i => VolumeUp()));
                     settingsScreen.AddItem(new MenuItem(i => Localization.Current.Volume + " -", i => VolumeDown()));
-                    settingsScreen.AddItem(new MenuItem(i => IsConnected ? Localization.Current.Disconnect : Localization.Current.Connect, i => { if (IsConnected) Disconnect(); else Connect(); }), 3);
                     settingsScreen.AddBackButton();
 
                     var nowPlayingScreen = new MenuScreen(s => StringHelpers.IsNullOrEmpty(menu.Status) ? Localization.Current.Disconnected : menu.Status);
