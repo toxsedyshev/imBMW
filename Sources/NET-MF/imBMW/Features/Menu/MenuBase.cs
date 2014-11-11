@@ -45,7 +45,15 @@ namespace imBMW.Features.Menu
 
         protected void ShowPlayerStatus(IAudioPlayer player)
         {
-            ShowPlayerStatus(player, player.IsPlaying);
+            // TODO move to player interface
+            if (player is BluetoothWT32 && !((BluetoothWT32)player).IsConnected)
+            {
+                ShowPlayerStatus(player, Localization.Current.Disconnected, PlayerEvent.Wireless);
+            }
+            else
+            {
+                ShowPlayerStatus(player, player.IsPlaying);
+            }
         }
 
         protected void ShowPlayerStatus(IAudioPlayer player, string status)

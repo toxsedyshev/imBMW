@@ -78,6 +78,10 @@ namespace imBMW.Features.Menu
                 case PlayerEvent.Voice:
                     status = TextWithIcon("*", status);
                     break;
+                case PlayerEvent.Settings:
+                    status = TextWithIcon("*", status);
+                    showAfterWithDelay = true;
+                    break;
             }
             ShowPlayerStatus(player, status);
             if (showAfterWithDelay)

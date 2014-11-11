@@ -20,7 +20,8 @@ namespace imBMW.Multimedia
         Playing,
         Wireless,
         IncomingCall,
-        Text
+        Text,
+        Settings
     }
 
     public enum PlayerHostState
