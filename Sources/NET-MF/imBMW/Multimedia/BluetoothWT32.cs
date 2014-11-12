@@ -36,7 +36,7 @@ namespace imBMW.Multimedia
 
             queue = new QueueThreadWorker(ProcessSendCommand);
 
-            this.port = new SerialInterruptPort(new SerialPortConfiguration(port, BaudRate.Baudrate115200, Parity.None, 8, StopBits.One, true), Cpu.Pin.GPIO_NONE, 0, 100, 0);
+            this.port = new SerialInterruptPort(new SerialPortConfiguration(port, BaudRate.Baudrate115200, Parity.None, 8, StopBits.One, true), Cpu.Pin.GPIO_NONE, 0, 60, 0);
             this.port.NewLine = "\n";
             this.port.DataReceived += port_DataReceived;
 
@@ -51,6 +51,8 @@ namespace imBMW.Multimedia
         }
 
         public bool NowPlayingTagsSeparatedRows { get; set; }
+
+        public Link SPPLink { get; set; }
 
         protected bool IsMuxMode
         {
@@ -146,6 +148,7 @@ namespace imBMW.Multimedia
 
         public enum Link : byte 
         {
+            Unset = 0xEF,
             Control = 0xFF,
             One = 0x00,
             Two = 0x01,
@@ -168,16 +171,20 @@ namespace imBMW.Multimedia
 
             public MuxCommand(string command, Link link)
             {
+                if (link == Link.Unset)
+                {
+                    throw new Exception("Can't send to Link.Unset.");
+                }
                 IsStringCommand = true;
-                Command = command;
                 Link = link;
+                Command = command;
             }
 
             public MuxCommand(byte[] command, Link link, string description = "")
+                : this(description, link)
             {
+                IsStringCommand = false;
                 Data = command;
-                Link = link;
-                Command = description;
             }
 
             public byte[] GetBytes()
@@ -259,16 +266,12 @@ namespace imBMW.Multimedia
             }
         }
 
-        // TODO delete
-        int reads = 0;
-
         private void port_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
             if (port.AvailableBytes == 0)
             {
                 return;
             }
-            reads++;
             var data = port.ReadAvailable();
             var mux = IsMuxMode;
             if (mux)
@@ -336,9 +339,6 @@ namespace imBMW.Multimedia
                     }
                     btBufferLen = bLen - packLen;
                     index = -1;
-
-                    Logger.Info("Reads count: " + reads, " BT ");
-                    reads = 0;
                 }
                 if (index > 0)
                 {
@@ -376,7 +376,7 @@ namespace imBMW.Multimedia
                 }
             }
         }
-        
+
         private void ProcessBTNotification(string s)
         {
             if (s.IndexOf('\r') >= 0)
@@ -411,6 +411,7 @@ namespace imBMW.Multimedia
                         case 0:
                             // init
                             //SendCommand("SET");
+                            SendCommand("SET PROFILE SPP imBMW");
                             SendCommand("SET PROFILE A2DP SINK");
                             SendCommand("SET PROFILE AVRCP CONTROLLER");
                             SendCommand("SET BT PAGEMODE 4 2000 1"); // TODO 3 2000 1 for more than 1 connection
@@ -439,6 +440,12 @@ namespace imBMW.Multimedia
                                 break;
                             case "AVRCP":
                                 OnAVRCPConnected();
+                                break;
+                            case "RFCOMM":
+                                if (p[3] == "1")
+                                {
+                                    SPPLink = (Link)byte.Parse(p[1]);
+                                }
                                 break;
                         }
                     }
@@ -493,9 +500,16 @@ namespace imBMW.Multimedia
                     }
                     break;
                 case "NO":
-                    if (plen > 2 && p[1] == "CARRIER" && p[2] == "0")
+                    if (plen > 2 && p[1] == "CARRIER")
                     {
-                        IsConnected = false;
+                        if (p[2] == "0")
+                        {
+                            IsConnected = false;
+                        }
+                        if (p[2] == ((byte)SPPLink).ToString())
+                        {
+                            SPPLink = Link.Unset;
+                        }
                     }
                     break;
                 case "VOLUME":
