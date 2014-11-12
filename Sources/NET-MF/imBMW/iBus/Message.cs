@@ -112,8 +112,12 @@ namespace imBMW.iBus
             return check == packet[packetLength - 1];
         }
 
-        public static bool CanStartWith(byte[] packet, int length)
+        public static bool CanStartWith(byte[] packet, int length = -1)
         {
+            if (length < 0)
+            {
+                length = packet.Length;
+            }
             if (length < PacketLengthMin)
             {
                 return true;

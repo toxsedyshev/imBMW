@@ -231,6 +231,13 @@ namespace imBMW.iBus
 
         static void SendMessage(object o)
         {
+            if (o is byte[])
+            {
+                iBus.Write((byte[])o);
+                Thread.Sleep(iBus.AfterWriteDelay);
+                return;
+            }
+
             Message m = (Message)o;
 
             #if DEBUG
@@ -266,6 +273,11 @@ namespace imBMW.iBus
             }
 
             Thread.Sleep(iBus.AfterWriteDelay); // Don't flood iBus
+        }
+
+        public static void EnqueueRawMessage(byte[] m)
+        {
+            messageWriteQueue.Enqueue(m);
         }
 
         public static void EnqueueMessage(Message m)
