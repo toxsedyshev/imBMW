@@ -85,7 +85,7 @@ namespace System.IO.Ports
         public virtual void Write(byte[] data, int offset, int length)
         {
             _writeThread = Thread.CurrentThread;                                // grab the current thread so that we can pause the writing
-            if (!CanWrite) _writeThread.Suspend();                              // do not continue if _busy is already set (eg. the signal was changed when we weren't writing)
+            while (!CanWrite) _writeThread.Suspend();                              // do not continue if _busy is already set (eg. the signal was changed when we weren't writing)
 
             if (_writeBufferSize < 1)                                           // If user does not want to split data into chunks,
             {
