@@ -1,5 +1,4 @@
 using System;
-using Microsoft.SPOT;
 
 namespace System.Text
 {

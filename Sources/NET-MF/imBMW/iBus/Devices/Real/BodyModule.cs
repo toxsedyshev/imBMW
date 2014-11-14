@@ -1,5 +1,4 @@
 using System;
-using Microsoft.SPOT;
 using imBMW.Tools;
 
 namespace imBMW.iBus.Devices.Real
@@ -13,7 +12,7 @@ namespace imBMW.iBus.Devices.Real
         Trunk
     }
 
-    public class RemoteKeyEventArgs : EventArgs
+    public class RemoteKeyEventArgs
     {
         public RemoteKeyButton Button { get; private set; }
 

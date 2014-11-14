@@ -68,8 +68,7 @@ namespace imBMW.iBus.Diagnostics
             }
 
             byte packetLength = (byte)(packet[1] + 2);
-            if (packetLength < PacketLengthMin
-                || packetLength > PacketLengthMax)
+            if (packetLength < PacketLengthMin)
             {
                 return false;
             }

@@ -8,27 +8,6 @@ using imBMW.Tools;
 
 namespace imBMW.iBus
 {
-    #region Enums, delegales and event args
-
-    public class MessageEventArgs : EventArgs
-    {
-        public Message Message { get; private set; }
-
-        public bool Cancel { get; set; }
-
-        public MessageEventArgs(Message message)
-        {
-            Message = message;
-        }
-    }
-
-    public delegate void MessageEventHandler(MessageEventArgs e);
-
-    public delegate void DeviceFindHandler(DeviceAddress d, bool found);
-
-    #endregion
-
-
     public static class Manager
     {
         static ISerialPort iBus;
@@ -118,7 +97,7 @@ namespace imBMW.iBus
             }
         }
 
-        static void SkipBuffer(byte count)
+        static void SkipBuffer(int count)
         {
             messageBufferLength -= count;
             if (messageBufferLength > 0)
@@ -127,10 +106,8 @@ namespace imBMW.iBus
             }
         }
 
-        public static void ProcessMessage(object o)
+        public static void ProcessMessage(Message m)
         {
-            var m = (Message)o;
-
             #if DEBUG
             m.PerformanceInfo.TimeStartedProcessing = DateTime.Now;
             #endif
@@ -159,41 +136,7 @@ namespace imBMW.iBus
             {
                 try
                 {
-                    switch (receiver.Match)
-                    {
-                        case MessageReceiverRegistration.MatchType.Source:
-                            if (receiver.Source == m.SourceDevice)
-                            {
-                                receiver.Callback(m);
-                            }
-                            break;
-                        case MessageReceiverRegistration.MatchType.Destination:
-                            if (receiver.Destination == m.DestinationDevice
-                                || m.DestinationDevice == DeviceAddress.Broadcast
-                                || m.DestinationDevice == DeviceAddress.GlobalBroadcastAddress)
-                            {
-                                receiver.Callback(m);
-                            }
-                            break;
-                        case MessageReceiverRegistration.MatchType.SourceAndDestination:
-                            if (receiver.Source == m.SourceDevice
-                                && (receiver.Destination == m.DestinationDevice
-                                    || m.DestinationDevice == DeviceAddress.Broadcast
-                                    || m.DestinationDevice == DeviceAddress.GlobalBroadcastAddress))
-                            {
-                                receiver.Callback(m);
-                            }
-                            break;
-                        case MessageReceiverRegistration.MatchType.SourceOrDestination:
-                            if (receiver.Source == m.SourceDevice
-                                || receiver.Destination == m.DestinationDevice
-                                || m.DestinationDevice == DeviceAddress.Broadcast
-                                || m.DestinationDevice == DeviceAddress.GlobalBroadcastAddress)
-                            {
-                                receiver.Callback(m);
-                            }
-                            break;
-                    }
+                    receiver.Process(m);
                 }
                 catch (Exception ex)
                 {
@@ -338,33 +281,7 @@ namespace imBMW.iBus
         /// Fired after sending the message
         /// </summary>
         public static event MessageEventHandler AfterMessageSent;
-
-        public delegate void MessageReceiver(Message message);
-
-        class MessageReceiverRegistration
-        {
-            public enum MatchType
-            {
-                Source,
-                Destination,
-                SourceOrDestination,
-                SourceAndDestination
-            }
-
-            public readonly DeviceAddress Source;
-            public readonly DeviceAddress Destination;
-            public readonly MessageReceiver Callback;
-            public readonly MatchType Match;
-
-            public MessageReceiverRegistration(DeviceAddress source, DeviceAddress destination, MessageReceiver callback, MatchType match)
-            {
-                Source = source;
-                Destination = destination;
-                Callback = callback;
-                Match = match;
-            }
-        }
-
+        
         static ArrayList messageReceiverList = new ArrayList();
 
         public static void AddMessageReceiverForSourceDevice(DeviceAddress source, MessageReceiver callback)

@@ -1,5 +1,4 @@
 using System;
-using Microsoft.SPOT;
 using imBMW.Tools;
 using System.Collections;
 using System.Text;
@@ -327,6 +326,16 @@ namespace imBMW.iBus
                 return null;
             }
             return message.DataDump + " (" + messageTypeDescriptions[firstByte] + ')';
+        }
+
+        public static bool IsInternal(this byte device)
+        {
+            return ((DeviceAddress)device).IsInternal();
+        }
+
+        public static bool IsInternal(this DeviceAddress device)
+        {
+            return device == DeviceAddress.imBMWLogger || device == DeviceAddress.imBMWPlayer;
         }
     }
 }

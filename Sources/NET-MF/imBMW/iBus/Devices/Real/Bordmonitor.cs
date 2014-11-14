@@ -1,7 +1,5 @@
 using System;
-using Microsoft.SPOT;
 using imBMW.Tools;
-using imBMW.Features.Localizations;
 
 namespace imBMW.iBus.Devices.Real
 {
@@ -52,7 +50,13 @@ namespace imBMW.iBus.Devices.Real
         {
             int len;
             byte[] data;
-            var translit = Localization.Current is EnglishLocalization; // sorry for ditry hack, I'm tired :)
+            
+            #if NETMF
+            var translit = imBMW.Features.Localizations.Localization.Current is imBMW.Features.Localizations.EnglishLocalization; // sorry for ditry hack, I'm tired :)
+            #else
+            var translit = false; // TODO
+            #endif
+
             if (translit)
             {
                 s = s.Translit();

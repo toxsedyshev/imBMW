@@ -17,7 +17,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DefineConstants>DEBUG;TRACE,MF_FRAMEWORK_VERSION_V4_2,NETMF</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -62,6 +62,8 @@
     <Compile Include="iBus\Devices\Emulators\CDChanger.cs" />
     <Compile Include="iBus\Diagnostics\DBusConverter.cs" />
     <Compile Include="iBus\Diagnostics\DBusMessage.cs" />
+    <Compile Include="iBus\InternalMessage.cs" />
+    <Compile Include="iBus\ManagerTools.cs" />
     <Compile Include="IO\ISerialPort.cs" />
     <Compile Include="IO\SerialInterruptPortBase.cs" />
     <Compile Include="IO\SerialPortBase.cs" />

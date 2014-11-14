@@ -1,5 +1,4 @@
 using System;
-using Microsoft.SPOT;
 using imBMW.Tools;
 
 namespace imBMW.iBus.Devices.Real
@@ -13,7 +12,7 @@ namespace imBMW.iBus.Devices.Real
         Ign
     }
 
-    public class IgnitionEventArgs : EventArgs
+    public class IgnitionEventArgs
     {
         public IgnitionState CurrentIgnitionState { get; private set; }
         public IgnitionState PreviousIgnitionState { get; private set; }
@@ -25,7 +24,7 @@ namespace imBMW.iBus.Devices.Real
         }
     }
 
-    public class SpeedRPMEventArgs : EventArgs
+    public class SpeedRPMEventArgs
     {
         public uint Speed { get; private set; }
         public uint RPM { get; private set; }
@@ -37,7 +36,7 @@ namespace imBMW.iBus.Devices.Real
         }
     }
 
-    public class TemperatureEventArgs : EventArgs
+    public class TemperatureEventArgs
     {
         public sbyte Outside { get; private set; }
         public sbyte Coolant { get; private set; }

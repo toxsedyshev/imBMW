@@ -1,5 +1,4 @@
 ﻿using System;
-using Microsoft.SPOT;
 using System.Text;
 
 namespace imBMW.Tools
@@ -150,6 +149,13 @@ namespace imBMW.Tools
             }
             return r;
         }
+
+        #if !NETMF
+        public static char ToLower(this char c)
+        {
+            return c.ToString().ToLower()[0];
+        }
+        #endif
 
         public static string UTF8ToASCII(this string s)
         {

@@ -45,6 +45,10 @@ namespace imBMW.iBus
         Television = 0xED,
         OnBoardMonitor = 0xF0,
         Broadcast = 0xFF,
+
+        imBMWPlayer = 0xFD,
+        imBMWLogger = 0xFE,
+        
         Unset = 0x100,
         Unknown = 0x101
     }

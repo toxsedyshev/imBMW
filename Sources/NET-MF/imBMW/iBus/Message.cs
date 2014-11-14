@@ -15,7 +15,7 @@ namespace imBMW.iBus
         byte check;
 
         byte[] packet;
-        byte packetLength;
+        int packetLength;
         string packetDump;
         string dataDump;
         DeviceAddress sourceDevice = DeviceAddress.Unset;
@@ -58,11 +58,11 @@ namespace imBMW.iBus
             this.destination = destination;
             this.data = data;
             this.ReceiverDescription = description;
-            packetLength = (byte)(data.Length + 4); // + source + destination + len + chksum
+            packetLength = data.Length + 4; // + source + destination + len + chksum
 
             byte check = 0x00;
             check ^= source;
-            check ^= (byte)(packetLength - 2);
+            check ^= (byte)(PacketLength - 2);
             check ^= destination;
             foreach (byte b in data)
             {
@@ -71,41 +71,50 @@ namespace imBMW.iBus
             this.check = check;
         }
 
-        public static Message TryCreate(byte[] packet)
+        public static Message TryCreate(byte[] packet, int length = -1)
         {
-            return TryCreate(packet, (byte)packet.Length);
-        }
-
-        public static Message TryCreate(byte[] packet, int length)
-        {
+            if (length < 0)
+            {
+                length = packet.Length;
+            }
             if (!IsValid(packet, length))
             {
                 return null;
             }
 
-            return new Message(packet[0], packet[2], packet.SkipAndTake(3, packet[1] - 2));
+            return new Message(packet[0], packet[2], packet.SkipAndTake(3, ParseDataLength(packet)));
         }
 
-        public static bool IsValid(byte[] packet)
+        protected delegate int IntFromByteArray(byte[] packet);
+
+        public static bool IsValid(byte[] packet, int length = -1)
         {
-            return IsValid(packet, (byte)packet.Length);
+            return IsValid(packet, ParsePacketLength, length);
         }
 
-        public static bool IsValid(byte[] packet, int length)
+        protected static bool IsValid(byte[] packet, IntFromByteArray packetLengthCallback, int length = -1)
         {
+            if (length < 0)
+            {
+                length = packet.Length;
+            }
             if (length < PacketLengthMin)
             {
                 return false;
             }
+            if (packet[0].IsInternal())
+            {
+                return false;
+            }
 
-            byte packetLength = (byte)(packet[1] + 2);
+            int packetLength = packetLengthCallback(packet);
             if (length < packetLength || packetLength < PacketLengthMin)
             {
                 return false;
             }
 
             byte check = 0x00;
-            for (byte i = 0; i < packetLength - 1; i++)
+            for (int i = 0; i < packetLength - 1; i++)
             {
                 check ^= packet[i];
             }
@@ -113,6 +122,11 @@ namespace imBMW.iBus
         }
 
         public static bool CanStartWith(byte[] packet, int length = -1)
+        {
+            return CanStartWith(packet, ParsePacketLength, length);
+        }
+
+        protected static bool CanStartWith(byte[] packet, IntFromByteArray packetLengthCallback, int length = -1)
         {
             if (length < 0)
             {
@@ -123,9 +137,8 @@ namespace imBMW.iBus
                 return true;
             }
 
-            byte packetLength = (byte)(packet[1] + 2);
-            if (packetLength < PacketLengthMin
-                || packetLength > PacketLengthMax)
+            int packetLength = packetLengthCallback(packet);
+            if (packetLength < PacketLengthMin)
             {
                 return false;
             }
@@ -138,7 +151,17 @@ namespace imBMW.iBus
             return true;
         }
 
-        public byte PacketLength
+        protected static int ParsePacketLength(byte[] packet)
+        {
+            return packet[1] + 2;
+        }
+
+        protected static int ParseDataLength(byte[] packet)
+        {
+            return ParsePacketLength(packet) - 4;
+        }
+
+        public int PacketLength
         {
             get
             {

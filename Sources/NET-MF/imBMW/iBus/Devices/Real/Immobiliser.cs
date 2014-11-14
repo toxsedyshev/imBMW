@@ -1,12 +1,11 @@
 using System;
-using Microsoft.SPOT;
 using imBMW.Tools;
 
 namespace imBMW.iBus.Devices.Real
 {
     #region Enums, delegales and event args
 
-    public class KeyEventArgs : EventArgs
+    public class KeyEventArgs
     {
         public byte KeyNumber { get; private set; }
 
