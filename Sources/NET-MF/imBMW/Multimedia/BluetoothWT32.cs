@@ -34,6 +34,8 @@ namespace imBMW.Multimedia
         {
             Name = "Bluetooth";
 
+            SPPLink = Link.Unset;
+
             queue = new QueueThreadWorker(ProcessSendCommand);
 
             this.port = new SerialInterruptPort(new SerialPortConfiguration(port, BaudRate.Baudrate115200, Parity.None, 8, StopBits.One, true), Cpu.Pin.GPIO_NONE, 0, 60, 0);
@@ -581,7 +583,7 @@ namespace imBMW.Multimedia
 
         void OnAVRCPConnected()
         {
-            SendCommand("CALL " + ConnectedAddress + " 1101 RFCOMM");
+            //SendCommand("CALL " + ConnectedAddress + " 1101 RFCOMM");
             //SendCommand("SDP " + ConnectedAddress + " 1101");
             SendCommand("AVRCP PDU 20 0"); // get now playing
             //SendCommand("AVRCP PDU 10 3"); // get supported events
