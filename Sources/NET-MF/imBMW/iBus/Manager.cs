@@ -132,7 +132,7 @@ namespace imBMW.iBus
                 return;
             }
 
-            foreach (MessageReceiverRegistration receiver in messageReceiverList)
+            foreach (MessageReceiverRegistration receiver in MessageReceiverList)
             {
                 try
                 {
@@ -281,27 +281,39 @@ namespace imBMW.iBus
         /// Fired after sending the message
         /// </summary>
         public static event MessageEventHandler AfterMessageSent;
-        
-        static ArrayList messageReceiverList = new ArrayList();
+
+        static ArrayList messageReceiverList;
+
+        static ArrayList MessageReceiverList
+        {
+            get
+            {
+                if (messageReceiverList == null)
+                {
+                    messageReceiverList = new ArrayList();
+                }
+                return messageReceiverList;
+            }
+        }
 
         public static void AddMessageReceiverForSourceDevice(DeviceAddress source, MessageReceiver callback)
         {
-            messageReceiverList.Add(new MessageReceiverRegistration(source, DeviceAddress.Unset, callback, MessageReceiverRegistration.MatchType.Source));
+            MessageReceiverList.Add(new MessageReceiverRegistration(source, DeviceAddress.Unset, callback, MessageReceiverRegistration.MatchType.Source));
         }
 
         public static void AddMessageReceiverForDestinationDevice(DeviceAddress destination, MessageReceiver callback)
         {
-            messageReceiverList.Add(new MessageReceiverRegistration(DeviceAddress.Unset, destination, callback, MessageReceiverRegistration.MatchType.Destination));
+            MessageReceiverList.Add(new MessageReceiverRegistration(DeviceAddress.Unset, destination, callback, MessageReceiverRegistration.MatchType.Destination));
         }
 
         public static void AddMessageReceiverForSourceAndDestinationDevice(DeviceAddress source, DeviceAddress destination, MessageReceiver callback)
         {
-            messageReceiverList.Add(new MessageReceiverRegistration(source, destination, callback, MessageReceiverRegistration.MatchType.SourceAndDestination));
+            MessageReceiverList.Add(new MessageReceiverRegistration(source, destination, callback, MessageReceiverRegistration.MatchType.SourceAndDestination));
         }
 
         public static void AddMessageReceiverForSourceOrDestinationDevice(DeviceAddress source, DeviceAddress destination, MessageReceiver callback)
         {
-            messageReceiverList.Add(new MessageReceiverRegistration(source, destination, callback, MessageReceiverRegistration.MatchType.SourceOrDestination));
+            MessageReceiverList.Add(new MessageReceiverRegistration(source, destination, callback, MessageReceiverRegistration.MatchType.SourceOrDestination));
         }
 
         #endregion
