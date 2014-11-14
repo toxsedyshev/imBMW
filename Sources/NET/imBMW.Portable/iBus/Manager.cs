@@ -90,9 +90,9 @@ namespace imBMW.iBus
                 }
             }
 
-#if DEBUG
+            #if DEBUG
             m.PerformanceInfo.TimeEndedProcessing = DateTime.Now;
-#endif
+            #endif
 
             try
             {

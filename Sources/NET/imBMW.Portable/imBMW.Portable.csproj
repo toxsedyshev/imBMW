@@ -89,6 +89,9 @@
     <Compile Include="..\..\NET-MF\imBMW\Tools\StringHelpers.cs">
       <Link>Tools\StringHelpers.cs</Link>
     </Compile>
+    <Compile Include="Clients\BluetoothClient.cs" />
+    <Compile Include="Clients\SocketClient.cs" />
+    <Compile Include="Clients\SocketConnectionSettings.cs" />
     <Compile Include="iBus\Manager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tools\DateTimeHelpers.cs" />
