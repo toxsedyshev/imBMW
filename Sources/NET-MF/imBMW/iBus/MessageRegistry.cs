@@ -286,6 +286,11 @@ namespace imBMW.iBus
 
         public static string ToPrettyString(this Message message, bool withPerformanceInfo = false, bool withBytesAsAscii = false)
         {
+            if (message is InternalMessage)
+            {
+                var m = (InternalMessage)message;
+                return m.Device.ToStringValue() + ": " + m.DataString;
+            }
             string description = message.Describe();
             if (description == null)
             {

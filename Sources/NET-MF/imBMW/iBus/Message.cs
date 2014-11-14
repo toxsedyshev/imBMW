@@ -102,10 +102,6 @@ namespace imBMW.iBus
             {
                 return false;
             }
-            if (packet[0].IsInternal())
-            {
-                return false;
-            }
 
             int packetLength = packetLengthCallback(packet);
             if (length < packetLength || packetLength < PacketLengthMin)
