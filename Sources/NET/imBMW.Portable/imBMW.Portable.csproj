@@ -1,0 +1,107 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <MinimumVisualStudioVersion>12.0</MinimumVisualStudioVersion>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{131C81A5-E1B7-4032-94D7-580BD08FA652}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>imBMW</RootNamespace>
+    <AssemblyName>imBMW.Portable</AssemblyName>
+    <DefaultLanguage>ru-RU</DefaultLanguage>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{786C830F-07A1-408B-BD7F-6EE04809D6DB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <TargetFrameworkProfile>Profile32</TargetFrameworkProfile>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- A reference to the entire .NET Framework is automatically included -->
+  </ItemGroup>
+  <ItemGroup>
+    <TargetPlatform Include="WindowsPhoneApp, Version=8.1" />
+    <TargetPlatform Include="Windows, Version=8.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\..\NET-MF\imBMW\iBus\DeviceAddress.cs">
+      <Link>iBus\DeviceAddress.cs</Link>
+    </Compile>
+    <Compile Include="..\..\NET-MF\imBMW\iBus\Devices\Real\BodyModule.cs">
+      <Link>iBus\Devices\Real\BodyModule.cs</Link>
+    </Compile>
+    <Compile Include="..\..\NET-MF\imBMW\iBus\Devices\Real\Bordmonitor.cs">
+      <Link>iBus\Devices\Real\Bordmonitor.cs</Link>
+    </Compile>
+    <Compile Include="..\..\NET-MF\imBMW\iBus\Devices\Real\Immobiliser.cs">
+      <Link>iBus\Devices\Real\Immobiliser.cs</Link>
+    </Compile>
+    <Compile Include="..\..\NET-MF\imBMW\iBus\Devices\Real\InstrumentClusterElectronics.cs">
+      <Link>iBus\Devices\Real\InstrumentClusterElectronics.cs</Link>
+    </Compile>
+    <Compile Include="..\..\NET-MF\imBMW\iBus\Devices\Real\LightControlModule.cs">
+      <Link>iBus\Devices\Real\LightControlModule.cs</Link>
+    </Compile>
+    <Compile Include="..\..\NET-MF\imBMW\iBus\Devices\Real\MultiFunctionSteeringWheel.cs">
+      <Link>iBus\Devices\Real\MultiFunctionSteeringWheel.cs</Link>
+    </Compile>
+    <Compile Include="..\..\NET-MF\imBMW\iBus\Devices\Real\Radio.cs">
+      <Link>iBus\Devices\Real\Radio.cs</Link>
+    </Compile>
+    <Compile Include="..\..\NET-MF\imBMW\iBus\InternalMessage.cs">
+      <Link>iBus\InternalMessage.cs</Link>
+    </Compile>
+    <Compile Include="..\..\NET-MF\imBMW\iBus\ManagerTools.cs">
+      <Link>iBus\ManagerTools.cs</Link>
+    </Compile>
+    <Compile Include="..\..\NET-MF\imBMW\iBus\Message.cs">
+      <Link>iBus\Message.cs</Link>
+    </Compile>
+    <Compile Include="..\..\NET-MF\imBMW\iBus\MessageRegistry.cs">
+      <Link>iBus\MessageRegistry.cs</Link>
+    </Compile>
+    <Compile Include="..\..\NET-MF\imBMW\Tools\ArrayHelpers.cs">
+      <Link>Tools\ArrayHelpers.cs</Link>
+    </Compile>
+    <Compile Include="..\..\NET-MF\imBMW\Tools\ASCIIEncoding.cs">
+      <Link>Tools\ASCIIEncoding.cs</Link>
+    </Compile>
+    <Compile Include="..\..\NET-MF\imBMW\Tools\NumHelpers.cs">
+      <Link>Tools\NumHelpers.cs</Link>
+    </Compile>
+    <Compile Include="..\..\NET-MF\imBMW\Tools\StringHelpers.cs">
+      <Link>Tools\StringHelpers.cs</Link>
+    </Compile>
+    <Compile Include="iBus\Manager.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Tools\DateTimeHelpers.cs" />
+    <Compile Include="Tools\EnumHelpers.cs" />
+    <Compile Include="Tools\Hashtable.cs" />
+    <Compile Include="Tools\Logger.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
