@@ -59,7 +59,7 @@ namespace imBMW.App
             public Dictionary<int, BordmonitorText> Items { get; set; }
         }
 
-        private BordmonitorScreen currentScreen = new BordmonitorScreen { Title = "imBMW" };
+        private static BordmonitorScreen currentScreen = new BordmonitorScreen { Title = "imBMW" };
 
         private NavigationHelper navigationHelper;
         private ObservableDictionary defaultViewModel = new ObservableDictionary();
@@ -119,11 +119,14 @@ namespace imBMW.App
         void RefreshScreen()
         {
             DefaultViewModel["Title"] = currentScreen.Title;
-            DefaultViewModel["Status"] = currentScreen.Title;
+            DefaultViewModel["Status"] = currentScreen.Status;
             for (byte i = 0; i < 10; i++)
             {
-                var index = Bordmonitor.GetItemIndex(currentScreen.Items.Count, i, true);
-                var item = currentScreen.Items.Keys.Contains(index) ? currentScreen.Items[index] : null;
+                var item = currentScreen.Items.Keys.Contains(i) ? currentScreen.Items[i] : null;
+                if (item != null && string.IsNullOrWhiteSpace(item.Text))
+                {
+                    item = null;
+                }
                 DefaultViewModel["Item" + i] = item;
             }
         }
@@ -181,5 +184,12 @@ namespace imBMW.App
         }
 
         #endregion
+
+        private void Button_Tapped(object sender, TappedRoutedEventArgs e)
+        {
+            var b = (Button)sender;
+            var index = byte.Parse((string)b.Tag);
+            Bordmonitor.PressItem(index);
+        }
     }
 }

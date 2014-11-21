@@ -76,7 +76,7 @@ namespace imBMW.iBus.Devices.Real
             get
             {
                 Parse();
-                return text;
+                return text + (IsChecked ? " [x]" : ""); // TODO remove
             }
             protected set { text = value; }
         }
@@ -101,10 +101,10 @@ namespace imBMW.iBus.Devices.Real
             switch (Field)
             {
                 case BordmonitorFields.Title:
-                    Text = ASCIIEncoding.GetString(Data, Bordmonitor.DataShowTitle.Length, -1, false).ASCIIToUTF8();
+                    Text = ASCIIEncoding.GetString(Data, Bordmonitor.DataShowTitle.Length, -1, false).Trim().ASCIIToUTF8();
                     break;
                 case BordmonitorFields.Status:
-                    Text = ASCIIEncoding.GetString(Data, Bordmonitor.DataShowStatus.Length, -1, false).ASCIIToUTF8();
+                    Text = ASCIIEncoding.GetString(Data, Bordmonitor.DataShowStatus.Length, -1, false).Trim().ASCIIToUTF8();
                     break;
                 case BordmonitorFields.Item:
                     throw new Exception("Use ParseItems() instead.");
@@ -133,7 +133,7 @@ namespace imBMW.iBus.Devices.Real
 
             if (Data.Length > 3)
             {
-                var index = Data[3];
+                var index = (byte)(Data[3] - 0x40);
                 bool isChecked = false;
                 var offset = 4;
                 for (int i = offset; i < Data.Length; i++)
@@ -145,7 +145,7 @@ namespace imBMW.iBus.Devices.Real
                         {
                             isChecked = Data[i] == 0x2A;
                         }
-                        var s = ASCIIEncoding.GetString(Data, offset, i - offset + (isNext ? 0 : 1), false).ASCIIToUTF8();
+                        var s = ASCIIEncoding.GetString(Data, offset, i - offset + (isNext ? 0 : 1) - (isChecked ? 1 : 0), false).Trim().ASCIIToUTF8();
                         res.Add(new BordmonitorText(Field, s, index, isChecked));
                         index++;
                         offset = i + 1;
@@ -302,6 +302,11 @@ namespace imBMW.iBus.Devices.Real
                 Manager.EnqueueMessage(m);
             }
             return m;
+        }
+
+        public static void PressItem(byte index)
+        {
+            Manager.EnqueueMessage(new Message(DeviceAddress.GraphicsNavigationDriver, DeviceAddress.Radio, "Screen item click #" + index, 0x31, 0x60, 0x00, index));
         }
 
         public static void RefreshScreen()

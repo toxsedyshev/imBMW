@@ -225,6 +225,11 @@ namespace imBMW.iBus
 
         public static void EnqueueMessage(Message m)
         {
+            if (iBus is SerialPortEcho)
+            {
+                ProcessMessage(m);
+                return;
+            }
             if (iBus is SerialPortHub)
             {
                 SendMessage(m);
@@ -238,6 +243,14 @@ namespace imBMW.iBus
 
         public static void EnqueueMessage(params Message[] messages)
         {
+            if (iBus is SerialPortEcho)
+            {
+                foreach (Message m in messages)
+                {
+                    ProcessMessage(m);
+                }
+                return;
+            }
             if (iBus is SerialPortHub)
             {
                 foreach (Message m in messages)

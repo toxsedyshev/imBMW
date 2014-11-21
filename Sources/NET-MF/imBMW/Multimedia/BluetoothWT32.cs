@@ -8,6 +8,7 @@ using imBMW.Features.Localizations;
 using imBMW.Features.Menu;
 using imBMW.Multimedia.Models;
 using System.Threading;
+using imBMW.iBus;
 
 namespace imBMW.Multimedia
 {
@@ -223,6 +224,15 @@ namespace imBMW.Multimedia
                 cmd = new MuxCommand(command, link);
             }
             queue.Enqueue(cmd);
+        }
+
+        public void SendCommand(Message message, Link link, string description = null)
+        {
+            if (description == null)
+            {
+                description = message.ToString();
+            }
+            SendCommand(message.Packet, link, description);
         }
 
         public void SendCommand(byte[] command, Link link, string description = "")

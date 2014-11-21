@@ -69,17 +69,17 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <Button Grid.Column="0" Grid.Row="0" Style="{StaticResource bmButton}" Content="{Binding Item0.Text}" Visibility="{Binding Item0.Text, Converter={StaticResource NotEmptyToVisibilityConverter}}"/>
-                <Button Grid.Column="0" Grid.Row="1" Style="{StaticResource bmButton}" Content="{Binding Item1.Text}" Visibility="{Binding Item1.Text, Converter={StaticResource NotEmptyToVisibilityConverter}}"/>
-                <Button Grid.Column="0" Grid.Row="2" Style="{StaticResource bmButton}" Content="{Binding Item2.Text}" Visibility="{Binding Item2.Text, Converter={StaticResource NotEmptyToVisibilityConverter}}"/>
-                <Button Grid.Column="0" Grid.Row="3" Style="{StaticResource bmButton}" Content="{Binding Item3.Text}" Visibility="{Binding Item3.Text, Converter={StaticResource NotEmptyToVisibilityConverter}}"/>
-                <Button Grid.Column="0" Grid.Row="4" Style="{StaticResource bmButton}" Content="{Binding Item4.Text}" Visibility="{Binding Item4.Text, Converter={StaticResource NotEmptyToVisibilityConverter}}"/>
+                <Button Grid.Column="0" Grid.Row="0" Style="{StaticResource bmButton}" Content="{Binding Item0.Text}" Visibility="{Binding Item0, Converter={StaticResource NotEmptyToVisibilityConverter}}" Tag="0" Tapped="Button_Tapped"/>
+                <Button Grid.Column="0" Grid.Row="1" Style="{StaticResource bmButton}" Content="{Binding Item1.Text}" Visibility="{Binding Item1, Converter={StaticResource NotEmptyToVisibilityConverter}}" Tag="1" Tapped="Button_Tapped"/>
+                <Button Grid.Column="0" Grid.Row="2" Style="{StaticResource bmButton}" Content="{Binding Item2.Text}" Visibility="{Binding Item2, Converter={StaticResource NotEmptyToVisibilityConverter}}" Tag="2" Tapped="Button_Tapped"/>
+                <Button Grid.Column="0" Grid.Row="3" Style="{StaticResource bmButton}" Content="{Binding Item3.Text}" Visibility="{Binding Item3, Converter={StaticResource NotEmptyToVisibilityConverter}}" Tag="3" Tapped="Button_Tapped"/>
+                <Button Grid.Column="0" Grid.Row="4" Style="{StaticResource bmButton}" Content="{Binding Item4.Text}" Visibility="{Binding Item4, Converter={StaticResource NotEmptyToVisibilityConverter}}" Tag="4" Tapped="Button_Tapped"/>
 
-                <Button Grid.Column="1" Grid.Row="0" Style="{StaticResource bmRightButton}" Content="{Binding Item5.Text}" Visibility="{Binding Item5.Text, Converter={StaticResource NotEmptyToVisibilityConverter}}"/>
-                <Button Grid.Column="1" Grid.Row="1" Style="{StaticResource bmRightButton}" Content="{Binding Item6.Text}" Visibility="{Binding Item6.Text, Converter={StaticResource NotEmptyToVisibilityConverter}}"/>
-                <Button Grid.Column="1" Grid.Row="2" Style="{StaticResource bmRightButton}" Content="{Binding Item7.Text}" Visibility="{Binding Item7.Text, Converter={StaticResource NotEmptyToVisibilityConverter}}"/>
-                <Button Grid.Column="1" Grid.Row="3" Style="{StaticResource bmRightButton}" Content="{Binding Item8.Text}" Visibility="{Binding Item8.Text, Converter={StaticResource NotEmptyToVisibilityConverter}}"/>
-                <Button Grid.Column="1" Grid.Row="4" Style="{StaticResource bmRightButton}" Content="{Binding Item9.Text}" Visibility="{Binding Item9.Text, Converter={StaticResource NotEmptyToVisibilityConverter}}"/>
+                <Button Grid.Column="1" Grid.Row="0" Style="{StaticResource bmRightButton}" Content="{Binding Item5.Text}" Visibility="{Binding Item5, Converter={StaticResource NotEmptyToVisibilityConverter}}" Tag="5" Tapped="Button_Tapped"/>
+                <Button Grid.Column="1" Grid.Row="1" Style="{StaticResource bmRightButton}" Content="{Binding Item6.Text}" Visibility="{Binding Item6, Converter={StaticResource NotEmptyToVisibilityConverter}}" Tag="6" Tapped="Button_Tapped"/>
+                <Button Grid.Column="1" Grid.Row="2" Style="{StaticResource bmRightButton}" Content="{Binding Item7.Text}" Visibility="{Binding Item7, Converter={StaticResource NotEmptyToVisibilityConverter}}" Tag="7" Tapped="Button_Tapped"/>
+                <Button Grid.Column="1" Grid.Row="3" Style="{StaticResource bmRightButton}" Content="{Binding Item8.Text}" Visibility="{Binding Item8, Converter={StaticResource NotEmptyToVisibilityConverter}}" Tag="8" Tapped="Button_Tapped"/>
+                <Button Grid.Column="1" Grid.Row="4" Style="{StaticResource bmRightButton}" Content="{Binding Item9.Text}" Visibility="{Binding Item9, Converter={StaticResource NotEmptyToVisibilityConverter}}" Tag="9" Tapped="Button_Tapped"/>
 
             </Grid>
             

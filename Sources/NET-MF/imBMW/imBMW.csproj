@@ -67,6 +67,7 @@
     <Compile Include="IO\ISerialPort.cs" />
     <Compile Include="IO\SerialInterruptPortBase.cs" />
     <Compile Include="IO\SerialPortBase.cs" />
+    <Compile Include="IO\SerialPortEcho.cs" />
     <Compile Include="IO\SerialPortHub.cs" />
     <Compile Include="IO\SerialPortOptoPair.cs" />
     <Compile Include="IO\SerialPortTH3122.cs" />
