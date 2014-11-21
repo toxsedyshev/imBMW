@@ -15,6 +15,11 @@ namespace imBMW.iBus
         public InternalMessage(DeviceAddress device, params byte[] data)
             : base((byte)device, (byte)((data.Length + 2) >> 8), data)
         {
+            if (!device.IsInternal())
+            {
+                throw new Exception("Internal messages are for internal devices only.");
+            }
+
             if (PacketLength > 1024)
             {
                 throw new Exception("Message packet length exceeds 1024 bytes.");
@@ -29,7 +34,7 @@ namespace imBMW.iBus
             }
         }
 
-        private new DeviceAddress DestinationAddress
+        public override DeviceAddress DestinationDevice
         {
             get
             {

@@ -332,21 +332,7 @@ namespace imBMW.Features.Menu
 
         byte GetItemIndex(byte index, bool back = false)
         {
-            if (index > 9)
-            {
-                index -= 0x40;
-            }
-            // TODO also try 1-3 & 6-8
-            var smallscreenOffset = CurrentScreen.ItemsCount > 6 ? 0 : 2;
-            if (back)
-            {
-                if (index > 2 && index < smallscreenOffset + 3)
-                {
-                    index += (byte)(3 + smallscreenOffset);
-                }
-                smallscreenOffset *= -1;
-            }
-            return (byte)(index <= 2 ? index : index + smallscreenOffset);
+            return Bordmonitor.GetItemIndex(CurrentScreen.ItemsCount, index, back);
         }
 
         public bool IsScreenSwitched

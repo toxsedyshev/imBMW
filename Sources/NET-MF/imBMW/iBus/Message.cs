@@ -54,6 +54,11 @@ namespace imBMW.iBus
 
         void init(byte source, byte destination, byte[] data, string description = null) 
         {
+            if (source.IsInternal() || destination.IsInternal())
+            {
+                throw new Exception("iBus messages are not for internal devices.");
+            }
+
             this.source = source;
             this.destination = destination;
             this.data = data;
@@ -237,7 +242,7 @@ namespace imBMW.iBus
         }
 
 
-        public DeviceAddress DestinationDevice
+        public virtual DeviceAddress DestinationDevice
         {
             get
             {

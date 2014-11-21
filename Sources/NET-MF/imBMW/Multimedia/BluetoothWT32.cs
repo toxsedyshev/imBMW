@@ -345,7 +345,7 @@ namespace imBMW.Multimedia
                 if (index > 0)
                 {
                     #if DEBUG
-                    Logger.Warning("Skipping BT data: " + ASCIIEncoding.GetString(btBuffer, true, btBufferLen - index));
+                    Logger.Warning("Skipping BT data: " + ASCIIEncoding.GetString(btBuffer, 0, btBufferLen - index));
                     #endif
                     Array.Copy(btBuffer, index, btBuffer, 0, btBufferLen - index);
                     btBufferLen -= index;
@@ -425,7 +425,7 @@ namespace imBMW.Multimedia
                             break;
                         default:
                             // inited
-                            SendCommand("VOLUME 10");
+                            SendCommand("VOLUME 8");
                             //SendCommand("RFCOMM CREATE");
                             //Connect();
                             break;

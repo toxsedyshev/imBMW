@@ -46,6 +46,7 @@ namespace imBMW.iBus
         OnBoardMonitor = 0xF0,
         Broadcast = 0xFF,
 
+        imBMWMenu = 0xFC,
         imBMWPlayer = 0xFD,
         imBMWLogger = 0xFE,
         

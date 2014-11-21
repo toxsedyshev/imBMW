@@ -109,6 +109,11 @@ namespace imBMW.Tools
                 case DeviceAddress.Television: return "Television";
                 case DeviceAddress.OnBoardMonitor: return "OnBoardMonitor";
                 case DeviceAddress.Broadcast: return "Broadcast";
+                                
+                case DeviceAddress.imBMWMenu: return "imBMWMenu";
+                case DeviceAddress.imBMWPlayer: return "imBMWPlayer";
+                case DeviceAddress.imBMWLogger: return "imBMWLogger";
+                
                 case DeviceAddress.Unset: return "Unset";
                 case DeviceAddress.Unknown: return "Unknown";
             }

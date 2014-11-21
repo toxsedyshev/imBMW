@@ -66,6 +66,11 @@ namespace imBMW.Tools
             return s;
         }
 
+        public static bool IsRussianASCIIChar(this char c)
+        {
+            return c >= '\xC0' && c <= '\xFF';
+        }
+
         public static CharType GetRussianCharType(this char c)
         {
             if (c >= 0x0410 && c <= 0x042F)
@@ -206,6 +211,39 @@ namespace imBMW.Tools
             return new string(res);
         }
 
+        public static string ASCIIToUTF8(this string s)
+        {
+            var found = false;
+            foreach (var ch in s)
+            {
+                if (ch.IsRussianASCIIChar())
+                {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found)
+            {
+                return s;
+            }
+
+            var res = new char[s.Length];
+            char c;
+            for (var i = 0; i < s.Length; i++)
+            {
+                c = s[i];
+                if (c.IsRussianASCIIChar())
+                {
+                    res[i] = (char)(c + 0x0350);
+                }
+                else
+                {
+                    res[i] = c;
+                }
+            }
+            return new string(res);
+        }
+        
         public static string GetString(this Encoding encoding, params byte[] bytes)
         {
             return encoding.GetString(bytes, 0, bytes.Length);
