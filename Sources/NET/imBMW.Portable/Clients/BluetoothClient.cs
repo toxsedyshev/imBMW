@@ -12,7 +12,9 @@ namespace imBMW.Clients
 {
     public class BluetoothClient : SocketClient
     {
-        public BluetoothClient()
+        static BluetoothClient instance;
+
+        protected BluetoothClient()
         {
 
         }
@@ -26,6 +28,18 @@ namespace imBMW.Clients
             var sppService = await RfcommDeviceService.FromIdAsync(device.Id);
 
             await Connect(new SocketConnectionSettings(sppService.ConnectionHostName, sppService.ConnectionServiceName));
+        }
+
+        public static BluetoothClient Instance
+        {
+            get
+            {
+                if (instance == null)
+                {
+                    instance = new BluetoothClient();
+                }
+                return instance;
+            }
         }
     }
 }

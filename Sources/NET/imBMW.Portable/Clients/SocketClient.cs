@@ -33,9 +33,17 @@ namespace imBMW.Clients
             AutoReconnect = true;
         }
 
+        public bool IsConnected
+        {
+            get
+            {
+                return dataWriter != null;
+            }
+        }
+
         public async Task SendMessage(Message message)
         {
-            if (dataWriter == null)
+            if (!IsConnected)
             {
                 throw new Exception("Not connected.");
             }
@@ -72,13 +80,13 @@ namespace imBMW.Clients
             }
             await Socket.ConnectAsync(settings.HostName, settings.ServiceName);
 
-            dataWriter = new DataWriter(Socket.OutputStream);
-
             OnConnected();
         }
 
         protected void OnConnected()
         {
+            dataWriter = new DataWriter(Socket.OutputStream);
+
             Manager.MessageEnqueued += Manager_MessageEnqueued;
 
             var dataReader = new DataReader(Socket.InputStream);
