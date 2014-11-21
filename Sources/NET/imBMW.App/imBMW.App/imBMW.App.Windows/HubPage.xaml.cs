@@ -115,5 +115,15 @@ namespace imBMW.App
         }
 
         #endregion
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            Frame.Navigate(typeof(BordmonitorPage));
+        }
+
+        private void Button_Click_1(object sender, RoutedEventArgs e)
+        {
+            Frame.Navigate(typeof(TestPage));
+        }
     }
 }

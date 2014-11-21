@@ -16,6 +16,11 @@ using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Media.Animation;
 using Windows.UI.Xaml.Navigation;
 using imBMW.App.Common;
+using imBMW.Clients;
+using System.Diagnostics;
+using imBMW.iBus;
+using imBMW.iBus.Devices.Real;
+using Windows.UI.Popups;
 
 // Документацию по шаблону проекта "Универсальное приложение с Hub" см. по адресу http://go.microsoft.com/fwlink/?LinkID=391955
 
@@ -36,7 +41,21 @@ namespace imBMW.App
         /// </summary>
         public App()
         {
+            BluetoothClient.Instance.InternalMessageReceived += BluetoothClient_InternalMessageReceived;
+
+            Manager.AfterMessageReceived += Manager_AfterMessageReceived;
+
             this.Suspending += this.OnSuspending;
+        }
+
+        void Manager_AfterMessageReceived(iBus.MessageEventArgs e)
+        {
+            Debug.WriteLine(e.Message.ToString());
+        }
+
+        void BluetoothClient_InternalMessageReceived(SocketClient sender, InternalMessage message)
+        {
+            Debug.WriteLine(message.ToString());
         }
 
         /// <summary>
@@ -50,7 +69,7 @@ namespace imBMW.App
 #if DEBUG
             if (System.Diagnostics.Debugger.IsAttached)
             {
-                this.DebugSettings.EnableFrameRateCounter = true;
+                //this.DebugSettings.EnableFrameRateCounter = true;
             }
 #endif
 
@@ -115,6 +134,17 @@ namespace imBMW.App
 
             // Обеспечение активности текущего окна
             Window.Current.Activate();
+
+            try
+            {
+                await BluetoothClient.Instance.Connect();
+                new MessageDialog("Connected").ShowAsync();
+            }
+            catch (Exception ex)
+            {
+                new MessageDialog("Not connected").ShowAsync();
+                Debug.WriteLine("BT Connect: " + ex.Message);
+            }
         }
 
 #if WINDOWS_PHONE_APP
@@ -138,6 +168,15 @@ namespace imBMW.App
         /// </summary>
         private async void OnSuspending(object sender, SuspendingEventArgs e)
         {
+            try
+            {
+                BluetoothClient.Instance.Disconnect();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("BT Disconnect: " + ex.Message);
+            }
+
             var deferral = e.SuspendingOperation.GetDeferral();
             await SuspensionManager.SaveAsync();
             deferral.Complete();

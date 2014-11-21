@@ -2,5 +2,11 @@
     x:Class="imBMW.App.App"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:imBMW.App">
+    xmlns:local="using:imBMW.App"
+    xmlns:conv="using:imBMW.App.Converters">
+    <Application.Resources>
+        <ResourceDictionary>
+            <conv:NotEmptyToVisibilityConverter x:Key="NotEmptyToVisibilityConverter"/>
+        </ResourceDictionary>
+    </Application.Resources>
 </Application>

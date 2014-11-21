@@ -53,7 +53,7 @@
                         AutomationProperties.Name="Back"
                         AutomationProperties.AutomationId="BackButton"
                         AutomationProperties.ItemType="Navigation Button"/>
-                    <TextBlock x:Name="pageTitle" x:Uid="Header" Text="application name" Style="{StaticResource HeaderTextBlockStyle}" Grid.Column="1" 
+                    <TextBlock x:Name="pageTitle" x:Uid="Header" Text="imBMW" Style="{StaticResource HeaderTextBlockStyle}" Grid.Column="1" 
                         VerticalAlignment="Top" IsHitTestVisible="false" TextWrapping="NoWrap" />
                 </Grid>
             </Hub.Header>
@@ -149,5 +149,7 @@
                 </DataTemplate>
             </HubSection>
         </Hub>
+        <Button Content="Bordmonitor" HorizontalAlignment="Left" Margin="120,195,0,0" VerticalAlignment="Top" Click="Button_Click"/>
+        <Button Content="Test" HorizontalAlignment="Left" Margin="120,264,0,0" VerticalAlignment="Top" Click="Button_Click_1"/>
     </Grid>
 </Page>
