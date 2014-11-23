@@ -3,6 +3,7 @@ using Microsoft.SPOT;
 using imBMW.iBus.Devices.Real;
 using System.Threading;
 using imBMW.Tools;
+using imBMW.iBus;
 
 namespace imBMW.Features
 {
@@ -18,9 +19,9 @@ namespace imBMW.Features
 
         static QueueThreadWorker commands;
 
-        static bool needLockDoors = true;
+        static bool needLockDoors = false;
         static bool needUnlockDoors = false;
-        static bool needComfortClose = true;
+        static bool needComfortClose = false;
 
         static Comfort()
         {
@@ -95,18 +96,30 @@ namespace imBMW.Features
             {
                 // TODO Fix windows closing: current commands close them just by half
                 case Command.FullCloseWindows:
-                    BodyModule.CloseWindows();
-                    Thread.Sleep(3000);
-                    BodyModule.CloseWindows();
-                    Thread.Sleep(3000);
-                    BodyModule.CloseWindows();
+                    for (int i = 0; i < 3; i++)
+                    {
+                        Manager.EnqueueMessage(BodyModule.MessageCloseWindowDriverFront);
+                        Thread.Sleep(750);
+                        Manager.EnqueueMessage(BodyModule.MessageCloseWindowPassengerFront);
+                        Thread.Sleep(750);
+                        Manager.EnqueueMessage(BodyModule.MessageCloseWindowDriverRear);
+                        Thread.Sleep(750);
+                        Manager.EnqueueMessage(BodyModule.MessageCloseWindowPassengerRear);
+                        Thread.Sleep(750);
+                    }
                     break;
                 case Command.FullOpenWindows:
-                    BodyModule.OpenWindows();
-                    Thread.Sleep(3000);
-                    BodyModule.OpenWindows();
-                    Thread.Sleep(3000);
-                    BodyModule.OpenWindows();
+                    for (int i = 0; i < 3; i++)
+                    {
+                        Manager.EnqueueMessage(BodyModule.MessageCloseWindowDriverFront);
+                        Thread.Sleep(750);
+                        Manager.EnqueueMessage(BodyModule.MessageCloseWindowPassengerFront);
+                        Thread.Sleep(750);
+                        Manager.EnqueueMessage(BodyModule.MessageCloseWindowDriverRear);
+                        Thread.Sleep(750);
+                        Manager.EnqueueMessage(BodyModule.MessageCloseWindowPassengerRear);
+                        Thread.Sleep(750);
+                    }
                     break;
             }
         }
