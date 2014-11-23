@@ -44,18 +44,24 @@ namespace imBMW.App
             BluetoothClient.Instance.InternalMessageReceived += BluetoothClient_InternalMessageReceived;
 
             Manager.AfterMessageReceived += Manager_AfterMessageReceived;
+            Manager.MessageEnqueued += Manager_MessageEnqueued;
 
             this.Suspending += this.OnSuspending;
         }
 
+        void Manager_MessageEnqueued(MessageEventArgs e)
+        {
+            Debug.WriteLine("[ >]: " + e.Message.ToString());
+        }
+
         void Manager_AfterMessageReceived(iBus.MessageEventArgs e)
         {
-            Debug.WriteLine(e.Message.ToString());
+            Debug.WriteLine("[< ]: " + e.Message.ToString());
         }
 
         void BluetoothClient_InternalMessageReceived(SocketClient sender, InternalMessage message)
         {
-            Debug.WriteLine(message.ToString());
+            Debug.WriteLine("[<I]: " + message.ToString());
         }
 
         /// <summary>

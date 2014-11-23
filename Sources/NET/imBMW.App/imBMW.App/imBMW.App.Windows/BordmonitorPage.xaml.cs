@@ -16,6 +16,8 @@ using Windows.UI.Xaml.Navigation;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using imBMW.iBus.Devices.Real;
+using System.Threading.Tasks;
+using System.Diagnostics;
 
 // The Item Detail Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=234232
 
@@ -60,6 +62,9 @@ namespace imBMW.App
         }
 
         private static BordmonitorScreen currentScreen = new BordmonitorScreen { Title = "imBMW" };
+        private static bool isRadioOn;
+
+        private DispatcherTimer timeTimer = new DispatcherTimer();
 
         private NavigationHelper navigationHelper;
         private ObservableDictionary defaultViewModel = new ObservableDictionary();
@@ -87,6 +92,31 @@ namespace imBMW.App
             this.navigationHelper = new NavigationHelper(this);
             this.navigationHelper.LoadState += navigationHelper_LoadState;
             this.navigationHelper.SaveState += navigationHelper_SaveState;
+
+            timeTimer.Tick += timeTimer_Tick;
+            timeTimer.Interval = TimeSpan.FromSeconds(1);
+        }
+
+        void timeTimer_Tick(object sender, object e)
+        {
+            RefreshTime();
+        }
+
+        void RefreshTime()
+        {
+            DefaultViewModel["Time"] = DateTime.Now.ToString("t");
+            DefaultViewModel["Date"] = DateTime.Now.ToString("D");
+        }
+
+        void StartTimeTimer()
+        {
+            RefreshTime();
+            timeTimer.Start();
+        }
+
+        void StopTimeTimer()
+        {
+            timeTimer.Stop();
         }
 
         /// <summary>
@@ -105,19 +135,32 @@ namespace imBMW.App
             Bordmonitor.TextReceived += Bordmonitor_TextReceived;
             Bordmonitor.ScreenCleared += Bordmonitor_ScreenCleared;
             Bordmonitor.ScreenRefreshed += Bordmonitor_ScreenRefreshed;
+            Radio.OnOffChanged += Radio_RadioOnOffChanged;
 
+            RefreshScreen();
+            StartTimeTimer();
+        }
+
+        void Radio_RadioOnOffChanged(bool turnedOn)
+        {
+            isRadioOn = turnedOn;
+            if (!turnedOn)
+            {
+                currentScreen.Title = "imBMW";
+                currentScreen.Status = "";
+                currentScreen.Items.Clear();
+            }
             RefreshScreen();
         }
 
         void navigationHelper_SaveState(object sender, SaveStateEventArgs e)
         {
-            Bordmonitor.TextReceived -= Bordmonitor_TextReceived;
-            Bordmonitor.ScreenCleared -= Bordmonitor_ScreenCleared;
-            Bordmonitor.ScreenRefreshed -= Bordmonitor_ScreenRefreshed;
+            StopTimeTimer();
         }
 
         void RefreshScreen()
         {
+            DefaultViewModel["RadioOn"] = isRadioOn;
             DefaultViewModel["Title"] = currentScreen.Title;
             DefaultViewModel["Status"] = currentScreen.Status;
             for (byte i = 0; i < 10; i++)
@@ -185,11 +228,94 @@ namespace imBMW.App
 
         #endregion
 
-        private void Button_Tapped(object sender, TappedRoutedEventArgs e)
+        private void ItemTapped(object sender, TappedRoutedEventArgs e)
         {
             var b = (Button)sender;
             var index = byte.Parse((string)b.Tag);
             Bordmonitor.PressItem(index);
+        }
+
+        bool volHolding;
+        byte volStep;
+
+        async void HoldVolume(bool holding, bool increase)
+        {
+            volHolding = holding;
+            if (!holding)
+            {
+                volStep = 1;
+            }
+            else
+            {
+                while (volHolding)
+                {
+                    if (increase)
+                    {
+                        MultiFunctionSteeringWheel.VolumeUp(volStep);
+                    }
+                    else
+                    {
+                        MultiFunctionSteeringWheel.VolumeDown(volStep);
+                    }
+                    volStep++;
+                    await Task.Delay(TimeSpan.FromMilliseconds(100));
+                }
+            }
+        }
+
+        private void VolumeUp(object sender, TappedRoutedEventArgs e)
+        {
+            MultiFunctionSteeringWheel.VolumeUp();
+        }
+
+        private void VolumeDown(object sender, TappedRoutedEventArgs e)
+        {
+            MultiFunctionSteeringWheel.VolumeDown();
+        }
+
+        private void VolumeUpHolding(object sender, HoldingRoutedEventArgs e)
+        {
+            HoldVolume(e.HoldingState == Windows.UI.Input.HoldingState.Started, true);
+        }
+
+        private void VolumeDownHolding(object sender, HoldingRoutedEventArgs e)
+        {
+            HoldVolume(e.HoldingState == Windows.UI.Input.HoldingState.Started, false);
+        }
+
+        private void OnOffToggle(object sender, TappedRoutedEventArgs e)
+        {
+            Radio.PressOnOffToggle();
+        }
+
+        private void PressNext(object sender, TappedRoutedEventArgs e)
+        {
+            Radio.PressNext();
+        }
+
+        private void PressPrev(object sender, TappedRoutedEventArgs e)
+        {
+            Radio.PressPrev();
+        }
+
+        private void PressMode(object sender, TappedRoutedEventArgs e)
+        {
+            Radio.PressMode();
+        }
+
+        private void PressFM(object sender, TappedRoutedEventArgs e)
+        {
+            Radio.PressFM();
+        }
+
+        private void PressAM(object sender, TappedRoutedEventArgs e)
+        {
+            Radio.PressAM();
+        }
+
+        private void PressSwitchSide(object sender, TappedRoutedEventArgs e)
+        {
+            Radio.PressSwitchSide();
         }
     }
 }

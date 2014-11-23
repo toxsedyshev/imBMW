@@ -43,9 +43,11 @@
                         AutomationProperties.Name="Back"
                         AutomationProperties.AutomationId="BackButton"
                         AutomationProperties.ItemType="Navigation Button"/>
-            <TextBlock x:Name="pageTitle" Text="{StaticResource AppName}" Style="{StaticResource HeaderTextBlockStyle}" Grid.Column="1" 
+            <TextBlock x:Name="pageTitle" Text="imBMW Test" Style="{StaticResource HeaderTextBlockStyle}" Grid.Column="1" 
                         IsHitTestVisible="false" TextWrapping="NoWrap" VerticalAlignment="Bottom" Margin="0,0,30,40"/>
         </Grid>
-        <Button Content="Doors" HorizontalAlignment="Left" Margin="663,242,0,0" Grid.Row="1" VerticalAlignment="Top" Click="Button_Click"/>
+        <Button Content="Doors" HorizontalAlignment="Left" Margin="120,43,0,0" Grid.Row="1" VerticalAlignment="Top" Click="Button_Click"/>
+        <Button Content="Windows open" HorizontalAlignment="Left" Margin="120,102,0,0" Grid.Row="1" VerticalAlignment="Top" Click="Button_Click_1"/>
+        <Button Content="Windows close" HorizontalAlignment="Left" Margin="120,160,0,0" Grid.Row="1" VerticalAlignment="Top" Click="Button_Click_2"/>
     </Grid>
 </Page>

@@ -30,17 +30,41 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="120"/>
                 <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="120"/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="60"/>
             </Grid.RowDefinitions>
+
+            <StackPanel Orientation="Vertical" x:Name="bmLeftKnobs" VerticalAlignment="Bottom">
+                <AppBarButton HorizontalAlignment="Center" Icon="Add" Tapped="VolumeUp" Holding="VolumeUpHolding" />
+                <AppBarButton HorizontalAlignment="Center" Icon="Remove" Tapped="VolumeDown" Holding="VolumeDownHolding" />
+                <AppBarToggleButton IsChecked="{Binding RadioOn}" HorizontalAlignment="Center" Icon="Target" Tapped="OnOffToggle" />
+            </StackPanel>
+
+            <StackPanel Orientation="Vertical" x:Name="bmRightKnobs" Grid.Column="2" VerticalAlignment="Bottom">
+                <AppBarButton HorizontalAlignment="Center" Icon="Next" Tapped="PressNext"/>
+                <AppBarButton HorizontalAlignment="Center" Icon="Previous" Tapped="PressPrev"/>
+                <AppBarButton HorizontalAlignment="Center" Icon="Switch" Tapped="PressMode"/>
+                <AppBarButton HorizontalAlignment="Center" Tapped="PressFM">
+                    <AppBarButton.Icon>
+                        <FontIcon FontFamily="Candara" Glyph="FM"/>
+                    </AppBarButton.Icon>
+                </AppBarButton>
+                <AppBarButton HorizontalAlignment="Center" Tapped="PressAM">
+                    <AppBarButton.Icon>
+                        <FontIcon FontFamily="Candara" Glyph="AM"/>
+                    </AppBarButton.Icon>
+                </AppBarButton>
+                <AppBarButton HorizontalAlignment="Center" Tapped="PressSwitchSide">
+                    <AppBarButton.Icon>
+                        <FontIcon FontFamily="Segoe UI Symbol" Glyph="◀▶" FontSize="18"/>
+                    </AppBarButton.Icon>
+                </AppBarButton>
+            </StackPanel>
             
-            <Grid x:Name="bmKnob">
-                
-            </Grid>
-            
-            <Grid x:Name="bmItems" Grid.Column="1" Margin="0,50,120,50">
+            <Grid x:Name="bmItems" Grid.Column="1" Margin="0,50">
                 <Grid.Resources>
                     <Style x:Key="bmButton" TargetType="Button">
                         <Setter Property="BorderBrush" Value="Gray"/>
@@ -69,21 +93,21 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <Button Grid.Column="0" Grid.Row="0" Style="{StaticResource bmButton}" Content="{Binding Item0.Text}" Visibility="{Binding Item0, Converter={StaticResource NotEmptyToVisibilityConverter}}" Tag="0" Tapped="Button_Tapped"/>
-                <Button Grid.Column="0" Grid.Row="1" Style="{StaticResource bmButton}" Content="{Binding Item1.Text}" Visibility="{Binding Item1, Converter={StaticResource NotEmptyToVisibilityConverter}}" Tag="1" Tapped="Button_Tapped"/>
-                <Button Grid.Column="0" Grid.Row="2" Style="{StaticResource bmButton}" Content="{Binding Item2.Text}" Visibility="{Binding Item2, Converter={StaticResource NotEmptyToVisibilityConverter}}" Tag="2" Tapped="Button_Tapped"/>
-                <Button Grid.Column="0" Grid.Row="3" Style="{StaticResource bmButton}" Content="{Binding Item3.Text}" Visibility="{Binding Item3, Converter={StaticResource NotEmptyToVisibilityConverter}}" Tag="3" Tapped="Button_Tapped"/>
-                <Button Grid.Column="0" Grid.Row="4" Style="{StaticResource bmButton}" Content="{Binding Item4.Text}" Visibility="{Binding Item4, Converter={StaticResource NotEmptyToVisibilityConverter}}" Tag="4" Tapped="Button_Tapped"/>
+                <Button Grid.Column="0" Grid.Row="0" Style="{StaticResource bmButton}" Content="{Binding Item0.Text}" Visibility="{Binding Item0, Converter={StaticResource NotEmptyToVisibilityConverter}}" Tag="0" Tapped="ItemTapped"/>
+                <Button Grid.Column="0" Grid.Row="1" Style="{StaticResource bmButton}" Content="{Binding Item1.Text}" Visibility="{Binding Item1, Converter={StaticResource NotEmptyToVisibilityConverter}}" Tag="1" Tapped="ItemTapped"/>
+                <Button Grid.Column="0" Grid.Row="2" Style="{StaticResource bmButton}" Content="{Binding Item2.Text}" Visibility="{Binding Item2, Converter={StaticResource NotEmptyToVisibilityConverter}}" Tag="2" Tapped="ItemTapped"/>
+                <Button Grid.Column="0" Grid.Row="3" Style="{StaticResource bmButton}" Content="{Binding Item3.Text}" Visibility="{Binding Item3, Converter={StaticResource NotEmptyToVisibilityConverter}}" Tag="3" Tapped="ItemTapped"/>
+                <Button Grid.Column="0" Grid.Row="4" Style="{StaticResource bmButton}" Content="{Binding Item4.Text}" Visibility="{Binding Item4, Converter={StaticResource NotEmptyToVisibilityConverter}}" Tag="4" Tapped="ItemTapped"/>
 
-                <Button Grid.Column="1" Grid.Row="0" Style="{StaticResource bmRightButton}" Content="{Binding Item5.Text}" Visibility="{Binding Item5, Converter={StaticResource NotEmptyToVisibilityConverter}}" Tag="5" Tapped="Button_Tapped"/>
-                <Button Grid.Column="1" Grid.Row="1" Style="{StaticResource bmRightButton}" Content="{Binding Item6.Text}" Visibility="{Binding Item6, Converter={StaticResource NotEmptyToVisibilityConverter}}" Tag="6" Tapped="Button_Tapped"/>
-                <Button Grid.Column="1" Grid.Row="2" Style="{StaticResource bmRightButton}" Content="{Binding Item7.Text}" Visibility="{Binding Item7, Converter={StaticResource NotEmptyToVisibilityConverter}}" Tag="7" Tapped="Button_Tapped"/>
-                <Button Grid.Column="1" Grid.Row="3" Style="{StaticResource bmRightButton}" Content="{Binding Item8.Text}" Visibility="{Binding Item8, Converter={StaticResource NotEmptyToVisibilityConverter}}" Tag="8" Tapped="Button_Tapped"/>
-                <Button Grid.Column="1" Grid.Row="4" Style="{StaticResource bmRightButton}" Content="{Binding Item9.Text}" Visibility="{Binding Item9, Converter={StaticResource NotEmptyToVisibilityConverter}}" Tag="9" Tapped="Button_Tapped"/>
+                <Button Grid.Column="1" Grid.Row="0" Style="{StaticResource bmRightButton}" Content="{Binding Item5.Text}" Visibility="{Binding Item5, Converter={StaticResource NotEmptyToVisibilityConverter}}" Tag="5" Tapped="ItemTapped"/>
+                <Button Grid.Column="1" Grid.Row="1" Style="{StaticResource bmRightButton}" Content="{Binding Item6.Text}" Visibility="{Binding Item6, Converter={StaticResource NotEmptyToVisibilityConverter}}" Tag="6" Tapped="ItemTapped"/>
+                <Button Grid.Column="1" Grid.Row="2" Style="{StaticResource bmRightButton}" Content="{Binding Item7.Text}" Visibility="{Binding Item7, Converter={StaticResource NotEmptyToVisibilityConverter}}" Tag="7" Tapped="ItemTapped"/>
+                <Button Grid.Column="1" Grid.Row="3" Style="{StaticResource bmRightButton}" Content="{Binding Item8.Text}" Visibility="{Binding Item8, Converter={StaticResource NotEmptyToVisibilityConverter}}" Tag="8" Tapped="ItemTapped"/>
+                <Button Grid.Column="1" Grid.Row="4" Style="{StaticResource bmRightButton}" Content="{Binding Item9.Text}" Visibility="{Binding Item9, Converter={StaticResource NotEmptyToVisibilityConverter}}" Tag="9" Tapped="ItemTapped"/>
 
             </Grid>
             
-            <Grid Grid.Row="1" Grid.ColumnSpan="2" Background="#444444">
+            <Grid Grid.Row="1" Grid.ColumnSpan="3" Background="#444444">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>

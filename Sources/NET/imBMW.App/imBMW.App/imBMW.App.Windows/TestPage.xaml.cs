@@ -118,5 +118,15 @@ namespace imBMW.App
                 BodyModule.LockDoors();
             }
         }
+
+        private void Button_Click_1(object sender, RoutedEventArgs e)
+        {
+            BodyModule.OpenWindows();
+        }
+
+        private void Button_Click_2(object sender, RoutedEventArgs e)
+        {
+            BodyModule.CloseWindows();
+        }
     }
 }
