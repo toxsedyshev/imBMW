@@ -27,6 +27,7 @@ namespace imBMW.Features.Menu
         {
             mediaEmulator.IsEnabledChanged += mediaEmulator_IsEnabledChanged;
 
+            Radio.OnOffChanged += Radio_OnOffChanged;
             Manager.AddMessageReceiverForSourceDevice(DeviceAddress.Radio, ProcessRadioMessage);
             Manager.AddMessageReceiverForDestinationDevice(DeviceAddress.Radio, ProcessToRadioMessage);
         }
@@ -119,14 +120,16 @@ namespace imBMW.Features.Menu
             base.UpdateScreen(args);
         }
 
-        protected void ProcessRadioMessage(Message m)
+        void Radio_OnOffChanged(bool turnedOn)
         {
-            if (m.Data.Compare(Bordmonitor.DataRadioOn))
+            if (turnedOn)
             {
                 Bordmonitor.EnableRadioMenu(); // fixes disabled radio menu to update screen
-                return;
             }
+        }
 
+        protected void ProcessRadioMessage(Message m)
+        {
             if (!IsEnabled)
             {
                 return;
@@ -215,9 +218,9 @@ namespace imBMW.Features.Menu
             }
 
             // item click
-            if (m.Data.Length == 4 && m.Data.StartsWith(0x31, 0x60, 0x00) && m.Data[3] <= 9)
+            if (m.Data.Length == 4 && m.Data.StartsWith(0x31, 0x60, 0x00) && m.Data[3] > 9)
             {
-                var index = GetItemIndex(m.Data[3], true);
+                var index = GetItemIndex((byte)(m.Data[3] & 0x0F), true);
                 m.ReceiverDescription = "Screen item click #" + index;
                 var item = CurrentScreen.GetItem(index);
                 if (item != null)

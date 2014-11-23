@@ -1,7 +1,7 @@
 using System;
 using Microsoft.SPOT;
 
-namespace imBMW.Tools
+namespace imBMW
 {
     public delegate void Action();
 }

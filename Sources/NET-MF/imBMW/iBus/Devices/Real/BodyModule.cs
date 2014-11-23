@@ -45,15 +45,15 @@ namespace imBMW.iBus.Devices.Real
 
         //static Message MessageOpenWindows = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, 0x0C, 0x00, 0x65);
         
-        static Message MessageOpenWindowDriverFront = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Open driver front window", 0x0C, 0x52, 0x01);
-        static Message MessageOpenWindowDriverRear = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Open driver rear window", 0x0C, 0x41, 0x01);
-        static Message MessageOpenWindowPassengerFront = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Open passenger front window", 0x0C, 0x54, 0x01);
-        static Message MessageOpenWindowPassengerRear = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Open passenger rear window", 0x0C, 0x44, 0x01);
+        public static Message MessageOpenWindowDriverFront = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Open driver front window", 0x0C, 0x52, 0x01);
+        public static Message MessageOpenWindowDriverRear = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Open driver rear window", 0x0C, 0x41, 0x01);
+        public static Message MessageOpenWindowPassengerFront = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Open passenger front window", 0x0C, 0x54, 0x01);
+        public static Message MessageOpenWindowPassengerRear = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Open passenger rear window", 0x0C, 0x44, 0x01);
 
-        static Message MessageCloseWindowDriverFront = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Close driver front window", 0x0C, 0x53, 0x01);
-        static Message MessageCloseWindowDriverRear = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Close driver rear window", 0x0C, 0x42, 0x01);
-        static Message MessageCloseWindowPassengerFront = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Close passenger front window", 0x0C, 0x55, 0x01);
-        static Message MessageCloseWindowPassengerRear = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Close passenger rear window", 0x0C, 0x43, 0x01);
+        public static Message MessageCloseWindowDriverFront = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Close driver front window", 0x0C, 0x53, 0x01);
+        public static Message MessageCloseWindowDriverRear = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Close driver rear window", 0x0C, 0x42, 0x01);
+        public static Message MessageCloseWindowPassengerFront = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Close passenger front window", 0x0C, 0x55, 0x01);
+        public static Message MessageCloseWindowPassengerRear = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Close passenger rear window", 0x0C, 0x43, 0x01);
 
         static Message MessageOpenSunroof = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Open sunroof", 0x0C, 0x7E, 0x01);
         static Message MessageCloseSunroof = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Close sunroof", 0x0C, 0x7F, 0x01);

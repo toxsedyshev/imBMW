@@ -30,6 +30,7 @@ namespace imBMW.iBus.Devices.Emulators
         public BordmonitorAUX(IAudioPlayer player)
             : base(player)
         {
+            Radio.OnOffChanged += Radio_OnOffChanged;
             Manager.AddMessageReceiverForSourceDevice(DeviceAddress.Radio, ProcessRadioMessage);
         }
 
@@ -53,19 +54,14 @@ namespace imBMW.iBus.Devices.Emulators
 
         #region AUX
 
+        void Radio_OnOffChanged(bool turnedOn)
+        {
+            IsRadioActive = turnedOn;
+        }
+
         void ProcessRadioMessage(Message m)
         {
-            if (m.Data.Compare(Bordmonitor.DataRadioOn))
-            {
-                IsRadioActive = true;
-                m.ReceiverDescription = "Radio On";
-            }
-            else if (m.Data.Compare(Bordmonitor.DataRadioOff))
-            {
-                IsRadioActive = false;
-                m.ReceiverDescription = "Radio Off";
-            }
-            else if (!IsAUXSelected && m.Data.Compare(Bordmonitor.DataAUX))
+            if (!IsAUXSelected && m.Data.Compare(Bordmonitor.DataAUX))
             {
                 IsAUXSelected = true;
             }

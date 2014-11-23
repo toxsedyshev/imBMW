@@ -175,8 +175,6 @@ namespace imBMW.iBus.Devices.Real
         public static Message MessageDisableRadioMenu = new Message(DeviceAddress.GraphicsNavigationDriver, DeviceAddress.Radio, "Disable radio menu", 0x45, 0x02); // Thanks to RichardP (Intravee) for these two messages
         public static Message MessageEnableRadioMenu = new Message(DeviceAddress.GraphicsNavigationDriver, DeviceAddress.Radio, "Enable radio menu", 0x45, 0x00);
 
-        public static byte[] DataRadioOn = new byte[] { 0x4A, 0xFF };
-        public static byte[] DataRadioOff = new byte[] { 0x4A, 0x00 };
         public static byte[] DataShowTitle = new byte[] { 0x23, 0x62, 0x10 };
         public static byte[] DataShowStatus = new byte[] { 0xA5, 0x62, 0x01, 0x06 };
         public static byte[] DataAUX = new byte[] { 0x23, 0x62, 0x10, 0x41, 0x55, 0x58, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20 };
@@ -198,6 +196,7 @@ namespace imBMW.iBus.Devices.Real
             if (ae != null && (m.Data.Compare(MessageClearScreen.Data)))
             {
                 ae();
+                m.ReceiverDescription = "Clear screen";
                 return;
             }
 
@@ -205,6 +204,7 @@ namespace imBMW.iBus.Devices.Real
             if (ae != null && (m.Data.Compare(MessageRefreshScreen.Data)))
             {
                 ae();
+                m.ReceiverDescription = "Refresh screen";
                 return;
             }
 
@@ -214,16 +214,29 @@ namespace imBMW.iBus.Devices.Real
                 if (m.Data.StartsWith(0xA5, 0x62, 0x00) || m.Data.StartsWith(0x21, 0x60, 0x00))
                 {
                     e(new BordmonitorText(BordmonitorFields.Item, m.Data));
+                    m.ReceiverDescription = "BM fill items";
                     return;
                 }
                 if (m.Data.StartsWith(DataShowStatus))
                 {
-                    e(new BordmonitorText(BordmonitorFields.Status, m.Data));
+                    var a = new BordmonitorText(BordmonitorFields.Status, m.Data);
+                    e(a);
+                    #if NETMF
+                    m.ReceiverDescription = "BM show status";
+                    #else
+                    m.ReceiverDescription = "BM show status: " + a.Text;
+                    #endif
                     return;
                 }
                 if (m.Data.StartsWith(DataShowTitle))
                 {
-                    e(new BordmonitorText(BordmonitorFields.Title, m.Data));
+                    var a = new BordmonitorText(BordmonitorFields.Title, m.Data);
+                    e(a);
+                    #if NETMF
+                    m.ReceiverDescription = "BM show title";
+                    #else
+                    m.ReceiverDescription = "BM show title: " + a.Text;
+                    #endif
                     return;
                 }
             }
@@ -306,6 +319,8 @@ namespace imBMW.iBus.Devices.Real
 
         public static void PressItem(byte index)
         {
+            index &= 0x0F;
+            index += 0x40;
             Manager.EnqueueMessage(new Message(DeviceAddress.GraphicsNavigationDriver, DeviceAddress.Radio, "Screen item click #" + index, 0x31, 0x60, 0x00, index));
         }
 

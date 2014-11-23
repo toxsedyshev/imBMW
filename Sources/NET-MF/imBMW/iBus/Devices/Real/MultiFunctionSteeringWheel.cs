@@ -45,6 +45,20 @@ namespace imBMW.iBus.Devices.Real
             InstrumentClusterElectronics.IgnitionStateChanged += InstrumentClusterElectronics_IgnitionStateChanged;
         }
 
+        public static void VolumeUp(byte step = 1)
+        {
+            step = (byte)Math.Max((byte)1, Math.Min(step, (byte)9));
+            var p = (byte)(step << 4 + 1);
+            Manager.EnqueueMessage(new Message(DeviceAddress.MultiFunctionSteeringWheel, DeviceAddress.Radio, "Volume Up +" + step, 0x32, p));
+        }
+
+        public static void VolumeDown(byte step = 1)
+        {
+            step = (byte)Math.Max((byte)1, Math.Min(step, (byte)9));
+            var p = (byte)(step << 4);
+            Manager.EnqueueMessage(new Message(DeviceAddress.MultiFunctionSteeringWheel, DeviceAddress.Radio, "Volume Down -" + step, 0x32, p));
+        }
+
         static void InstrumentClusterElectronics_IgnitionStateChanged(IgnitionEventArgs e)
         {
             if (e.CurrentIgnitionState != IgnitionState.Off && e.PreviousIgnitionState == IgnitionState.Off)
