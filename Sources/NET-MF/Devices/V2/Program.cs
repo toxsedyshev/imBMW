@@ -18,6 +18,7 @@ using imBMW.Features.Menu.Screens;
 using imBMW.Features.Localizations;
 using imBMW.Devices.V2.Hardware;
 using FEZPin = GHI.Hardware.FEZCerb.Pin;
+using imBMW.Features;
 
 namespace imBMW.Devices.V2
 {
@@ -71,6 +72,7 @@ namespace imBMW.Devices.V2
             SettingsScreen.Instance.Status = version;
 
             // Create serial port to work with Melexis TH3122
+            //ISerialPort iBusPort = new SerialPortEcho();
             ISerialPort iBusPort = new SerialPortTH3122(Serial.COM3, FEZPin.PC2, true);
             Logger.Info("TH3122 serial port inited");
 
@@ -170,11 +172,28 @@ namespace imBMW.Devices.V2
             Logger.Info("iBus manager events subscribed");
 
             // Set iPod or Bluetooth as AUX or CDC-emulator for Bordmonitor or Radio
-            player = new BluetoothOVC3860(Serial.COM2, sd != null ? sd + @"\contacts.vcf" : null);
-            //player = new iPodViaHeadset(Pin.PC2);
-            
+
+            if (settings.MediaShield == "WT32")
+            {
+                var wt32 = new BluetoothWT32(Serial.COM2, Settings.Instance.BluetoothPin);
+                player = wt32;
+                InternalCommunications.Register(wt32);
+            }
+            else
+            {
+                player = new BluetoothOVC3860(Serial.COM2, sd != null ? sd + @"\contacts.vcf" : null);
+                //player = new iPodViaHeadset(Pin.PC2);
+            }
+
+            //player.IsCurrentPlayer = true;
+            //player.PlayerHostState = PlayerHostState.On;
+
             if (settings.MenuMode != Tools.MenuMode.RadioCDC || Manager.FindDevice(DeviceAddress.OnBoardMonitor))
             {
+                if (player is BluetoothWT32)
+                {
+                    ((BluetoothWT32)player).NowPlayingTagsSeparatedRows = true;
+                }
                 MediaEmulator emulator;
                 if (settings.MenuMode == Tools.MenuMode.BordmonitorCDC)
                 {
@@ -192,6 +211,7 @@ namespace imBMW.Devices.V2
                 }
                 //MenuScreen.MaxItemsCount = 6;
                 BordmonitorMenu.Init(emulator);
+
                 Logger.Info("Bordmonitor menu inited");
             }
             else
@@ -233,6 +253,8 @@ namespace imBMW.Devices.V2
                 RefreshLEDs();
             }, null, 0, 3000);*/
 
+            RefreshLEDs();
+
             LED.Write(true);
             Thread.Sleep(50);
             LED.Write(false);
@@ -261,7 +283,7 @@ namespace imBMW.Devices.V2
             {
                 //b = b.AddBit(2);
             }
-            if (player.IsPlaying)
+            if (player != null && player.IsPlaying)
             {
                 b = b.AddBit(4);
             }
@@ -332,6 +354,7 @@ namespace imBMW.Devices.V2
 
         public static void Main()
         {
+
             Debug.Print("Starting..");
 
 #if DEBUG

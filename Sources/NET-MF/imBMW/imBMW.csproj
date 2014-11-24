@@ -35,6 +35,7 @@
   <Import Project="$(NetMfTargetsBaseDir)$(TargetFrameworkVersion)\CSharp.Targets" />
   <ItemGroup>
     <Compile Include="Features\Comfort.cs" />
+    <Compile Include="Features\InternalCommunications.cs" />
     <Compile Include="Features\Light.cs" />
     <Compile Include="Features\Localizations\EnglishLocalization.cs" />
     <Compile Include="Features\Localizations\Localization.cs" />
@@ -64,6 +65,7 @@
     <Compile Include="iBus\Diagnostics\DBusMessage.cs" />
     <Compile Include="iBus\InternalMessage.cs" />
     <Compile Include="iBus\ManagerTools.cs" />
+    <Compile Include="iBus\MessageParser.cs" />
     <Compile Include="IO\ISerialPort.cs" />
     <Compile Include="IO\SerialInterruptPortBase.cs" />
     <Compile Include="IO\SerialPortBase.cs" />

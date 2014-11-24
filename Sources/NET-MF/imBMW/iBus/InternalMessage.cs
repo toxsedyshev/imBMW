@@ -9,10 +9,18 @@ namespace imBMW.iBus
         string dataString;
 
         public InternalMessage(DeviceAddress device, string data)
-            : this(device, Encoding.UTF8.GetBytes(data))
+            : this(device, data, data)
+        { }
+
+        public InternalMessage(DeviceAddress device, string data, string description)
+            : this(device, description, Encoding.UTF8.GetBytes(data))
         { }
 
         public InternalMessage(DeviceAddress device, params byte[] data)
+            : this(device, null, data)
+        { }
+
+        public InternalMessage(DeviceAddress device, string description, params byte[] data)
             : base((byte)device, (byte)((data.Length + 2) >> 8), data)
         {
             if (!device.IsInternal())

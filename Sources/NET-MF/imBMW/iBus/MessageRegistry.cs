@@ -289,7 +289,7 @@ namespace imBMW.iBus
             if (message is InternalMessage)
             {
                 var m = (InternalMessage)message;
-                return m.Device.ToStringValue() + ": " + m.DataString;
+                return m.Device.ToStringValue() + ": " + (m.ReceiverDescription ?? m.DataDump);
             }
             string description = message.Describe();
             if (description == null)
