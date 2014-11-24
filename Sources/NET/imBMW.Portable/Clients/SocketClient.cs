@@ -124,26 +124,25 @@ namespace imBMW.Clients
                             continue;
                         }
                     }
-                    var m = InternalMessage.TryCreate(buffer);
-                    if (m == null)
+                    Message m;
+                    while (buffer != null && (m = InternalMessage.TryCreate(buffer)) != null)
                     {
-                        continue;
-                    }
-                    if (m.PacketLength == buffer.Length)
-                    {
-                        buffer = null;
-                    }
-                    else
-                    {
-                        buffer = buffer.Skip(m.PacketLength);
-                    }
-                    if (m is InternalMessage)
-                    {
-                        OnInternalMessageReceived((InternalMessage)m);
-                    }
-                    else
-                    {
-                        Manager.ProcessMessage(m);
+                        if (m.PacketLength == buffer.Length)
+                        {
+                            buffer = null;
+                        }
+                        else
+                        {
+                            buffer = buffer.Skip(m.PacketLength);
+                        }
+                        if (m is InternalMessage)
+                        {
+                            OnInternalMessageReceived((InternalMessage)m);
+                        }
+                        else
+                        {
+                            Manager.ProcessMessage(m);
+                        }
                     }
                 }
             }
