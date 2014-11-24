@@ -149,6 +149,7 @@ namespace imBMW.Clients
             }
             catch (Exception ex)
             {
+                Logger.Error(ex, "imBMW socket client reading");
                 lock (this)
                 {
                     if (Socket != null)
@@ -168,7 +169,10 @@ namespace imBMW.Clients
                 {
                     await Connect(Settings);
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    Logger.Error(ex, "socket client reconnecting");
+                }
             }
         } 
 
@@ -186,7 +190,10 @@ namespace imBMW.Clients
                 {
                     e(this, m);
                 }
-                catch { }
+                catch(Exception ex)
+                {
+                    Logger.Error(ex, "while processing incoming internal message");
+                }
             }
         }
     }

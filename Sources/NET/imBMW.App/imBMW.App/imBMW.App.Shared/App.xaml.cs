@@ -51,17 +51,17 @@ namespace imBMW.App
 
         void Manager_MessageEnqueued(MessageEventArgs e)
         {
-            Debug.WriteLine("[ >]: " + e.Message.ToString());
+            Logger.Info(e.Message.ToString(), " >");
         }
 
         void Manager_AfterMessageReceived(iBus.MessageEventArgs e)
         {
-            Debug.WriteLine("[< ]: " + e.Message.ToString());
+            Logger.Info(e.Message.ToString(), "< ");
         }
 
         void BluetoothClient_InternalMessageReceived(SocketClient sender, InternalMessage message)
         {
-            Debug.WriteLine("[<I]: " + message.ToString());
+            Logger.Info(message.ToString(), "<I");
         }
 
         /// <summary>
@@ -149,7 +149,7 @@ namespace imBMW.App
             catch (Exception ex)
             {
                 new MessageDialog("Not connected").ShowAsync();
-                Debug.WriteLine("BT Connect: " + ex.Message);
+                Logger.Error(ex, "BT Connecting");
             }
         }
 
@@ -180,7 +180,7 @@ namespace imBMW.App
             }
             catch (Exception ex)
             {
-                Debug.WriteLine("BT Disconnect: " + ex.Message);
+                Logger.Error(ex, "BT Disconnecting");
             }
 
             var deferral = e.SuspendingOperation.GetDeferral();

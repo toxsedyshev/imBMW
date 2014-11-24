@@ -116,28 +116,28 @@ namespace imBMW.iBus
         {
             var e = MessageEnqueued;
             var be = BeforeMessageEnqueued;
-            if (e != null)
+            foreach (var m in message)
             {
-                foreach (var m in message)
-                {
-                    var args = new MessageEventArgs(m);
+                var args = new MessageEventArgs(m);
 
-                    if (be != null)
+                if (be != null)
+                {
+                    try
                     {
-                        try
+                        be(args);
+                        if (args.Cancel)
                         {
-                            be(args);
-                            if (args.Cancel)
-                            {
-                                continue;
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            Logger.Error(ex, "on before message enqueued " + m.ToPrettyString());
+                            continue;
                         }
                     }
+                    catch (Exception ex)
+                    {
+                        Logger.Error(ex, "on before message enqueued " + m.ToPrettyString());
+                    }
+                }
 
+                if (e != null)
+                {
                     try
                     {
                         e(args);
