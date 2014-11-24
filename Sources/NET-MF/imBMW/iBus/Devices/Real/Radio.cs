@@ -112,7 +112,10 @@ namespace imBMW.iBus.Devices.Real
         /// </summary>
         public static void PressOnOffToggle()
         {
-            Manager.EnqueueMessage(new Message(DeviceAddress.OnBoardMonitor, DeviceAddress.Radio, "Turn radio on/off", 0x48, 0x86));
+            Manager.EnqueueMessage(
+                new Message(DeviceAddress.OnBoardMonitor, DeviceAddress.Radio, "Press radio on/off", 0x48, 0x06),
+                new Message(DeviceAddress.OnBoardMonitor, DeviceAddress.Radio, "Release radio on/off", 0x48, 0x86)
+            );
         }
 
         /// <summary>
@@ -120,7 +123,10 @@ namespace imBMW.iBus.Devices.Real
         /// </summary>
         public static void PressNext()
         {
-            Manager.EnqueueMessage(new Message(DeviceAddress.OnBoardMonitor, DeviceAddress.Radio, "Press Next", 0x48, 0x80));
+            Manager.EnqueueMessage(
+                new Message(DeviceAddress.OnBoardMonitor, DeviceAddress.Radio, "Press Next", 0x48, 0x00),
+                new Message(DeviceAddress.OnBoardMonitor, DeviceAddress.Radio, "Release Next", 0x48, 0x80)
+           );
         }
 
         /// <summary>
@@ -128,7 +134,10 @@ namespace imBMW.iBus.Devices.Real
         /// </summary>
         public static void PressPrev()
         {
-            Manager.EnqueueMessage(new Message(DeviceAddress.OnBoardMonitor, DeviceAddress.Radio, "Press Prev", 0x48, 0x90));
+            Manager.EnqueueMessage(
+                new Message(DeviceAddress.OnBoardMonitor, DeviceAddress.Radio, "Press Prev", 0x48, 0x10),
+                new Message(DeviceAddress.OnBoardMonitor, DeviceAddress.Radio, "Release Prev", 0x48, 0x90)
+             );
         }
 
         /// <summary>
@@ -136,7 +145,10 @@ namespace imBMW.iBus.Devices.Real
         /// </summary>
         public static void PressMode()
         {
-            Manager.EnqueueMessage(new Message(DeviceAddress.OnBoardMonitor, DeviceAddress.Radio, "Press Mode", 0x48, 0xA3));
+            Manager.EnqueueMessage(
+                new Message(DeviceAddress.OnBoardMonitor, DeviceAddress.Radio, "Press Mode", 0x48, 0x23),
+                new Message(DeviceAddress.OnBoardMonitor, DeviceAddress.Radio, "Release Mode", 0x48, 0xA3)
+            );
         }
 
         /// <summary>
@@ -144,7 +156,10 @@ namespace imBMW.iBus.Devices.Real
         /// </summary>
         public static void PressFM()
         {
-            Manager.EnqueueMessage(new Message(DeviceAddress.OnBoardMonitor, DeviceAddress.Radio, "Press FM", 0x48, 0xB1));
+            Manager.EnqueueMessage(
+                new Message(DeviceAddress.OnBoardMonitor, DeviceAddress.Radio, "Press FM", 0x48, 0x31),
+                new Message(DeviceAddress.OnBoardMonitor, DeviceAddress.Radio, "Release FM", 0x48, 0xB1)
+            );
         }
 
         /// <summary>
@@ -152,7 +167,10 @@ namespace imBMW.iBus.Devices.Real
         /// </summary>
         public static void PressAM()
         {
-            Manager.EnqueueMessage(new Message(DeviceAddress.OnBoardMonitor, DeviceAddress.Radio, "Press AM", 0x48, 0xA1));
+            Manager.EnqueueMessage(
+                new Message(DeviceAddress.OnBoardMonitor, DeviceAddress.Radio, "Press AM", 0x48, 0x21),
+                new Message(DeviceAddress.OnBoardMonitor, DeviceAddress.Radio, "Release AM", 0x48, 0xA1)
+            );
         }
 
         /// <summary>
@@ -160,7 +178,10 @@ namespace imBMW.iBus.Devices.Real
         /// </summary>
         public static void PressSwitchSide()
         {
-            Manager.EnqueueMessage(new Message(DeviceAddress.OnBoardMonitor, DeviceAddress.Radio, "Press Switch Sides", 0x48, 0x94));
+            Manager.EnqueueMessage(
+                new Message(DeviceAddress.OnBoardMonitor, DeviceAddress.Radio, "Press Switch Sides", 0x48, 0x14),
+                new Message(DeviceAddress.OnBoardMonitor, DeviceAddress.Radio, "Release Switch Sides", 0x48, 0x94)
+            );
         }
     }
 }

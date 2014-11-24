@@ -133,7 +133,7 @@ namespace imBMW.iBus.Devices.Real
 
             if (Data.Length > 3)
             {
-                var index = (byte)(Data[3] - 0x40);
+                var index = (byte)(Data[3] & (0xFF - 0x40));
                 bool isChecked = false;
                 var offset = 4;
                 for (int i = offset; i < Data.Length; i++)
@@ -320,8 +320,9 @@ namespace imBMW.iBus.Devices.Real
         public static void PressItem(byte index)
         {
             index &= 0x0F;
+            Manager.EnqueueMessage(new Message(DeviceAddress.GraphicsNavigationDriver, DeviceAddress.Radio, "Press Screen item #" + index, 0x31, 0x60, 0x00, index));
             index += 0x40;
-            Manager.EnqueueMessage(new Message(DeviceAddress.GraphicsNavigationDriver, DeviceAddress.Radio, "Screen item click #" + index, 0x31, 0x60, 0x00, index));
+            Manager.EnqueueMessage(new Message(DeviceAddress.GraphicsNavigationDriver, DeviceAddress.Radio, "Release Screen item #" + index, 0x31, 0x60, 0x00, index));
         }
 
         public static void RefreshScreen()

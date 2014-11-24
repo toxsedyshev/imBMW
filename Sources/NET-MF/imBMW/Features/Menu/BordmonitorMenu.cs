@@ -218,9 +218,9 @@ namespace imBMW.Features.Menu
             }
 
             // item click
-            if (m.Data.Length == 4 && m.Data.StartsWith(0x31, 0x60, 0x00) && m.Data[3] > 9)
+            if (m.Data.Length == 4 && m.Data.StartsWith(0x31, 0x60, 0x00) && m.Data[3] <= 9)
             {
-                var index = GetItemIndex((byte)(m.Data[3] & 0x0F), true);
+                var index = GetItemIndex(m.Data[3], true);
                 m.ReceiverDescription = "Screen item click #" + index;
                 var item = CurrentScreen.GetItem(index);
                 if (item != null)

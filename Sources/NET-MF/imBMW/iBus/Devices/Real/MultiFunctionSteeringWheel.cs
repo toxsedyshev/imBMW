@@ -48,7 +48,7 @@ namespace imBMW.iBus.Devices.Real
         public static void VolumeUp(byte step = 1)
         {
             step = (byte)Math.Max((byte)1, Math.Min(step, (byte)9));
-            var p = (byte)(step << 4 + 1);
+            var p = (byte)((step << 4) + 1);
             Manager.EnqueueMessage(new Message(DeviceAddress.MultiFunctionSteeringWheel, DeviceAddress.Radio, "Volume Up +" + step, 0x32, p));
         }
 
