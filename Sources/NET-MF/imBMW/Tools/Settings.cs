@@ -41,6 +41,8 @@ namespace imBMW.Tools
 
         public string Language { get; set; }
 
+        public string BluetoothPin { get; set; }
+
         public static Settings Init(string path)
         {
             Instance = new Settings();
@@ -64,6 +66,7 @@ namespace imBMW.Tools
             MenuMFLControl = true;
             MenuModeMK2 = false;
             MenuMode = Tools.MenuMode.RadioCDC;
+            BluetoothPin = "0000";
         }
 
         protected virtual void InitFile(string path)
@@ -134,6 +137,9 @@ namespace imBMW.Tools
                         break;
                     case "Language":
                         Language = value;
+                        break;
+                    case "BluetoothPin":
+                        BluetoothPin = value;
                         break;
                     default:
                         Logger.Warning("  Unknown setting");
