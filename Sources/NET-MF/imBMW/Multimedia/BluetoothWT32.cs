@@ -26,14 +26,17 @@ namespace imBMW.Multimedia
         bool isHFPConnected;
         bool isMuxMode;
         int initStep = 0;
+        string pin;
 
         //bool isSleeping;
 
         static string[] nowPlayingTags = new string[] { "TITLE", "ARTIST", "ALBUM", "GENRE", "TRACK_NUMBER", "TOTAL_TRACK_NUMBER", "PLAYING_TIME" };
         
-        public BluetoothWT32(string port)
+        public BluetoothWT32(string port, string pin = "0000")
         {
             Name = "Bluetooth";
+
+            this.pin = pin;
 
             SPPLink = Link.Unset;
 
@@ -426,10 +429,10 @@ namespace imBMW.Multimedia
                             SendCommand("SET PROFILE SPP imBMW");
                             SendCommand("SET PROFILE A2DP SINK");
                             SendCommand("SET PROFILE AVRCP CONTROLLER");
-                            SendCommand("SET BT PAGEMODE 4 2000 1"); // TODO 3 2000 1 for more than 1 connection
+                            SendCommand("SET BT PAGEMODE 3 2000 1");
                             SendCommand("SET BT CLASS 240408");
                             SendCommand("SET BT SSP 3 0");
-                            SendCommand("SET BT AUTH * 0000");
+                            SendCommand("SET BT AUTH * " + pin);
                             SendCommand("SET BT NAME imBMW");
                             SendCommand("RESET");
                             break;
@@ -451,7 +454,7 @@ namespace imBMW.Multimedia
                                 OnA2DPConnected(p[2], p[1]);
                                 break;
                             case "AVRCP":
-                                OnAVRCPConnected();
+                                OnAVRCPConnected(p[2], p[1]);
                                 break;
                             case "RFCOMM":
                                 if (p[3] == "1")
@@ -471,7 +474,7 @@ namespace imBMW.Multimedia
                                 OnA2DPConnected(lastConnectedAddress, p[1]);
                                 break;
                             case "AVRCP":
-                                OnAVRCPConnected();
+                                OnAVRCPConnected(lastConnectedAddress, p[1]);
                                 break;
                             case "RFCOMM":
                                 break;
@@ -591,8 +594,13 @@ namespace imBMW.Multimedia
             NowPlaying = n;
         }
 
-        void OnAVRCPConnected()
+        void OnAVRCPConnected(string address, string link)
         {
+            if (IsConnected && address != ConnectedAddress)
+            {
+                SendCommand("CLOSE " + link);
+                return;
+            }
             //SendCommand("CALL " + ConnectedAddress + " 1101 RFCOMM");
             //SendCommand("SDP " + ConnectedAddress + " 1101");
             SendCommand("AVRCP PDU 20 0"); // get now playing
@@ -606,11 +614,12 @@ namespace imBMW.Multimedia
 
         void OnA2DPConnected(string address, string link)
         {
-            // Don't save address of second connected device
-            if (!IsConnected)
+            if (IsConnected && address != ConnectedAddress)
             {
-                ConnectedAddress = address;
+                SendCommand("CLOSE " + link);
+                return;
             }
+            ConnectedAddress = address;
             if (PlayerHostState == Multimedia.PlayerHostState.Off)
             {
                 Disconnect();
