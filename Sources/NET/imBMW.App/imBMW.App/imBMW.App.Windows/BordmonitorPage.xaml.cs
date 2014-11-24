@@ -182,6 +182,7 @@ namespace imBMW.App
         void Bordmonitor_ScreenCleared()
         {
             currentScreen.Items.Clear();
+            currentScreen.Status = "";
             RefreshScreen();
         }
 
@@ -191,6 +192,7 @@ namespace imBMW.App
             {
                 case BordmonitorFields.Title:
                     currentScreen.Title = args.Text;
+                    RefreshScreen();
                     break;
                 case BordmonitorFields.Status:
                     currentScreen.Status = args.Text;

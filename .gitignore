@@ -161,3 +161,4 @@ pip-log.txt
 
 # Mac crap
 .DS_Store
+/Sources/NET/imBMW.App/imBMW.App/imBMW.App.Windows/AppPackages
