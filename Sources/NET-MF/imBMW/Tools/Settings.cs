@@ -43,6 +43,8 @@ namespace imBMW.Tools
 
         public string BluetoothPin { get; set; }
 
+        public string MediaShield { get; set; }
+
         public static Settings Init(string path)
         {
             Instance = new Settings();
@@ -140,6 +142,9 @@ namespace imBMW.Tools
                         break;
                     case "BluetoothPin":
                         BluetoothPin = value;
+                        break;
+                    case "MediaShield":
+                        MediaShield = value; // TODO make enum
                         break;
                     default:
                         Logger.Warning("  Unknown setting");
