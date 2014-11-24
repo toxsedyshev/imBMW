@@ -74,6 +74,9 @@
     <Compile Include="..\..\NET-MF\imBMW\iBus\Message.cs">
       <Link>iBus\Message.cs</Link>
     </Compile>
+    <Compile Include="..\..\NET-MF\imBMW\iBus\MessageParser.cs">
+      <Link>iBus\MessageParser.cs</Link>
+    </Compile>
     <Compile Include="..\..\NET-MF\imBMW\iBus\MessageRegistry.cs">
       <Link>iBus\MessageRegistry.cs</Link>
     </Compile>

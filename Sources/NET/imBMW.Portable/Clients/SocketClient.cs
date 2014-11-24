@@ -98,51 +98,21 @@ namespace imBMW.Clients
         {
             try
             {
-                byte[] buffer = null;
+                var parser = new MessageParser();
+                parser.MessageReceived += parser_MessageReceived;
                 while (true)
                 {
                     var size = await dataReader.LoadAsync(1028);
-                    var c = new byte[size];
-                    dataReader.ReadBytes(c);
+                    var data = new byte[size];
+                    dataReader.ReadBytes(data);
 
-                    if (buffer == null)
+                    try
                     {
-                        buffer = c;
+                        parser.Parse(data);
                     }
-                    else
+                    catch (Exception ex)
                     {
-                        buffer = buffer.Combine(c);
-                    }
-                    if (!InternalMessage.CanStartWith(buffer))
-                    {
-                        if (InternalMessage.CanStartWith(c))
-                        {
-                            buffer = c;
-                        }
-                        else
-                        {
-                            continue;
-                        }
-                    }
-                    Message m;
-                    while (buffer != null && (m = InternalMessage.TryCreate(buffer)) != null)
-                    {
-                        if (m.PacketLength == buffer.Length)
-                        {
-                            buffer = null;
-                        }
-                        else
-                        {
-                            buffer = buffer.Skip(m.PacketLength);
-                        }
-                        if (m is InternalMessage)
-                        {
-                            OnInternalMessageReceived((InternalMessage)m);
-                        }
-                        else
-                        {
-                            Manager.ProcessMessage(m);
-                        }
+                        Logger.Error(ex, "Parsing message by SocketClient.");
                     }
                 }
             }
@@ -157,6 +127,18 @@ namespace imBMW.Clients
                         Reconnect();
                     }
                 }
+            }
+        }
+
+        void parser_MessageReceived(Message message)
+        {
+            if (message is InternalMessage)
+            {
+                OnInternalMessageReceived((InternalMessage)message);
+            }
+            else
+            {
+                Manager.ProcessMessage(message);
             }
         }
 
