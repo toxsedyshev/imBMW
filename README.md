@@ -16,7 +16,7 @@ The imBMW V1 device, that uses FEZ Mini, connects iPod via headset cable to BMW 
 The imBMW V2 device, that uses FEZ Cerb40 II, is a *duino iBus-ready board. It could be used with any shield, for example with imBMW Bluetooth OVC3860 or Bluetooth Pro WT32 Shields for wireless stereo audio connection to BMW audio system, handsfree calls and even for forwarding iBus via Bluetooth to smartphones and tablets - imBMW already has a library for Windows Phone and Windows 8 devices.
 
 CD-changer emulator and Bordmonitor AUX interface were implemented to connect radio with iPod/iPhone/iPad or with other players, phones and tablets like Windows Phone, Android etc. 
-Also imBMW allows to communicate with instrument cluster, immobilizer, GM, ZKE, navigation and other modules to receive notifications and control doors, windows, lights, etc.
+Also imBMW allows communicating with instrument cluster, immobilizer, GM, ZKE, navigation and other modules to receive notifications and control doors, windows, lights, etc.
 
 You could [order imBMW boards](http://oshpark.com/profiles/toxsedyshev) from OSH Park.  
 Also you could order assembled imBMW V2 + Bluetooth, details by email: [imbmw@toxs.ru](mailto:imbmw@toxs.ru).  
