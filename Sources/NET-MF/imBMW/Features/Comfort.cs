@@ -111,13 +111,13 @@ namespace imBMW.Features
                 case Command.FullOpenWindows:
                     for (int i = 0; i < 3; i++)
                     {
-                        Manager.EnqueueMessage(BodyModule.MessageCloseWindowDriverFront);
+                        Manager.EnqueueMessage(BodyModule.MessageOpenWindowDriverFront);
                         Thread.Sleep(750);
-                        Manager.EnqueueMessage(BodyModule.MessageCloseWindowPassengerFront);
+                        Manager.EnqueueMessage(BodyModule.MessageOpenWindowPassengerFront);
                         Thread.Sleep(750);
-                        Manager.EnqueueMessage(BodyModule.MessageCloseWindowDriverRear);
+                        Manager.EnqueueMessage(BodyModule.MessageOpenWindowDriverRear);
                         Thread.Sleep(750);
-                        Manager.EnqueueMessage(BodyModule.MessageCloseWindowPassengerRear);
+                        Manager.EnqueueMessage(BodyModule.MessageOpenWindowPassengerRear);
                         Thread.Sleep(750);
                     }
                     break;
