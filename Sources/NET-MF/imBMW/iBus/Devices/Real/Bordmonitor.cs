@@ -133,13 +133,14 @@ namespace imBMW.iBus.Devices.Real
 
             if (Data.Length > 3)
             {
-                var index = (byte)(Data[3] & (0xFF - 0x40));
+                var index = (byte)(Data[3] & 0x0F);
                 bool isChecked = false;
                 var offset = 4;
                 for (int i = offset; i < Data.Length; i++)
                 {
                     var isNext = Data[i] == 0x06;
-                    if (isNext || i == Data.Length - 1)
+                    var isLast = i == Data.Length - 1;
+                    if (isNext || isLast)
                     {
                         if (!isNext)
                         {
@@ -148,6 +149,10 @@ namespace imBMW.iBus.Devices.Real
                         var s = ASCIIEncoding.GetString(Data, offset, i - offset + (isNext ? 0 : 1) - (isChecked ? 1 : 0), false).Trim().ASCIIToUTF8();
                         res.Add(new BordmonitorText(Field, s, index, isChecked));
                         index++;
+                        if (isNext && isLast)
+                        {
+                            res.Add(new BordmonitorText(Field, "", index, false));
+                        }
                         offset = i + 1;
                         continue;
                     }
@@ -178,7 +183,7 @@ namespace imBMW.iBus.Devices.Real
         public static byte[] DataShowTitle = new byte[] { 0x23, 0x62, 0x10 };
         public static byte[] DataShowStatus = new byte[] { 0xA5, 0x62, 0x01, 0x06 };
         public static byte[] DataAUX = new byte[] { 0x23, 0x62, 0x10, 0x41, 0x55, 0x58, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20 };
-
+        
         public static bool MK2Mode { get; set; }
 
         public static event BordmonitorTextHandler TextReceived;
@@ -190,10 +195,15 @@ namespace imBMW.iBus.Devices.Real
             Manager.AddMessageReceiverForDestinationDevice(DeviceAddress.GraphicsNavigationDriver, ProcessNavGraphicsMessage);
         }
 
+        /// <summary>
+        /// Does nothing. Just to call static constructor.
+        /// </summary>
+        public static void Init() { }
+
         static void ProcessNavGraphicsMessage(Message m)
         {
             var ae = ScreenCleared;
-            if (ae != null && (m.Data.Compare(MessageClearScreen.Data)))
+            if (ae != null && m.Data.Compare(MessageClearScreen.Data))
             {
                 ae();
                 m.ReceiverDescription = "Clear screen";
@@ -201,7 +211,7 @@ namespace imBMW.iBus.Devices.Real
             }
 
             ae = ScreenRefreshed;
-            if (ae != null && (m.Data.Compare(MessageRefreshScreen.Data)))
+            if (ae != null && m.Data.Compare(MessageRefreshScreen.Data))
             {
                 ae();
                 m.ReceiverDescription = "Refresh screen";
@@ -213,8 +223,19 @@ namespace imBMW.iBus.Devices.Real
             {
                 if (m.Data.StartsWith(0xA5, 0x62, 0x00) || m.Data.StartsWith(0x21, 0x60, 0x00))
                 {
-                    e(new BordmonitorText(BordmonitorFields.Item, m.Data));
+                    var a = new BordmonitorText(BordmonitorFields.Item, m.Data);
+                    e(a);
+                    #if NETMF
                     m.ReceiverDescription = "BM fill items";
+                    #else
+                    var s = "BM fill items";
+                    var items = a.ParseItems();
+                    foreach (var i in items)
+                    {
+                        s += " | " + i.Index.ToHex() + "." + i.Text;
+                    }
+                    m.ReceiverDescription = s;
+                    #endif
                     return;
                 }
                 if (m.Data.StartsWith(DataShowStatus))
