@@ -1,5 +1,4 @@
-﻿using GHI.OSHW.Hardware;
-using imBMW.iBus;
+﻿using imBMW.iBus;
 using imBMW.iBus.Devices.Real;
 using imBMW.Tools;
 using Microsoft.SPOT;
@@ -17,8 +16,9 @@ using imBMW.iBus.Devices.Emulators;
 using imBMW.Features.Menu.Screens;
 using imBMW.Features.Localizations;
 using imBMW.Devices.V2.Hardware;
-using FEZPin = GHI.Hardware.FEZCerb.Pin;
 using imBMW.Features;
+using GHI.Pins;
+using GHI.IO.Storage;
 
 namespace imBMW.Devices.V2
 {
@@ -35,7 +35,7 @@ namespace imBMW.Devices.V2
 
         static void Init()
         {
-            LED = new OutputPort(FEZPin.PA8, false);
+            LED = new OutputPort(Generic.GetPin('A', 8), false);
 
             var sd = GetRootDirectory();
 
@@ -73,7 +73,7 @@ namespace imBMW.Devices.V2
 
             // Create serial port to work with Melexis TH3122
             //ISerialPort iBusPort = new SerialPortEcho();
-            ISerialPort iBusPort = new SerialPortTH3122(Serial.COM3, FEZPin.PC2, true);
+            ISerialPort iBusPort = new SerialPortTH3122(Serial.COM3, Generic.GetPin('C', 2), true);
             Logger.Info("TH3122 serial port inited");
 
             /*InputPort jumper = new InputPort((Cpu.Pin)FEZ_Pin.Digital.An7, false, Port.ResistorMode.PullUp);
@@ -290,12 +290,15 @@ namespace imBMW.Devices.V2
             Manager.EnqueueMessage(new Message(DeviceAddress.Telephone, DeviceAddress.FrontDisplay, "Set LEDs", 0x2B, b));
         }
 
+        static SDCard sdCard;
+
         public static string GetRootDirectory()
         {
             try
             {
                 Logger.Info("Mount", "SD");
-                GHI.OSHW.Hardware.StorageDev.MountSD();
+                sdCard = new SDCard(SDCard.SDInterface.MCI);
+                sdCard.Mount();
                 Logger.Info("Mounted", "SD");
             }
             catch

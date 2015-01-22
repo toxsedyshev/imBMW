@@ -1,7 +1,7 @@
 using System;
 using Microsoft.SPOT;
 using Microsoft.SPOT.Hardware;
-using FEZPin = GHI.Hardware.FEZCerb.Pin;
+using GHI.Pins;
 
 namespace imBMW.Devices.V2.Hardware
 {
@@ -9,115 +9,115 @@ namespace imBMW.Devices.V2.Hardware
     {
         // Summary:
         //     A value indicating that no GPIO pin is specified.
-        public const Cpu.Pin GPIO_NONE = FEZPin.GPIO_NONE;
+        public const Cpu.Pin GPIO_NONE = Cpu.Pin.GPIO_NONE;
         //
         // Summary:
         //     Digital I/O.
         //     COM2 RX.
-        public const Cpu.Pin Di0 = FEZPin.PA3;
+        public static Cpu.Pin Di0 = Generic.GetPin('A', 3);
         //
         // Summary:
         //     Digital I/O.
         //     COM2 TX.
-        public const Cpu.Pin Di1 = FEZPin.PA2;
+        public static Cpu.Pin Di1 = Generic.GetPin('A', 2);
         //
         // Summary:
         //     Digital I/O.
         //     I2C SDA.
-        public const Cpu.Pin Di2 = FEZPin.PB7;
+        public static Cpu.Pin Di2 = Generic.GetPin('B', 7);
         //
         // Summary:
         //     Digital I/O.
         //     I2C SCL.
-        public const Cpu.Pin Di3 = FEZPin.PB6;
+        public static Cpu.Pin Di3 = Generic.GetPin('B', 6);
         //
         // Summary:
         //     Digital I/O.
         //     CAN1 RX.
-        public const Cpu.Pin Di4 = FEZPin.PB8;
+        public static Cpu.Pin Di4 = Generic.GetPin('B', 8);
         //
         // Summary:
         //     Digital I/O.
         //     COM2 CTS.
-        public const Cpu.Pin Di5 = FEZPin.PA0;
+        public static Cpu.Pin Di5 = Generic.GetPin('A', 0);
         //
         // Summary:
         //     Digital I/O.
         //     COM2 RTS.
-        public const Cpu.Pin Di6 = FEZPin.PA1;
+        public static Cpu.Pin Di6 = Generic.GetPin('A', 1);
         //
         // Summary:
         //     Digital I/O.
         //     CAN1 TX.
-        public const Cpu.Pin Di7 = FEZPin.PB9;
+        public static Cpu.Pin Di7 = Generic.GetPin('B', 9);
         //
         // Summary:
         //     Digital I/O.
         //     COM1 TX.
-        public const Cpu.Pin Di8 = FEZPin.PC6;
+        public static Cpu.Pin Di8 = Generic.GetPin('C', 6);
         //
         // Summary:
         //     Digital I/O.
         //     COM1 RX.
-        public const Cpu.Pin DI9 = FEZPin.PC7;
+        public static Cpu.Pin Di9 = Generic.GetPin('C', 7);
         //
         // Summary:
         //     Digital I/O.
-        public const Cpu.Pin Di10 = FEZPin.PA7;
+        public static Cpu.Pin Di10 = Generic.GetPin('A', 7);
         //
         // Summary:
         //     Digital I/O.
         //     SPI1 MOSI.
-        public const Cpu.Pin Di11 = FEZPin.PB5;
+        public static Cpu.Pin Di11 = Generic.GetPin('B', 5);
         //
         // Summary:
         //     Digital I/O.
         //     SPI1 MISO.
-        public const Cpu.Pin Di12 = FEZPin.PB4;
+        public static Cpu.Pin Di12 = Generic.GetPin('B', 4);
         //
         // Summary:
         //     Digital I/O.
         //     SPI1 SCK.
-        public const Cpu.Pin Di13 = FEZPin.PB3;
+        public static Cpu.Pin Di13 = Generic.GetPin('B', 3);
         //
         // Summary:
         //     Digital I/O.
         //     Analog in A0.
-        public const Cpu.Pin Di14 = FEZPin.PA6;
+        public static Cpu.Pin Di14 = Generic.GetPin('A', 6);
         //
         // Summary:
         //     Digital I/O.
         //     Analog in/out A1.
-        public const Cpu.Pin Di15 = FEZPin.PA5;
+        public static Cpu.Pin Di15 = Generic.GetPin('A', 5);
         //
         // Summary:
         //     Digital I/O.
         //     Analog in A2.
-        public const Cpu.Pin Di16 = FEZPin.PC3;
+        public static Cpu.Pin Di16 = Generic.GetPin('C', 3);
         //
         // Summary:
         //     Digital I/O.
         //     Analog in/out A3.
-        public const Cpu.Pin Di17 = FEZPin.PA4;
+        public static Cpu.Pin Di17 = Generic.GetPin('A', 4);
         //
         // Summary:
         //     Digital I/O.
         //     Analog in A4.
-        public const Cpu.Pin Di18 = FEZPin.PC1;
+        public static Cpu.Pin Di18 = Generic.GetPin('C', 1);
         //
         // Summary:
         //     Digital I/O.
         //     Analog in A5.
-        public const Cpu.Pin Di19 = FEZPin.PC0;
+        public static Cpu.Pin Di19 = Generic.GetPin('C', 0);
         //
         // Summary:
         //     Digital I/O.
         //     On the V2 main board under Cerb40.
-        public const Cpu.Pin Di20 = FEZPin.PA13;
+        public static Cpu.Pin Di20 = Generic.GetPin('A', 13);
         //
         // Summary:
         //     Digital I/O.
         //     On the V2 main board near LED1.
-        public const Cpu.Pin Di21 = FEZPin.PA14;
+        public static Cpu.Pin Di21 = Generic.GetPin('A', 14);
     }
 }
