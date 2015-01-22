@@ -26,6 +26,11 @@ namespace imBMW.iBus.Devices.Real
             Manager.AddMessageReceiverForSourceDevice(DeviceAddress.LightControlModule, ProcessLCMMessage);
         }
 
+        /// <summary>
+        /// Does nothing. Just to call static constructor.
+        /// </summary>
+        public static void Init() { }
+
         static void ProcessLCMMessage(Message m)
         {
             if (m.Data.Length == 5 && m.Data[0] == 0x5B)

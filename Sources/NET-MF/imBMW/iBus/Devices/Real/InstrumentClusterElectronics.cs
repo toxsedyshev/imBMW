@@ -78,6 +78,11 @@ namespace imBMW.iBus.Devices.Real
             Manager.AddMessageReceiverForSourceDevice(DeviceAddress.InstrumentClusterElectronics, ProcessIKEMessage);
         }
 
+        /// <summary>
+        /// Does nothing. Just to call static constructor.
+        /// </summary>
+        public static void Init() { }
+
         static void ProcessIKEMessage(Message m)
         {
             if (m.Data.Length == 3 && m.Data[0] == 0x18)

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using imBMW.iBus.Devices.Real;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -148,6 +149,20 @@ namespace imBMW.iBus
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Subscribes to messages from devices to translate them.
+        /// </summary>
+        public static void InitRealDevices()
+        {
+            BodyModule.Init();
+            Bordmonitor.Init();
+            Immobiliser.Init();
+            InstrumentClusterElectronics.Init();
+            LightControlModule.Init();
+            MultiFunctionSteeringWheel.Init();
+            Radio.Init();
         }
     }
 }

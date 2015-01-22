@@ -33,6 +33,11 @@ namespace imBMW.iBus.Devices.Real
             Manager.AddMessageReceiverForSourceDevice(DeviceAddress.Radio, ProcessRadioMessage);
         }
 
+        /// <summary>
+        /// Does nothing. Just to call static constructor.
+        /// </summary>
+        public static void Init() { }
+
         static void ProcessRadioMessage(Message m)
         {
             var radioOnOffChanged = OnOffChanged;

@@ -45,6 +45,11 @@ namespace imBMW.iBus.Devices.Real
             InstrumentClusterElectronics.IgnitionStateChanged += InstrumentClusterElectronics_IgnitionStateChanged;
         }
 
+        /// <summary>
+        /// Does nothing. Just to call static constructor.
+        /// </summary>
+        public static void Init() { }
+
         public static void VolumeUp(byte step = 1)
         {
             step = (byte)Math.Max((byte)1, Math.Min(step, (byte)9));

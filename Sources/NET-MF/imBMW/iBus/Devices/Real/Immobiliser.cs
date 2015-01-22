@@ -32,6 +32,11 @@ namespace imBMW.iBus.Devices.Real
             Manager.AddMessageReceiverForSourceDevice(DeviceAddress.Immobiliser, ProcessEWSMessage);
         }
 
+        /// <summary>
+        /// Does nothing. Just to call static constructor.
+        /// </summary>
+        public static void Init() { }
+
         static void ProcessEWSMessage(Message m)
         {
             if (m.Data.Length == 3 && m.Data[0] == 0x74)

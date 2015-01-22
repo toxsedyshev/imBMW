@@ -80,6 +80,11 @@ namespace imBMW.iBus.Devices.Real
             Manager.AddMessageReceiverForSourceDevice(DeviceAddress.BodyModule, ProcessGMMessage);
         }
 
+        /// <summary>
+        /// Does nothing. Just to call static constructor.
+        /// </summary>
+        public static void Init() { }
+
         static void ProcessGMMessage(Message m)
         {
             if (m.Data.Length == 2 && m.Data[0] == 0x72)
