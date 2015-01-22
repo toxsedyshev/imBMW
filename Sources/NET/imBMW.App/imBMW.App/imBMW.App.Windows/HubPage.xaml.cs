@@ -125,5 +125,10 @@ namespace imBMW.App
         {
             Frame.Navigate(typeof(TestPage));
         }
+
+        private void Button_Click_Logs(object sender, RoutedEventArgs e)
+        {
+            Frame.Navigate(typeof(LoggerPage));
+        }
     }
 }
