@@ -182,13 +182,25 @@ namespace imBMW.iBus.Devices.Real
 
         public static byte[] DataShowTitle = new byte[] { 0x23, 0x62, 0x10 };
         public static byte[] DataShowStatus = new byte[] { 0xA5, 0x62, 0x01, 0x06 };
+        public static byte[] DataUpdateScreen = new byte[] { 0xA5, 0x62, 0x01 };
         public static byte[] DataAUX = new byte[] { 0x23, 0x62, 0x10, 0x41, 0x55, 0x58, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20 };
-        
+
+        /// <summary>
+        /// MK2 navigation mode.
+        /// </summary>
         public static bool MK2Mode { get; set; }
+
+        /// <summary>
+        /// Emulate response from navigation to radio for screen updates.
+        /// </summary>
+        public static bool ReplyToScreenUpdates { get; set; }
 
         public static event BordmonitorTextHandler TextReceived;
         public static event Action ScreenCleared;
         public static event Action ScreenRefreshed;
+
+        private static byte _screenUpdatedMenuCounter;
+        private static byte _screenUpdatedCounter;
 
         static Bordmonitor()
         {
@@ -215,16 +227,20 @@ namespace imBMW.iBus.Devices.Real
             {
                 ae();
                 m.ReceiverDescription = "Refresh screen";
+                OnScreenUpdated();
                 return;
             }
 
             var e = TextReceived;
-            if (e != null)
+            if (e != null || ReplyToScreenUpdates)
             {
                 if (m.Data.StartsWith(0xA5, 0x62, 0x00) || m.Data.StartsWith(0x21, 0x60, 0x00))
                 {
                     var a = new BordmonitorText(BordmonitorFields.Item, m.Data);
-                    e(a);
+                    if (e != null)
+                    {
+                        e(a);
+                    }
                     #if NETMF
                     m.ReceiverDescription = "BM fill items";
                     #else
@@ -236,30 +252,79 @@ namespace imBMW.iBus.Devices.Real
                     }
                     m.ReceiverDescription = s;
                     #endif
-                    return;
+                    OnScreenUpdated(true);
                 }
-                if (m.Data.StartsWith(DataShowStatus))
+                else if (m.Data.StartsWith(DataUpdateScreen))
                 {
-                    var a = new BordmonitorText(BordmonitorFields.Status, m.Data);
-                    e(a);
-                    #if NETMF
-                    m.ReceiverDescription = "BM show status";
-                    #else
-                    m.ReceiverDescription = "BM show status: " + a.Text;
-                    #endif
-                    return;
+                    if (m.Data.StartsWith(DataShowStatus))
+                    {
+                        var a = new BordmonitorText(BordmonitorFields.Status, m.Data);
+                        if (e != null)
+                        {
+                            e(a);
+                        }
+                        #if NETMF
+                        m.ReceiverDescription = "BM show status";
+                        #else
+                        m.ReceiverDescription = "BM show status: " + a.Text;
+                        #endif
+                    }
+                    OnScreenUpdated(false);
                 }
-                if (m.Data.StartsWith(DataShowTitle))
+                else if (m.Data.StartsWith(DataShowTitle))
                 {
                     var a = new BordmonitorText(BordmonitorFields.Title, m.Data);
-                    e(a);
+                    if (e != null)
+                    {
+                        e(a);
+                    }
                     #if NETMF
                     m.ReceiverDescription = "BM show title";
                     #else
                     m.ReceiverDescription = "BM show title: " + a.Text;
                     #endif
-                    return;
+                    OnScreenUpdated();
                 }
+            }
+        }
+
+        private static void OnScreenUpdated()
+        {
+            if (!ReplyToScreenUpdates)
+            {
+                return;
+            }
+            byte i = _screenUpdatedCounter;
+            if (i > 0)
+            {
+                i--;
+                _screenUpdatedCounter = 0;
+                Manager.EnqueueMessage(new Message(DeviceAddress.GraphicsNavigationDriver, DeviceAddress.Radio, "Screen updated messages: " + (i + 1), 0x22, 0x00, i));
+            }
+
+            i = _screenUpdatedMenuCounter;
+            if (i > 0)
+            {
+                i--;
+                _screenUpdatedMenuCounter = 0;
+                Manager.EnqueueMessage(new Message(DeviceAddress.GraphicsNavigationDriver, DeviceAddress.Radio, "Menu updated messages: " + (i + 1), 0x22, i, 0xFF));
+            }
+        }
+
+        private static void OnScreenUpdated(bool isMenuUpdated)
+        {
+            if (isMenuUpdated)
+            {
+                _screenUpdatedMenuCounter++;
+                if (_screenUpdatedMenuCounter >= 3)
+                {
+                    OnScreenUpdated();
+                }
+            }
+            else
+            {
+                _screenUpdatedCounter++; 
+                OnScreenUpdated();
             }
         }
 
