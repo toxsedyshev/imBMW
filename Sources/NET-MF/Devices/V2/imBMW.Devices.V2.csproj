@@ -31,9 +31,6 @@
   </PropertyGroup>
   <Import Project="$(NetMfTargetsBaseDir)$(TargetFrameworkVersion)\CSharp.Targets" />
   <ItemGroup>
-    <Compile Include="..\V1\SampleFeatures.cs">
-      <Link>SampleFeatures.cs</Link>
-    </Compile>
     <Compile Include="Hardware\Pin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Program.cs" />

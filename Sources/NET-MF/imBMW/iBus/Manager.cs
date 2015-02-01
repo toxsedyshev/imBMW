@@ -335,6 +335,8 @@ namespace imBMW.iBus
 
         const int findDeviceTimeout = 2000;
 
+        static DeviceAddress findDevice;
+        static ManualResetEvent findDeviceSync = new ManualResetEvent(false);
         static ArrayList foundDevices = new ArrayList();
 
         public static bool FindDevice(DeviceAddress device)
@@ -350,9 +352,11 @@ namespace imBMW.iBus
             }
             lock (foundDevices)
             {
+                findDevice = device;
+                findDeviceSync.Reset(); 
                 AfterMessageReceived += SaveFoundDevice;
                 EnqueueMessage(new Message(DeviceAddress.Diagnostic, device, MessageRegistry.DataPollRequest));
-                Thread.Sleep(timeout);
+                findDeviceSync.WaitOne(timeout, true);
                 AfterMessageReceived -= SaveFoundDevice;
                 return foundDevices.Contains(device);
             }
@@ -363,6 +367,10 @@ namespace imBMW.iBus
             if (!foundDevices.Contains(e.Message.SourceDevice))
             {
                 foundDevices.Add(e.Message.SourceDevice);
+            }
+            if (findDevice == e.Message.SourceDevice)
+            {
+                findDeviceSync.Set();
             }
         }
 
