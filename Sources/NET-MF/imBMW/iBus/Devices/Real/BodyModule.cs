@@ -73,7 +73,6 @@ namespace imBMW.iBus.Devices.Real
         static double batteryVoltage;
         static bool isCarLocked;
         static bool wasDriverDoorOpened;
-        static bool needUnlock;
 
         static BodyModule()
         {
@@ -116,14 +115,9 @@ namespace imBMW.iBus.Devices.Real
                     {
                         wasDriverDoorOpened = true;
                     }
-                    if (needUnlock)
-                    {
-                        UnlockDoors();
-                    }
                 }
                 else
                 {
-                    needUnlock = false;
                     wasDriverDoorOpened = false;
                 }
             }
@@ -194,14 +188,12 @@ namespace imBMW.iBus.Devices.Real
 
         public static bool UnlockDoors()
         {
-            if (!isCarLocked)
+            if (!isCarLocked || wasDriverDoorOpened)
             {
-                return true;
+                return !isCarLocked;
             }
-            needUnlock = true;
             isCarLocked = wasDriverDoorOpened;
             wasDriverDoorOpened = false;
-            // TODO Request status after 500ms - GM5 is sloooow
             Manager.EnqueueMessage(MessageToggleLockDoors, MessageRequestDoorsStatus);
             return !isCarLocked;
         }
