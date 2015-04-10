@@ -10,6 +10,7 @@ namespace imBMW.iBus
         #region Registries
 
         static string[] messageTypeDescriptions = {
+            #if !MF_FRAMEWORK_VERSION_V4_1
             "", // "0x00",
             "Device status request",
             "Device status ready",
@@ -266,6 +267,7 @@ namespace imBMW.iBus
             "", // "0xFD",
             "", // "0xFE",
             "", // "0xFF"
+            #endif
         };
 
         public static byte[] DataPollRequest = new byte[] { 0x01 };
@@ -286,11 +288,14 @@ namespace imBMW.iBus
 
         public static string ToPrettyString(this Message message, bool withPerformanceInfo = false, bool withBytesAsAscii = false)
         {
+            #if !MF_FRAMEWORK_VERSION_V4_1
             if (message is InternalMessage)
             {
                 var m = (InternalMessage)message;
                 return m.Device.ToStringValue() + ": " + (m.ReceiverDescription ?? m.DataDump);
             }
+            #endif
+
             string description = message.Describe();
             if (description == null)
             {

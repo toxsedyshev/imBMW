@@ -1,3 +1,4 @@
+#if !MF_FRAMEWORK_VERSION_V4_1
 using System;
 using Microsoft.SPOT;
 
@@ -35,3 +36,4 @@ namespace imBMW.Shields
         An6,
     }
 }
+#endif

@@ -1,3 +1,4 @@
+using imBMW.Features.Localizations;
 using imBMW.Features.Menu;
 using imBMW.iBus.Devices.Real;
 using imBMW.Tools;
@@ -29,6 +30,7 @@ namespace imBMW.Multimedia
         OutputPort iPodVolumeUp;
         OutputPort iPodVolumeDown;
         QueueThreadWorker iPodCommands;
+        MenuScreen menu;
 
         bool canControlVolume;
         bool isInVoiceOverMenu;
@@ -254,7 +256,25 @@ namespace imBMW.Multimedia
         {
             get
             {
-                return null; // TODO
+                // TODO move to abstract
+                if (menu == null)
+                {
+                    menu = new MenuScreen(Name);
+
+                    var settingsScreen = new MenuScreen(s => Localization.Current.Settings);
+                    settingsScreen.Status = Name;
+                    settingsScreen.AddItem(new MenuItem(i => Localization.Current.Volume + " +", i => VolumeUp()));
+                    settingsScreen.AddItem(new MenuItem(i => Localization.Current.Volume + " -", i => VolumeDown()));
+                    settingsScreen.AddBackButton();
+
+                    menu.AddItem(new MenuItem(i => IsPlaying ? Localization.Current.Pause : Localization.Current.Play, i => PlayPauseToggle()));
+                    menu.AddItem(new MenuItem(i => Localization.Current.NextTrack, i => Next()));
+                    menu.AddItem(new MenuItem(i => Localization.Current.PrevTrack, i => Prev()));
+                    menu.AddItem(new MenuItem(i => Localization.Current.Settings, MenuItemType.Button, MenuItemAction.GoToScreen) { GoToScreen = settingsScreen });
+                    menu.AddBackButton();
+                    menu.Updated += (m, a) => { if (a.Reason == MenuScreenUpdateReason.StatusChanged) { settingsScreen.Status = m.Status; } };
+                }
+                return menu;
             }
         }
 

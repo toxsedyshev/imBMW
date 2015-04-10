@@ -1,3 +1,4 @@
+/*
 using System;
 using Microsoft.SPOT;
 using GHIElectronics.NETMF.USBClient;
@@ -50,3 +51,4 @@ namespace System.IO.Ports
         public override void Flush() { }
     }
 }
+*/

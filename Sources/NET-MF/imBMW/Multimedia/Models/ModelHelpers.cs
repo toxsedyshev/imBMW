@@ -1,3 +1,4 @@
+#if !MF_FRAMEWORK_VERSION_V4_1
 using System;
 using Microsoft.SPOT;
 using imBMW.Tools;
@@ -49,3 +50,4 @@ namespace imBMW.Multimedia.Models
         }
     }
 }
+#endif

@@ -1,3 +1,5 @@
+#if !MF_FRAMEWORK_VERSION_V4_1
+
 using System;
 using imBMW.Tools;
 
@@ -50,3 +52,5 @@ namespace imBMW.iBus
         }
     }
 }
+
+#endif

@@ -1,3 +1,4 @@
+/*
 using System;
 using Microsoft.SPOT;
 using System.Collections;
@@ -119,7 +120,7 @@ namespace System.IO.Ports
             {
                 thread.Join();
             }
-        }*/
+        }* /
 
         public override void Flush()
         {
@@ -167,3 +168,4 @@ namespace System.IO.Ports
         }
     }
 }
+*/

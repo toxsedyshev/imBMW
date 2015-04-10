@@ -225,6 +225,7 @@ namespace imBMW.iBus
 
         public static void EnqueueMessage(Message m)
         {
+            /*
             if (iBus is SerialPortEcho)
             {
                 ProcessMessage(m);
@@ -234,7 +235,7 @@ namespace imBMW.iBus
             {
                 SendMessage(m);
                 return;
-            }
+            }*/
             #if DEBUG
             m.PerformanceInfo.TimeEnqueued = DateTime.Now;
             #endif
@@ -243,7 +244,7 @@ namespace imBMW.iBus
 
         public static void EnqueueMessage(params Message[] messages)
         {
-            if (iBus is SerialPortEcho)
+            /*if (iBus is SerialPortEcho)
             {
                 foreach (Message m in messages)
                 {
@@ -258,7 +259,7 @@ namespace imBMW.iBus
                     SendMessage(m);
                 }
                 return;
-            }
+            }*/
             #if DEBUG
             var now = DateTime.Now;
             foreach (Message m in messages)

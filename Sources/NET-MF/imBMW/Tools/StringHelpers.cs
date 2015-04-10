@@ -155,7 +155,7 @@ namespace imBMW.Tools
             return r;
         }
 
-        #if !NETMF
+        #if !NETMF || MF_FRAMEWORK_VERSION_V4_1
         public static char ToLower(this char c)
         {
             return c.ToString().ToLower()[0];

@@ -1,3 +1,4 @@
+#if !MF_FRAMEWORK_VERSION_V4_1
 using System;
 using Microsoft.SPOT;
 using System.IO.Ports;
@@ -617,3 +618,4 @@ namespace imBMW.Multimedia
         #endregion
     }
 }
+#endif

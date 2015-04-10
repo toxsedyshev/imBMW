@@ -1,3 +1,5 @@
+#if !MF_FRAMEWORK_VERSION_V4_1
+
 using imBMW.Features.Menu;
 using imBMW.iBus;
 using imBMW.Multimedia;
@@ -100,3 +102,5 @@ namespace imBMW.Features
         }
     }
 }
+
+#endif

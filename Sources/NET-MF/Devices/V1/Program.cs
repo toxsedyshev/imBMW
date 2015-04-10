@@ -1,5 +1,4 @@
 ﻿using GHIElectronics.NETMF.FEZ;
-using GHIElectronics.NETMF.USBClient;
 using imBMW.Features.Localizations;
 using imBMW.Features.Menu;
 using imBMW.Features.Menu.Screens;
@@ -56,7 +55,7 @@ namespace imBMW.Devices.V1
             Logger.Info("TH3122 serial port inited");
 
             InputPort jumper = new InputPort((Cpu.Pin)FEZ_Pin.Digital.An7, false, Port.ResistorMode.PullUp);
-            if (!jumper.Read())
+            /*if (!jumper.Read())
             {
                 Logger.Info("Jumper installed. Starting virtual COM port");
 
@@ -64,7 +63,7 @@ namespace imBMW.Devices.V1
                 ISerialPort cdc = new SerialPortCDC(USBClientController.StandardDevices.StartCDC_WithDebugging(), 0, iBus.Message.PacketLengthMax);
                 iBusPort = new SerialPortHub(iBusPort, cdc);
                 Logger.Info("Serial port hub started");
-            }
+            }*/
 
             // Enable iBus Manager
             iBus.Manager.Init(iBusPort);
