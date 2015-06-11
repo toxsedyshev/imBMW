@@ -429,16 +429,22 @@ namespace imBMW.Multimedia
                             SendCommand("SET PROFILE SPP imBMW");
                             SendCommand("SET PROFILE A2DP SINK");
                             SendCommand("SET PROFILE AVRCP CONTROLLER");
+                            SendCommand("SET PROFILE HFP ON");
                             SendCommand("SET BT PAGEMODE 3 2000 1");
                             SendCommand("SET BT CLASS 240408");
                             SendCommand("SET BT SSP 3 0");
                             SendCommand("SET BT AUTH * " + pin);
                             SendCommand("SET BT NAME imBMW");
+                            SendCommand("SET CONTROL MICBIAS b a");
+                            SendCommand("SET CONTROL GAIN 8 8 DEFAULT");
+                            SendCommand("SET CONTROL PREAMP 1 0");
                             SendCommand("RESET");
                             break;
                         default:
                             // inited
                             SendCommand("VOLUME 8");
+                            //SendCommand("SET CONTROL MICBIAS b 10");
+                            SendCommand("SET");
                             //SendCommand("RFCOMM CREATE");
                             //Connect();
                             break;
@@ -536,6 +542,12 @@ namespace imBMW.Multimedia
             }
         }
 
+        public void SetMicGain(byte b)
+        {
+            SendCommand("SET CONTROL GAIN " + b.ToHex() + " 8 DEFAULT");
+            SendCommand("SET");
+        }
+
         void ParseNowPlaying(string[] p)
         {
             var i = 0;
@@ -601,11 +613,9 @@ namespace imBMW.Multimedia
                 SendCommand("CLOSE " + link);
                 return;
             }
-            //SendCommand("CALL " + ConnectedAddress + " 1101 RFCOMM");
-            //SendCommand("SDP " + ConnectedAddress + " 1101");
             SendCommand("AVRCP PDU 20 0"); // get now playing
             //SendCommand("AVRCP PDU 10 3"); // get supported events
-            SendCommand("AVRCP PDU 31 1"); // subscribe
+            SendCommand("AVRCP PDU 31 1"); // subscribe..
             SendCommand("AVRCP PDU 31 2"); // ..
             SendCommand("AVRCP PDU 31 9"); // ..
             // TODO set max volume
