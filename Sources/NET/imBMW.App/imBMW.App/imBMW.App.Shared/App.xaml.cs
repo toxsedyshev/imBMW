@@ -21,6 +21,9 @@ using System.Diagnostics;
 using imBMW.iBus;
 using imBMW.iBus.Devices.Real;
 using Windows.UI.Popups;
+using Windows.UI.Core;
+using Windows.UI.Notifications;
+using Windows.Data.Xml.Dom;
 
 // Документацию по шаблону проекта "Универсальное приложение с Hub" см. по адресу http://go.microsoft.com/fwlink/?LinkID=391955
 
@@ -43,10 +46,41 @@ namespace imBMW.App
         {
             BluetoothClient.Instance.InternalMessageReceived += BluetoothClient_InternalMessageReceived;
 
+            Logger.Logged += Logger_Logged;
+
+            Manager.InitRealDevices();
             Manager.AfterMessageReceived += Manager_AfterMessageReceived;
             Manager.MessageEnqueued += Manager_MessageEnqueued;
 
             this.Suspending += this.OnSuspending;
+        }
+
+        void Logger_Logged(LogItem log)
+        {
+            var s = log.Timestamp.ToString() + " [" + log.PriorityLabel + "] " + log.Message;
+            if (log.Exception != null)
+            {
+                s += ": " + log.Exception.Message + " Stack trace:\n" + log.Exception.StackTrace;
+            }
+            Debug.WriteLine(s);
+            if (log.Priority == LogPriority.Error)
+            {
+
+                var toastTemplate = ToastTemplateType.ToastText02;
+                var toastXml = ToastNotificationManager.GetTemplateContent(toastTemplate);
+                toastXml.GetElementsByTagName("text")[0].AppendChild(toastXml.CreateTextNode(log.Message));
+                toastXml.GetElementsByTagName("text")[1].AppendChild(toastXml.CreateTextNode(log.Exception != null ? log.Exception.Message : ""));
+                var toast = new ToastNotification(toastXml);
+
+                //var toastNode = toastXml.SelectSingleNode("/toast");
+                //((XmlElement)toastNode).SetAttribute("launch", "{\"type\":\"toast\",\"param1\":\"12345\",\"param2\":\"67890\"}");
+                ToastNotificationManager.CreateToastNotifier().Show(toast);
+
+                /*Window.Current.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+                {
+                    new MessageDialog(s, "Error").ShowAsync();
+                });*/
+            }
         }
 
         void Manager_MessageEnqueued(MessageEventArgs e)
@@ -144,12 +178,19 @@ namespace imBMW.App
             try
             {
                 await BluetoothClient.Instance.Connect();
-                new MessageDialog("Connected").ShowAsync();
+                //new MessageDialog("Connected").ShowAsync();
+                Logger.Info("BT Connected");
+                
+                var toastTemplate = ToastTemplateType.ToastText02;
+                var toastXml = ToastNotificationManager.GetTemplateContent(toastTemplate);
+                toastXml.GetElementsByTagName("text")[0].AppendChild(toastXml.CreateTextNode("BT Connected"));
+                var toast = new ToastNotification(toastXml);
+                ToastNotificationManager.CreateToastNotifier().Show(toast);
             }
             catch (Exception ex)
             {
-                new MessageDialog("Not connected").ShowAsync();
-                Logger.Error(ex, "BT Connecting");
+                //new MessageDialog("Not Connected").ShowAsync();
+                Logger.Error(ex, "BT Not Connected");
             }
         }
 
