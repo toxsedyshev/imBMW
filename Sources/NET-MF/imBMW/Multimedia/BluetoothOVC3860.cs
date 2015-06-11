@@ -480,7 +480,7 @@ namespace imBMW.Multimedia
             }
         }
 
-        const int PlayAfterConnectMilliseconds = 1000;
+        const int PlayAfterConnectMilliseconds = 2000;
         Timer playAfterConnectTimer;
 
         void ProcessBTNotification(string s)
@@ -548,13 +548,6 @@ namespace imBMW.Multimedia
                     Logger.Info("Connected", "BT");
                     OnStatusChanged(Localization.Current.Connected, PlayerEvent.Wireless);
                     SendCommand("MI"); // conn av
-                    if (IsEnabled)
-                    {
-                        playAfterConnectTimer = new Timer(delegate
-                        {
-                            Play();
-                        }, null, PlayAfterConnectMilliseconds, 0);
-                    }
                     break;
                 case "II":
                     connected = false;
@@ -600,6 +593,7 @@ namespace imBMW.Multimedia
 
         void ProcessBTOK()
         {
+            Logger.Info("OK", "BT <");
             switch (lastCommand)
             {
                 case "CC":
@@ -609,7 +603,14 @@ namespace imBMW.Multimedia
                     SendCommand("CD"); // disconn hfp
                     break;
                 case "MI":
-                    Play();
+                    if (IsEnabled && playAfterConnectTimer == null)
+                    {
+                        playAfterConnectTimer = new Timer(delegate
+                        {
+                            Play();
+                            playAfterConnectTimer = null;
+                        }, null, PlayAfterConnectMilliseconds, 0);
+                    }
                     break;
             }
         }
