@@ -1,30 +1,27 @@
-﻿using imBMW.iBus;
+﻿using GHI.IO.Storage;
+using imBMW.Devices.V2.Hardware;
+using imBMW.Features;
+using imBMW.Features.Localizations;
+using imBMW.Features.Menu;
+using imBMW.Features.Menu.Screens;
+using imBMW.iBus;
+using imBMW.iBus.Devices.Emulators;
 using imBMW.iBus.Devices.Real;
+using imBMW.Multimedia;
 using imBMW.Tools;
 using Microsoft.SPOT;
 using Microsoft.SPOT.Hardware;
+using Microsoft.SPOT.IO;
 using System;
+using System.Collections;
 using System.IO.Ports;
 using System.Threading;
-using imBMW.Multimedia;
-using System.Collections;
-using System.Text;
-using Microsoft.SPOT.IO;
-using System.IO;
-using imBMW.Features.Menu;
-using imBMW.iBus.Devices.Emulators;
-using imBMW.Features.Menu.Screens;
-using imBMW.Features.Localizations;
-using imBMW.Devices.V2.Hardware;
-using imBMW.Features;
-using GHI.Pins;
-using GHI.IO.Storage;
 
 namespace imBMW.Devices.V2
 {
     public class Program
     {
-        const string version = "HW2 FW1.0.9";
+        const string version = "HW2 FW1.0.10";
 
         static OutputPort LED;
         static OutputPort ShieldLED;
@@ -35,10 +32,12 @@ namespace imBMW.Devices.V2
 
         static void Init()
         {
-            LED = new OutputPort(Generic.GetPin('A', 8), false);
+            LED = new OutputPort(Pin.LED, false);
+
+            #region Settings
 
             var sd = GetRootDirectory();
-
+            
             var settings = Settings.Init(sd != null ? sd + @"\imBMW.ini" : null);
             var log = settings.Log || settings.LogToSD;
 
@@ -71,9 +70,13 @@ namespace imBMW.Devices.V2
             Logger.Info(version);
             SettingsScreen.Instance.Status = version;
 
+            #endregion
+
+            #region iBus Manager
+
             // Create serial port to work with Melexis TH3122
             //ISerialPort iBusPort = new SerialPortEcho();
-            ISerialPort iBusPort = new SerialPortTH3122(Serial.COM3, Generic.GetPin('C', 2), true);
+            ISerialPort iBusPort = new SerialPortTH3122(Serial.COM3, Pin.TH3122SENSTA, true);
             Logger.Info("TH3122 serial port inited");
 
             /*InputPort jumper = new InputPort((Cpu.Pin)FEZ_Pin.Digital.An7, false, Port.ResistorMode.PullUp);
@@ -87,9 +90,12 @@ namespace imBMW.Devices.V2
                 Logger.Info("Serial port hub started");
             }*/
 
-            // Enable iBus Manager
             iBus.Manager.Init(iBusPort);
             Logger.Info("iBus manager inited");
+
+            #endregion
+
+            #region iBus IO logging
 
             Message sent1 = null, sent2 = null; // light "buffer" for last 2 messages
             bool isSent1 = false;
@@ -171,13 +177,26 @@ namespace imBMW.Devices.V2
             };
             Logger.Info("iBus manager events subscribed");
 
-            // Set iPod or Bluetooth as AUX or CDC-emulator for Bordmonitor or Radio
+            #endregion
 
+            #region Set iPod or Bluetooth as AUX or CDC-emulator for Bordmonitor or Radio
+
+            //
+            //Bordmonitor.ReplyToScreenUpdates = true;
+            //settings.MenuMode = MenuMode.RadioCDC;
+            //settings.MediaShield = "WT32";
+            //settings.BluetoothPin = "1111";
+            //
+
+            BluetoothWT32 wt32;
             if (settings.MediaShield == "WT32")
             {
-                var wt32 = new BluetoothWT32(Serial.COM2, Settings.Instance.BluetoothPin);
+                wt32 = new BluetoothWT32(Serial.COM2, Settings.Instance.BluetoothPin);
                 player = wt32;
                 InternalCommunications.Register(wt32);
+
+                byte gain = 0;
+                Button.OnPress(Pin.Di14, () => wt32.SetMicGain((byte)(++gain % 16)));
             }
             else
             {
@@ -185,16 +204,18 @@ namespace imBMW.Devices.V2
                 //player = new iPodViaHeadset(Pin.PC2);
             }
 
+            //
             //player.IsCurrentPlayer = true;
             //player.PlayerHostState = PlayerHostState.On;
+            //
 
+            MediaEmulator emulator;
             if (settings.MenuMode != Tools.MenuMode.RadioCDC || Manager.FindDevice(DeviceAddress.OnBoardMonitor))
             {
                 if (player is BluetoothWT32)
                 {
                     ((BluetoothWT32)player).NowPlayingTagsSeparatedRows = true;
                 }
-                MediaEmulator emulator;
                 if (settings.MenuMode == Tools.MenuMode.BordmonitorCDC)
                 {
                     emulator = new CDChanger(player);
@@ -240,8 +261,7 @@ namespace imBMW.Devices.V2
             };
             Logger.Info("Player events subscribed");
 
-            //SampleFeatures.Init();
-            //Logger.Info("Sample features inited");
+            #endregion
 
             /*blinkerTimer = new Timer((s) =>
             {
@@ -254,6 +274,19 @@ namespace imBMW.Devices.V2
             }, null, 0, 3000);*/
 
             RefreshLEDs();
+
+            //
+            //var ign = new Message(DeviceAddress.InstrumentClusterElectronics, DeviceAddress.GlobalBroadcastAddress, "Ignition ACC", 0x11, 0x01);
+            //Manager.EnqueueMessage(ign);
+            //Manager.AddMessageReceiverForDestinationDevice(DeviceAddress.InstrumentClusterElectronics, m =>
+            //{
+            //    if (m.Data.Compare(0x10))
+            //    {
+            //        Manager.EnqueueMessage(ign);
+            //    }
+            //});
+            //var b = Manager.FindDevice(DeviceAddress.Radio);
+            //
 
             LED.Write(true);
             Thread.Sleep(50);

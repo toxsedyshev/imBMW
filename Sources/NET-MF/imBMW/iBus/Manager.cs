@@ -238,7 +238,14 @@ namespace imBMW.iBus
             #if DEBUG
             m.PerformanceInfo.TimeEnqueued = DateTime.Now;
             #endif
-            messageWriteQueue.Enqueue(m);
+            try
+            {
+                messageWriteQueue.Enqueue(m);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
 
         public static void EnqueueMessage(params Message[] messages)

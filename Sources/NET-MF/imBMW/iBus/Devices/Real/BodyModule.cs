@@ -40,7 +40,7 @@ namespace imBMW.iBus.Devices.Real
         static Message MessageLockDoors = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Lock doors", 0x0C, 0x4F, 0x01); // 0x0C, 0x97, 0x01
         static Message MessageLockDriverDoor = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Lock driver door", 0x0C, 0x47, 0x01);
         static Message MessageUnlockDoors = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Unlock doors", 0x0C, 0x45, 0x01); // 0x0C, 0x03, 0x01
-        static Message MessageToggleLockDoors = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Toggle lock doors", 0x0C, 0x03, 0x01);
+        static Message MessageToggleLockDoors = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, "Toggle lock doors", 0x0C, 0x03, 0x01); // TODO after it sometimes can't open usign hardware button
         static Message MessageRequestDoorsStatus = new Message(DeviceAddress.InstrumentClusterElectronics, DeviceAddress.BodyModule, "Request doors status", 0x79);
 
         //static Message MessageOpenWindows = new Message(DeviceAddress.Diagnostic, DeviceAddress.BodyModule, 0x0C, 0x00, 0x65);
@@ -123,6 +123,7 @@ namespace imBMW.iBus.Devices.Real
             }
             else if (m.Data.Length > 3 && m.Data[0] == 0xA0)
             {
+                // TODO filter not analog-values responses
                 var voltage = ((double)m.Data[1]) / 10 + ((double)m.Data[2]) / 1000;
 
                 m.ReceiverDescription = "Analog values. Battery voltage = " + voltage + "V";
