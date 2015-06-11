@@ -15,6 +15,7 @@ using Microsoft.SPOT.IO;
 using System;
 using System.Collections;
 using System.IO.Ports;
+using System.Text;
 using System.Threading;
 
 namespace imBMW.Devices.V2
@@ -68,7 +69,7 @@ namespace imBMW.Devices.V2
             }
 
             Logger.Info(version);
-            SettingsScreen.Instance.Status = version;
+            SettingsScreen.Instance.Status = version.Length > 11 ? version.Replace(" ", "") : version;
 
             #endregion
 

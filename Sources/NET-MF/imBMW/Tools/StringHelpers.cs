@@ -306,5 +306,17 @@ namespace imBMW.Tools
         {
             return c >= '0' && c <= '9';
         }
+
+        /// <summary>
+        /// Replaces oldValue to newValue. Performance critical!
+        /// </summary>
+        /// <param name="s">Original string</param>
+        /// <param name="oldValue">Search string</param>
+        /// <param name="newValue">Replace string</param>
+        /// <returns>Modified string</returns>
+        public static string Replace(this string s, string oldValue, string newValue)
+        {
+            return new StringBuilder(s).Replace(oldValue, newValue).ToString();
+        }
     }
 }
