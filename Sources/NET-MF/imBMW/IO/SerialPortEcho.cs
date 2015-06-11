@@ -1,3 +1,4 @@
+/*
 using System;
 using Microsoft.SPOT;
 using System.Threading;
@@ -65,3 +66,4 @@ namespace System.IO.Ports
         }
     }
 }
+*/

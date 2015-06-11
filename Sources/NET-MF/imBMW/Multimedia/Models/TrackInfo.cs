@@ -6,6 +6,8 @@ namespace imBMW.Multimedia.Models
 {
     public class TrackInfo
     {
+        #if !MF_FRAMEWORK_VERSION_V4_1
+
         public TrackInfo()
         {
             TrackNumber = 1;
@@ -34,5 +36,7 @@ namespace imBMW.Multimedia.Models
         /// Length in milliseconds.
         /// </summary>
         public int TrackLength { get; set; }
+
+        #endif
     }
 }
