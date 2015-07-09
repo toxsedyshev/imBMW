@@ -22,7 +22,7 @@ namespace imBMW.Devices.V2
 {
     public class Program
     {
-        const string version = "HW2 FW1.0.10";
+        const string version = "FW1.0.10 HW2";
 
         static OutputPort LED;
         static OutputPort ShieldLED;
@@ -220,9 +220,8 @@ namespace imBMW.Devices.V2
                 if (settings.MenuMode == Tools.MenuMode.BordmonitorCDC)
                 {
                     emulator = new CDChanger(player);
-                    if (settings.MenuModeMK2)
+                    if (settings.NaviVersion == NaviVersion.MK2)
                     {
-                        Bordmonitor.MK2Mode = true;
                         Localization.Current = new RadioLocalization();
                         SettingsScreen.Instance.CanChangeLanguage = false;
                     }
@@ -231,6 +230,8 @@ namespace imBMW.Devices.V2
                 {
                     emulator = new BordmonitorAUX(player);
                 }
+                Bordmonitor.NaviVersion = settings.NaviVersion;
+                BordmonitorMenu.FastMenuDrawing = settings.NaviVersion == NaviVersion.MK4;
                 //MenuScreen.MaxItemsCount = 6;
                 BordmonitorMenu.Init(emulator);
 
@@ -308,6 +309,10 @@ namespace imBMW.Devices.V2
 
         static void RefreshLEDs()
         {
+            if (!Manager.Inited)
+            {
+                return;
+            }
             byte b = 0;
             if (error)
             {

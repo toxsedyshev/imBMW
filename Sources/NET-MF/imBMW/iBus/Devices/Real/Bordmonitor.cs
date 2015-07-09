@@ -186,9 +186,9 @@ namespace imBMW.iBus.Devices.Real
         public static byte[] DataAUX = new byte[] { 0x23, 0x62, 0x10, 0x41, 0x55, 0x58, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20 };
 
         /// <summary>
-        /// MK2 navigation mode.
+        /// Navigation version.
         /// </summary>
-        public static bool MK2Mode { get; set; }
+        public static Tools.NaviVersion NaviVersion { get; set; }
 
         /// <summary>
         /// Emulate response from navigation to radio for screen updates.
@@ -359,24 +359,28 @@ namespace imBMW.iBus.Devices.Real
                     data = DataShowStatus;
                     break;
                 case BordmonitorFields.Item:
-                    if (isChecked || MK2Mode)
+                    if (isChecked)
                     {
-                        len = 14;
+                        len = 15;
                     }
                     else
                     {
-                        len = 23;
-                    }
-                    if (!isChecked)
-                    {
-                        len = System.Math.Min(len, s.Length);
+                        switch (NaviVersion)
+                        {
+                            case Tools.NaviVersion.MK4:
+                                len = System.Math.Min(23, s.Length);
+                                break;
+                            default:
+                                len = 15;
+                                break;
+                        }
                     }
                     index += 0x40;
                     /*if (index == 0x47)
                     {
                         index = 0x7;
                     }*/
-                    if (MK2Mode)
+                    if (NaviVersion == Tools.NaviVersion.MK2)
                     {
                         data = new byte[] { 0xA5, 0x62, 0x00, (byte)index };
                     }
@@ -393,7 +397,11 @@ namespace imBMW.iBus.Devices.Real
             data.PasteASCII(translit ? s : s.UTF8ToASCII(), offset, len);
             if (isChecked)
             {
-                data[data.Length - 1] = 0x2A;
+                data[data.Length - 2] = 0x2A;
+            }
+            if (field == BordmonitorFields.Item && NaviVersion < Tools.NaviVersion.MK4)
+            {
+                data[data.Length - 1] = 0x06;
             }
             var m = new Message(iBus.DeviceAddress.Radio, iBus.DeviceAddress.GraphicsNavigationDriver, "Show message on BM (" + index.ToHex() + "): " + s, data);
             if (send)

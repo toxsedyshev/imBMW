@@ -11,6 +11,13 @@ namespace imBMW.Tools
         BordmonitorCDC = 3
     }
 
+    public enum NaviVersion : byte
+    {
+        MK2 = 2,
+        MK3 = 3,
+        MK4 = 4
+    }
+
     public class Settings
     {
         static Settings instance;
@@ -31,12 +38,12 @@ namespace imBMW.Tools
 
         public bool AutoCloseSunroof { get; set; }
 
-        public bool MenuModeMK2 { get; set; }
-
         public bool MenuMFLControl { get; set; }
 
         public bool RadioSpaceCharAlt { get; set; }
-
+        
+        public NaviVersion NaviVersion { get; set; }
+        
         public MenuMode MenuMode { get; set; }
 
         public string Language { get; set; }
@@ -66,7 +73,7 @@ namespace imBMW.Tools
             LogToSD = false;
             LogMessageToASCII = false;
             MenuMFLControl = true;
-            MenuModeMK2 = false;
+            NaviVersion = Tools.NaviVersion.MK4;
             MenuMode = Tools.MenuMode.RadioCDC;
             BluetoothPin = "0000";
         }
@@ -125,8 +132,8 @@ namespace imBMW.Tools
                     case "LogMessageToASCII":
                         LogMessageToASCII = isTrue;
                         break;
-                    case "MenuModeMK2":
-                        MenuModeMK2 = isTrue;
+                    case "MenuModeMK2": // Deprecated. Use NaviVersion
+                        NaviVersion = Tools.NaviVersion.MK2;
                         break;
                     case "MenuMFLControl":
                         MenuMFLControl = isTrue;
@@ -136,6 +143,9 @@ namespace imBMW.Tools
                         break;
                     case "MenuMode":
                         MenuMode = (Tools.MenuMode)byte.Parse(value);
+                        break;
+                    case "NaviVersion":
+                        NaviVersion = (Tools.NaviVersion)byte.Parse(value);
                         break;
                     case "Language":
                         Language = value;

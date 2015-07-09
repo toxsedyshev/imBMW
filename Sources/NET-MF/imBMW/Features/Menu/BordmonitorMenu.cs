@@ -103,6 +103,8 @@ namespace imBMW.Features.Menu
 
         #region Screen items
 
+        public static bool FastMenuDrawing { get; set; }
+
         protected override void ScreenWakeup()
         {
             base.ScreenWakeup();
@@ -295,42 +297,66 @@ namespace imBMW.Features.Menu
                 skipClearTillRefresh = true; // TODO test no screen items lost
                 base.DrawScreen(args);
 
-                var messages = new Message[4];
-                messages[0] = Bordmonitor.ShowText(CurrentScreen.Status ?? String.Empty, BordmonitorFields.Status, 0, false, false);
+                var messages = new Message[FastMenuDrawing ? 4 : 13];
+                var n = 0;
+                messages[n++] = Bordmonitor.ShowText(CurrentScreen.Status ?? String.Empty, BordmonitorFields.Status, 0, false, false);
                 lastTitle = Bordmonitor.ShowText(CurrentScreen.Title ?? String.Empty, BordmonitorFields.Title, 0, false, false);
-                messages[1] = lastTitle;
+                messages[n++] = lastTitle;
                 byte[] itemsBytes = null;
                 for (byte i = 0; i < 10; i++)
                 {
                     var index = GetItemIndex(i, true);
                     var item = CurrentScreen.GetItem(index);
-                    if (item == null && itemsBytes != null)
+                    if (FastMenuDrawing)
                     {
-                        itemsBytes = itemsBytes.Combine(0x06);
-                        continue;
-                    }
-                    var s = item != null ? item.Text : "";
-                    var m = Bordmonitor.ShowText(s ?? String.Empty, BordmonitorFields.Item, i, item != null && item.IsChecked, false);
-                    if (itemsBytes == null)
-                    {
-                        itemsBytes = m.Data;
+                        if (item == null && itemsBytes != null)
+                        {
+                            itemsBytes = itemsBytes.Combine(0x06);
+                            continue;
+                        }
+                        var m = DrawItem(item, i);
+                        if (itemsBytes == null)
+                        {
+                            itemsBytes = m.Data;
+                        }
+                        else
+                        {
+                            var d = m.Data.Skip(3);
+                            d[0] = 0x06;
+                            itemsBytes = itemsBytes.Combine(d);
+                        }
                     }
                     else
                     {
-                        var d = m.Data.Skip(3);
-                        d[0] = 0x06;
-                        itemsBytes = itemsBytes.Combine(d);
+                        if (item == null && n > 2)
+                        {
+                            var prevMess = messages[n-1];
+                            messages[n - 1] = new Message(prevMess.SourceDevice, prevMess.DestinationDevice, prevMess.ReceiverDescription, prevMess.Data.Combine(0x06));
+                        }
+                        else
+                        {
+                            messages[n++] = DrawItem(item, i);
+                        }
+                        messages[n - 1].AfterSendDelay = 40;
                     }
                 }
-                itemsBytes = itemsBytes.Combine(0x06);
-                // TODO split to 2-3 messages?
-                messages[2] = new Message(DeviceAddress.Radio, DeviceAddress.GraphicsNavigationDriver, "Fill screen items", itemsBytes);
-                messages[3] = Bordmonitor.MessageRefreshScreen;
+                if (FastMenuDrawing)
+                {
+                    itemsBytes = itemsBytes.Combine(0x06);
+                    messages[n++] = new Message(DeviceAddress.Radio, DeviceAddress.GraphicsNavigationDriver, "Fill screen items", itemsBytes);
+                }
+                messages[n++] = Bordmonitor.MessageRefreshScreen;
                 skipRefreshScreen = true;
                 skipClearTillRefresh = true;
                 Manager.EnqueueMessage(messages);
                 isDrawing = false;
             }
+        }
+
+        Message DrawItem(MenuItem item, byte index)
+        {
+            var s = item != null ? item.Text : "";
+            return Bordmonitor.ShowText(s ?? String.Empty, BordmonitorFields.Item, index, item != null && item.IsChecked, false);
         }
 
         byte GetItemIndex(byte index, bool back = false)

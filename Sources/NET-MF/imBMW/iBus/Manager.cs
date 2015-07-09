@@ -12,6 +12,8 @@ namespace imBMW.iBus
     {
         static ISerialPort iBus;
 
+        public static bool Inited { get; private set; }
+
         public static void Init(ISerialPort port)
         {
             messageWriteQueue = new QueueThreadWorker(SendMessage);
@@ -19,6 +21,8 @@ namespace imBMW.iBus
 
             iBus = port;
             iBus.DataReceived += new SerialDataReceivedEventHandler(iBus_DataReceived);
+
+            Inited = true;
         }
 
         #region Message reading and processing
@@ -215,7 +219,7 @@ namespace imBMW.iBus
                 e(args);
             }
 
-            Thread.Sleep(iBus.AfterWriteDelay); // Don't flood iBus
+            Thread.Sleep(m.AfterSendDelay > 0 ? m.AfterSendDelay : iBus.AfterWriteDelay); // Don't flood iBus
         }
 
         public static void EnqueueRawMessage(byte[] m)
@@ -271,7 +275,10 @@ namespace imBMW.iBus
             var now = DateTime.Now;
             foreach (Message m in messages)
             {
-                m.PerformanceInfo.TimeEnqueued = now;
+                if (m != null)
+                {
+                    m.PerformanceInfo.TimeEnqueued = now;
+                }
             }
             #endif
             messageWriteQueue.EnqueueArray(messages);

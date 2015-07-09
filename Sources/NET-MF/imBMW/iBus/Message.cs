@@ -266,6 +266,11 @@ namespace imBMW.iBus
         /// </summary>
         public string ReceiverDescription { get; set; }
 
+        /// <summary>
+        /// Custom delay after sending the message in milliseconds. Zero = default (20ms).
+        /// </summary>
+        public byte AfterSendDelay { get; set; }
+
         public PerformanceInfo PerformanceInfo
         {
             get
