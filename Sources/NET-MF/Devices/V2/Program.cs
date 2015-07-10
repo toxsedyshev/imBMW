@@ -22,7 +22,7 @@ namespace imBMW.Devices.V2
 {
     public class Program
     {
-        const string version = "FW1.0.10 HW2";
+        const string version = "FW1.0.11 HW2";
 
         static OutputPort LED;
         static OutputPort ShieldLED;
