@@ -34,6 +34,7 @@
   </PropertyGroup>
   <Import Project="$(NetMfTargetsBaseDir)$(TargetFrameworkVersion)\CSharp.Targets" />
   <ItemGroup>
+    <Compile Include="DebuggerBrowsableState.cs" />
     <Compile Include="Features\Comfort.cs" />
     <Compile Include="Features\InternalCommunications.cs" />
     <Compile Include="Features\Light.cs" />
@@ -106,14 +107,14 @@
     <Compile Include="Tools\StringHelpers.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.SPOT.Hardware" />
-    <Reference Include="Microsoft.SPOT.Hardware.SerialPort" />
-    <Reference Include="Microsoft.SPOT.Native">
-    </Reference>
-    <Reference Include="System.IO" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="ClassDiagram.cd" />
     <None Include="imBMW.SampleSettings.ini" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.SPOT.Hardware" />
+    <Reference Include="Microsoft.SPOT.Hardware.SerialPort" />
+    <Reference Include="Microsoft.SPOT.IO" />
+    <Reference Include="Microsoft.SPOT.Native" />
+    <Reference Include="System.IO" />
   </ItemGroup>
 </Project>

@@ -41,13 +41,11 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="GHI.Hardware, Version=4.3.6.0, Culture=neutral, processorArchitecture=MSIL" />
-    <Reference Include="GHI.Pins, Version=4.3.6.0, Culture=neutral, processorArchitecture=MSIL" />
-    <Reference Include="Microsoft.SPOT.Graphics" />
+    <Reference Include="GHI.Hardware, Version=4.3.7.10, Culture=neutral, processorArchitecture=MSIL" />
+    <Reference Include="GHI.Pins, Version=4.3.7.10, Culture=neutral, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.SPOT.Hardware" />
     <Reference Include="Microsoft.SPOT.IO" />
-    <Reference Include="Microsoft.SPOT.Native">
-    </Reference>
+    <Reference Include="Microsoft.SPOT.Native" />
     <Reference Include="System.IO" />
   </ItemGroup>
   <ItemGroup>

@@ -54,8 +54,10 @@ namespace imBMW.Multimedia
                 return; // TODO more than one phone
             }
             var phoneClear = "";
-            foreach (var c in phone)
+            char c;
+            for (int i = 0; i < phone.Length; i++)
             {
+                c = phone[i];
                 if (c.IsNumeric() || c == '+')
                 {
                     phoneClear += c;
@@ -464,8 +466,10 @@ namespace imBMW.Multimedia
             }
             var data = port.ReadAvailable();
             var s = ASCIIEncoding.GetString(data);
-            foreach (var c in s)
+            char c;
+            for (int i = 0; i < s.Length; i++)
             {
+                c = s[i];
                 if (c == '\r' || c == '\n')
                 {
                     if (btBuffer != "")

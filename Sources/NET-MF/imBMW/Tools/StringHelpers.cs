@@ -95,8 +95,10 @@ namespace imBMW.Tools
         public static string Translit(this string s)
         {
             var found = false;
-            foreach (var c in s)
+            char c;
+            for (int i = 0; i < s.Length; i++)
             {
+                c = s[i];
                 if (c.GetRussianCharType() != CharType.None)
                 {
                     found = true;
@@ -110,8 +112,9 @@ namespace imBMW.Tools
 
             var r = "";
             CharType t;
-            foreach (var c in s)
+            for (int j = 0; j < s.Length; j++)
             {
+                c = s[j];
                 t = c.GetRussianCharType();
                 if (t == CharType.None)
                 {
@@ -165,8 +168,10 @@ namespace imBMW.Tools
         public static string UTF8ToASCII(this string s)
         {
             var found = false;
-            foreach (var ch in s)
+            char ch;
+            for (int i = 0; i < s.Length; i++)
             {
+                ch = s[i];
                 if (ch > 0xFF)
                 {
                     found = true;
@@ -214,9 +219,11 @@ namespace imBMW.Tools
         public static string ASCIIToUTF8(this string s)
         {
             var found = false;
-            foreach (var ch in s)
+            char c;
+            for (var i = 0; i < s.Length; i++)
             {
-                if (ch.IsRussianASCIIChar())
+                c = s[i];
+                if (c.IsRussianASCIIChar())
                 {
                     found = true;
                     break;
@@ -228,7 +235,6 @@ namespace imBMW.Tools
             }
 
             var res = new char[s.Length];
-            char c;
             for (var i = 0; i < s.Length; i++)
             {
                 c = s[i];
@@ -280,8 +286,10 @@ namespace imBMW.Tools
             {
                 return false;
             }
-            foreach (var c in str)
+            char c;
+            for (int i = 0; i < str.Length; i++)
             {
+                c = str[i];
                 if (!c.IsNumeric())
                 {
                     if (c == '+')
