@@ -62,8 +62,9 @@
     <Compile Include="iBus\Devices\Real\MultiFunctionSteeringWheel.cs" />
     <Compile Include="iBus\Devices\Real\Radio.cs" />
     <Compile Include="iBus\Devices\Emulators\CDChanger.cs" />
-    <Compile Include="iBus\Diagnostics\DBusConverter.cs" />
     <Compile Include="iBus\Diagnostics\DBusMessage.cs" />
+    <Compile Include="iBus\Diagnostics\DME\DMEAnalogValues.cs" />
+    <Compile Include="iBus\Diagnostics\DME\MS43AnalogValues.cs" />
     <Compile Include="iBus\InternalMessage.cs" />
     <Compile Include="iBus\ManagerTools.cs" />
     <Compile Include="iBus\MessageParser.cs" />

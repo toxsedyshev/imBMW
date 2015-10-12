@@ -116,16 +116,8 @@ namespace imBMW.Tools
 
         public static String ToHex(this byte[] data, Char spacer)
         {
-            String s = "";
-            foreach (byte b in data)
-            {
-                if (s.Length > 0)
-                {
-                    s += spacer;
-                }
-                s += b.ToHex();
-            }
-            return s;
+            // TODO fix char to hex bug
+            return ToHex(data, " ");
         }
 
         public static byte[] PadRight(this byte[] data, byte b, int count)

@@ -11,6 +11,37 @@ namespace imBMW.iBus
 
         byte[] buffer = null;
 
+        bool dBus = false;
+
+        public MessageParser(bool dBus = false)
+        {
+            this.dBus = dBus;
+        }
+
+        bool CanStartWith(byte[] data)
+        {
+            if (dBus)
+            {
+                return DBusMessage.CanStartWith(data);
+            }
+            else
+            {
+                return InternalMessage.CanStartWith(data);
+            }
+        }
+
+        Message TryCreate(byte[] data)
+        {
+            if (dBus)
+            {
+                return DBusMessage.TryCreate(data);
+            }
+            else
+            {
+                return InternalMessage.TryCreate(data);
+            }
+        }
+
         public void Parse(byte[] data)
         {
             if (buffer == null)
@@ -21,9 +52,9 @@ namespace imBMW.iBus
             {
                 buffer = buffer.Combine(data);
             }
-            if (!InternalMessage.CanStartWith(buffer))
+            if (!CanStartWith(buffer))
             {
-                if (InternalMessage.CanStartWith(data))
+                if (CanStartWith(data))
                 {
                     buffer = data;
                 }
@@ -33,7 +64,7 @@ namespace imBMW.iBus
                 }
             }
             Message m;
-            while (buffer != null && (m = InternalMessage.TryCreate(buffer)) != null)
+            while (buffer != null && (m = TryCreate(buffer)) != null)
             {
                 if (m.PacketLength == buffer.Length)
                 {

@@ -71,6 +71,7 @@ namespace imBMW.Tools
             {
                 case DeviceAddress.BodyModule: return "BodyModule";
                 case DeviceAddress.SunroofControl: return "SunroofControl";
+                case DeviceAddress.DME: return "DME";
                 case DeviceAddress.CDChanger: return "CDChanger";
                 case DeviceAddress.RadioControlledClock: return "RadioControlledClock";
                 case DeviceAddress.CheckControlModule: return "CheckControlModule";

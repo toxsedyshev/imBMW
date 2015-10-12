@@ -29,7 +29,7 @@ namespace imBMW.iBus
             {
                 throw new Exception("Internal messages are for internal devices only.");
             }
-
+            
             if (PacketLength > 1024)
             {
                 throw new Exception("Message packet length exceeds 1024 bytes.");

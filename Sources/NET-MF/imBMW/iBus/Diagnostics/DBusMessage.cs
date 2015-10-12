@@ -1,55 +1,112 @@
-/*
-
 using System;
-using Microsoft.SPOT;
 using imBMW.Tools;
+using System.Text;
 
-namespace imBMW.iBus.Diagnostics
+namespace imBMW.iBus
 {
-    class DBusMessage : Message
+    /// <summary>
+    /// BMW DS2 Diagnostic Bus (DBus) message packet
+    /// </summary>
+    public class DBusMessage : Message
     {
-        public const int DBusPacketLengthMin = 4;
-        public const int DBusPacketLengthMax = 64;
+        string dataString;
+        
+        public DBusMessage(DeviceAddress device, params byte[] data)
+            : this(device, null, data)
+        { }
 
-        public DBusMessage(DeviceAddress destination, params byte[] data)
-            : base(DeviceAddress.Diagnostic, destination, data)
+        public DBusMessage(DeviceAddress device, string description, params byte[] data)
+            : base (device, DeviceAddress.Diagnostic, description, data)
         {
+            // packet = device + len + data + chksum
+
+            byte check = 0x00;
+            check ^= (byte)device;
+            check ^= (byte)(data.Length + 3);
+            foreach (byte b in data)
+            {
+                check ^= b;
+            }
+
+            init((byte)device, (byte)DeviceAddress.Diagnostic, data, data.Length + 3, check, description);
         }
 
-        public DBusMessage(byte destination, params byte[] data)
-            : base((byte)DeviceAddress.Diagnostic, destination, data)
+        public DeviceAddress Device
         {
+            get
+            {
+                return SourceDevice;
+            }
         }
 
-        public static new Message TryCreate(byte[] packet)
+        public override DeviceAddress DestinationDevice
         {
-            return TryCreate(packet, (byte)packet.Length);
+            get
+            {
+                return DeviceAddress.Diagnostic;
+            }
         }
 
-        public static new Message TryCreate(byte[] packet, int length)
+        public string DataString
         {
-            if (!IsValid(packet, length))
+            get
+            {
+                if (dataString == null)
+                {
+                    dataString = Encoding.UTF8.GetString(Data);
+                }
+                return dataString;
+            }
+        }
+
+        public override byte[] Packet
+        {
+            get
+            {
+                if (this.packet != null)
+                {
+                    return this.packet;
+                }
+
+                byte[] packet = new byte[PacketLength];
+                packet[0] = (byte)Device;
+                packet[1] = (byte)(PacketLength);
+                Data.CopyTo(packet, 2);
+                packet[PacketLength - 1] = CRC;
+
+                this.packet = packet;
+                return packet;
+            }
+        }
+
+        public static new Message TryCreate(byte[] packet, int length = -1)
+        {
+            if (length < 0)
+            {
+                length = packet.Length;
+            }
+            if (!IsValid(packet))
             {
                 return null;
             }
 
-            return new DBusMessage(packet[0], packet.SkipAndTake(2, packet[1] - 3));
+            return new DBusMessage((DeviceAddress)packet[0], packet.SkipAndTake(2, ParseDataLength(packet)));
         }
 
-        public static new bool IsValid(byte[] packet)
+        public static bool IsValid(byte[] packet)
         {
             return IsValid(packet, (byte)packet.Length);
         }
 
         public static new bool IsValid(byte[] packet, int length)
         {
-            if (length < PacketLengthMin)
+            if (length < 4)
             {
                 return false;
             }
 
-            byte packetLength = (byte)(packet[1] + 2);
-            if (length < packetLength)
+            byte packetLength = (byte)ParsePacketLength(packet);
+            if (length < packetLength || packetLength < 4)
             {
                 return false;
             }
@@ -62,15 +119,25 @@ namespace imBMW.iBus.Diagnostics
             return check == packet[packetLength - 1];
         }
 
-        public static new bool CanStartWith(byte[] packet, int length)
+        public static new bool CanStartWith(byte[] packet, int length = -1)
         {
-            if (length < PacketLengthMin)
+            return CanStartWith(packet, ParsePacketLength, length);
+        }
+
+        protected static new bool CanStartWith(byte[] packet, IntFromByteArray packetLengthCallback, int length = -1)
+        {
+            if (length < 0)
+            {
+                length = packet.Length;
+            }
+
+            if (length < 4)
             {
                 return true;
             }
 
             byte packetLength = (byte)(packet[1] + 2);
-            if (packetLength < PacketLengthMin)
+            if (packetLength < 4)
             {
                 return false;
             }
@@ -83,7 +150,14 @@ namespace imBMW.iBus.Diagnostics
             return true;
         }
 
+        protected static new int ParsePacketLength(byte[] packet)
+        {
+            return packet[1];
+        }
+
+        protected static new int ParseDataLength(byte[] packet)
+        {
+            return ParsePacketLength(packet) - 3;
+        }
     }
 }
-
-*/

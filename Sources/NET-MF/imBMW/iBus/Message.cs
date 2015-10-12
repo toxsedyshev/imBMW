@@ -14,12 +14,12 @@ namespace imBMW.iBus
         byte[] data;
         byte check;
 
-        byte[] packet;
+        protected byte[] packet;
         int packetLength;
         string packetDump;
         string dataDump;
-        DeviceAddress sourceDevice = DeviceAddress.Unset;
-        DeviceAddress destinationDevice = DeviceAddress.Unset;
+        protected DeviceAddress sourceDevice = DeviceAddress.Unset;
+        protected DeviceAddress destinationDevice = DeviceAddress.Unset;
         PerformanceInfo performanceInfo;
 
         public Message(DeviceAddress source, DeviceAddress destination, params byte[] data)
@@ -52,7 +52,23 @@ namespace imBMW.iBus
             init(source, destination, data, description);
         }
 
-        void init(byte source, byte destination, byte[] data, string description = null) 
+        void init(byte source, byte destination, byte[] data, string description = null)
+        {
+            // packet = source + len + destination + data + chksum
+            
+            byte check = 0x00;
+            check ^= source;
+            check ^= (byte)(data.Length);
+            check ^= destination;
+            foreach (byte b in data)
+            {
+                check ^= b;
+            }
+
+            init(source, destination, data, data.Length + 4, check, description);  
+        }
+
+        protected void init(byte source, byte destination, byte[] data, int packetLength, byte check, string description = null) 
         {
             if (source.IsInternal() || destination.IsInternal())
             {
@@ -63,16 +79,7 @@ namespace imBMW.iBus
             this.destination = destination;
             this.data = data;
             this.ReceiverDescription = description;
-            packetLength = data.Length + 4; // + source + destination + len + chksum
-
-            byte check = 0x00;
-            check ^= source;
-            check ^= (byte)(PacketLength - 2);
-            check ^= destination;
-            foreach (byte b in data)
-            {
-                check ^= b;
-            }
+            this.packetLength = packetLength;
             this.check = check;
         }
 
@@ -162,6 +169,18 @@ namespace imBMW.iBus
             return ParsePacketLength(packet) - 4;
         }
 
+        public byte CRC
+        {
+            get
+            {
+                return check;
+            }
+            private set
+            {
+                check = value;
+            }
+        }
+
         public int PacketLength
         {
             get
@@ -170,7 +189,7 @@ namespace imBMW.iBus
             }
         }
 
-        public byte[] Packet
+        public virtual byte[] Packet
         {
             get
             {
