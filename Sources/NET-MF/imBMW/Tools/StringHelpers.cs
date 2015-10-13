@@ -315,6 +315,7 @@ namespace imBMW.Tools
             return c >= '0' && c <= '9';
         }
 
+#if !MF_FRAMEWORK_VERSION_V4_1
         /// <summary>
         /// Replaces oldValue to newValue. Performance critical!
         /// </summary>
@@ -326,5 +327,6 @@ namespace imBMW.Tools
         {
             return new StringBuilder(s).Replace(oldValue, newValue).ToString();
         }
+#endif
     }
 }

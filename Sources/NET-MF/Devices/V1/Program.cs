@@ -150,15 +150,14 @@ namespace imBMW.Devices.V1
             //player = new BluetoothOVC3860(Serial.COM2, sd != null ? sd + @"\contacts.vcf" : null);
             player = new iPodViaHeadset((Cpu.Pin)FEZ_Pin.Digital.Di3);
 
+            MediaEmulator emulator;
             if (settings.MenuMode != Tools.MenuMode.RadioCDC || Manager.FindDevice(DeviceAddress.OnBoardMonitor))
             {
-                MediaEmulator emulator;
                 if (settings.MenuMode == Tools.MenuMode.BordmonitorCDC)
                 {
                     emulator = new CDChanger(player);
-                    if (settings.MenuModeMK2)
+                    if (settings.NaviVersion == NaviVersion.MK2)
                     {
-                        Bordmonitor.MK2Mode = true;
                         Localization.Current = new RadioLocalization();
                         SettingsScreen.Instance.CanChangeLanguage = false;
                     }
@@ -167,16 +166,21 @@ namespace imBMW.Devices.V1
                 {
                     emulator = new BordmonitorAUX(player);
                 }
+                Bordmonitor.NaviVersion = settings.NaviVersion;
+                BordmonitorMenu.FastMenuDrawing = settings.NaviVersion == NaviVersion.MK4;
                 //MenuScreen.MaxItemsCount = 6;
                 BordmonitorMenu.Init(emulator);
+
                 Logger.Info("Bordmonitor menu inited");
             }
             else
             {
                 Localization.Current = new RadioLocalization();
                 SettingsScreen.Instance.CanChangeLanguage = false;
+                MultiFunctionSteeringWheel.EmulatePhone = true;
                 Radio.HasMID = Manager.FindDevice(DeviceAddress.MultiInfoDisplay);
-                RadioMenu.Init(new CDChanger(player));
+                var menu = RadioMenu.Init(new CDChanger(player));
+                menu.TelephoneModeForNavigation = settings.MenuMFLControl;
                 Logger.Info("Radio menu inited" + (Radio.HasMID ? " with MID" : ""));
             }
 
