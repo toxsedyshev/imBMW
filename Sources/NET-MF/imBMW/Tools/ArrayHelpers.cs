@@ -1,4 +1,5 @@
 using System;
+using System.Text;
 
 namespace imBMW.Tools
 {
@@ -92,16 +93,53 @@ namespace imBMW.Tools
 
         public static String ToHex(this byte[] data)
         {
+            if (data.Length == 0)
+            {
+                return String.Empty;
+            }
+            if (data.Length == 1)
+            {
+                return data[0].ToHex();
+            }
+#if !MF_FRAMEWORK_VERSION_V4_1
+            var sb = new StringBuilder(data.Length * 2);
+            foreach (byte b in data)
+            {
+                sb.Append(b.ToHex());
+            }
+            return sb.ToString();
+#else
             String s = "";
             foreach (byte b in data)
             {
                 s += b.ToHex();
             }
             return s;
+#endif
         }
 
         public static String ToHex(this byte[] data, String spacer)
         {
+            if (data.Length == 0)
+            {
+                return String.Empty;
+            }
+            if (data.Length == 1)
+            {
+                return data[0].ToHex();
+            }
+#if !MF_FRAMEWORK_VERSION_V4_1
+            var sb = new StringBuilder(data.Length * 2 + (data.Length - 1) * spacer.Length);
+            foreach (byte b in data)
+            {
+                if (sb.Length > 0)
+                {
+                    sb.Append(spacer);
+                }
+                sb.Append(b.ToHex());
+            }
+            return sb.ToString();
+#else
             String s = "";
             foreach (byte b in data)
             {
@@ -112,12 +150,42 @@ namespace imBMW.Tools
                 s += b.ToHex();
             }
             return s;
+#endif
         }
 
         public static String ToHex(this byte[] data, Char spacer)
         {
-            // TODO fix char to hex bug
-            return ToHex(data, " ");
+            if (data.Length == 0)
+            {
+                return String.Empty;
+            }
+            if (data.Length == 1)
+            {
+                return data[0].ToHex();
+            }
+#if !MF_FRAMEWORK_VERSION_V4_1
+            var sb = new StringBuilder(data.Length * 2 + data.Length - 1);
+            foreach (byte b in data)
+            {
+                if (sb.Length > 0)
+                {
+                    sb.Append(spacer.ToString());
+                }
+                sb.Append(b.ToHex());
+            }
+            return sb.ToString();
+#else
+            String s = "";
+            foreach (byte b in data)
+            {
+                if (s.Length > 0)
+                {
+                    s += spacer.ToString();
+                }
+                s += b.ToHex();
+            }
+            return s;
+#endif
         }
 
         public static byte[] PadRight(this byte[] data, byte b, int count)
