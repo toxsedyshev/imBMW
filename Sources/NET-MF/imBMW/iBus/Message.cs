@@ -280,6 +280,18 @@ namespace imBMW.iBus
             }
         }
 
+        public virtual bool Compare(Message message)
+        {
+            return SourceDevice == message.SourceDevice
+                && DestinationDevice == message.DestinationDevice
+                && Data.Compare(message.Data);
+        }
+
+        public virtual bool Compare(byte[] packet)
+        {
+            return Packet.Compare(packet);
+        }
+
         /// <summary>
         /// Description of the message set by a receiver or by MessageRegistry
         /// </summary>

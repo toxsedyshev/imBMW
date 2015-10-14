@@ -1,8 +1,9 @@
 using System;
 using imBMW.Tools;
 using System.Text;
+using imBMW.iBus;
 
-namespace imBMW.iBus
+namespace imBMW.Diagnostics
 {
     /// <summary>
     /// BMW DS2 Diagnostic Bus (DBus) message packet
@@ -77,6 +78,11 @@ namespace imBMW.iBus
                 this.packet = packet;
                 return packet;
             }
+        }
+
+        public bool Compare(DBusMessage message)
+        {
+            return Device == message.Device && Data.Compare(message.Data);
         }
 
         public static new Message TryCreate(byte[] packet, int length = -1)

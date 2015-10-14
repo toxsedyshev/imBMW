@@ -30,7 +30,7 @@ namespace imBMW.iBus
                 throw new Exception("Internal messages are for internal devices only.");
             }
             
-            if (PacketLength > 1024)
+            if (PacketLength > 1024) // TODO try up to 0xFFFF length
             {
                 throw new Exception("Message packet length exceeds 1024 bytes.");
             }
@@ -48,7 +48,7 @@ namespace imBMW.iBus
         {
             get
             {
-                throw new Exception("No address in internal message.");
+                throw new Exception("No destination address in internal message.");
             }
         }
 
@@ -58,10 +58,22 @@ namespace imBMW.iBus
             {
                 if (dataString == null)
                 {
-                    dataString = Encoding.UTF8.GetString(Data);
+                    try
+                    {
+                        dataString = Encoding.UTF8.GetString(Data);
+                    }
+                    catch
+                    {
+                        dataString = DataDump;
+                    }
                 }
                 return dataString;
             }
+        }
+
+        public override bool Compare(Message message)
+        {
+            return SourceDevice == message.SourceDevice && Data.Compare(message.Data);
         }
 
         public static new Message TryCreate(byte[] packet, int length = -1)

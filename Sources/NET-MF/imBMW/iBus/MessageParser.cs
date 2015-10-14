@@ -10,36 +10,15 @@ namespace imBMW.iBus
         public event MessageReceiver MessageReceived;
 
         byte[] buffer = null;
-
-        bool dBus = false;
-
-        public MessageParser(bool dBus = false)
+        
+        protected virtual bool CanStartWith(byte[] data)
         {
-            this.dBus = dBus;
+            return InternalMessage.CanStartWith(data);
         }
 
-        bool CanStartWith(byte[] data)
+        protected virtual Message TryCreate(byte[] data)
         {
-            if (dBus)
-            {
-                return DBusMessage.CanStartWith(data);
-            }
-            else
-            {
-                return InternalMessage.CanStartWith(data);
-            }
-        }
-
-        Message TryCreate(byte[] data)
-        {
-            if (dBus)
-            {
-                return DBusMessage.TryCreate(data);
-            }
-            else
-            {
-                return InternalMessage.TryCreate(data);
-            }
+            return InternalMessage.TryCreate(data);
         }
 
         public void Parse(byte[] data)
@@ -60,6 +39,7 @@ namespace imBMW.iBus
                 }
                 else
                 {
+                    buffer = null;
                     throw new Exception("Wrong data: " + buffer.ToHex(' '));
                 }
             }
@@ -74,10 +54,17 @@ namespace imBMW.iBus
                 {
                     buffer = buffer.Skip(m.PacketLength);
                 }
-                var e = MessageReceived;
-                if (e != null)
+                try
                 {
-                    e(m);
+                    var e = MessageReceived;
+                    if (e != null)
+                    {
+                        e(m);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error(ex, "processing message by MessageParser");
                 }
             }
         }

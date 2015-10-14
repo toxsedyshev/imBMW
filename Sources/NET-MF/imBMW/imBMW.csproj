@@ -62,9 +62,6 @@
     <Compile Include="iBus\Devices\Real\MultiFunctionSteeringWheel.cs" />
     <Compile Include="iBus\Devices\Real\Radio.cs" />
     <Compile Include="iBus\Devices\Emulators\CDChanger.cs" />
-    <Compile Include="iBus\Diagnostics\DBusMessage.cs" />
-    <Compile Include="iBus\Diagnostics\DME\DMEAnalogValues.cs" />
-    <Compile Include="iBus\Diagnostics\DME\MS43AnalogValues.cs" />
     <Compile Include="iBus\InternalMessage.cs" />
     <Compile Include="iBus\ManagerTools.cs" />
     <Compile Include="iBus\MessageParser.cs" />
@@ -72,6 +69,7 @@
     <Compile Include="IO\SerialInterruptPortBase.cs" />
     <Compile Include="IO\SerialPortBase.cs" />
     <Compile Include="IO\SerialPortEcho.cs" />
+    <Compile Include="IO\SerialPortHelpers.cs" />
     <Compile Include="IO\SerialPortHub.cs" />
     <Compile Include="IO\SerialPortOptoPair.cs" />
     <Compile Include="IO\SerialPortTH3122.cs" />
