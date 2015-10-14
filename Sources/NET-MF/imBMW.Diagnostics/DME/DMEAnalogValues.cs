@@ -18,154 +18,144 @@ namespace imBMW.Diagnostics.DME
         /// <summary>
         /// Degree
         /// </summary>
-        public float Pedal { get; protected set; }
+        public double Pedal { get; protected set; }
 
         /// <summary>
         /// Degree
         /// </summary>
-        public float Throttle { get; protected set; }
+        public double Throttle { get; protected set; }
 
         /// <summary>
         /// kg/h
         /// </summary>
-        public float AirMass { get; protected set; }
+        public double AirMass { get; protected set; }
 
         /// <summary>
         /// Celsius
         /// </summary>
-        public float IntakeTemp { get; protected set; }
+        public double IntakeTemp { get; protected set; }
 
         /// <summary>
         /// Celsius
         /// </summary>
-        public float CoolantTemp { get; protected set; }
+        public double CoolantTemp { get; protected set; }
 
         /// <summary>
         /// Celsius
         /// </summary>
-        public float OilTemp { get; protected set; }
+        public double OilTemp { get; protected set; }
 
         /// <summary>
         /// Celsius
         /// </summary>
-        public float CoolantRadiatorTemp { get; protected set; }
+        public double CoolantRadiatorTemp { get; protected set; }
 
         /// <summary>
         /// Degree
         /// </summary>
-        public float IgnitionAngle { get; protected set; }
+        public double IgnitionAngle { get; protected set; }
 
         /// <summary>
         /// ms
         /// </summary>
-        public float InjectionTime { get; protected set; }
+        public double InjectionTime { get; protected set; }
 
         /// <summary>
         /// %
         /// Idle Control Valve PWM Integrator = Closing?
         /// </summary>
-        public float ISAPWM_IS { get; protected set; }
+        public double ISAPWM_IS { get; protected set; }
 
         /// <summary>
         /// %
         /// Idle Control Valve PWM Steller = Opening?
         /// </summary>
-        public float ISAPWM_ISA { get; protected set; }
+        public double ISAPWM_ISA { get; protected set; }
 
         /// <summary>
         /// Degree
         /// </summary>
-        public float VanosPositionIntake { get; protected set; }
+        public double VanosPositionIntake { get; protected set; }
 
         /// <summary>
         /// Degree
         /// </summary>
-        public float VanosPositionExhaust { get; protected set; }
+        public double VanosPositionExhaust { get; protected set; }
 
         /// <summary>
         /// Volts
         /// </summary>
-        public float VoltageKL15 { get; protected set; }
+        public double VoltageKL15 { get; protected set; }
 
         /// <summary>
         /// Number
         /// </summary>
-        public float LambdaIntegrator1 { get; protected set; }
+        public double LambdaIntegrator1 { get; protected set; }
 
         /// <summary>
         /// Number
         /// </summary>
-        public float LambdaIntegrator2 { get; protected set; }
+        public double LambdaIntegrator2 { get; protected set; }
+        
+        /// <summary>
+        /// %
+        /// </summary>
+        public double LambdaHeatingBeforeCats1 { get; protected set; }
 
         /// <summary>
         /// %
         /// </summary>
-        public float LambdaIntegratorV1 { get; protected set; }
+        public double LambdaHeatingBeforeCats2 { get; protected set; }
 
         /// <summary>
         /// %
         /// </summary>
-        public float LambdaIntegratorV2 { get; protected set; }
+        public double LambdaHeatingAfterCats1 { get; protected set; }
 
         /// <summary>
         /// %
         /// </summary>
-        public float LambdaHeatingBeforeCats1 { get; protected set; }
-
-        /// <summary>
-        /// %
-        /// </summary>
-        public float LambdaHeatingBeforeCats2 { get; protected set; }
-
-        /// <summary>
-        /// %
-        /// </summary>
-        public float LambdaHeatingAfterCats1 { get; protected set; }
-
-        /// <summary>
-        /// %
-        /// </summary>
-        public float LambdaHeatingAfterCats2 { get; protected set; }
+        public double LambdaHeatingAfterCats2 { get; protected set; }
 
         /// <summary>
         /// mg/HUB = mg per stroke
         /// </summary>
-        public float AirFlowPerStroke { get; protected set; }
+        public double AirMassPerStroke { get; protected set; }
 
         /// <summary>
         /// Volts
         /// </summary>
-        public float KnockSensor2 { get; protected set; }
+        public double KnockSensor2 { get; protected set; }
 
         /// <summary>
         /// Volts
         /// </summary>
-        public float KnockSensor5 { get; protected set; }
+        public double KnockSensor5 { get; protected set; }
 
         /// <summary>
         /// %
         /// </summary>
-        public float ElectricFanSpeed { get; protected set; }
+        public double ElectricFanSpeed { get; protected set; }
 
         /// <summary>
         /// hPa = bar*1000
         /// </summary>
-        public float AtmosphericPressure { get; protected set; }
+        public double AtmosphericPressure { get; protected set; }
 
         /// <summary>
         /// Volts
         /// </summary>
-        public float VoltageBattery { get; protected set; }
+        public double VoltageBattery { get; protected set; }
 
         /// <summary>
         /// hPa = bar*1000
         /// </summary>
-        public float IntakePressure { get; set; }
+        public double IntakePressure { get; set; }
 
         /// <summary>
         /// Air/Fuel
         /// </summary>
-        public float AFR { get; set; }
+        public double AFR { get; set; }
 
     }
 }
