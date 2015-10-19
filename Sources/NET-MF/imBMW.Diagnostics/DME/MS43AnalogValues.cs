@@ -1,6 +1,8 @@
 using System;
 using Microsoft.SPOT;
 using imBMW.iBus;
+using System.Text;
+using imBMW.Tools;
 
 namespace imBMW.Diagnostics.DME
 {
@@ -9,6 +11,12 @@ namespace imBMW.Diagnostics.DME
         public MS43AnalogValues() { }
 
         public MS43AnalogValues(Message message)
+        {
+            Parse(message);
+        }
+
+        public MS43AnalogValues(Message message, DateTime loggerStarted)
+            : base(loggerStarted)
         {
             Parse(message);
         }
@@ -57,6 +65,86 @@ namespace imBMW.Diagnostics.DME
             AtmosphericPressure = ((d[39] << 8) + d[40]) * 0.08292;
             VoltageBattery = d[41] * 0.10156;
             return this;
+        }
+
+        public override string ToString()
+        {
+            return String.Concat(Time, " RPM:", RPM);
+        }
+
+        public override string GenerateLogString()
+        {
+            var s = new StringBuilder();
+            //s.Append(Time); s.Append('+'); s.Append(Time.Millisecond); s.Append(";");
+            s.Append(TimeSpan.GetTotalMilliseconds()); s.Append(";");
+            s.Append(RPM); s.Append(";");
+            s.Append(Speed); s.Append(";");
+            s.Append(Throttle.ToString("F2")); s.Append(";");
+            s.Append(Pedal.ToString("F2")); s.Append(";");
+            s.Append(AFR.ToString("F3")); s.Append(";");
+            s.Append(IntakePressure.ToString("F3")); s.Append(";");
+            s.Append(AirMass.ToString("F2")); s.Append(";");
+            s.Append(AirMassPerStroke.ToString("F4")); s.Append(";");
+            s.Append(IgnitionAngle.ToString("F3")); s.Append(";");
+            s.Append(InjectionTime.ToString("F5")); s.Append(";");
+            s.Append(OilTemp.ToString("F2")); s.Append(";");
+            s.Append(IntakeTemp.ToString("F2")); s.Append(";");
+            s.Append(CoolantTemp.ToString("F2")); s.Append(";");
+            s.Append(CoolantRadiatorTemp.ToString("F2")); s.Append(";");
+            s.Append(ElectricFanSpeed.ToString("F1")); s.Append(";");
+            s.Append(ISAPWM_IS.ToString("F2")); s.Append(";");
+            s.Append(ISAPWM_ISA.ToString("F2")); s.Append(";");
+            s.Append(KnockSensor2.ToString("F5")); s.Append(";");
+            s.Append(KnockSensor5.ToString("F5")); s.Append(";");
+            s.Append(LambdaIntegrator1.ToString("F5")); s.Append(";");
+            s.Append(LambdaIntegrator2.ToString("F5")); s.Append(";");
+            s.Append(LambdaHeatingAfterCats1.ToString("F2")); s.Append(";");
+            s.Append(LambdaHeatingAfterCats2.ToString("F2")); s.Append(";");
+            s.Append(LambdaHeatingBeforeCats1.ToString("F2")); s.Append(";");
+            s.Append(LambdaHeatingBeforeCats2.ToString("F2")); s.Append(";");
+            s.Append(VanosPositionExhaust.ToString("F3")); s.Append(";");
+            s.Append(VanosPositionIntake.ToString("F3")); s.Append(";");
+            s.Append(AtmosphericPressure.ToString("F3")); s.Append(";");
+            s.Append(VoltageBattery.ToString("F2")); s.Append(";");
+            s.Append(VoltageKL15.ToString("F2")); s.Append(";\n");
+            return s.ToString();
+        }
+
+        public static string GenerateLogHeader()
+        {
+            var s = new StringBuilder();
+            s.Append("Time;");
+            s.Append("RPM;");
+            s.Append("Speed;");
+            s.Append("Throttle;");
+            s.Append("Pedal;");
+            s.Append("AFR;");
+            s.Append("IntakePressure;");
+            s.Append("AirMass;");
+            s.Append("AirMassPerStroke;");
+            s.Append("IgnitionAngle;");
+            s.Append("InjectionTime;");
+            s.Append("OilTemp;");
+            s.Append("IntakeTemp;");
+            s.Append("CoolantTemp;");
+            s.Append("CoolantRadiatorTemp;");
+            s.Append("ElectricFanSpeed;");
+            s.Append("ISAPWM_IS;");
+            s.Append("ISAPWM_ISA;");
+            s.Append("KnockSensor2;");
+            s.Append("KnockSensor5;");
+            s.Append("LambdaIntegrator1;");
+            s.Append("LambdaIntegrator2;");
+            s.Append("LambdaHeatingAfterCats1;");
+            s.Append("LambdaHeatingAfterCats2;");
+            s.Append("LambdaHeatingBeforeCats1;");
+            s.Append("LambdaHeatingBeforeCats2;");
+            s.Append("VanosPositionExhaust;");
+            s.Append("VanosPositionIntake;");
+            s.Append("AtmosphericPressure;");
+            s.Append("VoltageBattery;");
+            s.Append("VoltageKL15;\n");
+            return s.ToString();
         }
     }
 }

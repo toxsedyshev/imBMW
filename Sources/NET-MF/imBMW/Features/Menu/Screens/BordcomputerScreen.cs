@@ -88,10 +88,10 @@ namespace imBMW.Features.Menu.Screens
         {
             get
             {
-                var l = Math.Max(Localization.Current.Speed.Length, Localization.Current.Revs.Length);
-                l = Math.Max(l, Localization.Current.Voltage.Length);
-                l = Math.Max(l, Localization.Current.Engine.Length);
-                l = Math.Max(l, Localization.Current.Outside.Length);
+                var l = System.Math.Max(Localization.Current.Speed.Length, Localization.Current.Revs.Length);
+                l = System.Math.Max(l, Localization.Current.Voltage.Length);
+                l = System.Math.Max(l, Localization.Current.Engine.Length);
+                l = System.Math.Max(l, Localization.Current.Outside.Length);
                 return (uint)(l + 3);
             }
         }

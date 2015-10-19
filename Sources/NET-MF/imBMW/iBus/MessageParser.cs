@@ -39,8 +39,9 @@ namespace imBMW.iBus
                 }
                 else
                 {
+                    var tmp = buffer;
                     buffer = null;
-                    throw new Exception("Wrong data: " + buffer.ToHex(' '));
+                    throw new Exception("Wrong data: " + tmp.ToHex(' '));
                 }
             }
             Message m;

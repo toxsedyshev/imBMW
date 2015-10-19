@@ -5,6 +5,27 @@ namespace imBMW.Diagnostics.DME
 {
     public class DMEAnalogValues
     {
+        public DMEAnalogValues(DateTime loggerStarted)
+        {
+            Time = DateTime.Now;
+            TimeSpan = Time - loggerStarted;
+        }
+
+        public DMEAnalogValues()
+        {
+            Time = DateTime.Now;
+        }
+
+        /// <summary>
+        /// Time of log entry
+        /// </summary>
+        public DateTime Time { get; protected set; }
+
+        /// <summary>
+        /// Since logger started
+        /// </summary>
+        public TimeSpan TimeSpan { get; set; }
+
         /// <summary>
         /// 1/min
         /// </summary>
@@ -157,5 +178,9 @@ namespace imBMW.Diagnostics.DME
         /// </summary>
         public double AFR { get; set; }
 
+        public virtual string GenerateLogString()
+        {
+            throw new NotImplementedException();
+        }
     }
 }
