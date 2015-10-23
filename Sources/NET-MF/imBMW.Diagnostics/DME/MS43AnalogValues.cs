@@ -29,7 +29,7 @@ namespace imBMW.Diagnostics.DME
                 && message.Data[0] == 0xA0;
         }
 
-        public MS43AnalogValues Parse(Message message)
+        public virtual void Parse(Message message)
         {
             if (!CanParse(message))
             {
@@ -64,12 +64,6 @@ namespace imBMW.Diagnostics.DME
             ElectricFanSpeed = d[38] * 0.39063;
             AtmosphericPressure = ((d[39] << 8) + d[40]) * 0.08292;
             VoltageBattery = d[41] * 0.10156;
-            return this;
-        }
-
-        public override string ToString()
-        {
-            return String.Concat(Time, " RPM:", RPM);
         }
 
         public override string GenerateLogString()
@@ -81,8 +75,9 @@ namespace imBMW.Diagnostics.DME
             s.Append(Speed); s.Append(";");
             s.Append(Throttle.ToString("F2")); s.Append(";");
             s.Append(Pedal.ToString("F2")); s.Append(";");
-            s.Append(AFR.ToString("F3")); s.Append(";");
-            s.Append(IntakePressure.ToString("F3")); s.Append(";");
+            s.Append(AFR.ToString("F5")); s.Append(";");
+            s.Append(WideBandLambda.ToString("F5")); s.Append(";");
+            s.Append(IntakePressure.ToString("F1")); s.Append(";");
             s.Append(AirMass.ToString("F2")); s.Append(";");
             s.Append(AirMassPerStroke.ToString("F4")); s.Append(";");
             s.Append(IgnitionAngle.ToString("F3")); s.Append(";");
@@ -119,6 +114,7 @@ namespace imBMW.Diagnostics.DME
             s.Append("Throttle;");
             s.Append("Pedal;");
             s.Append("AFR;");
+            s.Append("WideBandLambda;");
             s.Append("IntakePressure;");
             s.Append("AirMass;");
             s.Append("AirMassPerStroke;");

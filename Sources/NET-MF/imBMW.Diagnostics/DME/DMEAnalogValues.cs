@@ -16,6 +16,11 @@ namespace imBMW.Diagnostics.DME
             Time = DateTime.Now;
         }
 
+        public override string ToString()
+        {
+            return String.Concat(Time, " RPM:", RPM);
+        }
+
         /// <summary>
         /// Time of log entry
         /// </summary>
@@ -177,6 +182,11 @@ namespace imBMW.Diagnostics.DME
         /// Air/Fuel
         /// </summary>
         public double AFR { get; set; }
+
+        /// <summary>
+        /// Number
+        /// </summary>
+        public double WideBandLambda { get; set; }
 
         public virtual string GenerateLogString()
         {

@@ -33,6 +33,7 @@
     <Compile Include="DBusMessageParser.cs" />
     <Compile Include="DME\DMEAnalogValues.cs" />
     <Compile Include="DME\MS43AnalogValues.cs" />
+    <Compile Include="DME\MS43JMGAnalogValues.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
