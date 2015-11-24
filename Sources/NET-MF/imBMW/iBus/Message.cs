@@ -6,7 +6,7 @@ namespace imBMW.iBus
 {
     public class Message
     {
-        public const int PacketLengthMin = 5;
+        public static int PacketLengthMin { get { return 5; } }
         public const int PacketLengthMax = 258;
 
         byte source;
@@ -54,11 +54,12 @@ namespace imBMW.iBus
 
         void init(byte source, byte destination, byte[] data, string description = null)
         {
-            // packet = source + len + destination + data + chksum
+            // packet = source + length + destination + data + chksum
+            //                            |   ===== length =====    |
             
             byte check = 0x00;
             check ^= source;
-            check ^= (byte)(data.Length);
+            check ^= (byte)(data.Length + 2);
             check ^= destination;
             foreach (byte b in data)
             {
