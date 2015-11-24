@@ -87,6 +87,7 @@
     <Compile Include="Tools\ASCIIEncoding.cs" />
     <Compile Include="Tools\Delegates.cs" />
     <Compile Include="Tools\FileLogger.cs" />
+    <Compile Include="Tools\Math.cs" />
     <Compile Include="Tools\NumHelpers.cs" />
     <Compile Include="Tools\EnumConverter.cs" />
     <Compile Include="iBus\Manager.cs" />
@@ -101,6 +102,7 @@
     <Compile Include="Tools\DateTimeHelpers.cs" />
     <Compile Include="Tools\ExtensionAttribute.cs" />
     <Compile Include="Tools\Logger.cs" />
+    <Compile Include="Tools\Parse.cs" />
     <Compile Include="Tools\QueueThreadWorker.cs" />
     <Compile Include="Tools\Settings.cs" />
     <Compile Include="Tools\StreamHelpers.cs" />

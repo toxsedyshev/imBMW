@@ -289,5 +289,39 @@ namespace imBMW.Tools
             }
             return -1;
         }
+
+        public static bool ParseFloat(this byte[] data, out float result)
+        {
+            result = 0;
+            var str = string.Empty;
+            for (int i = 3; i < data.Length; i++)
+            {
+                str += (char)(data[i]);
+            }
+            double d;
+            if (Parse.TryParseDouble(str, out d))
+            {
+                result = (float)d;
+                return true;
+            }
+            return false;
+        }
+
+        public static bool ParseInt(this byte[] data, out int result)
+        {
+            result = 0;
+            var str = string.Empty;
+            for (int i = 3; i < data.Length; i++)
+            {
+                str += (char)(data[i]);
+            }
+            int d;
+            if (Parse.TryParseInt(str, out d))
+            {
+                result = d;
+                return true;
+            }
+            return false;
+        }
     }
 }
