@@ -166,7 +166,7 @@ namespace imBMW.Diagnostics.DME
         /// <summary>
         /// hPa = bar*1000
         /// </summary>
-        public double AtmosphericPressure { get; protected set; }
+        public int AtmosphericPressure { get; protected set; }
 
         /// <summary>
         /// Volts
@@ -176,7 +176,7 @@ namespace imBMW.Diagnostics.DME
         /// <summary>
         /// hPa = bar*1000
         /// </summary>
-        public double IntakePressure { get; set; }
+        public int IntakePressure { get; set; }
 
         /// <summary>
         /// Air/Fuel

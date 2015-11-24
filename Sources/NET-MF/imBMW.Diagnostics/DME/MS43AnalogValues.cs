@@ -62,7 +62,7 @@ namespace imBMW.Diagnostics.DME
             KnockSensor2 = ((d[34] << 8) + d[35]) * 0.0000778;
             KnockSensor5 = ((d[36] << 8) + d[37]) * 0.0000778;
             ElectricFanSpeed = d[38] * 0.39063;
-            AtmosphericPressure = ((d[39] << 8) + d[40]) * 0.08292;
+            AtmosphericPressure = (int)(((d[39] << 8) + d[40]) * 0.08292);
             VoltageBattery = d[41] * 0.10156;
         }
 
@@ -75,9 +75,9 @@ namespace imBMW.Diagnostics.DME
             s.Append(Speed); s.Append(";");
             s.Append(Throttle.ToString("F2")); s.Append(";");
             s.Append(Pedal.ToString("F2")); s.Append(";");
-            s.Append(AFR.ToString("F5")); s.Append(";");
+            s.Append(AFR.ToString("F3")); s.Append(";");
             s.Append(WideBandLambda.ToString("F5")); s.Append(";");
-            s.Append(IntakePressure.ToString("F1")); s.Append(";");
+            s.Append(IntakePressure); s.Append(";");
             s.Append(AirMass.ToString("F2")); s.Append(";");
             s.Append(AirMassPerStroke.ToString("F4")); s.Append(";");
             s.Append(IgnitionAngle.ToString("F3")); s.Append(";");
@@ -99,7 +99,7 @@ namespace imBMW.Diagnostics.DME
             s.Append(LambdaHeatingBeforeCats2.ToString("F2")); s.Append(";");
             s.Append(VanosPositionExhaust.ToString("F3")); s.Append(";");
             s.Append(VanosPositionIntake.ToString("F3")); s.Append(";");
-            s.Append(AtmosphericPressure.ToString("F3")); s.Append(";");
+            s.Append(AtmosphericPressure); s.Append(";");
             s.Append(VoltageBattery.ToString("F2")); s.Append(";");
             s.Append(VoltageKL15.ToString("F2")); s.Append(";\n");
             return s.ToString();

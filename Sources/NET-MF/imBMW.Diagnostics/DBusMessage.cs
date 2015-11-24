@@ -10,6 +10,8 @@ namespace imBMW.Diagnostics
     /// </summary>
     public class DBusMessage : Message
     {
+        public static new int PacketLengthMin { get { return 4; } }
+
         string dataString;
         
         public DBusMessage(DeviceAddress device, params byte[] data)
@@ -19,17 +21,19 @@ namespace imBMW.Diagnostics
         public DBusMessage(DeviceAddress device, string description, params byte[] data)
             : base (device, DeviceAddress.Diagnostic, description, data)
         {
-            // packet = device + len + data + chksum
+            // packet = device + length + data + chksum
+            //          |     ===== length =====      |
 
+            var packetLength = data.Length + 3;
             byte check = 0x00;
             check ^= (byte)device;
-            check ^= (byte)(data.Length + 3);
+            check ^= (byte)packetLength;
             foreach (byte b in data)
             {
                 check ^= b;
             }
 
-            init((byte)device, (byte)DeviceAddress.Diagnostic, data, data.Length + 3, check, description);
+            init((byte)device, (byte)DeviceAddress.Diagnostic, data, packetLength, check, description);
         }
 
         public DeviceAddress Device
@@ -106,13 +110,13 @@ namespace imBMW.Diagnostics
 
         public static new bool IsValid(byte[] packet, int length)
         {
-            if (length < 4)
+            if (length < PacketLengthMin)
             {
                 return false;
             }
 
             byte packetLength = (byte)ParsePacketLength(packet);
-            if (length < packetLength || packetLength < 4)
+            if (length < packetLength || packetLength < PacketLengthMin)
             {
                 return false;
             }
@@ -137,13 +141,13 @@ namespace imBMW.Diagnostics
                 length = packet.Length;
             }
 
-            if (length < 4)
+            if (length < PacketLengthMin)
             {
                 return true;
             }
 
             byte packetLength = (byte)(packet[1] + 2);
-            if (packetLength < 4)
+            if (packetLength < PacketLengthMin)
             {
                 return false;
             }
@@ -158,11 +162,19 @@ namespace imBMW.Diagnostics
 
         protected static new int ParsePacketLength(byte[] packet)
         {
+            if (packet.Length < PacketLengthMin)
+            {
+                return 0;
+            }
             return packet[1];
         }
 
         protected static new int ParseDataLength(byte[] packet)
         {
+            if (packet.Length < PacketLengthMin)
+            {
+                return 0;
+            }
             return ParsePacketLength(packet) - 3;
         }
     }
