@@ -240,6 +240,14 @@ namespace imBMW.iBus.Devices.Real
                             }
                             var hour = Convert.ToByte(hourStr);
                             var minute = Convert.ToByte(minuteStr);
+                            if (hour == 12 && m.Data[8] == 0x41) // 12AM
+                            {
+                                hour = 0;
+                            }
+                            if (m.Data[8] == 0x50) // PM
+                            {
+                                hour += 12;
+                            }
                             OnTimeChanged(hour, minute);
                             m.ReceiverDescription = "Time: " + hour + ":" + minute;
                         }
@@ -258,6 +266,13 @@ namespace imBMW.iBus.Devices.Real
                             var day = Convert.ToByte(dayStr);
                             var month = Convert.ToByte(monthStr);
                             var year = Convert.ToUInt16(yearStr);
+                            if (m.Data[5] == 0x2F || month > 12 && day <= 12)
+                            {
+                                // TODO use region settings
+                                var t = day;
+                                day = month;
+                                month = t;
+                            }
                             OnDateChanged(day, month, year);
                             m.ReceiverDescription = "Date: " + day + "/" + month + "/" + year;
                         }
