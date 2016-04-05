@@ -5,7 +5,7 @@ using System.Threading;
 
 namespace imBMW.Tools
 {
-    class QueueThreadWorker : Queue
+    public class QueueThreadWorker : Queue
     {
         public delegate void ProcessItem(object item);
 
