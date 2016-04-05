@@ -67,18 +67,22 @@ namespace imBMW.iBus.Devices.Real
             }
         }
 
-        public static void DisplayTextWithDelay(string s, TextAlign align = TextAlign.Left)
+        public static void DisplayTextWithDelay(string s, TextAlign align = TextAlign.Left, Message[] messageSendAfter = null)
         {
-            DisplayTextWithDelay(s, displayTextDelay, align);
+            DisplayTextWithDelay(s, displayTextDelay, align, messageSendAfter);
         }
 
-        public static void DisplayTextWithDelay(string s, int delay, TextAlign align = TextAlign.Left)
+        public static void DisplayTextWithDelay(string s, int delay, TextAlign align = TextAlign.Left, Message[] messageSendAfter = null)
         {
             ClearTimer();
 
             displayTextDelayTimer = new Timer(delegate
             {
                 DisplayText(s, align);
+                if (messageSendAfter != null)
+                {
+                    Manager.EnqueueMessage(messageSendAfter);
+                }
             }, null, delay, 0);
         }
 

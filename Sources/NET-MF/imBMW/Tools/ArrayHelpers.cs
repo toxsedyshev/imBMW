@@ -52,12 +52,22 @@ namespace imBMW.Tools
             return array1.Compare(false, array2);
         }
 
+        public static bool Compare(this byte[] array1, int[] anyMaskIndexes, params byte[] array2)
+        {
+            return array1.Compare(false, anyMaskIndexes, array2);
+        }
+
         public static bool StartsWith(this byte[] array1, params byte[] array2)
         {
             return array1.Compare(true, array2);
         }
 
         static bool Compare(this byte[] array1, bool startsWith, params byte[] array2)
+        {
+            return Compare(array1, startsWith, null, array2);
+        }
+
+        static bool Compare(this byte[] array1, bool startsWith, int[] anyMaskIndexes, params byte[] array2)
         {
             int len2 = array2.Length;
             if ((!startsWith && len2 != array1.Length) || len2 > array1.Length)
@@ -68,24 +78,27 @@ namespace imBMW.Tools
             {
                 return true;
             }
-            if (len2 > 256)
+            for (int i = 0; i < len2; i++)
             {
-                for (int i = 0; i < len2; i++)
+                if (anyMaskIndexes != null)
                 {
-                    if (array1[i] != array2[i])
+                    bool any = false;
+                    foreach (var j in anyMaskIndexes)
                     {
-                        return false;
+                        if (j == i)
+                        {
+                            any = true;
+                            break;
+                        }
+                    }
+                    if (any)
+                    {
+                        continue;
                     }
                 }
-            }
-            else
-            {
-                for (byte i = 0; i < len2; i++)
+                if (array1[i] != array2[i])
                 {
-                    if (array1[i] != array2[i])
-                    {
-                        return false;
-                    }
+                    return false;
                 }
             }
             return true;
