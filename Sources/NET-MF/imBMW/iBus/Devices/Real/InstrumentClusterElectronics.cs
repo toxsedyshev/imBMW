@@ -240,11 +240,11 @@ namespace imBMW.iBus.Devices.Real
                             }
                             var hour = Convert.ToByte(hourStr);
                             var minute = Convert.ToByte(minuteStr);
-                            if (hour == 12 && m.Data[8] == 0x41) // 12AM
+                            if (hour == 12 && m.Data[8] == 'A') // 12AM
                             {
                                 hour = 0;
                             }
-                            if (m.Data[8] == 0x50) // PM
+                            else if (hour != 12 && m.Data[8] == 'P') // PM < 12
                             {
                                 hour += 12;
                             }
