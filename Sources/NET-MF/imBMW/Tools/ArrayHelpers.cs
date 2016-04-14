@@ -303,11 +303,11 @@ namespace imBMW.Tools
             return -1;
         }
 
-        public static bool ParseFloat(this byte[] data, out float result)
+        public static bool ParseFloat(this byte[] data, out float result, int offset, int length)
         {
             result = 0;
             var str = string.Empty;
-            for (int i = 3; i < data.Length; i++)
+            for (int i = offset; i < offset + length; i++)
             {
                 str += (char)(data[i]);
             }
@@ -320,11 +320,11 @@ namespace imBMW.Tools
             return false;
         }
 
-        public static bool ParseInt(this byte[] data, out int result)
+        public static bool ParseInt(this byte[] data, out int result, int offset, int length)
         {
             result = 0;
             var str = string.Empty;
-            for (int i = 3; i < data.Length; i++)
+            for (int i = offset; i < offset + length; i++)
             {
                 str += (char)(data[i]);
             }

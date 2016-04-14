@@ -58,17 +58,7 @@ namespace imBMW.iBus.Devices.Real
             Value = value;
         }
     }
-
-    public class OdometerEventArgs
-    {
-        public uint Value { get; private set; }
-
-        public OdometerEventArgs(uint value)
-        {
-            Value = value;
-        }
-    }
-
+    
     public class ConsumptionEventArgs
     {
         public float Value { get; private set; }
@@ -81,9 +71,19 @@ namespace imBMW.iBus.Devices.Real
 
     public class AverageSpeedEventArgs
     {
+        public float Value { get; private set; }
+
+        public AverageSpeedEventArgs(float value)
+        {
+            Value = value;
+        }
+    }
+
+    public class SpeedLimitEventArgs
+    {
         public ushort Value { get; private set; }
 
-        public AverageSpeedEventArgs(ushort value)
+        public SpeedLimitEventArgs(ushort value)
         {
             Value = value;
         }
@@ -119,12 +119,12 @@ namespace imBMW.iBus.Devices.Real
     public delegate void TemperatureEventHandler(TemperatureEventArgs e);
 
     public delegate void VinEventHandler(VinEventArgs e);
-
-    public delegate void OdometerEventHandler(OdometerEventArgs e);
-
+    
     public delegate void ConsumptionEventHandler(ConsumptionEventArgs e);
 
     public delegate void AverageSpeedEventHandler(AverageSpeedEventArgs e);
+
+    public delegate void SpeedLimitEventHandler(SpeedLimitEventArgs e);
 
     public delegate void RangeEventHandler(RangeEventArgs e);
 
@@ -147,7 +147,8 @@ namespace imBMW.iBus.Devices.Real
         public static float Consumption2 { get; private set; }
 
         public static uint Range { get; private set; }
-        public static ushort AverageSpeed { get; private set; }
+        public static float AverageSpeed { get; private set; }
+        public static ushort SpeedLimit { get; private set; }
 
         public static sbyte TemperatureOutside { get; private set; }
         public static sbyte TemperatureCoolant { get; private set; }
@@ -157,6 +158,13 @@ namespace imBMW.iBus.Devices.Real
 
         static readonly Message MessageGong1 = new Message(DeviceAddress.Radio, DeviceAddress.InstrumentClusterElectronics, "Gong 1", 0x23, 0x62, 0x30, 0x37, 0x08);
         static readonly Message MessageGong2 = new Message(DeviceAddress.Radio, DeviceAddress.InstrumentClusterElectronics, "Gong 2", 0x23, 0x62, 0x30, 0x37, 0x10);
+
+        static readonly Message MessageResetConsumption1 = new Message(DeviceAddress.GraphicsNavigationDriver, DeviceAddress.InstrumentClusterElectronics, "Reset Consumption 1", 0x41, 0x04, 0x10);
+        static readonly Message MessageResetConsumption2 = new Message(DeviceAddress.GraphicsNavigationDriver, DeviceAddress.InstrumentClusterElectronics, "Reset Consumption 2", 0x41, 0x05, 0x10);
+        static readonly Message MessageResetAverageSpeed = new Message(DeviceAddress.GraphicsNavigationDriver, DeviceAddress.InstrumentClusterElectronics, "Reset Avgerage Speed", 0x41, 0x0A, 0x10);
+
+        static readonly Message MessageSpeedLimitCurrentSpeed = new Message(DeviceAddress.GraphicsNavigationDriver, DeviceAddress.InstrumentClusterElectronics, "Speed Limit to Current Speed", 0x41, 0x09, 0x20);
+        static readonly Message MessageSpeedLimitOff = new Message(DeviceAddress.GraphicsNavigationDriver, DeviceAddress.InstrumentClusterElectronics, "Speed Limit OFF", 0x41, 0x09, 0x08);
 
         private const int _getDateTimeTimeout = 1000;
 
@@ -211,12 +219,12 @@ namespace imBMW.iBus.Devices.Real
             }
             else if (m.Data[0] == 0x17 && m.Data.Length == 8)
             {
-                OnOdometerChanged((uint)(m.Data[3] * 65536 + m.Data[2] * 256 + m.Data[1]));
+                OnOdometerChanged((uint)(m.Data[3] << 16 + m.Data[2] << 8 + m.Data[1]));
                 m.ReceiverDescription = "Odometer " + Odometer + " km";
             }
             else if (m.Data[0] == 0x54 && m.Data.Length == 14)
             {
-                OnVinChanged("" + (char)m.Data[1] + (char)m.Data[2] + m.Data[3].ToHex() + m.Data[4].ToHex() + m.Data[5].ToHex().Substring(0, 7));
+                OnVinChanged("" + (char)m.Data[1] + (char)m.Data[2] + m.Data[3].ToHex() + m.Data[4].ToHex() + m.Data[5].ToHex()[0]);
                 m.ReceiverDescription = "VIN " + VIN;
             }
             else if (m.Data.Length == 4 && m.Data[0] == 0x19)
@@ -281,7 +289,7 @@ namespace imBMW.iBus.Devices.Real
                         if (m.Data.Length == 8)
                         {
                             float temperature;
-                            if (m.Data.ParseFloat(out temperature))
+                            if (m.Data.ParseFloat(out temperature, 3, 5))
                             {
                                 //TemperatureOutside = (sbyte)temperature;
                                 m.ReceiverDescription = "Outside temperature  " + temperature + "°C";
@@ -292,7 +300,7 @@ namespace imBMW.iBus.Devices.Real
                         if (m.Data.Length == 7)
                         {
                             float consumption;
-                            if (m.Data.ParseFloat(out consumption))
+                            if (m.Data.ParseFloat(out consumption, 3, 4))
                             {
                                 OnConsumptionChanged(true, consumption);
                                 m.ReceiverDescription = "Consumption 1  " + Consumption1 + " l/km";
@@ -303,7 +311,7 @@ namespace imBMW.iBus.Devices.Real
                         if (m.Data.Length == 7)
                         {
                             float consumption;
-                            if (m.Data.ParseFloat(out consumption))
+                            if (m.Data.ParseFloat(out consumption, 3, 4))
                             {
                                 OnConsumptionChanged(false, consumption);
                                 m.ReceiverDescription = "Consumption 2  " + Consumption2 + " l/km";
@@ -314,10 +322,21 @@ namespace imBMW.iBus.Devices.Real
                         if (m.Data.Length == 7)
                         {
                             int range;
-                            if (m.Data.ParseInt(out range))
+                            if (m.Data.ParseInt(out range, 3, 4))
                             {
                                 OnRangeChanged((uint)range);
                                 m.ReceiverDescription = "Range  " + Range + " km";
+                            }
+                        }
+                        break;
+                    case 0x09:
+                        if (m.Data.Length == 7)
+                        {
+                            int speedLimit;
+                            if (m.Data.ParseInt(out speedLimit, 3, 3))
+                            {
+                                OnSpeedLimitChanged((ushort)speedLimit);
+                                m.ReceiverDescription = "Speed limit  " + SpeedLimit + " km/h";
                             }
                         }
                         break;
@@ -325,15 +344,21 @@ namespace imBMW.iBus.Devices.Real
                         if (m.Data.Length == 7)
                         {
                             float speed;
-                            if (m.Data.ParseFloat(out speed))
+                            if (m.Data.ParseFloat(out speed, 3, 4))
                             {
-                                OnAverageSpeedChanged((ushort)speed);
+                                OnAverageSpeedChanged(speed);
                                 m.ReceiverDescription = "Average speed  " + AverageSpeed + " km/h";
                             }
                         }
                         break;
                 }
             }
+            else if (m.DestinationDevice == DeviceAddress.FrontDisplay && m.Data.Compare(0x2A, 0x00, 0x00))
+            {
+                OnSpeedLimitChanged(0);
+                m.ReceiverDescription = "Speed limit turned off";
+            }
+            // TODO arrive time, arrive distance, timers
         }
 
         public static void Gong1()
@@ -344,6 +369,62 @@ namespace imBMW.iBus.Devices.Real
         public static void Gong2()
         {
             Manager.EnqueueMessage(MessageGong2);
+        }
+
+        public static void ResetConsumption1()
+        {
+            Manager.EnqueueMessage(MessageResetConsumption1);
+        }
+
+        public static void ResetConsumption2()
+        {
+            Manager.EnqueueMessage(MessageResetConsumption2);
+        }
+
+        public static void ResetAverageSpeed()
+        {
+            Manager.EnqueueMessage(MessageResetAverageSpeed);
+        }
+
+        public static void SetSpeedLimitToCurrentSpeed()
+        {
+            Manager.EnqueueMessage(MessageSpeedLimitCurrentSpeed);
+        }
+
+        public static void SetSpeedLimitOff()
+        {
+            Manager.EnqueueMessage(MessageSpeedLimitOff);
+        }
+
+        public static void SetSpeedLimit(ushort limit)
+        {
+            if (limit <= 0)
+            {
+                SetSpeedLimitOff();
+                return;
+            }
+            if (limit > 300) // TODO fix region settings
+            {
+                limit = 300;
+            }
+            Manager.EnqueueMessage(new Message(DeviceAddress.GraphicsNavigationDriver, DeviceAddress.InstrumentClusterElectronics, "Set speed limit", 0x40, 0x09, (byte)(limit >> 8), (byte)(limit & 0xFF)));
+        }
+
+        public static void IncreaseSpeedLimit(ushort add = 5)
+        {
+            SetSpeedLimit((ushort)(SpeedLimit + add));
+        }
+
+        public static void DecreaseSpeedLimit(ushort sub = 5)
+        {
+            if (sub >= SpeedLimit)
+            {
+                SetSpeedLimitOff();
+            }
+            else
+            {
+                SetSpeedLimit((ushort)(SpeedLimit - sub));
+            }
         }
 
         public static void RequestDateTime()
@@ -438,11 +519,11 @@ namespace imBMW.iBus.Devices.Real
             var e = OdometerChanged;
             if (e != null)
             {
-                e(new OdometerEventArgs(odometer));
+                e(new RangeEventArgs(odometer));
             }
         }
 
-        private static void OnAverageSpeedChanged(ushort averageSpeed)
+        private static void OnAverageSpeedChanged(float averageSpeed)
         {
             AverageSpeed = averageSpeed;
             var e = AverageSpeedChanged;
@@ -459,6 +540,16 @@ namespace imBMW.iBus.Devices.Real
             if (e != null)
             {
                 e(new RangeEventArgs(range));
+            }
+        }
+
+        private static void OnSpeedLimitChanged(ushort speedLimit)
+        {
+            SpeedLimit = speedLimit;
+            var e = SpeedLimitChanged;
+            if (e != null)
+            {
+                e(new SpeedLimitEventArgs(speedLimit));
             }
         }
 
@@ -551,7 +642,7 @@ namespace imBMW.iBus.Devices.Real
         /// <summary>
         /// IKE sends odometer value every TBD sec
         /// </summary>
-        public static event OdometerEventHandler OdometerChanged;
+        public static event RangeEventHandler OdometerChanged;
 
         /// <summary>
         /// IKE sends consumption1 information every TBD sec
@@ -577,5 +668,7 @@ namespace imBMW.iBus.Devices.Real
         /// IKE sends time and date (optional) on request
         /// </summary>
         public static event DateTimeEventHandler DateTimeChanged;
+
+        public static event SpeedLimitEventHandler SpeedLimitChanged;
     }
 }
