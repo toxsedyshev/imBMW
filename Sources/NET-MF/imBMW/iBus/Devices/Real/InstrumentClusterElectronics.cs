@@ -297,25 +297,13 @@ namespace imBMW.iBus.Devices.Real
                         }
                         break;
                     case 0x04:
-                        if (m.Data.Length == 7)
-                        {
-                            float consumption;
-                            if (m.Data.ParseFloat(out consumption, 3, 4))
-                            {
-                                OnConsumptionChanged(true, consumption);
-                                m.ReceiverDescription = "Consumption 1  " + Consumption1 + " l/km";
-                            }
-                        }
-                        break;
                     case 0x05:
                         if (m.Data.Length == 7)
                         {
-                            float consumption;
-                            if (m.Data.ParseFloat(out consumption, 3, 4))
-                            {
-                                OnConsumptionChanged(false, consumption);
-                                m.ReceiverDescription = "Consumption 2  " + Consumption2 + " l/km";
-                            }
+                            float consumption = 0;
+                            m.Data.ParseFloat(out consumption, 3, 4);
+                            OnConsumptionChanged(m.Data[1] == 0x04, consumption);
+                            m.ReceiverDescription = "Consumption " + (m.Data[1] == 0x04 ? 1 : 2) + " = " + consumption + " l/km";
                         }
                         break;
                     case 0x06:
@@ -343,12 +331,10 @@ namespace imBMW.iBus.Devices.Real
                     case 0x0A:
                         if (m.Data.Length == 7)
                         {
-                            float speed;
-                            if (m.Data.ParseFloat(out speed, 3, 4))
-                            {
-                                OnAverageSpeedChanged(speed);
-                                m.ReceiverDescription = "Average speed  " + AverageSpeed + " km/h";
-                            }
+                            float speed = 0;
+                            m.Data.ParseFloat(out speed, 3, 4);
+                            OnAverageSpeedChanged(speed);
+                            m.ReceiverDescription = "Average speed  " + AverageSpeed + " km/h";
                         }
                         break;
                 }
@@ -483,6 +469,10 @@ namespace imBMW.iBus.Devices.Real
 
         private static void OnTemperatureChanged(sbyte outside, sbyte coolant)
         {
+            if (TemperatureOutside == outside && TemperatureCoolant == coolant)
+            {
+                return;
+            }
             TemperatureOutside = outside;
             TemperatureCoolant = coolant;
             var e = TemperatureChanged;
@@ -494,6 +484,10 @@ namespace imBMW.iBus.Devices.Real
 
         private static void OnSpeedRPMChanged(ushort speed, ushort rpm)
         {
+            if (CurrentSpeed == speed && CurrentRPM == rpm)
+            {
+                return;
+            }
             CurrentSpeed = speed;
             CurrentRPM = rpm;
             var e = SpeedRPMChanged;
@@ -505,6 +499,10 @@ namespace imBMW.iBus.Devices.Real
 
         private static void OnVinChanged(string vin)
         {
+            if (VIN == vin)
+            {
+                return;
+            }
             VIN = vin;
             var e = VinChanged;
             if (e != null)
@@ -515,6 +513,10 @@ namespace imBMW.iBus.Devices.Real
 
         private static void OnOdometerChanged(uint odometer)
         {
+            if (Odometer == odometer)
+            {
+                return;
+            }
             Odometer = odometer;
             var e = OdometerChanged;
             if (e != null)
@@ -525,6 +527,10 @@ namespace imBMW.iBus.Devices.Real
 
         private static void OnAverageSpeedChanged(float averageSpeed)
         {
+            if (AverageSpeed == averageSpeed)
+            {
+                return;
+            }
             AverageSpeed = averageSpeed;
             var e = AverageSpeedChanged;
             if (e != null)
@@ -535,6 +541,10 @@ namespace imBMW.iBus.Devices.Real
 
         private static void OnRangeChanged(uint range)
         {
+            if (Range == range)
+            {
+                return;
+            }
             Range = range;
             var e = RangeChanged;
             if (e != null)
@@ -545,6 +555,10 @@ namespace imBMW.iBus.Devices.Real
 
         private static void OnSpeedLimitChanged(ushort speedLimit)
         {
+            if (SpeedLimit == speedLimit)
+            {
+                return;
+            }
             SpeedLimit = speedLimit;
             var e = SpeedLimitChanged;
             if (e != null)
@@ -558,11 +572,19 @@ namespace imBMW.iBus.Devices.Real
             ConsumptionEventHandler e;
             if (isFirst)
             {
+                if (Consumption1 == value)
+                {
+                    return;
+                }
                 e = Consumption1Changed;
                 Consumption1 = value;
             }
             else
             {
+                if (Consumption2 == value)
+                {
+                    return;
+                }
                 e = Consumption2Changed;
                 Consumption2 = value;
             }
