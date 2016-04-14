@@ -101,7 +101,7 @@ namespace imBMW.Features.Menu.Screens
             ClearItems();
             AddItem(new MenuItem(i => Localization.Current.Speed + ": " + InstrumentClusterElectronics.CurrentSpeed + Localization.Current.KMH));
             AddItem(new MenuItem(i => Localization.Current.Revs + ": " + InstrumentClusterElectronics.CurrentRPM));
-            AddItem(new MenuItem(i => Localization.Current.Voltage + ": " + BodyModule.BatteryVoltage.ToString("F1") + " " + Localization.Current.VoltageShort, i => UpdateVoltage()));
+            AddItem(new MenuItem(i => Localization.Current.Voltage + ": " + (BodyModule.BatteryVoltage > 0 ? BodyModule.BatteryVoltage.ToString("F1") : "-") + " " + Localization.Current.VoltageShort, i => UpdateVoltage()));
             AddItem(new MenuItem(i =>
             {
                 var coolant = InstrumentClusterElectronics.TemperatureCoolant == sbyte.MinValue ? "-" : InstrumentClusterElectronics.TemperatureCoolant.ToString();

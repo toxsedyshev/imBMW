@@ -77,6 +77,7 @@ namespace imBMW.iBus.Devices.Real
         static BodyModule()
         {
             Manager.AddMessageReceiverForSourceDevice(DeviceAddress.BodyModule, ProcessGMMessage);
+            InstrumentClusterElectronics.IgnitionStateChanged += InstrumentClusterElectronics_IgnitionStateChanged;
         }
 
         /// <summary>
@@ -140,6 +141,14 @@ namespace imBMW.iBus.Devices.Real
             }
             m.ReceiverDescription = "Remote key press " + button.ToStringValue() + " button";
             Logger.Info(m.ReceiverDescription);
+        }
+
+        private static void InstrumentClusterElectronics_IgnitionStateChanged(IgnitionEventArgs e)
+        {
+            if (e.CurrentIgnitionState != IgnitionState.Ign)
+            {
+                BatteryVoltage = 0;
+            }
         }
 
         public static bool IsCarLocked
