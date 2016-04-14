@@ -19,8 +19,9 @@ namespace imBMW.Features.Menu
         private readonly byte[] DataMIDFirstButtons = new byte[] { 0x21, 0x00, 0x00, 0x60, 0x20, 0x31, 0x20, 0x05, 0x20, 0x32, 0x20, 0x05, 0x20, 0x33, 0x20, 0x05, 0x20, 0x34, 0x20, 0x05, 0x20, 0x35, 0x20, 0x05, 0x20, 0x36, 0x20 };
 
         private readonly Message MessageMIDMenuButtons = new Message(DeviceAddress.Radio, DeviceAddress.MultiInfoDisplay, "MID menu buttons", 0x21, 0x00, 0x00, 0x60, 0x20, 0x05, 0x20, (byte)'S', (byte)'E', (byte)'L', 0x05, 0xAE, (byte)'S', (byte)'C', (byte)'R', 0x05, (byte)'O', (byte)'L', (byte)'L', 0xAD, 0x05, 0xCA, (byte)'B', (byte)'A', (byte)'C', 0x05, (byte)'K', 0x20, 0xC0, 0xCA);
-        private readonly Message MessageMIDLastButtons = new Message(DeviceAddress.Radio, DeviceAddress.MultiInfoDisplay, "MID menu last butttons", 0x21, 0x00, 0x00, 0x06, 0x46, 0x4D, 0x05, 0x41, 0x4D, 0x05, 0x54, 0x50, 0x20, 0x05, 0x20, 0x52, 0x4E, 0x44, 0x05, 0x53, 0x43, 0x20, 0x05, 0x4D, 0x4F, 0x44, 0x45);
-        
+        private Message MessageMIDLastButtons = new Message(DeviceAddress.Radio, DeviceAddress.MultiInfoDisplay, "MID menu last buttons", 0x21, 0x00, 0x00, 0x06, 0x46, 0x4D, 0x05, 0x41, 0x4D, 0x05, 0x54, 0x50, 0x20, 0x05, 0x20, 0x52, 0x4E, 0x44, 0x05, 0x53, 0x43, 0x20, 0x05, 0x4D, 0x4F, 0x44, 0x45);
+        private readonly int[] MaskMIDLastButtons = new int[] { 12, 14, 21 };
+
         private bool mflModeTelephone;
         private bool wereMIDButtonsOverriden;
 
@@ -252,8 +253,10 @@ namespace imBMW.Features.Menu
                     wereMIDButtonsOverriden = false;
                     m.ReceiverDescription = "Disk change buttons display";
                 }
-                else if (m.Data.Compare(MessageMIDLastButtons.Data)) // todo mask
+                else if (m.Data.Compare(MaskMIDLastButtons, MessageMIDLastButtons.Data))
                 {
+                    m.ReceiverDescription = MessageMIDLastButtons.ReceiverDescription;
+                    MessageMIDLastButtons = m; // to save statuses of TP, RND and SC flags
                     if (!wereMIDButtonsOverriden)
                     {
                         Manager.EnqueueMessage(MessageMIDMenuButtons, m);
@@ -263,7 +266,6 @@ namespace imBMW.Features.Menu
                     {
                         wereMIDButtonsOverriden = false;
                     }
-                    m.ReceiverDescription = "Mode buttons display";
                 }
             }
         }
