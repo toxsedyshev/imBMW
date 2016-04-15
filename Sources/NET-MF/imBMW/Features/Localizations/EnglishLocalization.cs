@@ -246,5 +246,50 @@ namespace imBMW.Features.Localizations
         {
             get { return "Genre"; }
         }
+
+        public override string Limit
+        {
+            get { return "Limit"; }
+        }
+
+        public override string Range
+        {
+            get { return "Range"; }
+        }
+
+        public override string Consumption
+        {
+            get { return "Consumption"; }
+        }
+
+        public override string LitersPer100KM
+        {
+            get { return "L/100km"; }
+        }
+
+        public override string KM
+        {
+            get { return "km"; }
+        }
+
+        public override string TurnOff
+        {
+            get { return "Turn off"; }
+        }
+
+        public override string LimitCurrentSpeed
+        {
+            get { return "Current speed"; }
+        }
+
+        public override string LimitIncrease
+        {
+            get { return "Increase"; }
+        }
+
+        public override string LimitDecrease
+        {
+            get { return "Decrease"; }
+        }
     }
 }

@@ -42,5 +42,15 @@ namespace imBMW.Features.Localizations
         {
             get { return CharIcons.Degree + "C"; }
         }
+
+        public override string Consumption
+        {
+            get { return "Consump."; }
+        }
+
+        public override string LimitCurrentSpeed
+        {
+            get { return "Curr. speed"; }
+        }
     }
 }

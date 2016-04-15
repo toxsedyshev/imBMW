@@ -246,5 +246,50 @@ namespace imBMW.Features.Localizations
         {
             get { return "Жанр"; }
         }
+
+        public override string Limit
+        {
+            get { return "Лимит"; }
+        }
+
+        public override string Range
+        {
+            get { return "Запас"; }
+        }
+
+        public override string Consumption
+        {
+            get { return "Расход"; }
+        }
+
+        public override string LitersPer100KM
+        {
+            get { return "л/100км"; }
+        }
+
+        public override string KM
+        {
+            get { return "км"; }
+        }
+
+        public override string TurnOff
+        {
+            get { return "Выключить"; }
+        }
+
+        public override string LimitCurrentSpeed
+        {
+            get { return "Текущая скорость"; }
+        }
+
+        public override string LimitIncrease
+        {
+            get { return "Увеличить"; }
+        }
+
+        public override string LimitDecrease
+        {
+            get { return "Уменьшить"; }
+        }
     }
 }

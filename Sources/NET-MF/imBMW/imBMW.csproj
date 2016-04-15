@@ -51,6 +51,7 @@
     <Compile Include="Features\Menu\BordmonitorMenu.cs" />
     <Compile Include="Features\Menu\RadioMenu.cs" />
     <Compile Include="Features\Menu\Screens\SettingsScreen.cs" />
+    <Compile Include="Features\Menu\Screens\SpeedLimitScreen.cs" />
     <Compile Include="iBus\DeviceAddress.cs" />
     <Compile Include="iBus\Devices\Emulators\BordmonitorAUX.cs" />
     <Compile Include="iBus\Devices\Emulators\MediaEmulator.cs" />

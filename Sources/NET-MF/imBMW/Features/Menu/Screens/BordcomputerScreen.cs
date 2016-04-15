@@ -32,6 +32,11 @@ namespace imBMW.Features.Menu.Screens
                 BodyModule.BatteryVoltageChanged += BodyModule_BatteryVoltageChanged;
                 InstrumentClusterElectronics.SpeedRPMChanged += InstrumentClusterElectronics_SpeedRPMChanged;
                 InstrumentClusterElectronics.TemperatureChanged += InstrumentClusterElectronics_TemperatureChanged;
+                InstrumentClusterElectronics.AverageSpeedChanged += InstrumentClusterElectronics_AverageSpeedChanged;
+                InstrumentClusterElectronics.Consumption1Changed += InstrumentClusterElectronics_Consumption1Changed;
+                InstrumentClusterElectronics.Consumption2Changed += InstrumentClusterElectronics_Consumption2Changed;
+                InstrumentClusterElectronics.RangeChanged += InstrumentClusterElectronics_RangeChanged;
+                InstrumentClusterElectronics.SpeedLimitChanged += InstrumentClusterElectronics_SpeedLimitChanged;
 
                 UpdateVoltage();
                 return true;
@@ -46,9 +51,39 @@ namespace imBMW.Features.Menu.Screens
                 BodyModule.BatteryVoltageChanged -= BodyModule_BatteryVoltageChanged;
                 InstrumentClusterElectronics.SpeedRPMChanged -= InstrumentClusterElectronics_SpeedRPMChanged;
                 InstrumentClusterElectronics.TemperatureChanged -= InstrumentClusterElectronics_TemperatureChanged;
+                InstrumentClusterElectronics.AverageSpeedChanged -= InstrumentClusterElectronics_AverageSpeedChanged;
+                InstrumentClusterElectronics.Consumption1Changed -= InstrumentClusterElectronics_Consumption1Changed;
+                InstrumentClusterElectronics.Consumption2Changed -= InstrumentClusterElectronics_Consumption2Changed;
+                InstrumentClusterElectronics.RangeChanged -= InstrumentClusterElectronics_RangeChanged;
+                InstrumentClusterElectronics.SpeedLimitChanged -= InstrumentClusterElectronics_SpeedLimitChanged;
                 return true;
             }
             return false;
+        }
+
+        private void InstrumentClusterElectronics_SpeedLimitChanged(SpeedLimitEventArgs e)
+        {
+            UpdateItems();
+        }
+
+        private void InstrumentClusterElectronics_RangeChanged(RangeEventArgs e)
+        {
+            UpdateItems();
+        }
+
+        private void InstrumentClusterElectronics_Consumption2Changed(ConsumptionEventArgs e)
+        {
+            UpdateItems();
+        }
+
+        private void InstrumentClusterElectronics_Consumption1Changed(ConsumptionEventArgs e)
+        {
+            UpdateItems();
+        }
+
+        private void InstrumentClusterElectronics_AverageSpeedChanged(AverageSpeedEventArgs e)
+        {
+            UpdateItems();
         }
 
         void InstrumentClusterElectronics_TemperatureChanged(TemperatureEventArgs e)
@@ -101,6 +136,10 @@ namespace imBMW.Features.Menu.Screens
             ClearItems();
             AddItem(new MenuItem(i => Localization.Current.Speed + ": " + InstrumentClusterElectronics.CurrentSpeed + Localization.Current.KMH));
             AddItem(new MenuItem(i => Localization.Current.Revs + ": " + InstrumentClusterElectronics.CurrentRPM));
+            AddItem(new MenuItem(i => Localization.Current.Consumption + " 1: " + InstrumentClusterElectronics.Consumption1 + Localization.Current.LitersPer100KM));
+            AddItem(new MenuItem(i => Localization.Current.Consumption + " 2: " + InstrumentClusterElectronics.Consumption2 + Localization.Current.LitersPer100KM));
+            AddItem(new MenuItem(i => Localization.Current.Range + ": " + InstrumentClusterElectronics.Range + Localization.Current.KM));
+
             AddItem(new MenuItem(i => Localization.Current.Voltage + ": " + (BodyModule.BatteryVoltage > 0 ? BodyModule.BatteryVoltage.ToString("F1") : "-") + " " + Localization.Current.VoltageShort, i => UpdateVoltage()));
             AddItem(new MenuItem(i =>
             {
@@ -112,6 +151,11 @@ namespace imBMW.Features.Menu.Screens
                 var outside = InstrumentClusterElectronics.TemperatureOutside == sbyte.MinValue ? "-" : InstrumentClusterElectronics.TemperatureOutside.ToString();
                 return Localization.Current.Outside + ": " + outside + Localization.Current.DegreeCelsius;
             }));
+            AddItem(new MenuItem(i => Localization.Current.Limit + ": " + (InstrumentClusterElectronics.SpeedLimit == 0 ? "-" : InstrumentClusterElectronics.SpeedLimit + Localization.Current.KMH), MenuItemType.Button, MenuItemAction.GoToScreen)
+            {
+                GoToScreen = SpeedLimitScreen.Instance
+            });
+
             this.AddBackButton();
         }
 

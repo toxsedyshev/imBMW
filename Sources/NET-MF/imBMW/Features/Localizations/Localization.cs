@@ -120,6 +120,24 @@ namespace imBMW.Features.Localizations
         public abstract string Album { get; }
 
         public abstract string Genre { get; }
+        
+        public abstract string Limit { get; }
+
+        public abstract string Range { get; }
+
+        public abstract string Consumption { get; }
+
+        public abstract string LitersPer100KM { get; }
+
+        public abstract string KM { get; }
+
+        public abstract string TurnOff { get; }
+
+        public abstract string LimitCurrentSpeed { get; }
+
+        public abstract string LimitIncrease { get; }
+
+        public abstract string LimitDecrease { get; }
 
         /*
         
