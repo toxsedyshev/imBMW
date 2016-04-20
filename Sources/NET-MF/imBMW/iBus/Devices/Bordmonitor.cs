@@ -337,9 +337,9 @@ namespace imBMW.iBus.Devices.Real
         {
             int len;
             byte[] data;
-            
-            #if NETMF
-            var translit = imBMW.Features.Localizations.Localization.Current is imBMW.Features.Localizations.EnglishLocalization; // sorry for ditry hack, I'm tired :)
+
+#if NETMF
+            var translit = false; // TODO //imBMW.Features.Localizations.Localization.Current is imBMW.Features.Localizations.EnglishLocalization; // sorry for ditry hack, I'm tired :)
             #else
             var translit = false; // TODO
             #endif

@@ -1,6 +1,4 @@
 ﻿using System;
-using Microsoft.SPOT;
-using imBMW.Tools;
 
 namespace imBMW.Features.Localizations
 {
@@ -154,7 +152,7 @@ namespace imBMW.Features.Localizations
 
         public static Localization Get(string language)
         {
-            if (StringHelpers.IsNullOrEmpty(language))
+            if (language == null || language.Length == 0)
             {
                 language = EnglishLocalization.SystemName;
             }

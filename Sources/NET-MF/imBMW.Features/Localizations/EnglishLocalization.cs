@@ -1,5 +1,3 @@
-using System;
-using Microsoft.SPOT;
 
 namespace imBMW.Features.Localizations
 {
