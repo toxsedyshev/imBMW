@@ -1,4 +1,5 @@
-﻿using System;
+﻿using imBMW.iBus.Devices.Real;
+using System;
 
 namespace imBMW.Features.Localizations
 {
@@ -14,9 +15,23 @@ namespace imBMW.Features.Localizations
                 {
                     current = new EnglishLocalization();
                 } 
-                return Localization.current;
+                return current;
             }
-            set { Localization.current = value; }
+            set
+            {
+                if (current == value)
+                {
+                    return;
+                }
+                current = value;
+                OnCurrentLocalizationChanged();
+            }
+        }
+
+        private static void OnCurrentLocalizationChanged()
+        {
+            // TODO refactor
+            Bordmonitor.Translit = Current is EnglishLocalization;
         }
 
         #region Keys

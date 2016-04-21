@@ -195,6 +195,11 @@ namespace imBMW.iBus.Devices.Real
         /// </summary>
         public static bool ReplyToScreenUpdates { get; set; }
 
+        /// <summary>
+        /// Use translit for non-latin characters
+        /// </summary>
+        public static bool Translit { get; set; }
+
         public static event BordmonitorTextHandler TextReceived;
         public static event Action ScreenCleared;
         public static event Action ScreenRefreshed;
@@ -337,14 +342,8 @@ namespace imBMW.iBus.Devices.Real
         {
             int len;
             byte[] data;
-
-#if NETMF
-            var translit = false; // TODO //imBMW.Features.Localizations.Localization.Current is imBMW.Features.Localizations.EnglishLocalization; // sorry for ditry hack, I'm tired :)
-            #else
-            var translit = false; // TODO
-            #endif
-
-            if (translit)
+            
+            if (Translit)
             {
                 s = s.Translit();
             }
@@ -394,7 +393,7 @@ namespace imBMW.iBus.Devices.Real
             }
             var offset = data.Length;
             data = data.PadRight(0x20, len);
-            data.PasteASCII(translit ? s : s.UTF8ToASCII(), offset, len);
+            data.PasteASCII(Translit ? s : s.UTF8ToASCII(), offset, len);
             if (isChecked)
             {
                 data[data.Length - 2] = 0x2A;
