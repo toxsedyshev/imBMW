@@ -165,7 +165,7 @@ namespace imBMW.iBus.Devices.Real
 
         static readonly Message MessageSpeedLimitCurrentSpeed = new Message(DeviceAddress.GraphicsNavigationDriver, DeviceAddress.InstrumentClusterElectronics, "Speed Limit to Current Speed", 0x41, 0x09, 0x20);
         static readonly Message MessageSpeedLimitOff = new Message(DeviceAddress.GraphicsNavigationDriver, DeviceAddress.InstrumentClusterElectronics, "Speed Limit OFF", 0x41, 0x09, 0x08);
-        static readonly Message MessageSpeedLimitOn = new Message(DeviceAddress.GraphicsNavigationDriver, DeviceAddress.InstrumentClusterElectronics, "Speed Limit Refresh", 0x41, 0x09, 0x04);
+        static readonly Message MessageSpeedLimitOn = new Message(DeviceAddress.GraphicsNavigationDriver, DeviceAddress.InstrumentClusterElectronics, "Speed Limit ON", 0x41, 0x09, 0x04);
 
         private const int _getDateTimeTimeout = 1000;
 
@@ -391,7 +391,7 @@ namespace imBMW.iBus.Devices.Real
 
         public static void SetSpeedLimitOn()
         {
-            SetSpeedLimit(_lastSpeedLimit);
+            SetSpeedLimit(_lastSpeedLimit == 0 ? (ushort)1 : _lastSpeedLimit);
         }
 
         public static void SetSpeedLimit(ushort limit)
@@ -412,6 +412,10 @@ namespace imBMW.iBus.Devices.Real
             var refresh = SpeedLimit == 0;
             if (limit != _lastSpeedLimit)
             {
+                if (refresh)
+                {
+                    _lastSpeedLimit = limit;
+                }
                 Manager.EnqueueMessage(new Message(DeviceAddress.GraphicsNavigationDriver, DeviceAddress.InstrumentClusterElectronics, "Set speed limit", 0x40, 0x09, (byte)(limit >> 8), (byte)(limit & 0xFF)));
             }
             if (refresh)
