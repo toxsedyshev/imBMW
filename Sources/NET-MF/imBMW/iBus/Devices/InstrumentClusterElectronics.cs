@@ -165,6 +165,7 @@ namespace imBMW.iBus.Devices.Real
 
         static readonly Message MessageSpeedLimitCurrentSpeed = new Message(DeviceAddress.GraphicsNavigationDriver, DeviceAddress.InstrumentClusterElectronics, "Speed Limit to Current Speed", 0x41, 0x09, 0x20);
         static readonly Message MessageSpeedLimitOff = new Message(DeviceAddress.GraphicsNavigationDriver, DeviceAddress.InstrumentClusterElectronics, "Speed Limit OFF", 0x41, 0x09, 0x08);
+        static readonly Message MessageSpeedLimitOn = new Message(DeviceAddress.GraphicsNavigationDriver, DeviceAddress.InstrumentClusterElectronics, "Speed Limit Refresh", 0x41, 0x09, 0x04);
 
         private const int _getDateTimeTimeout = 1000;
 
@@ -174,6 +175,7 @@ namespace imBMW.iBus.Devices.Real
         private static bool _timeIsSet, _dateIsSet;
         private static byte _timeHour, _timeMinute, _dateDay, _dateMonth;
         private static ushort _dateYear;
+        private static ushort _lastSpeedLimit;
 
         static InstrumentClusterElectronics()
         {
@@ -344,6 +346,11 @@ namespace imBMW.iBus.Devices.Real
                 OnSpeedLimitChanged(0);
                 m.ReceiverDescription = "Speed limit turned off";
             }
+            else if (m.DestinationDevice == DeviceAddress.FrontDisplay && m.Data.Compare(0x2A, 0x02, 0x00))
+            {
+                OnSpeedLimitChanged(_lastSpeedLimit);
+                m.ReceiverDescription = "Speed limit turned on";
+            }
             // TODO arrive time, arrive distance, timers
         }
 
@@ -382,6 +389,11 @@ namespace imBMW.iBus.Devices.Real
             Manager.EnqueueMessage(MessageSpeedLimitOff);
         }
 
+        public static void SetSpeedLimitOn()
+        {
+            SetSpeedLimit(_lastSpeedLimit);
+        }
+
         public static void SetSpeedLimit(ushort limit)
         {
             if (limit <= 0)
@@ -389,11 +401,23 @@ namespace imBMW.iBus.Devices.Real
                 SetSpeedLimitOff();
                 return;
             }
+            if (limit < 10) // TODO check mph
+            {
+                limit = 10;
+            }
             if (limit > 300) // TODO fix region settings
             {
                 limit = 300;
             }
-            Manager.EnqueueMessage(new Message(DeviceAddress.GraphicsNavigationDriver, DeviceAddress.InstrumentClusterElectronics, "Set speed limit", 0x40, 0x09, (byte)(limit >> 8), (byte)(limit & 0xFF)));
+            var refresh = SpeedLimit == 0;
+            if (limit != _lastSpeedLimit)
+            {
+                Manager.EnqueueMessage(new Message(DeviceAddress.GraphicsNavigationDriver, DeviceAddress.InstrumentClusterElectronics, "Set speed limit", 0x40, 0x09, (byte)(limit >> 8), (byte)(limit & 0xFF)));
+            }
+            if (refresh)
+            {
+                Manager.EnqueueMessage(MessageSpeedLimitOn);
+            }
         }
 
         public static void IncreaseSpeedLimit(ushort add = 5)
@@ -560,6 +584,10 @@ namespace imBMW.iBus.Devices.Real
                 return;
             }
             SpeedLimit = speedLimit;
+            if (speedLimit != 0)
+            {
+                _lastSpeedLimit = speedLimit;
+            }
             var e = SpeedLimitChanged;
             if (e != null)
             {

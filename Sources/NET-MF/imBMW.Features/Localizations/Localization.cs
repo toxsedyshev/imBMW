@@ -144,6 +144,8 @@ namespace imBMW.Features.Localizations
 
         public abstract string KM { get; }
 
+        public abstract string TurnOn { get; }
+
         public abstract string TurnOff { get; }
 
         public abstract string LimitCurrentSpeed { get; }

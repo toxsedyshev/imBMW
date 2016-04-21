@@ -21,6 +21,7 @@ namespace imBMW.Features.Menu.Screens
             if (base.OnNavigatedTo(menu))
             {
                 InstrumentClusterElectronics.SpeedLimitChanged += InstrumentClusterElectronics_SpeedLimitChanged;
+                UpdateLimit();
                 return true;
             }
             return false;
@@ -43,7 +44,7 @@ namespace imBMW.Features.Menu.Screens
 
         void UpdateLimit()
         {
-            Status = InstrumentClusterElectronics.SpeedLimit > 0 ? "" : InstrumentClusterElectronics.SpeedLimit + Localization.Current.KMH;
+            Status = InstrumentClusterElectronics.SpeedLimit == 0 ? "" : InstrumentClusterElectronics.SpeedLimit + Localization.Current.KMH;
         }
 
         protected virtual void SetItems()
@@ -52,7 +53,17 @@ namespace imBMW.Features.Menu.Screens
             AddItem(new MenuItem(i => Localization.Current.LimitIncrease, i => InstrumentClusterElectronics.IncreaseSpeedLimit()));
             AddItem(new MenuItem(i => Localization.Current.LimitDecrease, i => InstrumentClusterElectronics.DecreaseSpeedLimit()));
             AddItem(new MenuItem(i => Localization.Current.LimitCurrentSpeed, i => InstrumentClusterElectronics.SetSpeedLimitToCurrentSpeed()));
-            AddItem(new MenuItem(i => Localization.Current.TurnOff, i => InstrumentClusterElectronics.SetSpeedLimitOff()));
+            AddItem(new MenuItem(i => InstrumentClusterElectronics.SpeedLimit == 0 ? Localization.Current.TurnOn : Localization.Current.TurnOff, i =>
+            {
+                if (InstrumentClusterElectronics.SpeedLimit == 0)
+                {
+                    InstrumentClusterElectronics.SetSpeedLimitOn();
+                }
+                else
+                {
+                    InstrumentClusterElectronics.SetSpeedLimitOff();
+                }
+            }));
 
             this.AddBackButton();
         }

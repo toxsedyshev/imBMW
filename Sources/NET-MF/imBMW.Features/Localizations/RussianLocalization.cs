@@ -270,6 +270,11 @@ namespace imBMW.Features.Localizations
             get { return "км"; }
         }
 
+        public override string TurnOn
+        {
+            get { return "Включить"; }
+        }
+
         public override string TurnOff
         {
             get { return "Выключить"; }

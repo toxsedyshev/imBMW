@@ -136,8 +136,8 @@ namespace imBMW.Features.Menu.Screens
             ClearItems();
             AddItem(new MenuItem(i => Localization.Current.Speed + ": " + InstrumentClusterElectronics.CurrentSpeed + Localization.Current.KMH));
             AddItem(new MenuItem(i => Localization.Current.Revs + ": " + InstrumentClusterElectronics.CurrentRPM));
-            AddItem(new MenuItem(i => Localization.Current.Consumption + " 1: " + InstrumentClusterElectronics.Consumption1 + Localization.Current.LitersPer100KM));
-            AddItem(new MenuItem(i => Localization.Current.Consumption + " 2: " + InstrumentClusterElectronics.Consumption2 + Localization.Current.LitersPer100KM));
+            AddItem(new MenuItem(i => Localization.Current.Consumption + " 1: " + InstrumentClusterElectronics.Consumption1.ToString("F1"), i => InstrumentClusterElectronics.ResetConsumption1()));
+            AddItem(new MenuItem(i => Localization.Current.Consumption + " 2: " + InstrumentClusterElectronics.Consumption2.ToString("F1"), i => InstrumentClusterElectronics.ResetConsumption2()));
             AddItem(new MenuItem(i => Localization.Current.Range + ": " + InstrumentClusterElectronics.Range + Localization.Current.KM));
 
             AddItem(new MenuItem(i => Localization.Current.Voltage + ": " + (BodyModule.BatteryVoltage > 0 ? BodyModule.BatteryVoltage.ToString("F1") : "-") + " " + Localization.Current.VoltageShort, i => UpdateVoltage()));
