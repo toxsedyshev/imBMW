@@ -145,7 +145,7 @@ namespace imBMW.iBus.Devices.Real
 
         private static void InstrumentClusterElectronics_IgnitionStateChanged(IgnitionEventArgs e)
         {
-            if (e.CurrentIgnitionState != IgnitionState.Ign)
+            if (e.CurrentIgnitionState != IgnitionState.Ign && e.PreviousIgnitionState == IgnitionState.Ign)
             {
                 BatteryVoltage = 0;
             }
