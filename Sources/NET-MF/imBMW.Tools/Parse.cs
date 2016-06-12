@@ -1,5 +1,4 @@
 using System;
-using Microsoft.SPOT;
 
 namespace imBMW.Tools
 {
@@ -161,7 +160,7 @@ namespace imBMW.Tools
         {
             ulong i;
             if (!TryParseULong(s, out i))
-                throw new ApplicationException("Failed to parse");
+                throw new Exception("Failed to parse");
             return i;
         }
 

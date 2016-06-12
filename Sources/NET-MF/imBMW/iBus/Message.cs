@@ -14,7 +14,7 @@ namespace imBMW.iBus
         byte[] data;
         byte check;
 
-        protected byte[] packet;
+        byte[] packet;
         int packetLength;
         string packetDump;
         string dataDump;

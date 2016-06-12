@@ -34,6 +34,7 @@
     <Compile Include="ASCIIEncoding.cs" />
     <Compile Include="DateTimeHelpers.cs" />
     <Compile Include="Delegates.cs" />
+    <Compile Include="Enums.cs" />
     <Compile Include="ExtensionAttribute.cs" />
     <Compile Include="LoggerArgs.cs" />
     <Compile Include="Math.cs" />

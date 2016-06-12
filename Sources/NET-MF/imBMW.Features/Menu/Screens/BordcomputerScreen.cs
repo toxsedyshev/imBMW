@@ -98,19 +98,23 @@ namespace imBMW.Features.Menu.Screens
 
         void BodyModule_BatteryVoltageChanged(double voltage)
         {
-            UpdateItems();
+            if (voltage == 0)
+            {
+                needUpdateVoltage = true;
+            }
+            UpdateItems(voltage == 0);
         }
 
         protected bool UpdateItems(bool force = false)
         {
             var now = DateTime.Now;
             int span;
+            if (needUpdateVoltage) // span > updateLimitSeconds / 2 && 
+            {
+                UpdateVoltage();
+            }
             if (!force && lastUpdated != DateTime.MinValue && (span = (now - lastUpdated).GetTotalSeconds()) < updateLimitSeconds)
             {
-                if (needUpdateVoltage) // span > updateLimitSeconds / 2 && 
-                {
-                    UpdateVoltage();
-                }
                 return false;
             }
             lastUpdated = now;
