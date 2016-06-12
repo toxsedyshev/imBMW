@@ -40,6 +40,10 @@
     <Reference Include="Microsoft.SPOT.Native" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\imBMW.Tools\imBMW.Tools.csproj">
+      <Project>{76B622B3-B9D7-41DF-8A7C-627F32AABEB3}</Project>
+      <Name>imBMW.Tools</Name>
+    </ProjectReference>
     <ProjectReference Include="..\imBMW\imBMW.csproj">
       <Project>{1809C7F6-0A9F-412B-A45E-E667996E86A3}</Project>
       <Name>imBMW</Name>

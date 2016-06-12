@@ -10,6 +10,8 @@ namespace imBMW.Diagnostics
     /// </summary>
     public class DBusMessage : Message
     {
+        byte[] packet;
+
         public static new int PacketLengthMin { get { return 4; } }
 
         string dataString;

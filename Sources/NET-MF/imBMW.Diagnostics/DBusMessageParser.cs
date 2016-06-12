@@ -1,5 +1,4 @@
 using System;
-using Microsoft.SPOT;
 using imBMW.iBus;
 
 namespace imBMW.Diagnostics
