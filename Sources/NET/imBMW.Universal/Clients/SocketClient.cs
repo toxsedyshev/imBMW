@@ -78,7 +78,14 @@ namespace imBMW.Clients
             {
                 Socket = new StreamSocket();
             }
-            await Socket.ConnectAsync(settings.HostName, settings.ServiceName);
+            try
+            {
+                await Socket.ConnectAsync(settings.HostName, settings.ServiceName);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Can't connect to imBMW Bluetooth device. Check that it's paired and online.", ex);
+            }
 
             OnConnected();
         }

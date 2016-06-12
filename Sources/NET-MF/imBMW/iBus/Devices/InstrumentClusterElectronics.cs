@@ -457,7 +457,11 @@ namespace imBMW.iBus.Devices.Real
             _getDateTimeResult = null;
             DateTimeChanged += GetDateTimeCallback;
             RequestDateTime();
+#if NETMF
             _getDateTimeSync.WaitOne(timeout, true);
+#else
+            _getDateTimeSync.WaitOne(timeout);
+#endif
             DateTimeChanged -= GetDateTimeCallback;
             return _getDateTimeResult;
         }
