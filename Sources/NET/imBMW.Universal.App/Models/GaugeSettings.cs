@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace imBMW.Universal.App.Models
 {
-    public class GaugeSettings
+    public class GaugeSettings : ObservableObject
     {
-        public GaugeSettings AdditionalGauge { get; set; }
+        private GaugeSettings secondaryGauge;
 
         public string Name { get; set; }
 
@@ -29,5 +29,18 @@ namespace imBMW.Universal.App.Models
         public double MaxRed { get; set; }
 
         public string Format { get; set; }
+
+        public GaugeSettings SecondaryGauge
+        {
+            get
+            {
+                return secondaryGauge;
+            }
+
+            set
+            {
+                Set(ref secondaryGauge, value);
+            }
+        }
     }
 }

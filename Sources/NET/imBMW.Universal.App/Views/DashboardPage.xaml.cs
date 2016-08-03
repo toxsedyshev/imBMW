@@ -1,4 +1,6 @@
-﻿using imBMW.Universal.App.Models;
+﻿using imBMW.Diagnostics.DME;
+using imBMW.iBus;
+using imBMW.Universal.App.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -21,18 +23,25 @@ namespace imBMW.Universal.App.Views
     /// <summary>
     /// An empty page that can be used on its own or navigated to within a Frame.
     /// </summary>
-    public sealed partial class DashboardPage : Page
+    public sealed partial class DashboardPage : ExtendedPage
     {
-        public List<GaugeSettings> Gauges
+        private List<GaugeWatcher> gauges;
+
+        public List<GaugeWatcher> Gauges
         {
             get
             {
-                return new List<GaugeSettings>
+                if (gauges == null)
                 {
-                    new GaugeSettings { Name = "Oil" },
-                    new GaugeSettings { Name = "Coolant" },
-                    new GaugeSettings { Name = "Radiator" },
-                };
+                    gauges = GaugeWatcher.FromSettingsList(new List<GaugeSettings>
+                    {
+                        new GaugeSettings { Name = "Oil", Field = "OilTemp", Format = "N0", MinValue = 0, MaxValue = 150 },
+                        new GaugeSettings { Name = "Voltage", Field = "VoltageBattery", Format = "F1" },
+                        new GaugeSettings { Name = "Coolant", Field = "CoolantTemp" },
+                        new GaugeSettings { Name = "Radiator" },
+                    });
+                }
+                return gauges;
             }
         }
 
@@ -44,6 +53,33 @@ namespace imBMW.Universal.App.Views
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
+
+            Manager.AfterMessageReceived += Manager_AfterMessageReceived;
+
+
+            var av = new MS43JMGAnalogValues();
+            av.OilTemp = 95.5;
+            av.VoltageBattery = 14.1;
+            av.CoolantTemp = 93.1;
+            av.CoolantRadiatorTemp = 90.3;
+            Gauges.ForEach(g => g.Update(av));
+        }
+        
+        protected override void OnNavigatedFrom(NavigationEventArgs e)
+        {
+            base.OnNavigatedFrom(e);
+
+            Manager.AfterMessageReceived -= Manager_AfterMessageReceived;
+        }
+
+        private void Manager_AfterMessageReceived(MessageEventArgs e)
+        {
+            if (MS43AnalogValues.CanParse(e.Message))
+            {
+                var av = new MS43JMGAnalogValues();
+                av.Parse(e.Message);
+                Gauges.ForEach(g => g.Update(av));
+            }
         }
     }
 }

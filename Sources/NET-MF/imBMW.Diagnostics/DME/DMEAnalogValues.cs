@@ -23,7 +23,7 @@ namespace imBMW.Diagnostics.DME
         /// <summary>
         /// Time of log entry
         /// </summary>
-        public DateTime Time { get; protected set; }
+        public DateTime Time { get; set; }
 
         /// <summary>
         /// Since logger started
@@ -33,144 +33,144 @@ namespace imBMW.Diagnostics.DME
         /// <summary>
         /// 1/min
         /// </summary>
-        public int RPM { get; protected set; }
+        public int RPM { get; set; }
 
         /// <summary>
         /// km/h
         /// </summary>
-        public int Speed { get; protected set; }
+        public int Speed { get; set; }
 
         /// <summary>
         /// Degree
         /// </summary>
-        public double Pedal { get; protected set; }
+        public double Pedal { get; set; }
 
         /// <summary>
         /// Degree
         /// </summary>
-        public double Throttle { get; protected set; }
+        public double Throttle { get; set; }
 
         /// <summary>
         /// kg/h
         /// </summary>
-        public double AirMass { get; protected set; }
+        public double AirMass { get; set; }
 
         /// <summary>
         /// Celsius
         /// </summary>
-        public double IntakeTemp { get; protected set; }
+        public double IntakeTemp { get; set; }
 
         /// <summary>
         /// Celsius
         /// </summary>
-        public double CoolantTemp { get; protected set; }
+        public double CoolantTemp { get; set; }
 
         /// <summary>
         /// Celsius
         /// </summary>
-        public double OilTemp { get; protected set; }
+        public double OilTemp { get; set; }
 
         /// <summary>
         /// Celsius
         /// </summary>
-        public double CoolantRadiatorTemp { get; protected set; }
+        public double CoolantRadiatorTemp { get; set; }
 
         /// <summary>
         /// Degree
         /// </summary>
-        public double IgnitionAngle { get; protected set; }
+        public double IgnitionAngle { get; set; }
 
         /// <summary>
         /// ms
         /// </summary>
-        public double InjectionTime { get; protected set; }
+        public double InjectionTime { get; set; }
 
         /// <summary>
         /// %
         /// Idle Control Valve PWM Integrator = Closing?
         /// </summary>
-        public double ISAPWM_IS { get; protected set; }
+        public double ISAPWM_IS { get; set; }
 
         /// <summary>
         /// %
         /// Idle Control Valve PWM Steller = Opening?
         /// </summary>
-        public double ISAPWM_ISA { get; protected set; }
+        public double ISAPWM_ISA { get; set; }
 
         /// <summary>
         /// Degree
         /// </summary>
-        public double VanosPositionIntake { get; protected set; }
+        public double VanosPositionIntake { get; set; }
 
         /// <summary>
         /// Degree
         /// </summary>
-        public double VanosPositionExhaust { get; protected set; }
+        public double VanosPositionExhaust { get; set; }
 
         /// <summary>
         /// Volts
         /// </summary>
-        public double VoltageKL15 { get; protected set; }
+        public double VoltageKL15 { get; set; }
 
         /// <summary>
         /// Number
         /// </summary>
-        public double LambdaIntegrator1 { get; protected set; }
+        public double LambdaIntegrator1 { get; set; }
 
         /// <summary>
         /// Number
         /// </summary>
-        public double LambdaIntegrator2 { get; protected set; }
+        public double LambdaIntegrator2 { get; set; }
         
         /// <summary>
         /// %
         /// </summary>
-        public double LambdaHeatingBeforeCats1 { get; protected set; }
+        public double LambdaHeatingBeforeCats1 { get; set; }
 
         /// <summary>
         /// %
         /// </summary>
-        public double LambdaHeatingBeforeCats2 { get; protected set; }
+        public double LambdaHeatingBeforeCats2 { get; set; }
 
         /// <summary>
         /// %
         /// </summary>
-        public double LambdaHeatingAfterCats1 { get; protected set; }
+        public double LambdaHeatingAfterCats1 { get; set; }
 
         /// <summary>
         /// %
         /// </summary>
-        public double LambdaHeatingAfterCats2 { get; protected set; }
+        public double LambdaHeatingAfterCats2 { get; set; }
 
         /// <summary>
         /// mg/HUB = mg per stroke
         /// </summary>
-        public double AirMassPerStroke { get; protected set; }
+        public double AirMassPerStroke { get; set; }
 
         /// <summary>
         /// Volts
         /// </summary>
-        public double KnockSensor2 { get; protected set; }
+        public double KnockSensor2 { get; set; }
 
         /// <summary>
         /// Volts
         /// </summary>
-        public double KnockSensor5 { get; protected set; }
+        public double KnockSensor5 { get; set; }
 
         /// <summary>
         /// %
         /// </summary>
-        public double ElectricFanSpeed { get; protected set; }
+        public double ElectricFanSpeed { get; set; }
 
         /// <summary>
         /// hPa = bar*1000
         /// </summary>
-        public int AtmosphericPressure { get; protected set; }
+        public int AtmosphericPressure { get; set; }
 
         /// <summary>
         /// Volts
         /// </summary>
-        public double VoltageBattery { get; protected set; }
+        public double VoltageBattery { get; set; }
 
         /// <summary>
         /// hPa = bar*1000
