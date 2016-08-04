@@ -69,7 +69,7 @@ namespace imBMW.Universal.App.Controls
             // http://blog.jerrynixon.com/2012/06/windows-8-animated-pie-slice.html
             
             Width = Height = 2 * (Diameter / 2 + StrokeThickness);
-            var startAngle = StartAngle + 180;
+            var startAngle = StartAngle - 90;
             var endAngle = startAngle + Angle;
 
             // path container

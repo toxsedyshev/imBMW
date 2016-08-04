@@ -7,6 +7,8 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using Windows.UI;
+using Windows.UI.Xaml.Media;
 
 namespace imBMW.Universal.App.Models
 {
@@ -16,6 +18,8 @@ namespace imBMW.Universal.App.Models
         string stringValue;
         double numValue;
         GaugeWatcher secondaryWatcher;
+
+        static Dictionary<string, PropertyInfo> properties = new Dictionary<string, PropertyInfo>(); 
 
         public GaugeSettings Settings { get; protected set; }
 
@@ -52,7 +56,7 @@ namespace imBMW.Universal.App.Models
                     return 0;
                 }
                 var res = (NumValue - Settings.MinValue) / (Settings.MaxValue - Settings.MinValue);
-                res = Math.Max(Math.Min(res, 100), 0);
+                res = Math.Max(Math.Min(res, 1), 0);
                 return res * 100;
             }
         }
@@ -61,7 +65,7 @@ namespace imBMW.Universal.App.Models
         {
             get
             {
-                return 3.6 * Percentage;
+                return Math.Min(3.6 * Percentage, 359);
             }
         }
 
@@ -77,7 +81,23 @@ namespace imBMW.Universal.App.Models
         {
             get
             {
-                return 360 - GrayAngleStart - 1;
+                return Math.Max(360 - GrayAngleStart - 1, 0);
+            }
+        }
+
+        public Brush Foreground
+        {
+            get
+            {
+                if (NumValue < Settings.MinRed || NumValue > Settings.MaxRed)
+                {
+                    return new SolidColorBrush(Colors.Red);
+                }
+                if (NumValue < Settings.MinYellow || NumValue > Settings.MaxYellow)
+                {
+                    return new SolidColorBrush(Colors.Yellow);
+                }
+                return new SolidColorBrush(Colors.Green);
             }
         }
 
@@ -94,6 +114,9 @@ namespace imBMW.Universal.App.Models
                 {
                     OnPropertyChanged("Percentage");
                     OnPropertyChanged("Angle");
+                    OnPropertyChanged("GrayAngleStart");
+                    OnPropertyChanged("GrayAngle");
+                    OnPropertyChanged("Foreground");
                 }
             }
         }
@@ -157,7 +180,11 @@ namespace imBMW.Universal.App.Models
         {
             try
             {
-                RawValue = av.GetType().GetProperty(Settings.Field).GetValue(av);
+                if (!properties.Keys.Contains(Settings.Field))
+                {
+                    properties.Add(Settings.Field, av.GetType().GetProperty(Settings.Field));
+                }
+                RawValue = properties[Settings.Field].GetValue(av);
             }
             catch
             {

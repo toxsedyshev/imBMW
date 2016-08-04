@@ -11,15 +11,17 @@
 
     <Grid Padding="10">
         <local:PieSlice Diameter="230" Fill="Gray" StartAngle="{Binding GrayAngleStart}" Angle="{Binding GrayAngle}"/>
-        <local:PieSlice Diameter="230" Fill="Green" StartAngle="0" Angle="{Binding Angle}"/>
+        <local:PieSlice Diameter="230" Fill="{Binding Foreground}" StartAngle="0" Angle="{Binding Angle}"/>
         <Ellipse Fill="Black" Margin="10"/>
         <Grid>
             <Grid.RowDefinitions>
-                <RowDefinition Height="3*"/>
-                <RowDefinition Height="2*"/>
+                <RowDefinition Height="26*"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="30*"/>
             </Grid.RowDefinitions>
-            <TextBlock Grid.Row="0" Text="{Binding StringValue}" FontSize="60" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,-10"/>
-            <TextBlock Grid.Row="1" Text="{Binding Settings.Name}" FontSize="25" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+            <TextBlock Grid.Row="0" Text="{Binding Settings.Dimention}" FontSize="15" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,-5"/>
+            <TextBlock Grid.Row="1" Text="{Binding StringValue}" FontSize="60" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,-10,0,-10"/>
+            <TextBlock Grid.Row="2" Text="{Binding Settings.Name}" FontSize="25" HorizontalAlignment="Center" VerticalAlignment="Top"/>
         </Grid>
     </Grid>
 </UserControl>
