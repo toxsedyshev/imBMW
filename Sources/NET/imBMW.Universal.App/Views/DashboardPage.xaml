@@ -9,7 +9,7 @@
     mc:Ignorable="d"
     DataContext="{Binding RelativeSource={RelativeSource Self}}">
 
-    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    <Grid Background="Black">
         <GridView ItemsSource="{Binding Gauges}" IsItemClickEnabled="False" SelectionMode="None">
             <GridView.ItemsPanel>
                 <ItemsPanelTemplate>

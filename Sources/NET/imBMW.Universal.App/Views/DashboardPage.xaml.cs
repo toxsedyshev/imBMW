@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading;
 using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
@@ -65,15 +66,47 @@ namespace imBMW.Universal.App.Views
             av.CoolantRadiatorTemp = 90.3;
             Gauges.ForEach(g => g.Update(av));
 
-            for (double i = -100; i < 200; i+=1)
+            // TODO don't do on second visit
+            testTimer = new DispatcherTimer();
+            testTimer.Interval = TimeSpan.FromMilliseconds(1);
+            testTimer.Tick += TestTimer_Tick;
+            testTimer.Start();            
+        }
+
+        DispatcherTimer testTimer;
+        double testTimerTicks = 0;
+
+        private void TestTimer_Tick(object sender, object e)
+        {
+            if (testTimerTicks > 200)
             {
-                av.OilTemp = i;
-                av.VoltageBattery = i;
-                av.CoolantTemp = i;
-                av.CoolantRadiatorTemp = i;
-                Gauges.ForEach(g => g.Update(av));
-                await Task.Delay(1);
+                testTimer.Stop();
+                testTimer = null;
+                return;
             }
+            foreach (var g in Gauges)
+            {
+                TestGauge(g, testTimerTicks);
+                if (g.SecondaryWatcher != null)
+                {
+                    TestGauge(g.SecondaryWatcher, testTimerTicks);
+                }
+            }
+            testTimerTicks += 3;
+        }
+
+        void TestGauge(GaugeWatcher g, double percent)
+        {
+            if (percent > 100)
+            {
+                percent = 200 - percent;
+            }
+            if (percent < 3)
+            {
+                percent = 0;
+            }
+            var value = g.Settings.MinValue + (g.Settings.MaxValue - g.Settings.MinValue) * percent / 100;
+            g.RawValue = value;
         }
         
         protected override void OnNavigatedFrom(NavigationEventArgs e)

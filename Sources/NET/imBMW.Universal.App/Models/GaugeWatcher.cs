@@ -19,6 +19,9 @@ namespace imBMW.Universal.App.Models
         double numValue;
         GaugeWatcher secondaryWatcher;
 
+        static Brush redBrush = new SolidColorBrush(Colors.Red);
+        static Brush yellowBrush = new SolidColorBrush(Colors.Yellow);
+        static Brush greenBrush = new SolidColorBrush(Colors.Green);
         static Dictionary<string, PropertyInfo> properties = new Dictionary<string, PropertyInfo>(); 
 
         public GaugeSettings Settings { get; protected set; }
@@ -30,7 +33,7 @@ namespace imBMW.Universal.App.Models
                 return rawValue;
             }
 
-            protected set
+            set
             {
                 if (Set(ref rawValue, value))
                 {
@@ -91,13 +94,13 @@ namespace imBMW.Universal.App.Models
             {
                 if (NumValue < Settings.MinRed || NumValue > Settings.MaxRed)
                 {
-                    return new SolidColorBrush(Colors.Red);
+                    return redBrush;
                 }
                 if (NumValue < Settings.MinYellow || NumValue > Settings.MaxYellow)
                 {
-                    return new SolidColorBrush(Colors.Yellow);
+                    return yellowBrush;
                 }
-                return new SolidColorBrush(Colors.Green);
+                return greenBrush;
             }
         }
 
@@ -108,7 +111,7 @@ namespace imBMW.Universal.App.Models
                 return numValue;
             }
 
-            set
+            protected set
             {
                 if (Set(ref numValue, value))
                 {
