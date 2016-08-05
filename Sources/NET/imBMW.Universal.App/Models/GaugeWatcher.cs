@@ -18,13 +18,12 @@ namespace imBMW.Universal.App.Models
         string stringValue;
         double numValue;
         GaugeWatcher secondaryWatcher;
+        GaugeSettings settings;
 
         static Brush redBrush = new SolidColorBrush(Colors.Red);
         static Brush yellowBrush = new SolidColorBrush(Colors.Yellow);
         static Brush greenBrush = new SolidColorBrush(Colors.Green);
         static Dictionary<string, PropertyInfo> properties = new Dictionary<string, PropertyInfo>(); 
-
-        public GaugeSettings Settings { get; protected set; }
 
         public object RawValue
         {
@@ -147,6 +146,19 @@ namespace imBMW.Universal.App.Models
             protected set
             {
                 Set(ref secondaryWatcher, value);
+            }
+        }
+
+        public GaugeSettings Settings
+        {
+            get
+            {
+                return settings;
+            }
+
+            protected set
+            {
+                Set(ref settings, value);
             }
         }
 

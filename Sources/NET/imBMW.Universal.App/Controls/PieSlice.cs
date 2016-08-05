@@ -55,6 +55,10 @@ namespace imBMW.Universal.App.Controls
             set { SetValue(DiameterProperty, value); }
         }
 
+        public double Multiply { get; set; } = 1;
+
+        public bool InvertDirection { get; set; } = false;
+
         private static void Changed(PieSlice pieSlice)
         {
             if (pieSlice._isLoaded)
@@ -69,9 +73,16 @@ namespace imBMW.Universal.App.Controls
             // http://blog.jerrynixon.com/2012/06/windows-8-animated-pie-slice.html
             
             Width = Height = 2 * (Diameter / 2 + StrokeThickness);
-            var startAngle = StartAngle - 90;
-            var endAngle = startAngle + Angle;
-
+            var invert = InvertDirection ? -1 : 1;
+            var startAngle = StartAngle * invert * Multiply - 90;
+            var endAngle = startAngle + Angle * invert * Multiply;
+            if (InvertDirection)
+            {
+                var t = startAngle;
+                startAngle = endAngle;
+                endAngle = t;
+            }
+            
             // path container
             var figure = new PathFigure
             {
@@ -90,7 +101,7 @@ namespace imBMW.Universal.App.Controls
             var arcY = Diameter / 2 - Math.Cos(endAngle * Math.PI / 180) * Diameter / 2;
             var arc = new ArcSegment
             {
-                IsLargeArc = Angle >= 180.0,
+                IsLargeArc = Angle * Multiply >= 180.0,
                 Point = new Point(arcX, arcY),
                 Size = new Size(Diameter / 2, Diameter / 2),
                 SweepDirection = SweepDirection.Clockwise,
