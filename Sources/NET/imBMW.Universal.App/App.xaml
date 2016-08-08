@@ -3,6 +3,12 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:imBMW.Universal.App"
+    xmlns:Common="using:imBMW.Universal.App.Common"
     RequestedTheme="Dark">
-
+    <Application.Resources>
+        <ResourceDictionary>
+            <Common:NullVisibilityConverter x:Key="NullVisibilityConverter"/>
+            <Common:NotNullVisibilityConverter x:Key="NotNullVisibilityConverter"/>
+        </ResourceDictionary>
+    </Application.Resources>
 </Application>

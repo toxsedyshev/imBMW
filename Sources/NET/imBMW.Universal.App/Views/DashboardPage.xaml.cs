@@ -37,9 +37,9 @@ namespace imBMW.Universal.App.Views
                 {
                     gauges = GaugeWatcher.FromSettingsList(new List<GaugeSettings>
                     {
-                        new GaugeSettings { Name = "Oil", Field = "OilTemp", Format = "N0", Dimention = "Celsius", MinValue = 0, MaxValue = 150, MinRed = 60, MinYellow = 75, MaxYellow = 95, MaxRed = 105 },
+                        new GaugeSettings { Name = "Oil", Field = "OilTemp", Format = "N0", Dimention = "Celsius", MinValue = 0, MaxValue = 150, MinRed = 60, MinYellow = 75, MaxYellow = 95, MaxRed = 105,
+                            SecondaryGauge = new GaugeSettings { Name = "Coolant", Field = "CoolantTemp" }},
                         new GaugeSettings { Name = "Voltage", Field = "VoltageBattery", Format = "F1", Dimention = "Volts" },
-                        new GaugeSettings { Name = "Coolant", Field = "CoolantTemp" },
                         new GaugeSettings { Name = "Radiator" },
                     });
                 }

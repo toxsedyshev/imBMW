@@ -99,6 +99,8 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Common\NotNullVisibilityConverter.cs" />
+    <Compile Include="Common\NullVisibilityConverter.cs" />
     <Compile Include="Controls\Gauge.xaml.cs">
       <DependentUpon>Gauge.xaml</DependentUpon>
     </Compile>
