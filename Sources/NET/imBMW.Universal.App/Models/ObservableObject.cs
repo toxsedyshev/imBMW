@@ -7,7 +7,7 @@ namespace imBMW.Universal.App.Models
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
-        protected bool Set<T>(ref T field, T value, [CallerMemberName]string property = "")
+        protected virtual bool Set<T>(ref T field, T value, [CallerMemberName]string property = "")
         {
             if (field == null && value == null || field != null && field.Equals(value))
             {

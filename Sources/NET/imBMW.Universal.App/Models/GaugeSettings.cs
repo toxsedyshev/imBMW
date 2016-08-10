@@ -14,6 +14,8 @@ namespace imBMW.Universal.App.Models
 
         public string Dimention { get; set; }
 
+        public GaugeField FieldType { get; set; } = GaugeField.Custom;
+
         public string Field { get; set; }
 
         public double MinValue { get; set; } = 0;
@@ -30,6 +32,12 @@ namespace imBMW.Universal.App.Models
 
         public string Format { get; set; }
 
+        public string Suffix { get; set; }
+
+        public double AddToValue { get; set; } = 0;
+
+        public double MultiplyValue { get; set; } = 1;
+
         public GaugeSettings SecondaryGauge
         {
             get
@@ -42,5 +50,22 @@ namespace imBMW.Universal.App.Models
                 Set(ref secondaryGauge, value);
             }
         }
+    }
+
+    public enum GaugeField : int
+    {
+        Custom,
+        Consumption1,
+        Consumption2,
+        SpeedLimit,
+        AverageSpeed,
+        Range,
+        ArrivalDistance,
+        ArrivalTime,
+        CoolantTemperature,
+        OutsideTemperature,
+        Voltage,
+        Speed,
+        RPM
     }
 }

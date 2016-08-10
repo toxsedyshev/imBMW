@@ -23,6 +23,7 @@ namespace imBMW.Diagnostics.DME
         public static bool CanParse(Message message)
         {
             return message.SourceDevice == DeviceAddress.DME
+                && message.DestinationDevice == DeviceAddress.Diagnostic
                 && message.Data.Length == 42 
                 && message.Data[0] == 0xA0;
         }

@@ -36,17 +36,23 @@ namespace imBMW.Universal.App.Models
             {
                 if (Set(ref rawValue, value))
                 {
-                    StringValue = string.Format("{0:" + Settings.Format + "}", value);
                     try
                     {
-                        NumValue = (double)value;
+                        NumValue = ((double)value + Settings.AddToValue) * Settings.MultiplyValue;
+                        FormatValue(NumValue);
                     }
                     catch
                     {
+                        FormatValue(value);
                         NumValue = 0;
                     }
                 }
             }
+        }
+
+        void FormatValue(object value)
+        {
+            StringValue = string.Format("{0:" + Settings.Format + "}{1}", value, Settings.Suffix);
         }
 
         public double Percentage
@@ -193,6 +199,12 @@ namespace imBMW.Universal.App.Models
 
         public void Update(DMEAnalogValues av)
         {
+            SecondaryWatcher?.Update(av);
+
+            if (Settings.FieldType != GaugeField.Custom)
+            {
+                return;
+            }
             try
             {
                 if (!properties.Keys.Contains(Settings.Field))
@@ -205,8 +217,6 @@ namespace imBMW.Universal.App.Models
             {
                 StringValue = "N/A";
             }
-
-            SecondaryWatcher?.Update(av);
         }
 
         public static List<GaugeWatcher> FromSettingsList(IEnumerable<GaugeSettings> settingsList)

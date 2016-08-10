@@ -1,8 +1,11 @@
 ﻿using imBMW.Diagnostics.DME;
 using imBMW.iBus;
+using imBMW.iBus.Devices.Real;
 using imBMW.Universal.App.Models;
+using imBMW.Universal.App.Tools;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
@@ -35,46 +38,80 @@ namespace imBMW.Universal.App.Views
             {
                 if (gauges == null)
                 {
-                    gauges = GaugeWatcher.FromSettingsList(new List<GaugeSettings>
-                    {
-                        new GaugeSettings { Name = "Oil", Field = "OilTemp", Format = "N0", Dimention = "Celsius", MinValue = 0, MaxValue = 150, MinRed = 60, MinYellow = 75, MaxYellow = 95, MaxRed = 105,
-                            SecondaryGauge = new GaugeSettings { Name = "Coolant", Field = "CoolantTemp" }},
-                        new GaugeSettings { Name = "Voltage", Field = "VoltageBattery", Format = "F1", Dimention = "Volts" },
-                        new GaugeSettings { Name = "Radiator" },
-                    });
+                    gauges = GaugeWatcher.FromSettingsList(Settings.Instance.Gauges);
                 }
                 return gauges;
+            }
+            private set
+            {
+                Set(ref gauges, value);
             }
         }
 
         public DashboardPage()
         {
             this.InitializeComponent();
+
+            Settings.Instance.PropertyChanged += Instance_PropertyChanged;
         }
 
-        protected override async void OnNavigatedTo(NavigationEventArgs e)
+        private void Instance_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == "Gauges")
+            {
+                Gauges = GaugeWatcher.FromSettingsList(Settings.Instance.Gauges);
+            }
+        }
+
+        protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
 
             Manager.AfterMessageReceived += Manager_AfterMessageReceived;
+            InstrumentClusterElectronics.AverageSpeedChanged += InstrumentClusterElectronics_AverageSpeedChanged;
+            InstrumentClusterElectronics.Consumption1Changed += InstrumentClusterElectronics_Consumption1Changed;
+            InstrumentClusterElectronics.Consumption2Changed += InstrumentClusterElectronics_Consumption2Changed;
+            InstrumentClusterElectronics.RangeChanged += InstrumentClusterElectronics_RangeChanged;
+            InstrumentClusterElectronics.SpeedLimitChanged += InstrumentClusterElectronics_SpeedLimitChanged;
+            InstrumentClusterElectronics.SpeedRPMChanged += InstrumentClusterElectronics_SpeedRPMChanged;
+            InstrumentClusterElectronics.TemperatureChanged += InstrumentClusterElectronics_TemperatureChanged;
 
+            //var av = new MS43JMGAnalogValues();
+            //av.OilTemp = 95.5;
+            //av.VoltageBattery = 14.1;
+            //av.CoolantTemp = 93.1;
+            //av.CoolantRadiatorTemp = 90.3;
+            //Gauges.ForEach(g => g.Update(av));
 
-            var av = new MS43JMGAnalogValues();
-            av.OilTemp = 95.5;
-            av.VoltageBattery = 14.1;
-            av.CoolantTemp = 93.1;
-            av.CoolantRadiatorTemp = 90.3;
-            Gauges.ForEach(g => g.Update(av));
-
-            // TODO don't do on second visit
-            testTimer = new DispatcherTimer();
-            testTimer.Interval = TimeSpan.FromMilliseconds(1);
-            testTimer.Tick += TestTimer_Tick;
-            testTimer.Start();            
+            if (!wasTested)
+            {
+                testTimer = new DispatcherTimer();
+                testTimer.Interval = TimeSpan.FromMilliseconds(1);
+                testTimer.Tick += TestTimer_Tick;
+                testTimer.Start();
+                wasTested = true;
+            }
         }
+
+        protected override void OnNavigatedFrom(NavigationEventArgs e)
+        {
+            base.OnNavigatedFrom(e);
+
+            Manager.AfterMessageReceived -= Manager_AfterMessageReceived;
+            InstrumentClusterElectronics.AverageSpeedChanged -= InstrumentClusterElectronics_AverageSpeedChanged;
+            InstrumentClusterElectronics.Consumption1Changed -= InstrumentClusterElectronics_Consumption1Changed;
+            InstrumentClusterElectronics.Consumption2Changed -= InstrumentClusterElectronics_Consumption2Changed;
+            InstrumentClusterElectronics.RangeChanged -= InstrumentClusterElectronics_RangeChanged;
+            InstrumentClusterElectronics.SpeedLimitChanged -= InstrumentClusterElectronics_SpeedLimitChanged;
+            InstrumentClusterElectronics.SpeedRPMChanged -= InstrumentClusterElectronics_SpeedRPMChanged;
+            InstrumentClusterElectronics.TemperatureChanged -= InstrumentClusterElectronics_TemperatureChanged;
+        }
+
+        #region Gauges test
 
         DispatcherTimer testTimer;
         double testTimerTicks = 0;
+        static bool wasTested = false;
 
         private void TestTimer_Tick(object sender, object e)
         {
@@ -108,13 +145,8 @@ namespace imBMW.Universal.App.Views
             var value = g.Settings.MinValue + (g.Settings.MaxValue - g.Settings.MinValue) * percent / 100;
             g.RawValue = value;
         }
-        
-        protected override void OnNavigatedFrom(NavigationEventArgs e)
-        {
-            base.OnNavigatedFrom(e);
 
-            Manager.AfterMessageReceived -= Manager_AfterMessageReceived;
-        }
+        #endregion
 
         private void Manager_AfterMessageReceived(MessageEventArgs e)
         {
@@ -124,6 +156,48 @@ namespace imBMW.Universal.App.Views
                 av.Parse(e.Message);
                 Gauges.ForEach(g => g.Update(av));
             }
+        }
+
+        void UpdateIKEGauge(GaugeField field, object value)
+        {
+            Gauges.Where(g => g.Settings.FieldType == field).ToList().ForEach(g => g.RawValue = value);
+        }
+
+        private void InstrumentClusterElectronics_TemperatureChanged(TemperatureEventArgs e)
+        {
+            UpdateIKEGauge(GaugeField.CoolantTemperature, e.Coolant);
+            UpdateIKEGauge(GaugeField.OutsideTemperature, e.Outside);
+        }
+
+        private void InstrumentClusterElectronics_SpeedRPMChanged(SpeedRPMEventArgs e)
+        {
+            UpdateIKEGauge(GaugeField.Speed, e.Speed);
+            UpdateIKEGauge(GaugeField.RPM, e.RPM);
+        }
+
+        private void InstrumentClusterElectronics_SpeedLimitChanged(SpeedLimitEventArgs e)
+        {
+            UpdateIKEGauge(GaugeField.SpeedLimit, e.Value);
+        }
+
+        private void InstrumentClusterElectronics_RangeChanged(RangeEventArgs e)
+        {
+            UpdateIKEGauge(GaugeField.Range, e.Value);
+        }
+
+        private void InstrumentClusterElectronics_Consumption2Changed(ConsumptionEventArgs e)
+        {
+            UpdateIKEGauge(GaugeField.Consumption2, e.Value);
+        }
+
+        private void InstrumentClusterElectronics_Consumption1Changed(ConsumptionEventArgs e)
+        {
+            UpdateIKEGauge(GaugeField.Consumption1, e.Value);
+        }
+
+        private void InstrumentClusterElectronics_AverageSpeedChanged(AverageSpeedEventArgs e)
+        {
+            UpdateIKEGauge(GaugeField.AverageSpeed, e.Value);
         }
     }
 }
