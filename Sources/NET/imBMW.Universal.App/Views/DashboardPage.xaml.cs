@@ -52,10 +52,19 @@ namespace imBMW.Universal.App.Views
         {
             this.InitializeComponent();
 
-            Settings.Instance.PropertyChanged += Instance_PropertyChanged;
+            Settings.Instance.PropertyChanged += Settings_PropertyChanged;
+            InstrumentClusterElectronics.IgnitionStateChanged += InstrumentClusterElectronics_IgnitionStateChanged;
         }
 
-        private void Instance_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        private void InstrumentClusterElectronics_IgnitionStateChanged(IgnitionEventArgs e)
+        {
+            if (e.CurrentIgnitionState == IgnitionState.Ign && e.PreviousIgnitionState != IgnitionState.Ign)
+            {
+                wasTested = false;
+            }
+        }
+
+        private void Settings_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == "Gauges")
             {
@@ -111,7 +120,7 @@ namespace imBMW.Universal.App.Views
 
         DispatcherTimer testTimer;
         double testTimerTicks = 0;
-        static bool wasTested = false;
+        static bool wasTested;
 
         private void TestTimer_Tick(object sender, object e)
         {
@@ -142,7 +151,7 @@ namespace imBMW.Universal.App.Views
             {
                 percent = 0;
             }
-            var value = g.Settings.MinValue + (g.Settings.MaxValue - g.Settings.MinValue) * percent / 100;
+            var value = (g.Settings.MinValue + (g.Settings.MaxValue - g.Settings.MinValue) * percent / 100) / g.Settings.MultiplyValue - g.Settings.AddToValue;
             g.RawValue = value;
         }
 
@@ -150,6 +159,10 @@ namespace imBMW.Universal.App.Views
 
         private void Manager_AfterMessageReceived(MessageEventArgs e)
         {
+            if (testTimer.IsEnabled)
+            {
+                return;
+            }
             if (MS43AnalogValues.CanParse(e.Message))
             {
                 var av = new MS43JMGAnalogValues();
@@ -160,6 +173,10 @@ namespace imBMW.Universal.App.Views
 
         void UpdateIKEGauge(GaugeField field, object value)
         {
+            if (testTimer.IsEnabled)
+            {
+                return;
+            }
             Gauges.Where(g => g.Settings.FieldType == field).ToList().ForEach(g => g.RawValue = value);
         }
 

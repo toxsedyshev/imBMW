@@ -54,7 +54,7 @@ namespace imBMW.Universal.App.Tools
                     new GaugeSettings { Name = "Radiator", Field = "CoolantRadiatorTemp", Format = "N0", Suffix = "°", MinValue = 0, MaxValue = 150, MinYellow = 75, MaxYellow = 95, MaxRed = 105,
                         SecondaryGauge = new GaugeSettings { Name = "Fan", Field = "ElectricFanSpeed", Suffix = "%", Format = "N0", MaxYellow = 70}},
 
-                    new GaugeSettings { Name = "AFR", Field = "AFR", Format = "F1", Dimention = "Air/Fuel", MinValue = 7.5, MaxValue = 22.5, MinRed = 10, MinYellow = 11, MaxYellow = 14.7, MaxRed = 15.5 },
+                    new GaugeSettings { Name = "Lambda", Field = "AFR", Format = "F1", Dimention = "Air/Fuel", MinValue = 7.5, MaxValue = 22.5, MinRed = 10, MinYellow = 11, MaxYellow = 14.7, MaxRed = 15.5 },
 
                     new GaugeSettings { Name = "Boost", Field = "IntakePressure", Format = "F2", Dimention = "Bar", MinValue = -1, MaxValue = 1, MinYellow = 0, MaxYellow = 0.5, MaxRed = 0.8, AddToValue = -1000, MultiplyValue = 0.001},
 
