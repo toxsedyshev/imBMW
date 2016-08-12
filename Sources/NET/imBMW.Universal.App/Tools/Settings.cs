@@ -62,7 +62,7 @@ namespace imBMW.Universal.App.Tools
                         SecondaryGauge = new GaugeSettings { Name = "Voltage", Field = "VoltageBattery", Format = "F1", Suffix = " V", MinValue = 9, MaxValue = 16, MinRed = 13.3, MinYellow = 13.6, MaxYellow = 14.1, MaxRed = 14.5}},
 
                     new GaugeSettings { Name = "Throttle", Field = "Throttle", Format = "N0", Suffix = "%", MinValue = 0, MaxValue = 100, MinYellow = 79,
-                        SecondaryGauge = new GaugeSettings { Name = "Air Mass", Field = "AirMass", Format = "N0", MinValue = 0, MaxValue = 100, MinYellow = 500}},
+                        SecondaryGauge = new GaugeSettings { Name = "Air Mass", Field = "AirMass", Format = "N0", MinValue = 0, MaxValue = 1500, MinYellow = 500}},
 
                     new GaugeSettings { Name = "Cons 1", FieldType = GaugeField.Consumption1, Format = "F1", MinValue = 0, MaxValue = 40,
                         SecondaryGauge = new GaugeSettings { Name = "Cons 2", FieldType = GaugeField.Consumption2, Format = "F1", MinValue = 0, MaxValue = 40}},

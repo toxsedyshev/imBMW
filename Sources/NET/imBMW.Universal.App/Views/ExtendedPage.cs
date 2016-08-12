@@ -6,11 +6,14 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Navigation;
 
 namespace imBMW.Universal.App.Views
 {
     public class ExtendedPage : Page
     {
+        public bool IsNavigated { get; private set; }
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         protected bool Set<T>(ref T field, T value, [CallerMemberName]string property = "")
@@ -22,6 +25,20 @@ namespace imBMW.Universal.App.Views
             field = value;
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(property));
             return true;
+        }
+
+        protected override void OnNavigatedTo(NavigationEventArgs e)
+        {
+            base.OnNavigatedTo(e);
+
+            IsNavigated = true;
+        }
+
+        protected override void OnNavigatedFrom(NavigationEventArgs e)
+        {
+            base.OnNavigatedFrom(e);
+
+            IsNavigated = false;
         }
     }
 }

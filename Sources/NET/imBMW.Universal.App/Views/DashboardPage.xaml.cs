@@ -56,14 +56,6 @@ namespace imBMW.Universal.App.Views
             InstrumentClusterElectronics.IgnitionStateChanged += InstrumentClusterElectronics_IgnitionStateChanged;
         }
 
-        private void InstrumentClusterElectronics_IgnitionStateChanged(IgnitionEventArgs e)
-        {
-            if (e.CurrentIgnitionState == IgnitionState.Ign && e.PreviousIgnitionState != IgnitionState.Ign)
-            {
-                wasTested = false;
-            }
-        }
-
         private void Settings_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == "Gauges")
@@ -85,21 +77,7 @@ namespace imBMW.Universal.App.Views
             InstrumentClusterElectronics.SpeedRPMChanged += InstrumentClusterElectronics_SpeedRPMChanged;
             InstrumentClusterElectronics.TemperatureChanged += InstrumentClusterElectronics_TemperatureChanged;
 
-            //var av = new MS43JMGAnalogValues();
-            //av.OilTemp = 95.5;
-            //av.VoltageBattery = 14.1;
-            //av.CoolantTemp = 93.1;
-            //av.CoolantRadiatorTemp = 90.3;
-            //Gauges.ForEach(g => g.Update(av));
-
-            if (!wasTested)
-            {
-                testTimer = new DispatcherTimer();
-                testTimer.Interval = TimeSpan.FromMilliseconds(1);
-                testTimer.Tick += TestTimer_Tick;
-                testTimer.Start();
-                wasTested = true;
-            }
+            TestGauges();
         }
 
         protected override void OnNavigatedFrom(NavigationEventArgs e)
@@ -153,6 +131,37 @@ namespace imBMW.Universal.App.Views
             }
             var value = (g.Settings.MinValue + (g.Settings.MaxValue - g.Settings.MinValue) * percent / 100) / g.Settings.MultiplyValue - g.Settings.AddToValue;
             g.RawValue = value;
+        }
+
+        private void InstrumentClusterElectronics_IgnitionStateChanged(IgnitionEventArgs e)
+        {
+            if (e.CurrentIgnitionState == IgnitionState.Ign && e.PreviousIgnitionState != IgnitionState.Ign)
+            {
+                wasTested = false;
+                if (IsNavigated)
+                {
+                    TestGauges();
+                }
+            }
+        }
+
+        void TestGauges()
+        {
+            //var av = new MS43JMGAnalogValues();
+            //av.OilTemp = 95.5;
+            //av.VoltageBattery = 14.1;
+            //av.CoolantTemp = 93.1;
+            //av.CoolantRadiatorTemp = 90.3;
+            //Gauges.ForEach(g => g.Update(av));
+
+            if (!wasTested)
+            {
+                testTimer = new DispatcherTimer();
+                testTimer.Interval = TimeSpan.FromMilliseconds(1);
+                testTimer.Tick += TestTimer_Tick;
+                testTimer.Start();
+                wasTested = true;
+            }
         }
 
         #endregion
