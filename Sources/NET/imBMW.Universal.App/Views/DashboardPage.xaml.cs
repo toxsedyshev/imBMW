@@ -168,7 +168,7 @@ namespace imBMW.Universal.App.Views
 
         private void Manager_AfterMessageReceived(MessageEventArgs e)
         {
-            if (testTimer.IsEnabled)
+            if (testTimer != null && testTimer.IsEnabled)
             {
                 return;
             }
