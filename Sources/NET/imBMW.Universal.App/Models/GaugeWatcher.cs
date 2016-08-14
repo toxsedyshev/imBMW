@@ -38,6 +38,10 @@ namespace imBMW.Universal.App.Models
                 {
                     try
                     {
+                        if (value is int)
+                        {
+                            value = Convert.ToDouble((int)value);
+                        }
                         NumValue = ((double)value + Settings.AddToValue) * Settings.MultiplyValue;
                         FormatValue(NumValue);
                     }
