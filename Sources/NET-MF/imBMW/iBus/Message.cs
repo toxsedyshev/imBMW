@@ -78,10 +78,10 @@ namespace imBMW.iBus
 
             this.source = source;
             this.destination = destination;
-            this.data = data;
-            this.ReceiverDescription = description;
-            this.packetLength = packetLength;
-            this.check = check;
+            Data = data;
+            ReceiverDescription = description;
+            PacketLength = packetLength;
+            CRC = check;
         }
 
         public static Message TryCreate(byte[] packet, int length = -1)
@@ -188,9 +188,13 @@ namespace imBMW.iBus
             {
                 return packetLength;
             }
+            private set
+            {
+                packetLength = value;
+            }
         }
 
-        public virtual byte[] Packet
+        public byte[] Packet
         {
             get
             {
@@ -216,6 +220,10 @@ namespace imBMW.iBus
             get
             {
                 return data;
+            }
+            private set
+            {
+                data = value;
             }
         }
 

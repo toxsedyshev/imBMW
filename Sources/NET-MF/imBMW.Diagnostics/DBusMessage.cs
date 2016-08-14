@@ -11,6 +11,8 @@ namespace imBMW.Diagnostics
     public class DBusMessage : Message
     {
         byte[] packet;
+        byte check;
+        int packetLength;
 
         public static new int PacketLengthMin { get { return 4; } }
 
@@ -35,7 +37,8 @@ namespace imBMW.Diagnostics
                 check ^= b;
             }
 
-            init((byte)device, (byte)DeviceAddress.Diagnostic, data, packetLength, check, description);
+            PacketLength = packetLength;
+            CRC = check;
         }
 
         public DeviceAddress Device
@@ -66,7 +69,31 @@ namespace imBMW.Diagnostics
             }
         }
 
-        public override byte[] Packet
+        public new byte CRC
+        {
+            get
+            {
+                return check;
+            }
+            private set
+            {
+                check = value;
+            }
+        }
+
+        public new int PacketLength
+        {
+            get
+            {
+                return packetLength;
+            }
+            private set
+            {
+                packetLength = value;
+            }
+        }
+
+        public new byte[] Packet
         {
             get
             {
