@@ -91,6 +91,11 @@ namespace imBMW.Diagnostics
             return Device == message.Device && Data.Compare(message.Data);
         }
 
+        public Message ToIBusMessage()
+        {
+            return new Message(SourceDevice, DestinationDevice, ReceiverDescription, Data);
+        }
+
         public static new Message TryCreate(byte[] packet, int length = -1)
         {
             if (length < 0)

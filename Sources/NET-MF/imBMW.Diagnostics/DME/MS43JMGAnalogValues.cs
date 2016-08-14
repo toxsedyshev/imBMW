@@ -28,7 +28,7 @@ namespace imBMW.Diagnostics.DME
             IntakePressure = d[31] * 10; // 0..2550 hPa
         }
 
-        public static DBusMessage ModifyMS43Message(MS43AnalogValues av, DBusMessage message)
+        public static DBusMessage ModifyMS43Message(DMEAnalogValues av, Message message)
         {
             var data = message.Data.Skip(0);
             data[30] = (byte)((av.WideBandLambda - 0.5) * 255); // TODO why not?
