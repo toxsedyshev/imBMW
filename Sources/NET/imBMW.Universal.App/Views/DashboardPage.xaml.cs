@@ -168,7 +168,7 @@ namespace imBMW.Universal.App.Views
 
         private void Manager_AfterMessageReceived(MessageEventArgs e)
         {
-            if (testTimer != null && testTimer.IsEnabled)
+            if (testTimer?.IsEnabled == true)
             {
                 return;
             }
@@ -182,7 +182,7 @@ namespace imBMW.Universal.App.Views
 
         void UpdateIKEGauge(GaugeField field, object value)
         {
-            if (testTimer.IsEnabled)
+            if (testTimer?.IsEnabled == true)
             {
                 return;
             }
