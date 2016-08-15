@@ -1,5 +1,4 @@
-﻿using imBMW.Universal.App.Views;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -14,9 +13,9 @@ using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 
-// The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
+// The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=234238
 
-namespace imBMW.Universal.App
+namespace imBMW.Universal.App.Views
 {
     /// <summary>
     /// An empty page that can be used on its own or navigated to within a Frame.
@@ -28,9 +27,14 @@ namespace imBMW.Universal.App
             this.InitializeComponent();
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private void DashboardButton_Click(object sender, RoutedEventArgs e)
         {
             Frame.Navigate(typeof(DashboardPage));
+        }
+
+        private void ToolsButton_Click(object sender, RoutedEventArgs e)
+        {
+            Frame.Navigate(typeof(ToolsPage));
         }
     }
 }

@@ -18,6 +18,9 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
+using imBMW.Universal.App.Views;
+using Windows.UI.Core;
+using Windows.Foundation.Metadata;
 
 namespace imBMW.Universal.App
 {
@@ -120,6 +123,29 @@ namespace imBMW.Universal.App
                 {
                     //TODO: Load state from previously suspended application
                 }
+
+                Windows.UI.Core.SystemNavigationManager.GetForCurrentView().AppViewBackButtonVisibility = AppViewBackButtonVisibility.Visible;
+                Windows.UI.Core.SystemNavigationManager.GetForCurrentView().BackRequested += (s, a) =>
+                {
+                    if (rootFrame.CanGoBack)
+                    {
+                        rootFrame.GoBack();
+                        a.Handled = true;
+                    }
+                };
+
+                /*if (ApiInformation.IsTy‌​pePresent("Windows.Ph‌​one.UI.Input.Hardware‌​Buttons")))
+                {
+                    Windows.Phone.UI.Input.HardwareButtons.BackPressed += (s, a) =>
+                    {
+                        Debug.WriteLine("BackPressed");
+                        if (Frame.CanGoBack)
+                        {
+                            Frame.GoBack();
+                            a.Handled = true;
+                        }
+                    };
+                }*/
 
                 // Place the frame in the current Window
                 Window.Current.Content = rootFrame;
