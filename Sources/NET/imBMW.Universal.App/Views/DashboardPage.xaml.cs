@@ -30,7 +30,7 @@ namespace imBMW.Universal.App.Views
     /// </summary>
     public sealed partial class DashboardPage : ExtendedPage
     {
-        private List<GaugeWatcher> gauges;
+        private static List<GaugeWatcher> gauges;
 
         public List<GaugeWatcher> Gauges
         {

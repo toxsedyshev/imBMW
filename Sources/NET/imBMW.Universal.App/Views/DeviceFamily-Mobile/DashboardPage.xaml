@@ -1,5 +1,5 @@
 ﻿<local:ExtendedPage
-    x:Class="imBMW.Universal.App.Views.DashboardPage"
+    x:Class="imBMW.Universal.App.Views.DeviceFamily_Mobile.DashboardPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:imBMW.Universal.App.Views"
@@ -10,15 +10,23 @@
     DataContext="{Binding RelativeSource={RelativeSource Self}}">
 
     <Grid Background="Black">
-        <GridView ItemsSource="{Binding Gauges}" IsItemClickEnabled="False" SelectionMode="None">
+        <GridView ItemsSource="{Binding Gauges}" IsItemClickEnabled="False" SelectionMode="None" Padding="25,0,0,0">
             <GridView.ItemsPanel>
                 <ItemsPanelTemplate>
-                    <ItemsWrapGrid Orientation="Horizontal" />
+                    <ItemsWrapGrid Orientation="Horizontal">
+                        <!--<ItemsWrapGrid.RenderTransform>
+                            <ScaleTransform ScaleX="0.5" ScaleY="0.5"/>
+                        </ItemsWrapGrid.RenderTransform>-->
+                    </ItemsWrapGrid>
                 </ItemsPanelTemplate>
             </GridView.ItemsPanel>
             <GridView.ItemTemplate>
                 <DataTemplate>
-                    <Controls:Gauge Margin="10"/>
+                    <Controls:GaugeMobile>
+                        <!--<Controls:Gauge.RenderTransform>
+                            <ScaleTransform ScaleX="0.5" ScaleY="0.5"/>
+                        </Controls:Gauge.RenderTransform>-->
+                    </Controls:GaugeMobile>
                 </DataTemplate>
             </GridView.ItemTemplate>
         </GridView>

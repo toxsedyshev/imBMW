@@ -5,11 +5,12 @@
     xmlns:local="using:imBMW.Universal.App.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:sys="using:System"
     mc:Ignorable="d"
-    d:DesignHeight="250"
-    d:DesignWidth="250">
+    Width="230"
+    Height="230">
 
-    <Grid Padding="10">
+    <Grid>
         <Grid Visibility="{Binding SecondaryWatcher, Converter={StaticResource NullVisibilityConverter}}">
             <local:PieSlice Diameter="230" Fill="Gray" StartAngle="{Binding GrayAngleStart}" Angle="{Binding GrayAngle}"/>
             <local:PieSlice Diameter="230" Fill="{Binding Foreground}" StartAngle="0" Angle="{Binding Angle}"/>
@@ -32,7 +33,7 @@
             <local:PieSlice Diameter="230" Fill="Gray" StartAngle="{Binding SecondaryWatcher.GrayAngleStart}" Angle="{Binding SecondaryWatcher.GrayAngle}" Multiply="0.5" InvertDirection="True"/>
             <local:PieSlice Diameter="230" Fill="{Binding SecondaryWatcher.Foreground}" StartAngle="0" Angle="{Binding SecondaryWatcher.Angle}" Multiply="0.5" InvertDirection="True"/>
             <Ellipse Fill="Black" Margin="10"/>
-            <Rectangle Fill="White" Height="2" VerticalAlignment="Center" Margin="0,0,2,2"/>
+            <Rectangle Fill="White" Height="2" VerticalAlignment="Center"/>
             <TextBlock Text="{Binding Settings.Name}" FontSize="25" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,15,0,0"/>
             <TextBlock Text="{Binding StringValue}" FontSize="60" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,0,80"/>
             <TextBlock Text="{Binding SecondaryWatcher.StringValue}" FontSize="60" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,60,0,0"/>
