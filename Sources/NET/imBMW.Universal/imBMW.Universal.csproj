@@ -186,6 +186,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tools\DateTimeHelpers.cs" />
     <Compile Include="Tools\EnumHelpers.cs" />
+    <Compile Include="Tools\Hashtable.cs" />
     <Compile Include="Tools\Logger.cs" />
     <Content Include="Properties\imBMW.Universal.rd.xml" />
   </ItemGroup>
