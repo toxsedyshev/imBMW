@@ -21,6 +21,11 @@ namespace imBMW.iBus
             return InternalMessage.TryCreate(data);
         }
 
+        protected virtual int GetPacketLength(Message m)
+        {
+            return m.PacketLength;
+        }
+
         public void Parse(byte[] data)
         {
             if (buffer == null)
@@ -47,13 +52,13 @@ namespace imBMW.iBus
             Message m;
             while (buffer != null && (m = TryCreate(buffer)) != null)
             {
-                if (m.PacketLength == buffer.Length)
+                if (GetPacketLength(m) == buffer.Length)
                 {
                     buffer = null;
                 }
                 else
                 {
-                    buffer = buffer.Skip(m.PacketLength);
+                    buffer = buffer.Skip(GetPacketLength(m));
                 }
                 try
                 {

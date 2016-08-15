@@ -14,5 +14,10 @@ namespace imBMW.Diagnostics
         {
             return DBusMessage.TryCreate(data);
         }
+
+        protected override int GetPacketLength(Message m)
+        {
+            return ((DBusMessage)m).PacketLength;
+        }
     }
 }
