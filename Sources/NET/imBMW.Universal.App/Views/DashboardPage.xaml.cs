@@ -186,7 +186,7 @@ namespace imBMW.Universal.App.Views
             {
                 return;
             }
-            Gauges.Where(g => g.Settings.FieldType == field).ToList().ForEach(g => g.RawValue = value);
+            Gauges.ForEach(g => g.Update(field, value));
         }
 
         private void InstrumentClusterElectronics_TemperatureChanged(TemperatureEventArgs e)
