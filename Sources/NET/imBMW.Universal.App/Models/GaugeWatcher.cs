@@ -14,7 +14,7 @@ namespace imBMW.Universal.App.Models
 {
     public class GaugeWatcher : ObservableObject
     {
-        object rawValue;
+        double rawValue;
         string stringValue;
         double numValue;
         GaugeWatcher secondaryWatcher;
@@ -25,7 +25,7 @@ namespace imBMW.Universal.App.Models
         static Brush greenBrush = new SolidColorBrush(Colors.Green);
         static Dictionary<string, PropertyInfo> properties = new Dictionary<string, PropertyInfo>(); 
 
-        public object RawValue
+        public double RawValue
         {
             get
             {
@@ -36,20 +36,7 @@ namespace imBMW.Universal.App.Models
             {
                 if (Set(ref rawValue, value))
                 {
-                    try
-                    {
-                        if (value is int)
-                        {
-                            value = Convert.ToDouble((int)value);
-                        }
-                        NumValue = ((double)value + Settings.AddToValue) * Settings.MultiplyValue;
-                        FormatValue(NumValue);
-                    }
-                    catch
-                    {
-                        FormatValue(value);
-                        NumValue = 0;
-                    }
+                    NumValue = (value + Settings.AddToValue) * Settings.MultiplyValue;
                 }
             }
         }
@@ -70,6 +57,12 @@ namespace imBMW.Universal.App.Models
                 var res = (NumValue - Settings.MinValue) / (Settings.MaxValue - Settings.MinValue);
                 res = Math.Max(Math.Min(res, 1), 0);
                 return res * 100;
+            }
+            set
+            {
+                value = Math.Min(100, Math.Max(0, value));
+                var val = (Settings.MinValue + (Settings.MaxValue - Settings.MinValue) * value / 100) / Settings.MultiplyValue - Settings.AddToValue;
+                RawValue = val;
             }
         }
 
@@ -124,6 +117,7 @@ namespace imBMW.Universal.App.Models
             {
                 if (Set(ref numValue, value))
                 {
+                    FormatValue(NumValue);
                     OnPropertyChanged("Percentage");
                     OnPropertyChanged("Angle");
                     OnPropertyChanged("GrayAngleStart");
@@ -215,12 +209,27 @@ namespace imBMW.Universal.App.Models
                 {
                     properties.Add(Settings.Field, av.GetType().GetProperty(Settings.Field));
                 }
-                RawValue = properties[Settings.Field].GetValue(av);
+                var obj = properties[Settings.Field].GetValue(av);
+                if (obj is double)
+                {
+                    RawValue = (double)obj;
+                }
+                else if (obj is int)
+                {
+                    RawValue = Convert.ToDouble((int)obj);
+                }
             }
             catch
             {
                 StringValue = "N/A";
             }
+        }
+
+        public void Init()
+        {
+            SecondaryWatcher?.Init();
+
+            Percentage = 0;
         }
 
         public static List<GaugeWatcher> FromSettingsList(IEnumerable<GaugeSettings> settingsList)

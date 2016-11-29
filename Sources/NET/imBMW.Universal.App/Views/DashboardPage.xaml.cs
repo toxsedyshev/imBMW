@@ -111,12 +111,8 @@ namespace imBMW.Universal.App.Views
             foreach (var g in Gauges)
             {
                 TestGauge(g, testTimerTicks);
-                if (g.SecondaryWatcher != null)
-                {
-                    TestGauge(g.SecondaryWatcher, testTimerTicks);
-                }
             }
-            testTimerTicks += 3;
+            testTimerTicks += 8;
         }
 
         void TestGauge(GaugeWatcher g, double percent)
@@ -129,8 +125,11 @@ namespace imBMW.Universal.App.Views
             {
                 percent = 0;
             }
-            var value = (g.Settings.MinValue + (g.Settings.MaxValue - g.Settings.MinValue) * percent / 100) / g.Settings.MultiplyValue - g.Settings.AddToValue;
-            g.RawValue = value;
+            g.Percentage = percent;
+            if (g.SecondaryWatcher != null)
+            {
+                g.SecondaryWatcher.Percentage = percent;
+            }
         }
 
         private void InstrumentClusterElectronics_IgnitionStateChanged(IgnitionEventArgs e)
@@ -154,14 +153,22 @@ namespace imBMW.Universal.App.Views
             //av.CoolantRadiatorTemp = 90.3;
             //Gauges.ForEach(g => g.Update(av));
 
-            if (!wasTested)
+            if (wasTested)
             {
-                testTimer = new DispatcherTimer();
-                testTimer.Interval = TimeSpan.FromMilliseconds(1);
-                testTimer.Tick += TestTimer_Tick;
-                testTimer.Start();
-                wasTested = true;
+                return;
             }
+
+            testTimer = new DispatcherTimer();
+            testTimer.Interval = TimeSpan.FromMilliseconds(3);
+            testTimer.Tick += TestTimer_Tick;
+            testTimer.Start();
+
+            //foreach (var g in Gauges)
+            //{
+            //    g.Init();
+            //}
+
+            wasTested = true;
         }
 
         #endregion
@@ -180,7 +187,7 @@ namespace imBMW.Universal.App.Views
             }
         }
 
-        void UpdateIKEGauge(GaugeField field, object value)
+        void UpdateIKEGauge(GaugeField field, double value)
         {
             if (testTimer?.IsEnabled == true)
             {
