@@ -139,8 +139,11 @@ namespace imBMW.Features.Menu
                     return;
                 }
                 mflModeTelephone = value;
-                Radio.DisplayText(CharIcons.SelectedArrow + (value ? "Navigation" : "Playback"), TextAlign.Center);
-                RefreshScreenWithDelay(MenuScreenUpdateReason.Scroll);
+                if (IsEnabled)
+                {
+                    Radio.DisplayText(CharIcons.SelectedArrow + (value ? "Navigation" : "Playback"), TextAlign.Center);
+                    RefreshScreenWithDelay(MenuScreenUpdateReason.Scroll);
+                }
             }
             get
             {
@@ -163,7 +166,7 @@ namespace imBMW.Features.Menu
                     MflModeTelephone = true;
                     return;
             }
-            if (MflModeTelephone)
+            if (IsEnabled && MflModeTelephone)
             {
                 switch (button)
                 {
