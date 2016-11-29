@@ -195,7 +195,7 @@ namespace imBMW.Universal.App.Models
             }
         }
 
-        public void Update(GaugeField field, object rawValue)
+        public void Update(GaugeField field, double rawValue)
         {
             SecondaryWatcher?.Update(field, rawValue);
             
