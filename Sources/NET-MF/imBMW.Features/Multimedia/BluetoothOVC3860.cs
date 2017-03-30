@@ -543,7 +543,7 @@ namespace imBMW.Multimedia
                     //IsPlaying = true; // sent even when paused?
                     break;
                 case "MX":
-                    Logger.Info("NextItems", "BT");
+                    Logger.Info("Next", "BT");
                     break;
                 case "MS":
                     Logger.Info("Previous", "BT");

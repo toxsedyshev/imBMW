@@ -28,7 +28,6 @@ namespace imBMW.Features.Menu
             mediaEmulator.IsEnabledChanged += mediaEmulator_IsEnabledChanged;
 
             Radio.OnOffChanged += Radio_OnOffChanged;
-            Manager.AddMessageReceiverForSourceDevice(DeviceAddress.Radio, ProcessRadioMessage);
             Manager.AddMessageReceiverForDestinationDevice(DeviceAddress.Radio, ProcessToRadioMessage);
         }
 
@@ -130,8 +129,10 @@ namespace imBMW.Features.Menu
             }
         }
 
-        protected void ProcessRadioMessage(Message m)
+        protected override void ProcessRadioMessage(Message m)
         {
+            base.ProcessRadioMessage(m);
+
             if (!IsEnabled)
             {
                 return;
@@ -267,14 +268,6 @@ namespace imBMW.Features.Menu
                         // TODO fix Tone - skip clear till aux title
                         IsEnabled = false;
                         //Bordmonitor.EnableRadioMenu(); // TODO test [and remove]
-                        break;
-                    case 0x10:
-                        m.ReceiverDescription = "BM Button < prev track";
-                        mediaEmulator.Player.Prev();
-                        break;
-                    case 0x00:
-                        m.ReceiverDescription = "BM Button > next track";
-                        mediaEmulator.Player.Next();
                         break;
                 }
                 return;

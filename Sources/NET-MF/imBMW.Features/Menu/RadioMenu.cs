@@ -30,7 +30,6 @@ namespace imBMW.Features.Menu
         private RadioMenu(MediaEmulator mediaEmulator)
             : base(mediaEmulator)
         {
-            Manager.AddMessageReceiverForSourceDevice(DeviceAddress.Radio, ProcessRadioMessage);
             MultiFunctionSteeringWheel.ButtonPressed += MultiFunctionSteeringWheel_ButtonPressed;
         }
 
@@ -186,8 +185,15 @@ namespace imBMW.Features.Menu
             }
         }
 
-        void ProcessRadioMessage(Message m)
+        protected override void ProcessRadioMessage(Message m)
         {
+            base.ProcessRadioMessage(m);
+
+            if (!IsEnabled)
+            {
+                return;
+            }
+
             if (m.Data.Length == 3 && m.Data[0] == 0x38 && m.Data[1] == 0x06)
             {
                 // switch cd buttons:
@@ -219,31 +225,9 @@ namespace imBMW.Features.Menu
                 }
                 m.ReceiverDescription = "Change CD: " + cdNumber;
             }
-            else if (m.Data.Length == 3 && m.Data[0] == 0x38 && m.Data[1] == 0x0A)
-            {
-                switch (m.Data[2])
-                {
-                    case 0x00:
-                        if (CurrentScreen != mediaEmulator.Player.Menu)
-                        {
-                            UpdateScreen(MenuScreenUpdateReason.Refresh);
-                        }
-                        mediaEmulator.Player.Next();
-                        m.ReceiverDescription = "Next track";
-                        break;
-                    case 0x01:
-                        if (CurrentScreen != mediaEmulator.Player.Menu)
-                        {
-                            UpdateScreen(MenuScreenUpdateReason.Refresh);
-                        }
-                        mediaEmulator.Player.Prev();
-                        m.ReceiverDescription = "Prev track";
-                        break;
-                }
-            }
             // TODO bind rnd, scan
 
-            if (IsEnabled && Radio.HasMID && m.DestinationDevice == DeviceAddress.MultiInfoDisplay)
+            if (Radio.HasMID && m.DestinationDevice == DeviceAddress.MultiInfoDisplay)
             {
                 if (m.Data.StartsWith(DataMIDCDC))
                 {
@@ -269,6 +253,13 @@ namespace imBMW.Features.Menu
                     {
                         wereMIDButtonsOverriden = false;
                     }
+                }
+            }
+            else if (m.Data.Length == 3 && m.Data[0] == 0x38 && m.Data[1] == 0x0A)
+            {
+                if (CurrentScreen != mediaEmulator.Player.Menu)
+                {
+                    UpdateScreen(MenuScreenUpdateReason.Refresh);
                 }
             }
         }

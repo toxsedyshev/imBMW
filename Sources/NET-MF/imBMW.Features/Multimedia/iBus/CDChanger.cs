@@ -41,80 +41,7 @@ namespace imBMW.iBus.Devices.Emulators
         }
 
         #region Player control
-
-        // TODO move to radio menu
-        /*bool delayRadioText = false;
-
-        void ShowPlayerStatus(IAudioPlayer player, bool isPlaying)
-        {
-            string s = TextWithIcon(isPlaying ? CharIcons.Play : CharIcons.Pause);
-            ShowPlayerStatus(player, s);
-        }
-
-        void ShowPlayerStatus(IAudioPlayer player, string status, PlayerEvent playerEvent)
-        {
-            if (!IsEnabled)
-            {
-                return;
-            }
-            switch (playerEvent)
-            {
-                case PlayerEvent.Next:
-                    status = TextWithIcon(CharIcons.Next);
-                    break;
-                case PlayerEvent.Prev:
-                    status = TextWithIcon(CharIcons.Prev);
-                    break;
-                case PlayerEvent.Playing:
-                    status = TextWithIcon(CharIcons.Play, status);
-                    break;
-                case PlayerEvent.Current:
-                    status = TextWithIcon(CharIcons.SelectedArrow, status);
-                    break;
-                case PlayerEvent.Voice:
-                    status = TextWithIcon(CharIcons.Voice, status);
-                    break;
-            }
-            ShowPlayerStatus(player, status);
-        }
-
-        string TextWithIcon(string icon, string text = null)
-        {
-            if (text == null)
-            {
-                text = player.Name;
-            }
-            if (icon.Length + text.Length < Radio.DisplayTextMaxLen)
-            {
-                return icon + " " + text;
-            }
-            else
-            {
-                return icon + text;
-            }
-        }
-
-        void ShowPlayerStatus(IAudioPlayer player, string status)
-        {
-            if (!IsEnabled)
-            {
-                return;
-            }
-            if (status.Length > Radio.DisplayTextMaxLen)
-            {
-                status = status.Substring(status.Length - Radio.DisplayTextMaxLen);
-            }
-            if (delayRadioText)
-            {
-                Radio.DisplayTextWithDelay(status, TextAlign.Center);
-            }
-            else
-            {
-                Radio.DisplayText(status, TextAlign.Center);
-            }
-            delayRadioText = false;
-        }*/
-
+        
         protected override void Play()
         {
             CancelStopDelay();
@@ -148,7 +75,6 @@ namespace imBMW.iBus.Devices.Emulators
 
         protected override void OnIsEnabledChanged(bool isEnabled, bool fire = true)
         {
-            //delayRadioText = true; // TODO move to radio menu
             Player.PlayerHostState = isEnabled ? PlayerHostState.On : PlayerHostState.Off;
             if (isEnabled)
             {

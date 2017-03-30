@@ -32,6 +32,7 @@ namespace imBMW.iBus.Devices.Emulators
         {
             Radio.OnOffChanged += Radio_OnOffChanged;
             Manager.AddMessageReceiverForSourceDevice(DeviceAddress.Radio, ProcessRadioMessage);
+            Manager.AddMessageReceiverForDestinationDevice(DeviceAddress.Radio, ProcessToRadioMessage);
         }
 
         protected override void MultiFunctionSteeringWheel_ButtonPressed(MFLButton button)
@@ -75,6 +76,30 @@ namespace imBMW.iBus.Devices.Emulators
                 if (RadioBands.Contains(band))
                 {
                     IsAUXSelected = false;
+                }
+            }
+        }
+
+        private void ProcessToRadioMessage(Message m)
+        {
+            if (!IsEnabled)
+            {
+                return;
+            }
+            
+            // BM buttons
+            if (m.Data.Length == 2 && m.Data[0] == 0x48)
+            {
+                switch (m.Data[1])
+                {
+                    case 0x00:
+                        m.ReceiverDescription = "BM Button > Next Track";
+                        Next();
+                        break;
+                    case 0x10:
+                        m.ReceiverDescription = "BM Button < Prev Track";
+                        Prev();
+                        break;
                 }
             }
         }
