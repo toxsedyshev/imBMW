@@ -300,7 +300,7 @@ namespace imBMW.iBus.Devices.Real
                         break;
                     case 0x04:
                     case 0x05:
-                        if (m.Data.Length == 7)
+                        if (m.Data.Length >= 7)
                         {
                             float consumption = 0;
                             m.Data.ParseFloat(out consumption, 3, 4);
@@ -331,7 +331,7 @@ namespace imBMW.iBus.Devices.Real
                         }
                         break;
                     case 0x0A:
-                        if (m.Data.Length == 7)
+                        if (m.Data.Length >= 7)
                         {
                             float speed = 0;
                             m.Data.ParseFloat(out speed, 3, 4);
