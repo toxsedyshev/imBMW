@@ -60,6 +60,7 @@ namespace imBMW.Universal.App.Views
         {
             if (e.PropertyName == "Gauges")
             {
+                AreGaugesEnabled = false;
                 Gauges = GaugeWatcher.FromSettingsList(Settings.Instance.Gauges);
             }
         }
@@ -77,6 +78,7 @@ namespace imBMW.Universal.App.Views
             InstrumentClusterElectronics.SpeedRPMChanged += InstrumentClusterElectronics_SpeedRPMChanged;
             InstrumentClusterElectronics.TemperatureChanged += InstrumentClusterElectronics_TemperatureChanged;
 
+            AreGaugesEnabled = true;
             TestGauges();
         }
 
@@ -106,6 +108,7 @@ namespace imBMW.Universal.App.Views
             {
                 testTimer.Stop();
                 testTimer = null;
+                AreGaugesEnabled = true;
                 return;
             }
             foreach (var g in Gauges)
@@ -153,10 +156,12 @@ namespace imBMW.Universal.App.Views
             //av.CoolantRadiatorTemp = 90.3;
             //Gauges.ForEach(g => g.Update(av));
 
-            if (wasTested)
+            if (wasTested || InstrumentClusterElectronics.CurrentRPM > 0)
             {
                 return;
             }
+
+            AreGaugesEnabled = false;
 
             testTimer = new DispatcherTimer();
             testTimer.Interval = TimeSpan.FromMilliseconds(3);
@@ -173,12 +178,16 @@ namespace imBMW.Universal.App.Views
 
         #endregion
 
+        bool AreGaugesEnabled
+        {
+            set
+            {
+                Gauges.ForEach(g => g.IsEnabled = value);
+            }
+        }
+
         private void Manager_AfterMessageReceived(MessageEventArgs e)
         {
-            if (testTimer?.IsEnabled == true)
-            {
-                return;
-            }
             if (MS43AnalogValues.CanParse(e.Message))
             {
                 var av = new MS43JMGAnalogValues();
@@ -186,51 +195,42 @@ namespace imBMW.Universal.App.Views
                 Gauges.ForEach(g => g.Update(av));
             }
         }
-
-        void UpdateIKEGauge(GaugeField field, double value)
-        {
-            if (testTimer?.IsEnabled == true)
-            {
-                return;
-            }
-            Gauges.ForEach(g => g.Update(field, value));
-        }
-
+        
         private void InstrumentClusterElectronics_TemperatureChanged(TemperatureEventArgs e)
         {
-            UpdateIKEGauge(GaugeField.CoolantTemperature, e.Coolant);
-            UpdateIKEGauge(GaugeField.OutsideTemperature, e.Outside);
+            UpdateIKEGauge(GaugeType.CoolantTemperatureBC, e.Coolant);
+            UpdateIKEGauge(GaugeType.OutsideTemperature, e.Outside);
         }
 
         private void InstrumentClusterElectronics_SpeedRPMChanged(SpeedRPMEventArgs e)
         {
-            UpdateIKEGauge(GaugeField.Speed, e.Speed);
-            UpdateIKEGauge(GaugeField.RPM, e.RPM);
+            UpdateIKEGauge(GaugeType.SpeedBC, e.Speed);
+            UpdateIKEGauge(GaugeType.RPMBC, e.RPM);
         }
 
         private void InstrumentClusterElectronics_SpeedLimitChanged(SpeedLimitEventArgs e)
         {
-            UpdateIKEGauge(GaugeField.SpeedLimit, e.Value);
+            UpdateIKEGauge(GaugeType.SpeedLimit, e.Value);
         }
 
         private void InstrumentClusterElectronics_RangeChanged(RangeEventArgs e)
         {
-            UpdateIKEGauge(GaugeField.Range, e.Value);
+            UpdateIKEGauge(GaugeType.Range, e.Value);
         }
 
         private void InstrumentClusterElectronics_Consumption2Changed(ConsumptionEventArgs e)
         {
-            UpdateIKEGauge(GaugeField.Consumption2, e.Value);
+            UpdateIKEGauge(GaugeType.Consumption2, e.Value);
         }
 
         private void InstrumentClusterElectronics_Consumption1Changed(ConsumptionEventArgs e)
         {
-            UpdateIKEGauge(GaugeField.Consumption1, e.Value);
+            UpdateIKEGauge(GaugeType.Consumption1, e.Value);
         }
 
         private void InstrumentClusterElectronics_AverageSpeedChanged(AverageSpeedEventArgs e)
         {
-            UpdateIKEGauge(GaugeField.AverageSpeed, e.Value);
+            UpdateIKEGauge(GaugeType.AverageSpeed, e.Value);
         }
     }
 }

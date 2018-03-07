@@ -1,4 +1,5 @@
-﻿using System;
+﻿using imBMW.Diagnostics.DME;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,18 +7,26 @@ using System.Threading.Tasks;
 
 namespace imBMW.Universal.App.Models
 {
+    public delegate double GaugeGetDMEValueDelegate(DMEAnalogValues av);
+
+    public delegate void GaugeValueUpdatedDelegate(double value);
+
+    public delegate void GaugeSubcribeToUpdatesDelegate(GaugeValueUpdatedDelegate callback);
+
     public class GaugeSettings : ObservableObject
     {
         private GaugeSettings secondaryGauge;
-
+        
         public string Name { get; set; }
 
-        public string Dimention { get; set; }
+        public string Dimension { get; set; }
 
-        public GaugeField FieldType { get; set; } = GaugeField.Custom;
+        public GaugeGetDMEValueDelegate GetDMEValue { get; set; }
 
-        public string Field { get; set; }
+        public GaugeSubcribeToUpdatesDelegate SubcribeToUpdates { get; set; }
 
+        public GaugeType GaugeType { get; set; } = GaugeType.Custom;
+        
         public double MinValue { get; set; } = 0;
 
         public double MaxValue { get; set; } = 100;
@@ -50,22 +59,5 @@ namespace imBMW.Universal.App.Models
                 Set(ref secondaryGauge, value);
             }
         }
-    }
-
-    public enum GaugeField : int
-    {
-        Custom,
-        Consumption1,
-        Consumption2,
-        SpeedLimit,
-        AverageSpeed,
-        Range,
-        ArrivalDistance,
-        ArrivalTime,
-        CoolantTemperature,
-        OutsideTemperature,
-        Voltage,
-        Speed,
-        RPM
     }
 }

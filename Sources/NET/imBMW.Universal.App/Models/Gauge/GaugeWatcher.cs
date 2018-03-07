@@ -17,13 +17,23 @@ namespace imBMW.Universal.App.Models
         double rawValue;
         string stringValue;
         double numValue;
+        bool isSubscribed;
+        bool isEnabled = true;
         GaugeWatcher secondaryWatcher;
         GaugeSettings settings;
 
         static Brush redBrush = new SolidColorBrush(Colors.Red);
         static Brush yellowBrush = new SolidColorBrush(Colors.Yellow);
         static Brush greenBrush = new SolidColorBrush(Colors.Green);
-        static Dictionary<string, PropertyInfo> properties = new Dictionary<string, PropertyInfo>(); 
+
+        public GaugeWatcher(GaugeSettings settings)
+        {
+            Settings = settings;
+
+            Settings.PropertyChanged += Settings_PropertyChanged;
+
+            InitSecondaryWatcher();
+        }
 
         public double RawValue
         {
@@ -41,9 +51,9 @@ namespace imBMW.Universal.App.Models
             }
         }
 
-        void FormatValue(object value)
+        void FormatValue(double value)
         {
-            StringValue = string.Format("{0:" + Settings.Format + "}{1}", value, Settings.Suffix);
+            StringValue = value.ToString(Settings.Format) + Settings.Suffix;
         }
 
         public double Percentage
@@ -166,14 +176,7 @@ namespace imBMW.Universal.App.Models
             }
         }
 
-        public GaugeWatcher(GaugeSettings settings)
-        {
-            Settings = settings;
-
-            Settings.PropertyChanged += Settings_PropertyChanged;
-
-            InitSecondaryWatcher();
-        }
+        public bool IsEnabled { get => isEnabled; set => Set(ref isEnabled, value); }
 
         private void Settings_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
@@ -195,40 +198,27 @@ namespace imBMW.Universal.App.Models
             }
         }
 
-        public void Update(GaugeField field, double rawValue)
-        {
-            SecondaryWatcher?.Update(field, rawValue);
-            
-            if (Settings.FieldType != field)
-            {
-                return;
-            }
-            RawValue = rawValue;
-        }
+        //public void Update(GaugeType field, double rawValue)
+        //{
+        //    SecondaryWatcher?.Update(field, rawValue);
+        //    
+        //    if (Settings.GaugeType == field)
+        //    {
+        //        RawValue = rawValue;
+        //    }
+        //}
 
         public void Update(DMEAnalogValues av)
         {
             SecondaryWatcher?.Update(av);
 
-            if (Settings.FieldType != GaugeField.Custom)
+            if (!IsEnabled || Settings.GetDMEValue == null)
             {
                 return;
             }
             try
             {
-                if (!properties.Keys.Contains(Settings.Field))
-                {
-                    properties.Add(Settings.Field, av.GetType().GetProperty(Settings.Field));
-                }
-                var obj = properties[Settings.Field].GetValue(av);
-                if (obj is double)
-                {
-                    RawValue = (double)obj;
-                }
-                else if (obj is int)
-                {
-                    RawValue = Convert.ToDouble((int)obj);
-                }
+                RawValue = Settings.GetDMEValue(av);
             }
             catch
             {
@@ -236,21 +226,25 @@ namespace imBMW.Universal.App.Models
             }
         }
 
+        public void SubscribeToUpdates()
+        {
+            if (!isSubscribed)
+            {
+                isSubscribed = true;
+                Settings.SubcribeToUpdates?.Invoke(value =>
+                {
+                    if (IsEnabled) RawValue = value;
+                });
+            }
+
+            SecondaryWatcher.SubscribeToUpdates();
+        }
+
         public void Init()
         {
             SecondaryWatcher?.Init();
 
             Percentage = 0;
-        }
-
-        public static List<GaugeWatcher> FromSettingsList(IEnumerable<GaugeSettings> settingsList)
-        {
-            var list = new List<GaugeWatcher>();
-            foreach (var s in settingsList)
-            {
-                list.Add(new GaugeWatcher(s));
-            }
-            return list;
         }
     }
 }
