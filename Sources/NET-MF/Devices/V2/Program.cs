@@ -77,7 +77,7 @@ namespace imBMW.Devices.V2
 
             // Create serial port to work with Melexis TH3122
             //ISerialPort iBusPort = new SerialPortEcho();
-            ISerialPort iBusPort = new SerialPortTH3122(Serial.COM3, Pin.TH3122SENSTA, true);
+            ISerialPort iBusPort = new SerialPortTH3122(Serial.COM3, Pin.TH3122SENSTA);
             Logger.Info("TH3122 serial port inited");
 
             /*InputPort jumper = new InputPort((Cpu.Pin)FEZ_Pin.Digital.An7, false, Port.ResistorMode.PullUp);
