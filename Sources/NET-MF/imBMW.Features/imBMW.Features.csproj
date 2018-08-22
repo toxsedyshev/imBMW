@@ -30,6 +30,13 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="3rdparty\MCP2515.cs" />
+    <Compile Include="CanBus\Adapters\CanAdapter.cs" />
+    <Compile Include="CanBus\Adapters\CanAdapterSettings.cs" />
+    <Compile Include="CanBus\Adapters\CanMCP2515Adapter.cs" />
+    <Compile Include="CanBus\Adapters\CanNativeAdapter.cs" />
+    <Compile Include="CanBus\CanException.cs" />
+    <Compile Include="CanBus\CanMessage.cs" />
     <Compile Include="Comfort.cs" />
     <Compile Include="FeaturesEnumConverter.cs" />
     <Compile Include="InternalCommunications.cs" />
@@ -62,6 +69,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="GHI.Hardware, Version=4.3.8.1, Culture=neutral, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.SPOT.Hardware" />
     <Reference Include="Microsoft.SPOT.Native" />
     <Reference Include="System.IO" />
