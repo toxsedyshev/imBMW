@@ -8,10 +8,10 @@ namespace imBMW.Features.CanBus.Adapters
     {
         ControllerAreaNetwork can;
 
-        public CanNativeAdapter(CanAdapterSettings settings)
+        public CanNativeAdapter(int canPort, CanAdapterSettings settings)
             : base(settings)
         {
-            can = new ControllerAreaNetwork(settings.Port, settings.Speed);
+            can = new ControllerAreaNetwork(canPort, settings.Speed);
             can.ErrorReceived += Can_ErrorReceived;
             can.MessageAvailable += Can_MessageAvailable;
         }

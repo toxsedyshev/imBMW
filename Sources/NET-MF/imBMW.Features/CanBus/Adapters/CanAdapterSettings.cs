@@ -6,8 +6,6 @@ namespace imBMW.Features.CanBus.Adapters
 {
     public class CanAdapterSettings
     {
-        public readonly int Port;
-
         public readonly ControllerAreaNetwork.Speed Speed;
 
         public MCP2515.enBaudRate MCP2515Speed

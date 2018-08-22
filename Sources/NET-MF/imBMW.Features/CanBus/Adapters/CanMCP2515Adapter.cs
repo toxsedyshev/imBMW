@@ -2,6 +2,7 @@ using System;
 using Microsoft.SPOT;
 using System.Threading;
 using System.Collections;
+using Microsoft.SPOT.Hardware;
 
 namespace imBMW.Features.CanBus.Adapters
 {
@@ -11,10 +12,10 @@ namespace imBMW.Features.CanBus.Adapters
         Thread receiveThread;
         bool isEnabled;
 
-        public CanMCP2515Adapter(CanAdapterSettings settings) : base(settings)
+        public CanMCP2515Adapter(SPI.SPI_module spi, Cpu.Pin chipSelect, CanAdapterSettings settings) : base(settings)
         {
             can = new MCP2515();
-            can.InitCAN(settings.MCP2515Speed);
+            can.InitCAN(spi, chipSelect, settings.MCP2515Speed);
         }
 
         public override bool IsEnabled

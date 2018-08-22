@@ -130,9 +130,7 @@ namespace System
         private const byte DataIndexOffset = 2;
         /// <summary>The max CAN ID that can be represented on an 11 bit ID.</summary>
         private const int CANID_11BITS = 0x7FF;
-
-        /// <summary>SPI PIN for NETDuino Plus.</summary>
-        public const Cpu.Pin SLAVESELECT = (Cpu.Pin)54;
+        
         /// <summary>the SPI object that comunicates with the transceiver.</summary>
         private SPI spi;
 
@@ -159,10 +157,10 @@ namespace System
         /// <param name="baudrate">The selected baud rate.</param>
         /// <returns>True if configuration was successful.</returns>
         /// <remarks>Transceiver needs to be set to normal mode before starting TX/RX operations.</remarks>
-        public bool InitCAN(enBaudRate baudrate)
+        public bool InitCAN(SPI.SPI_module spiModule, Cpu.Pin chipSelect, enBaudRate baudrate)
         {
             // Configure SPI            
-            var configSPI = new SPI.Configuration(SLAVESELECT, LOW, 0, 0, HIGH, HIGH, 10000, SPI.SPI_module.SPI1);
+            var configSPI = new SPI.Configuration(chipSelect, LOW, 0, 0, HIGH, HIGH, 10000, spiModule);
             spi = new SPI(configSPI);
 
             // Write reset to the CAN transceiver.
