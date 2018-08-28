@@ -2,6 +2,7 @@ using System;
 using Microsoft.SPOT;
 using Microsoft.SPOT.Hardware;
 using GHI.Pins;
+using GHI.IO;
 
 namespace imBMW.Devices.V2.Hardware
 {
@@ -168,6 +169,6 @@ namespace imBMW.Devices.V2.Hardware
         /// <summary>
         /// CAN BUS port.
         /// </summary>
-        public static int CAN = FEZCerb40II.CanBus.Can1;
+        public static ControllerAreaNetwork.Channel CAN = (ControllerAreaNetwork.Channel)FEZCerb40II.CanBus.Can1;
     }
 }

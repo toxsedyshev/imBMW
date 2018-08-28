@@ -133,16 +133,7 @@ namespace System
         
         /// <summary>the SPI object that comunicates with the transceiver.</summary>
         private SPI spi;
-
-        /// <summary>
-        /// Represents the available baud rates.
-        /// </summary>
-        public enum enBaudRate
-        {
-            CAN_BAUD_10K = 1, CAN_BAUD_50K = 2, CAN_BAUD_100K = 3,
-            CAN_BAUD_125K = 4, CAN_BAUD_250K = 5, CAN_BAUD_500K = 6
-        }
-
+        
         /// <summary>Represents a CAN message.</summary>
         public class CANMSG
         {
@@ -157,8 +148,13 @@ namespace System
         /// <param name="baudrate">The selected baud rate.</param>
         /// <returns>True if configuration was successful.</returns>
         /// <remarks>Transceiver needs to be set to normal mode before starting TX/RX operations.</remarks>
-        public bool InitCAN(SPI.SPI_module spiModule, Cpu.Pin chipSelect, enBaudRate baudrate)
+        public bool InitCAN(SPI.SPI_module spiModule, Cpu.Pin chipSelect, byte[] baudrate)
         {
+            if (baudrate.Length != 3)
+            {
+                throw new Exception("Baudrate settings should be 3-byte array of CNF1,2,3 registers.");
+            }
+
             // Configure SPI            
             var configSPI = new SPI.Configuration(chipSelect, LOW, 0, 0, HIGH, HIGH, 10000, spiModule);
             spi = new SPI(configSPI);
@@ -182,52 +178,11 @@ namespace System
 
         /// <summary>Set the CAN baud rate.</summary>
         /// <param name="baudrate">The configured baudrate.</param>
-        /// <returns>True if configured.</returns>
-        private bool SetCANBaud(enBaudRate baudrate)
+        private void SetCANBaud(byte[] baudrate)
         {
-            byte brp;
-
-            //BRP<5:0> = 00h, so divisor (0+1)*2 for 125ns per quantum at 16MHz for 500K   
-            //SJW<1:0> = 00h, Sync jump width = 1
-            switch (baudrate)
-            {
-                case enBaudRate.CAN_BAUD_10K:
-                    brp = 5;
-                    break;
-                case enBaudRate.CAN_BAUD_50K:
-                    brp = 4;
-                    break;
-                case enBaudRate.CAN_BAUD_100K:
-                    brp = 3;
-                    break;
-                case enBaudRate.CAN_BAUD_125K:
-                    brp = 2;
-                    break;
-                case enBaudRate.CAN_BAUD_250K:
-                    brp = 1;
-                    break;
-                case enBaudRate.CAN_BAUD_500K:
-                    brp = 0;
-                    break;
-                default:
-                    return false;
-                    break;
-            }
-
-            byte[] cmdBuffer = new byte[] { WRITE, CNF1, (byte)(brp & 0x3F) };
-            spi.Write(cmdBuffer);
-
-            //PRSEG<2:0> = 0x01, 2 time quantum for prop
-            //PHSEG<2:0> = 0x06, 7 time constants to PS1 sample
-            //SAM = 0, just 1 sampling
-            //BTLMODE = 1, PS2 determined by CNF3
-            spi.Write(new byte[] { WRITE, CNF2, 0xB1 });
-
-            //PHSEG2<2:0> = 5 for 6 time constants after sample
-            spi.Write(new byte[] { WRITE, CNF3, 0x05 });
-
-            //SyncSeg + PropSeg + PS1 + PS2 = 1 + 2 + 7 + 6 = 16
-            return true;
+            WriteRegister(CNF1, baudrate[0]);
+            WriteRegister(CNF2, baudrate[1]);
+            WriteRegister(CNF3, baudrate[2]);
         }
 
         /// <summary>Writes a value to the selected register.</summary>
