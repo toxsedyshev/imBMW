@@ -1,6 +1,15 @@
-﻿using GHI.IO.Storage;
+﻿#define CANBUS
+#if CANBUS
+#define E65SEATS
+#endif
+
+using GHI.IO;
+using GHI.IO.Storage;
 using imBMW.Devices.V2.Hardware;
 using imBMW.Features;
+using imBMW.Features.CanBus;
+using imBMW.Features.CanBus.Adapters;
+using imBMW.Features.CanBus.Devices;
 using imBMW.Features.Localizations;
 using imBMW.Features.Menu;
 using imBMW.Features.Menu.Screens;
@@ -70,6 +79,30 @@ namespace imBMW.Devices.V2
 
             Logger.Info(version);
             SettingsScreen.Instance.Status = version.Length > 11 ? version.Replace(" ", "") : version;
+
+            #endregion
+
+            #region CAN BUS
+
+            #if CANBUS
+
+            var speed = CanAdapterSettings.CanSpeed.Kbps100;
+            var can = new CanNativeAdapter(Pin.CAN, speed);
+            //var canInterrupt = Cpu.Pin.GPIO_NONE;
+            //var canInterrupt = Pin.Di2;
+            //var can = new CanMCP2515Adapter(Pin.SPI, Pin.SPI_ChipSelect, canInterrupt, speed, CanMCP2515AdapterSettings.AdapterFrequency.Mhz8);
+            can.MessageReceived += Can_MessageReceived;
+            can.Error += Can_ErrorReceived;
+            can.MessageSent += Can_MessageSent;
+            can.IsEnabled = true;
+
+            #if E65SEATS
+            Button.Toggle(Pin.Di2, pressed => { if (pressed) E65Seats.StartEmulator(); else E65Seats.StopEmulator(); });
+            #endif
+
+            Logger.Info("CAN BUS inited");
+
+            #endif
 
             #endregion
 
@@ -296,6 +329,21 @@ namespace imBMW.Devices.V2
             Logger.Info("LED blinked - inited");
         }
 
+        private static void Can_MessageSent(CanAdapter can, CanMessage message)
+        {
+            Logger.Info(message.ToString(), "CAN>");
+        }
+
+        private static void Can_ErrorReceived(CanAdapter can, string message)
+        {
+            Logger.Error(message, "CAN-ERR");
+        }
+
+        private static void Can_MessageReceived(CanAdapter can, CanMessage message)
+        {
+            Logger.Info(message.ToString(), "CAN");
+        }
+        
         static bool mflPhone = false;
 
         static void InitTest()
@@ -436,7 +484,7 @@ namespace imBMW.Devices.V2
             {
                 // store errors to arraylist
                 error = true;
-                RefreshLEDs();
+                //RefreshLEDs();
             }
             Debug.Print(args.LogString);
         }
@@ -457,18 +505,35 @@ namespace imBMW.Devices.V2
            LED.Write(true);
        }*/
 
-       class Button
-       {
-           static ArrayList buttons = new ArrayList();
+        class Button
+        {
+            static ArrayList buttons = new ArrayList();
 
-           public delegate void Action();
+            /// <summary>
+            /// Toggle button callback handler.
+            /// </summary>
+            /// <param name="pressed">True if Pin is short to GND.</param>
+            public delegate void ToggleHandler(bool pressed);
 
-           public static void OnPress(Cpu.Pin pin, Action callback)
-           {
-               InterruptPort btn = new InterruptPort(pin, true, Port.ResistorMode.PullUp, Port.InterruptMode.InterruptEdgeLow);
-               btn.OnInterrupt += (s, e, t) => callback();
-               buttons.Add(btn);
-           }
-       }
+            public delegate void Action();
+
+            public static void OnPress(Cpu.Pin pin, Action callback)
+            {
+                var btn = new InterruptPort(pin, true, Port.ResistorMode.PullUp, Port.InterruptMode.InterruptEdgeLow);
+                btn.OnInterrupt += (s, e, t) => callback();
+                buttons.Add(btn);
+            }
+
+            public static void Toggle(Cpu.Pin pin, ToggleHandler callback, bool fire = true)
+            {
+                var btn = new InterruptPort(pin, true, Port.ResistorMode.PullUp, Port.InterruptMode.InterruptEdgeBoth);
+                btn.OnInterrupt += (s, e, t) => callback(!btn.Read());
+                buttons.Add(btn);
+                if (fire)
+                {
+                    callback(!btn.Read());
+                }
+            }
+        }
     }
 }

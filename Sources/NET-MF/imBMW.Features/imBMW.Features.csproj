@@ -37,6 +37,7 @@
     <Compile Include="CanBus\Adapters\CanNativeAdapter.cs" />
     <Compile Include="CanBus\CanException.cs" />
     <Compile Include="CanBus\CanMessage.cs" />
+    <Compile Include="CanBus\Devices\E65Seats.cs" />
     <Compile Include="Comfort.cs" />
     <Compile Include="FeaturesEnumConverter.cs" />
     <Compile Include="InternalCommunications.cs" />
