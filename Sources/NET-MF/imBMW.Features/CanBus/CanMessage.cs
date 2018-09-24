@@ -1,6 +1,8 @@
 using System;
 using GHI.IO;
 using Microsoft.SPOT;
+using System.Text;
+using imBMW.Tools;
 
 namespace imBMW.Features.CanBus
 {
@@ -8,20 +10,85 @@ namespace imBMW.Features.CanBus
     {
         ControllerAreaNetwork.Message message;
 
+        public CanMessage(uint arbitrationId, byte[] data, int length)
+            : this(new ControllerAreaNetwork.Message { ArbitrationId = arbitrationId, Data = PrepareData(data), Length = length })
+        { }
+
+        public CanMessage(uint arbitrationId, byte[] data)
+            : this(new ControllerAreaNetwork.Message { ArbitrationId = arbitrationId, Data = PrepareData(data), Length = data.Length })
+        { }
+
         public CanMessage(ControllerAreaNetwork.Message message)
         {
             this.message = message;
         }
 
         public CanMessage(MCP2515.CANMSG message)
+            : this(message, DateTime.Now)
+        { }
+
+        public CanMessage(MCP2515.CANMSG message, DateTime time)
             : this(new ControllerAreaNetwork.Message
             {
                 ArbitrationId = message.CANID,
                 Data = message.data,
                 IsRemoteTransmissionRequest = message.IsRemote,
-                IsExtendedId = message.IsExtended
+                IsExtendedId = message.IsExtended,
+                TimeStamp = time,
+                Length = message.data.Length
             })
         { }
+
+        public override string ToString()
+        {
+            return ArbitrationIdHex + " > " + DataHex;
+        }
+
+        public string ArbitrationIdHex
+        {
+            get
+            {
+                return ArbitrationId.ToString("x2");
+            }
+        }
+
+        public string DataHex
+        {
+            get
+            {
+                var sb = new StringBuilder(Length * 3 - 1);
+                for (int i = 0; i < Length && i < Data.Length; i++)
+                {
+                    var b = Data[i];
+                    if (sb.Length != 0)
+                    {
+                        sb.Append(" ");
+                    }
+                    sb.Append(b.ToString("x2"));
+                }
+                return sb.ToString();
+            }
+        }
+
+        public bool Compare(CanMessage message)
+        {
+            return message.ArbitrationId == ArbitrationId && message.Data.Compare(Data);
+        }
+
+        private static byte[] PrepareData(byte[] data)
+        {
+            if (data.Length == 8)
+            {
+                return data;
+            }
+            if (data.Length > 8)
+            {
+                throw new CanException("CAN message data length shouldn't be more that 8 bytes.");
+            }
+            var newData = new byte[8];
+            Array.Copy(data, newData, data.Length);
+            return newData;
+        }
 
         //
         // Summary:
@@ -94,8 +161,7 @@ namespace imBMW.Features.CanBus
                 {
                     CANID = ArbitrationId,
                     data = Data,
-                    IsRemote = IsRemoteTransmissionRequest,
-                    
+                    IsRemote = IsRemoteTransmissionRequest
                 };
             }
         }

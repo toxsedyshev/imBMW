@@ -11,15 +11,24 @@ namespace imBMW.Features.CanBus.Adapters
         MCP2515 can;
         Thread receiveThread;
         bool isEnabled;
+        InterruptPort interruptPort;
 
-        public CanMCP2515Adapter(SPI.SPI_module spi, Cpu.Pin chipSelect, CanAdapterSettings.CanSpeed speed, CanMCP2515AdapterSettings.AdapterFrequency frequency)
-            : this(new CanMCP2515AdapterSettings(spi, chipSelect, speed, frequency))
+        public CanMCP2515Adapter(SPI.SPI_module spi, Cpu.Pin chipSelect, Cpu.Pin interrupt, CanAdapterSettings.CanSpeed speed, CanMCP2515AdapterSettings.AdapterFrequency frequency)
+            : this(new CanMCP2515AdapterSettings(spi, chipSelect, interrupt, speed, frequency))
         { }
 
         public CanMCP2515Adapter(CanMCP2515AdapterSettings settings) : base(settings)
         {
             can = new MCP2515();
             can.InitCAN(settings.SPI, settings.ChipSelect, GetTimings(settings));
+        }
+
+        public new CanMCP2515AdapterSettings Settings
+        {
+            get
+            {
+                return (CanMCP2515AdapterSettings)base.Settings;
+            }
         }
 
         public override bool IsEnabled
@@ -34,10 +43,28 @@ namespace imBMW.Features.CanBus.Adapters
                 {
                     throw new CanException("Can't disable MCP2515 CAN adapter.");
                 }
-                can.SetCANNormalMode();
+                var interrupts = Settings.Interrupt != Cpu.Pin.GPIO_NONE;
+                can.SetCANNormalMode(interrupts);
                 isEnabled = true;
-                receiveThread = new Thread(Worker);
-                receiveThread.Start();
+                if (interrupts)
+                {
+                    interruptPort = new InterruptPort(Settings.Interrupt, false, Port.ResistorMode.PullUp, Port.InterruptMode.InterruptEdgeLow);
+                    interruptPort.OnInterrupt += (s, e, t) => OnInterrupt(t);
+                }
+                else
+                {
+                    receiveThread = new Thread(Worker);
+                    receiveThread.Start();
+                }
+            }
+        }
+        
+        private void OnInterrupt(DateTime time)
+        {
+            MCP2515.CANMSG message;
+            if (IsEnabled && can.Receive(out message, 20))
+            {
+                OnMessageReceived(new CanMessage(message, time));
             }
         }
 
@@ -53,10 +80,12 @@ namespace imBMW.Features.CanBus.Adapters
             }
         }
 
-        public override void SendMessage(CanMessage message)
+        public override bool SendMessage(CanMessage message)
         {
             CheckEnabled();
-            can.Transmit(message.MCP2515Message, 10);
+            var sent = can.Transmit(message.MCP2515Message, 10);
+            OnMessageSent(message, sent);
+            return sent;
         }
         
         private byte[] GetTimings(CanMCP2515AdapterSettings settings)
@@ -106,7 +135,7 @@ namespace imBMW.Features.CanBus.Adapters
                     }
                     else
                     {
-                        return new byte[] { 0x01, 0xB6, 0x04 };
+                        return new byte[] { 0x01, 0xB6, 0x04 }; // 0x01, 0xB4, 0x06
                     }
                 default:
                     throw new CanException("Specified baudrate isn't supported.");

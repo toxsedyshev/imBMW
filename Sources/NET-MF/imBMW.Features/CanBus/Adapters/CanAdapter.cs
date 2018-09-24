@@ -6,20 +6,24 @@ namespace imBMW.Features.CanBus.Adapters
 {
     public abstract class CanAdapter
     {
+        public static CanAdapter Current { get; set; }
+
         public CanAdapter(CanAdapterSettings settings)
         {
             Settings = settings;
         }
 
-        public delegate void MessageReceivedHandler(CanMessage message);
+        public delegate void MessageHandler(CanAdapter can, CanMessage message);
 
-        public delegate void ErrorReceivedHandler(string message);
+        public delegate void ErrorHandler(CanAdapter can, string message);
 
-        public event MessageReceivedHandler MessageReceived;
+        public event MessageHandler MessageReceived;
 
-        public event ErrorReceivedHandler ErrorReceived;
+        public event MessageHandler MessageSent;
 
-        public abstract void SendMessage(CanMessage message);
+        public event ErrorHandler Error;
+
+        public abstract bool SendMessage(CanMessage message);
 
         public CanAdapterSettings Settings { get; protected set; }
 
@@ -29,15 +33,30 @@ namespace imBMW.Features.CanBus.Adapters
         {
             if (MessageReceived != null)
             {
-                MessageReceived(message);
+                MessageReceived(this, message);
             }
         }
 
-        protected void OnErrorReceived(string error)
+        protected void OnMessageSent(CanMessage message, bool sent)
         {
-            if (ErrorReceived != null)
+            if (sent)
             {
-                ErrorReceived(error);
+                if (MessageSent != null)
+                {
+                    MessageSent(this, message);
+                }
+            }
+            else
+            {
+                OnError("Can't send: " + message);
+            }
+        }
+
+        protected void OnError(string error)
+        {
+            if (Error != null)
+            {
+                Error(this, error);
             }
         }
 

@@ -58,17 +58,23 @@ namespace imBMW.Features.CanBus.Adapters
 
         private void Can_ErrorReceived(ControllerAreaNetwork sender, ControllerAreaNetwork.ErrorReceivedEventArgs e)
         {
-            OnErrorReceived(e.Error.ToString());
+            if (true) //(e.Error == ControllerAreaNetwork.Error.BusOff)
+            {
+                can.Reset();
+            }
+            OnError(e.Error.ToString());
         }
 
-        public override void SendMessage(CanMessage message)
+        public override bool SendMessage(CanMessage message)
         {
             CheckEnabled();
             if (!can.CanSend)
             {
                 throw new CanException("CAN adapter is not allowed to send the message now.");
             }
-            can.SendMessage(message.NativeMessage);
+            var sent = can.SendMessage(message.NativeMessage);
+            OnMessageSent(message, sent);
+            return sent;
         }
         
         private ControllerAreaNetwork.Timings GetTimings(CanAdapterSettings settings)
@@ -79,8 +85,8 @@ namespace imBMW.Features.CanBus.Adapters
                     switch (settings.Speed)
                     {
                         case CanAdapterSettings.CanSpeed.Kbps100:
-                            // 21TQ, 75%SP
-                            return new ControllerAreaNetwork.Timings(0, 15, 5, 20, 1);
+                            // 21TQ, 66%SP
+                            return new ControllerAreaNetwork.Timings(0, 12, 8, 20, 1);
                     }
                     break;
                 case 72000000:

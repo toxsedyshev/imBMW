@@ -49,11 +49,14 @@ namespace imBMW.Features.CanBus.Adapters
 
         public Cpu.Pin ChipSelect { get; private set; }
 
-        public CanMCP2515AdapterSettings(SPI.SPI_module spi, Cpu.Pin chipSelect, CanSpeed speed, AdapterFrequency frequency)
+        public Cpu.Pin Interrupt { get; private set; }
+
+        public CanMCP2515AdapterSettings(SPI.SPI_module spi, Cpu.Pin chipSelect, Cpu.Pin interrupt, CanSpeed speed, AdapterFrequency frequency)
             : base(speed)
         {
             SPI = spi;
             ChipSelect = chipSelect;
+            Interrupt = interrupt;
             Frequency = frequency;
         }
     }

@@ -80,6 +80,8 @@ namespace System
         private const byte TX1IF = 3;
         private const byte TX0IF = 2;
         private const byte TX0IF_MASK = 0x04;
+        private const byte RX1IE_MASK = 2;
+        private const byte RX0IE_MASK = 1;
         private const byte RX1IF = 1;
         private const byte RX0IF = 0;
         private const byte RX1IF_MASK = 0x02;
@@ -395,8 +397,14 @@ namespace System
 
         /// <summary>Set transceiver to normal state.</summary>
         /// <remarks>This state needs to be selected before starting TX/RX.</remarks>
-        public void SetCANNormalMode()
+        public void SetCANNormalMode(bool interrupts = false)
         {
+            var temp = ReadRegister(CANINTE);
+            if (interrupts)
+            {
+                WriteRegister(CANINTE, RX0IE_MASK);
+            }
+            temp = ReadRegister(CANINTE);
             //REQOP2<2:0> = 000 for normal mode
             //ABAT = 0, do not abort pending transmission
             //OSM = 0, not one shot
