@@ -1,4 +1,4 @@
-﻿#define CANBUS
+﻿//#define CANBUS
 #if CANBUS
 #define E65SEATS
 #endif
@@ -95,8 +95,10 @@ namespace imBMW.Devices.V2
             can.Error += Can_ErrorReceived;
             can.MessageSent += Can_MessageSent;
             can.IsEnabled = true;
+            CanAdapter.Current = can;
 
             #if E65SEATS
+            E65Seats.Init();
             Button.Toggle(Pin.Di2, pressed => { if (pressed) E65Seats.StartEmulator(); else E65Seats.StopEmulator(); });
             #endif
 
