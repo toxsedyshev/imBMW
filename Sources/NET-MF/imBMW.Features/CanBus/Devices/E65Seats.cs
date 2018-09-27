@@ -67,11 +67,11 @@ namespace imBMW.Features.CanBus.Devices
 
                     lastEmulationFailed = false;
                     time++;
-                    Thread.Sleep(100);
+                    Thread.Sleep(80); // 100ms - 20ms for processing
                 }
                 else
                 {
-                    Thread.Sleep(lastEmulationFailed ? 1000 : 100); // slow down on second unsuccessful attempt
+                    Thread.Sleep(lastEmulationFailed ? 1000 : 80); // slow down on second unsuccessful attempt
                     lastEmulationFailed = true;
                 }
             }
@@ -95,6 +95,7 @@ namespace imBMW.Features.CanBus.Devices
                 }
                 emulatorStarted = true;
                 emulatorThread = new Thread(EmulatorWorker);
+                emulatorThread.Start();
             }
         }
 
@@ -109,7 +110,10 @@ namespace imBMW.Features.CanBus.Devices
                 emulatorStarted = false;
                 if (emulatorThread != null)
                 {
-                    emulatorThread.Abort();
+                    if (emulatorThread.ThreadState == ThreadState.Running)
+                    {
+                        emulatorThread.Abort();
+                    }
                     emulatorThread = null;
                 }
             }

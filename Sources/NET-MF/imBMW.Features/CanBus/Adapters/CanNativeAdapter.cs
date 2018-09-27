@@ -62,7 +62,24 @@ namespace imBMW.Features.CanBus.Adapters
             {
                 can.Reset();
             }
-            OnError(e.Error.ToString());
+            switch (e.Error)
+            {
+                case ControllerAreaNetwork.Error.BusOff:
+                    OnError("BusOff");
+                    break;
+                case ControllerAreaNetwork.Error.ErrorPassive:
+                    OnError("ErrorPassive");
+                    break;
+                case ControllerAreaNetwork.Error.Overrun:
+                    OnError("Overrun");
+                    break;
+                case ControllerAreaNetwork.Error.RXOver:
+                    OnError("RXOver");
+                    break;
+                default:
+                    OnError("Unknown");
+                    break;
+            }
         }
 
         public override bool SendMessage(CanMessage message)
