@@ -108,12 +108,11 @@ namespace imBMW.Features.Menu.Screens
         protected bool UpdateItems(bool force = false)
         {
             var now = DateTime.Now;
-            int span;
             if (needUpdateVoltage) // span > updateLimitSeconds / 2 && 
             {
                 UpdateVoltage();
             }
-            if (!force && lastUpdated != DateTime.MinValue && (span = (now - lastUpdated).GetTotalSeconds()) < updateLimitSeconds)
+            if (!force && lastUpdated != DateTime.MinValue && (now - lastUpdated).GetTotalSeconds() < updateLimitSeconds)
             {
                 return false;
             }

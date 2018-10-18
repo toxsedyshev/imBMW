@@ -82,32 +82,6 @@ namespace imBMW.Devices.V2
 
             #endregion
 
-            #region CAN BUS
-
-            #if CANBUS
-
-            var speed = CanAdapterSettings.CanSpeed.Kbps100;
-            var can = new CanNativeAdapter(Pin.CAN, speed);
-            //var canInterrupt = Cpu.Pin.GPIO_NONE;
-            //var canInterrupt = Pin.Di2;
-            //var can = new CanMCP2515Adapter(Pin.SPI, Pin.SPI_ChipSelect, canInterrupt, speed, CanMCP2515AdapterSettings.AdapterFrequency.Mhz8);
-            can.MessageReceived += Can_MessageReceived;
-            can.Error += Can_ErrorReceived;
-            can.MessageSent += Can_MessageSent;
-            can.IsEnabled = true;
-            CanAdapter.Current = can;
-
-            #if E65SEATS
-            E65Seats.Init();
-            Button.Toggle(Pin.Di2, pressed => { if (pressed) E65Seats.StartEmulator(); else E65Seats.StopEmulator(); });
-            #endif
-
-            Logger.Info("CAN BUS inited");
-
-            #endif
-
-            #endregion
-
             #region iBus Manager
 
             // Create serial port to work with Melexis TH3122
@@ -212,6 +186,32 @@ namespace imBMW.Devices.V2
                 isSent1 = !isSent1;
             };
             Logger.Info("iBus manager events subscribed");
+
+            #endregion
+
+            #region CAN BUS
+
+            #if CANBUS
+
+            var speed = CanAdapterSettings.CanSpeed.Kbps100;
+            CanAdapter.Current = new CanNativeAdapter(Pin.CAN, speed);
+            //var canInterrupt = Cpu.Pin.GPIO_NONE;
+            //var canInterrupt = Pin.Di2;
+            //CanAdapter.Current = new CanMCP2515Adapter(Pin.SPI, Pin.SPI_ChipSelect, canInterrupt, speed, CanMCP2515AdapterSettings.AdapterFrequency.Mhz8);
+            CanAdapter.Current.MessageReceived += Can_MessageReceived;
+            CanAdapter.Current.MessageSent += Can_MessageSent;
+            CanAdapter.Current.Error += Can_ErrorReceived;
+            CanAdapter.Current.IsEnabled = true;
+
+            #if E65SEATS
+            Button.Toggle(Pin.Di2, pressed => { if (pressed) E65Seats.EmulatorPaused = true; else E65Seats.EmulatorPaused = false; });
+            E65Seats.Init();
+            HomeScreen.Instance.SeatsScreen = E65SeatsScreen.Instance;
+            #endif
+
+            Logger.Info("CAN BUS inited");
+
+            #endif
 
             #endregion
 

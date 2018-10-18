@@ -7,38 +7,42 @@ namespace imBMW.Tools
     {
         public static int GetTotalHours(this TimeSpan timespan)
         {
-            if (timespan.Days == 0)
+            var days = timespan.Days;
+            if (days == 0)
             {
                 return timespan.Hours;
             }
-            return timespan.Days * 24 + timespan.Hours;
+            return days * 24 + timespan.Hours;
         }
 
         public static int GetTotalMinutes(this TimeSpan timespan)
         {
-            if (timespan.GetTotalHours() == 0)
+            var hours = timespan.GetTotalHours();
+            if (hours == 0)
             {
                 return timespan.Minutes;
             }
-            return timespan.GetTotalHours() * 60 + timespan.Minutes;
+            return hours * 60 + timespan.Minutes;
         }
 
-        public static int GetTotalSeconds(this TimeSpan timespan)
+        public static long GetTotalSeconds(this TimeSpan timespan)
         {
-            if (timespan.GetTotalMinutes() == 0)
+            var minutes = timespan.GetTotalMinutes();
+            if (minutes == 0)
             {
                 return timespan.Seconds;
             }
-            return timespan.GetTotalMinutes() * 60 + timespan.Seconds;
+            return (long)minutes * 60 + timespan.Seconds;
         }
 
-        public static int GetTotalMilliseconds(this TimeSpan timespan)
+        public static long GetTotalMilliseconds(this TimeSpan timespan)
         {
-            if (timespan.GetTotalSeconds() == 0)
+            var seconds = timespan.GetTotalSeconds();
+            if (seconds == 0)
             {
                 return timespan.Milliseconds;
             }
-            return timespan.GetTotalSeconds() * 1000 + timespan.Milliseconds;
+            return seconds * 1000 + timespan.Milliseconds;
         }
     }
 }

@@ -13,17 +13,19 @@ namespace imBMW.Features.Menu.Screens
         protected MenuItem itemBC;
         protected MenuItem itemSettings;
         protected MenuItem itemPhone;
-
+        protected MenuItem itemSeats;
+        
         protected HomeScreen()
         {
             Title = "imBMW";
 
             itemPlayer = new MenuItem(i => Localization.Current.Player, MenuItemType.Button, MenuItemAction.GoToScreen);
             itemPhone = new MenuItem(i => Localization.Current.Phone, MenuItemType.Button, MenuItemAction.GoToScreen);
-            itemFav = new MenuItem(i => Localization.Current.QuickAccess, MenuItemType.Button, MenuItemAction.GoToScreen)
-            {
-                GoToScreen = null // TODO fav screen
-            };
+            //itemFav = new MenuItem(i => Localization.Current.QuickAccess, MenuItemType.Button, MenuItemAction.GoToScreen)
+            //{
+            //    GoToScreen = null // TODO fav screen
+            //};
+            itemSeats = new MenuItem(i => "Seats", MenuItemType.Button, MenuItemAction.GoToScreen);
             itemBC = new MenuItem(i => Localization.Current.Bordcomputer, MenuItemType.Button, MenuItemAction.GoToScreen)
             {
                 GoToScreen = BordcomputerScreen.Instance
@@ -45,6 +47,10 @@ namespace imBMW.Features.Menu.Screens
             if (itemPhone.GoToScreen != null)
             {
                 AddItem(itemPhone);
+            }
+            if (itemSeats.GoToScreen != null)
+            {
+                AddItem(itemSeats);
             }
             //AddItem(itemFav);
             AddItem(itemBC);
@@ -74,6 +80,19 @@ namespace imBMW.Features.Menu.Screens
             set
             {
                 itemPhone.GoToScreen = value;
+                SetItems();
+            }
+        }
+
+        public MenuScreen SeatsScreen
+        {
+            get
+            {
+                return itemSeats.GoToScreen;
+            }
+            set
+            {
+                itemSeats.GoToScreen = value;
                 SetItems();
             }
         }

@@ -17,10 +17,16 @@ namespace imBMW.iBus.Devices.Real
 
     public delegate void LightStatusEventHandler(Message message, LightStatusEventArgs args);
 
+    public delegate void DimmerChangedEventHandler(double value, byte rawValue);
+
     #endregion
 
     public static class LightControlModule
     {
+        public static double Dimmer { get; private set; }
+
+        public static byte DimmerRaw { get; private set; }
+
         static LightControlModule()
         {
             Manager.AddMessageReceiverForSourceDevice(DeviceAddress.LightControlModule, ProcessLCMMessage);
@@ -36,6 +42,25 @@ namespace imBMW.iBus.Devices.Real
             if (m.Data.Length == 5 && m.Data[0] == 0x5B)
             {
                 OnLightStatusReceived(m);
+            }
+            else if (m.Data.Length == 3 && m.Data[0] == 0x5C)
+            {
+                OnDimmerChanged(m);
+            }
+        }
+
+        private static void OnDimmerChanged(Message m)
+        {
+            var rawValue = m.Data[1];
+            var value = 100.0 * rawValue / 0xFE;
+            m.ReceiverDescription = "Dimmer " + (int)value + "%, unknown=" + m.Data[2].ToHex();
+
+            Dimmer = value;
+            DimmerRaw = rawValue;
+
+            if (DimmerChanged != null)
+            {
+                DimmerChanged(value, rawValue);
             }
         }
 
@@ -122,5 +147,7 @@ namespace imBMW.iBus.Devices.Real
         }
 
         public static event LightStatusEventHandler LightStatusReceived;
+
+        public static event DimmerChangedEventHandler DimmerChanged;
     }
 }
