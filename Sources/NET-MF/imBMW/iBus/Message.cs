@@ -291,6 +291,10 @@ namespace imBMW.iBus
 
         public virtual bool Compare(Message message)
         {
+            if (message == null)
+            {
+                return false;
+            }
             return SourceDevice == message.SourceDevice
                 && DestinationDevice == message.DestinationDevice
                 && Data.Compare(message.Data);
