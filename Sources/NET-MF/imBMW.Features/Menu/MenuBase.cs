@@ -167,7 +167,7 @@ namespace imBMW.Features.Menu
 
         protected virtual void ScreenWakeup()
         {
-            ScreenNavigatedTo(CurrentScreen);
+            ScreenNavigatedTo(CurrentScreen, false);
         }
 
         public virtual void UpdateScreen(MenuScreenUpdateReason reason, object item = null)
@@ -269,12 +269,12 @@ namespace imBMW.Features.Menu
                 }
                 ScreenNavigatedFrom(currentScreen);
                 currentScreen = value;
-                ScreenNavigatedTo(currentScreen);
+                ScreenNavigatedTo(currentScreen, true);
                 UpdateScreen(MenuScreenUpdateReason.Navigation);
             }
         }
 
-        protected virtual void ScreenNavigatedTo(MenuScreen screen)
+        protected virtual void ScreenNavigatedTo(MenuScreen screen, bool fromAnotherScreen)
         {
             if (screen == null || !screen.OnNavigatedTo(this))
             {

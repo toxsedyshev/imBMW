@@ -310,11 +310,14 @@ namespace imBMW.Features.Menu
             }
         }
 
-        protected override void ScreenNavigatedTo(MenuScreen screen)
+        protected override void ScreenNavigatedTo(MenuScreen screen, bool fromAnotherScreen)
         {
-            ShownItemIndex = 0;
+            if (fromAnotherScreen)
+            {
+                ShownItemIndex = 0;
+            }
 
-            base.ScreenNavigatedTo(screen);
+            base.ScreenNavigatedTo(screen, fromAnotherScreen);
         }
 
         #endregion
