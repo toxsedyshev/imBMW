@@ -62,6 +62,7 @@
     <Compile Include="Multimedia\IAudioPlayer.cs" />
     <Compile Include="Multimedia\iBus\BordmonitorAUX.cs" />
     <Compile Include="Multimedia\iBus\CDChanger.cs" />
+    <Compile Include="Multimedia\iBus\MIDAUX.cs" />
     <Compile Include="Multimedia\iPodViaHeadset.cs" />
     <Compile Include="Multimedia\MediaEmulator.cs" />
     <Compile Include="Multimedia\Models\ModelHelpers.cs" />

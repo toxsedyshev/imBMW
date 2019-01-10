@@ -4,7 +4,8 @@ namespace imBMW.Tools
     {
         RadioCDC = 1,
         BordmonitorAUX = 2,
-        BordmonitorCDC = 3
+        BordmonitorCDC = 3,
+        MIDAUX = 4
     }
 
     public enum NaviVersion : byte

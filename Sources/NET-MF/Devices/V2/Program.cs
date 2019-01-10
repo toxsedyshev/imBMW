@@ -246,13 +246,15 @@ namespace imBMW.Devices.V2
             //
 
             MediaEmulator emulator;
-            if (settings.MenuMode != Tools.MenuMode.RadioCDC || Manager.FindDevice(DeviceAddress.OnBoardMonitor))
+            if (settings.MenuMode == MenuMode.BordmonitorAUX 
+                || settings.MenuMode == MenuMode.BordmonitorCDC
+                || Manager.FindDevice(DeviceAddress.OnBoardMonitor))
             {
                 if (player is BluetoothWT32)
                 {
                     ((BluetoothWT32)player).NowPlayingTagsSeparatedRows = true;
                 }
-                if (settings.MenuMode == Tools.MenuMode.BordmonitorCDC)
+                if (settings.MenuMode == MenuMode.BordmonitorCDC)
                 {
                     emulator = new CDChanger(player);
                     if (settings.NaviVersion == NaviVersion.MK2)
@@ -277,8 +279,17 @@ namespace imBMW.Devices.V2
                 Localization.Current = new RadioLocalization();
                 SettingsScreen.Instance.CanChangeLanguage = false;
                 MultiFunctionSteeringWheel.EmulatePhone = true;
-                Radio.HasMID = Manager.FindDevice(DeviceAddress.MultiInfoDisplay);
-                var menu = RadioMenu.Init(new CDChanger(player));
+                if (settings.MenuMode == MenuMode.MIDAUX)
+                {
+                    Radio.HasMID = true;
+                    emulator = new MIDAUX(player);
+                }
+                else
+                {
+                    Radio.HasMID = Manager.FindDevice(DeviceAddress.MultiInfoDisplay);
+                    emulator = new CDChanger(player);
+                }
+                var menu = RadioMenu.Init(emulator);
                 menu.TelephoneModeForNavigation = settings.MenuMFLControl;
                 Logger.Info("Radio menu inited" + (Radio.HasMID ? " with MID" : ""));
             }
