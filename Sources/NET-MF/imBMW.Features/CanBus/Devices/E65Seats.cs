@@ -52,6 +52,10 @@ namespace imBMW.Features.CanBus.Devices
                 i => E65Seats.ButtonHeaterPassengerPress(), MenuItemType.Button, MenuItemAction.Refresh);
             AddItem(driverHeater);
             AddItem(passengerHeater);
+            AddItem(new MenuItem(i => "Driver Front", i => E65Seats.ButtonFrontDriverPress(), MenuItemType.Button));
+            AddItem(new MenuItem(i => "Driver Back", i => E65Seats.ButtonBackDriverPress(), MenuItemType.Button));
+            AddItem(new MenuItem(i => "Memory", i => E65Seats.ButtonMDriverPress(), MenuItemType.Button));
+            AddItem(new MenuItem(i => "Memory 1", i => E65Seats.ButtonM1DriverPress(), MenuItemType.Button));
             AddItem(new MenuItem(i => "Activated", i => E65Seats.EmulatorPaused = !i.IsChecked, MenuItemType.Checkbox)
             {
                 IsChecked = !E65Seats.EmulatorPaused
@@ -158,6 +162,8 @@ namespace imBMW.Features.CanBus.Devices
         {
             ButtonHeaterDriver,
             ButtonHeaterPassenger,
+            ButtonMDriver,
+            ButtonM1Driver
         }
 
         static QueueThreadWorker queueWorker;
@@ -192,6 +198,12 @@ namespace imBMW.Features.CanBus.Devices
         static CanMessage messageButtonHeaterDriverRelease = new CanMessage(0x1E7, new byte[] { 0xF0, 0xFF });
         static CanMessage messageButtonHeaterPassengerPress = new CanMessage(0x1E8, new byte[] { 0xF1, 0xFF });
         static CanMessage messageButtonHeaterPassengerRelease = new CanMessage(0x1E8, new byte[] { 0xF0, 0xFF });
+
+        static CanMessage messageButtonDriverSeatMoveFront = new CanMessage(0xDA, new byte[] { 0x01, 0x00, 0xC0, 0xFF });
+        static CanMessage messageButtonDriverSeatMoveRear = new CanMessage(0xDA, new byte[] { 0x02, 0x00, 0xC0, 0xFF });
+        static CanMessage messageButtonDriverMPress = new CanMessage(0x1F3, new byte[] { 0xFC, 0xFF });
+        static CanMessage messageButtonDriverMRelease = new CanMessage(0x1F3, new byte[] { 0xF8, 0xFF });
+        static CanMessage messageButtonDriverM1Press = new CanMessage(0x1F3, new byte[] { 0xF9, 0xFF });
 
         static E65Seats()
         {
@@ -241,6 +253,18 @@ namespace imBMW.Features.CanBus.Devices
                     CanAdapter.Current.SendMessage(messageButtonHeaterPassengerRelease);
                     Thread.Sleep(100);
                     break;
+                case QueueCommand.ButtonMDriver:
+                    CanAdapter.Current.SendMessage(messageButtonDriverMPress);
+                    Thread.Sleep(100);
+                    CanAdapter.Current.SendMessage(messageButtonDriverMRelease);
+                    Thread.Sleep(100);
+                    break;
+                case QueueCommand.ButtonM1Driver:
+                    CanAdapter.Current.SendMessage(messageButtonDriverM1Press);
+                    Thread.Sleep(100);
+                    CanAdapter.Current.SendMessage(messageButtonDriverMRelease);
+                    Thread.Sleep(100);
+                    break;
             }
         }
 
@@ -252,6 +276,26 @@ namespace imBMW.Features.CanBus.Devices
         public static void ButtonHeaterPassengerPress()
         {
             queueWorker.Enqueue(QueueCommand.ButtonHeaterPassenger);
+        }
+
+        public static void ButtonFrontDriverPress()
+        {
+            CanAdapter.Current.SendMessage(messageButtonDriverSeatMoveFront);
+        }
+
+        public static void ButtonBackDriverPress()
+        {
+            CanAdapter.Current.SendMessage(messageButtonDriverSeatMoveRear);
+        }
+        
+        public static void ButtonMDriverPress()
+        {
+            queueWorker.Enqueue(QueueCommand.ButtonMDriver);
+        }
+
+        public static void ButtonM1DriverPress()
+        {
+            queueWorker.Enqueue(QueueCommand.ButtonM1Driver);
         }
 
         private static void IBusManager_AfterMessageReceived(MessageEventArgs e)
