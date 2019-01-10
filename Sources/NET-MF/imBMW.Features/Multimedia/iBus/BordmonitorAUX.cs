@@ -19,8 +19,7 @@ namespace imBMW.iBus.Devices.Emulators
         #region Messages
 
         static Message MessageAUXHighVolumeP6 = new Message(DeviceAddress.OnBoardMonitor, DeviceAddress.Radio, "Set AUX high volume", 0x48, 0x03);
-
-        static byte[] DataCD = new byte[] { 0x23, 0x62, 0x10, 0x43, 0x44 };
+        
         static byte[] DataCDStartPlaying = new byte[] { 0x38, 0x03, 0x00 };
         static byte[] DataBand = new byte[] { 0xA5, 0x62, 0x01, 0x41 };
         static string[] RadioBands = new string[] { "  FM ", " FMD ", " FM1 ", " FM2 ", " LW  ", " LWA ", " MW  ", " MWA ", " SW  ", " SWA " };
@@ -62,20 +61,26 @@ namespace imBMW.iBus.Devices.Emulators
 
         void ProcessRadioMessage(Message m)
         {
-            if (!IsAUXSelected && m.Data.Compare(Bordmonitor.DataAUX))
+            if (!IsAUXSelected)
             {
-                IsAUXSelected = true;
+                if (m.Data.Compare(Bordmonitor.DataAUX))
+                {
+                    IsAUXSelected = true;
+                }
             }
-            else if (IsAUXSelected && m.Data.StartsWith(DataCDStartPlaying))
+            else
             {
-                IsAUXSelected = false;
-            }
-            else if (IsAUXSelected && m.Data.StartsWith(DataBand))
-            {
-                var band = ASCIIEncoding.GetString(m.Data.Skip(DataBand.Length));
-                if (RadioBands.Contains(band))
+                if (m.Data.StartsWith(DataCDStartPlaying))
                 {
                     IsAUXSelected = false;
+                }
+                else if (m.Data.StartsWith(DataBand))
+                {
+                    var band = ASCIIEncoding.GetString(m.Data.Skip(DataBand.Length));
+                    if (RadioBands.Contains(band))
+                    {
+                        IsAUXSelected = false;
+                    }
                 }
             }
         }
