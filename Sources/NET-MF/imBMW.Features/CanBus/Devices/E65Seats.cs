@@ -321,7 +321,7 @@ namespace imBMW.Features.CanBus.Devices
                     continue;
                 }
 
-                if (time % 10 == 0)
+                if (time % 10 == 0 && lastIBusMessageTime != DateTime.MinValue)
                 {
                     var fromLastIBusMessage = DateTime.Now - lastIBusMessageTime;
                     // turn off after 5 minutes of inactivity on iBus
