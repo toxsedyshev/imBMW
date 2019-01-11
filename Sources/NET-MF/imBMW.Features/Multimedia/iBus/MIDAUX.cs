@@ -16,27 +16,34 @@ namespace imBMW.iBus.Devices.Emulators
 
         static Message MessageDisplayLast;
         
-        static byte[] DataDisplay = new byte[] { 0x23, 0x40, 0x20 };
-        static byte[] DataDisplayAUX = new byte[] { 0x23, 0x40, 0x20, (byte)'A', (byte)'U', (byte)'X', 0x20 };
+        public static byte[] DataDisplayAUX = new byte[] { 0x23, 0x00, 0x20, (byte)'A', (byte)'U', (byte)'X', 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20 };
+        public static byte[] DataDisplayAUX2 = new byte[] { 0x23, 0x00, 0x20, 0x07, 0x20, 0x20, 0x20, 0x20, 0x20, 0x08, 0x41, 0x55, 0x58, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20 };
 
         #endregion
 
         public MIDAUX(IAudioPlayer player)
             : base(player)
         {
-            Radio.OnOffChanged += Radio_OnOffChanged;
             Manager.AddMessageReceiverForSourceDevice(DeviceAddress.Radio, ProcessRadioMessage);
+            Manager.AddMessageReceiverForDestinationDevice(DeviceAddress.Radio, ProcessToRadioMessage);
             Manager.AfterMessageSent += Manager_AfterMessageSent;
         }
 
         private void Manager_AfterMessageSent(MessageEventArgs e)
         {
-            if (e.Message.SourceDevice == DeviceAddress.Radio
-                && e.Message.DestinationDevice == DeviceAddress.MultiInfoDisplay
-                && e.Message.Data.StartsWith(DataDisplay))
+            var msg = e.Message;
+            if (msg.SourceDevice == DeviceAddress.Radio
+                && msg.DestinationDevice == DeviceAddress.MultiInfoDisplay
+                && IsDisplayMessage(msg.Data))
             {
-                MessageDisplayLast = e.Message;
+                MessageDisplayLast = msg;
             }
+        }
+
+        bool IsDisplayMessage(byte[] data)
+        {
+            return data.Length >= 3 && data[0] == 0x23 && data[2] == 0x20
+                && (data[1] == 0x00 || data[1] == 0x40 || data[1] == 0xC0);
         }
 
         protected override void MultiFunctionSteeringWheel_ButtonPressed(MFLButton button)
@@ -58,27 +65,52 @@ namespace imBMW.iBus.Devices.Emulators
         }
 
         #region AUX
-
-        void Radio_OnOffChanged(bool turnedOn)
-        {
-            // TODO check with CD53
-            IsRadioActive = turnedOn;
-        }
-
+        
         void ProcessRadioMessage(Message m)
         {
-            if (!IsAUXSelected)
+            if (IsDisplayMessage(m.Data))
             {
-                if (m.Data.Compare(DataDisplayAUX))
+                IsRadioActive = m.Data.Length > 3;
+
+                if (!IsAUXSelected)
                 {
-                    IsAUXSelected = true;
+                    if (m.Data.Compare(DataDisplayAUX) || m.Data.Compare(DataDisplayAUX2))
+                    {
+                        IsAUXSelected = true;
+                    }
                 }
-            }
-            else
-            {
-                if (!m.Data.Compare(DataDisplayAUX) && !m.Compare(MessageDisplayLast))
+                else
                 {
-                    IsAUXSelected = false;
+                    if (!m.Data.Compare(DataDisplayAUX) 
+                        && !m.Data.Compare(DataDisplayAUX2) 
+                        && !m.Compare(MessageDisplayLast))
+                    {
+                        IsAUXSelected = false;
+                    }
+                }
+                //m.ReceiverDescription = m.DataDump + ASCIIEncoding.GetString(m.Data, 0, -1, true);
+            }
+        }
+
+        private void ProcessToRadioMessage(Message m)
+        {
+            if (!IsEnabled)
+            {
+                return;
+            }
+            
+            if (m.Data.Length == 4 && m.Data[0] == 0x31 && m.Data[1] == 0x00 && m.Data[2] == 0x00)
+            {
+                switch (m.Data[3])
+                {
+                    case 0x0D:
+                        m.ReceiverDescription = "MID Button > Next Track";
+                        Next();
+                        break;
+                    case 0x0C:
+                        m.ReceiverDescription = "MID Button < Prev Track";
+                        Prev();
+                        break;
                 }
             }
         }
@@ -115,6 +147,7 @@ namespace imBMW.iBus.Devices.Emulators
                     return;
                 }
                 isRadioActive = value;
+                Logger.Info("Radio" + (value ? "" : " not") + " active");
                 CheckAuxOn();
             }
         }
@@ -129,6 +162,7 @@ namespace imBMW.iBus.Devices.Emulators
                     return;
                 }
                 isAUXSelected = value;
+                Logger.Info("AUX" + (value ? "" : " not") + " selected");
                 CheckAuxOn();
             }
         }

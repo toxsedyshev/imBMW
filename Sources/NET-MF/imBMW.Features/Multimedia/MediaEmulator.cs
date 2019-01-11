@@ -2,6 +2,7 @@ using System;
 using Microsoft.SPOT;
 using imBMW.iBus.Devices.Real;
 using imBMW.Multimedia;
+using imBMW.Tools;
 
 namespace imBMW.iBus.Devices.Emulators
 {
@@ -33,6 +34,7 @@ namespace imBMW.iBus.Devices.Emulators
                     return;
                 }
                 isEnabled = value;
+                Logger.Info("Media emulator" + (value ? "" : " not") + " enabled");
                 OnIsEnabledChanged(value);
             }
         }
