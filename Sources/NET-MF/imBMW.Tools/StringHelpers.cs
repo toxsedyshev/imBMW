@@ -66,6 +66,32 @@ namespace imBMW.Tools
             return s;
         }
 
+        public static string TextWithIcon(this string text, string icon, int maxLength)
+        {
+            if (IsNullOrEmpty(text))
+            {
+                return icon;
+            }
+            if (icon.Length + text.Length < maxLength)
+            {
+                return icon + " " + text;
+            }
+            return icon + text;
+        }
+
+        public static string TextWithIcon(this string text, char icon, int maxLength)
+        {
+            if (IsNullOrEmpty(text))
+            {
+                return icon + "";
+            }
+            if (text.Length + 1 < maxLength)
+            {
+                return icon + " " + text;
+            }
+            return icon + text;
+        }
+
         public static bool IsRussianASCIIChar(this char c)
         {
             return c >= '\xC0' && c <= '\xFF';

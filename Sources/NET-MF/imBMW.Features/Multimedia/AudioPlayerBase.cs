@@ -3,6 +3,7 @@ using Microsoft.SPOT;
 using imBMW.iBus.Devices.Real;
 using imBMW.Features.Menu;
 using imBMW.Multimedia.Models;
+using imBMW.Tools;
 
 namespace imBMW.Multimedia
 {
@@ -51,6 +52,8 @@ namespace imBMW.Multimedia
         public abstract MenuScreen Menu { get; }
 
         public string Name { get; protected set; }
+
+        public bool IsShowStatusOnIKEEnabled { get; set; }
 
         public abstract bool IsPlaying
         {
@@ -161,10 +164,16 @@ namespace imBMW.Multimedia
 
         protected virtual void OnIsPlayingChanged(bool isPlaying)
         {
+            var args = new AudioPlayerIsPlayingStatusEventArgs { IsPlaying = isPlaying };
             var e = IsPlayingChanged;
             if (e != null)
             {
-                e.Invoke(this, isPlaying);
+                e.Invoke(this, args);
+            }
+
+            if (IsShowStatusOnIKEEnabled && !args.IsShownOnIKE)
+            {
+                ShowIKEStatusPlaying(isPlaying);
             }
         }
 
@@ -175,10 +184,20 @@ namespace imBMW.Multimedia
 
         protected virtual void OnStatusChanged(string status, PlayerEvent playerEvent)
         {
+            var args = new AudioPlayerStatusEventArgs
+            {
+                Status = status,
+                Event = playerEvent
+            };
             var e = StatusChanged;
             if (e != null)
             {
-                e.Invoke(this, status, playerEvent);
+                e.Invoke(this, args);
+            }
+
+            if (IsShowStatusOnIKEEnabled && !args.IsShownOnIKE)
+            {
+                ShowIKEStatus(status, playerEvent);
             }
         }
 
@@ -189,6 +208,69 @@ namespace imBMW.Multimedia
             {
                 e.Invoke(this, nowPlaying);
             }
+
+            if (IsShowStatusOnIKEEnabled)
+            {
+                ShowIKEStatus(nowPlaying);
+            }
+        }
+
+        private void ShowIKEStatusPlaying(bool isPlaying)
+        {
+            ShowIKEStatus(GetPlayingStatusString(isPlaying, InstrumentClusterElectronics.DisplayTextMaxLength));
+        }
+
+        private void ShowIKEStatus(string status, PlayerEvent playerEvent)
+        {
+            if (StringHelpers.IsNullOrEmpty(status))
+            {
+                status = Name;
+            }
+            status = GetStatusString(status, playerEvent, InstrumentClusterElectronics.DisplayTextMaxLength);
+            ShowIKEStatus(status);
+        }
+
+        private void ShowIKEStatus(TrackInfo nowPlaying)
+        {
+            ShowIKEStatus(nowPlaying.Title.TextWithIcon(CharIcons.Play, InstrumentClusterElectronics.DisplayTextMaxLength));
+        }
+
+        private void ShowIKEStatus(string s)
+        {
+            InstrumentClusterElectronics.ShowText(s, TextAlign.Left);
+        }
+
+        public string GetStatusString(string status, PlayerEvent playerEvent, int maxLength)
+        {
+            if (StringHelpers.IsNullOrEmpty(status))
+            {
+                status = Name;
+            }
+            switch (playerEvent)
+            {
+                case PlayerEvent.Next:
+                    status = status.TextWithIcon(CharIcons.Next, maxLength);
+                    break;
+                case PlayerEvent.Prev:
+                    status = status.TextWithIcon(CharIcons.Prev, maxLength);
+                    break;
+                case PlayerEvent.Playing:
+                    status = status.TextWithIcon(CharIcons.Play, maxLength);
+                    break;
+                case PlayerEvent.Current:
+                    status = status.TextWithIcon(CharIcons.SelectedArrow, maxLength);
+                    break;
+                case PlayerEvent.Voice:
+                case PlayerEvent.Settings:
+                    status = status.TextWithIcon(CharIcons.Voice, maxLength);
+                    break;
+            }
+            return status;
+        }
+
+        public string GetPlayingStatusString(bool isPlaying, int maxLength)
+        {
+            return Name.TextWithIcon(isPlaying ? CharIcons.Play : CharIcons.Pause, maxLength);
         }
     }
 }

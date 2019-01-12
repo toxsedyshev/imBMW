@@ -110,21 +110,21 @@ namespace imBMW.iBus.Devices.Emulators
             player.StatusChanged -= player_StatusChanged;
         }
 
-        void player_StatusChanged(IAudioPlayer sender, string status, PlayerEvent playerEvent)
+        void player_StatusChanged(IAudioPlayer sender, AudioPlayerStatusEventArgs args)
         {
             var e = PlayerStatusChanged;
             if (e != null)
             {
-                e(sender, status, playerEvent);
+                e(sender, args);
             }
         }
 
-        void player_IsPlayingChanged(IAudioPlayer sender, bool isPlaying)
+        void player_IsPlayingChanged(IAudioPlayer sender, AudioPlayerIsPlayingStatusEventArgs args)
         {
             var e = PlayerIsPlayingChanged;
             if (e != null)
             {
-                e(sender, isPlaying);
+                e(sender, args);
             }
         }
 

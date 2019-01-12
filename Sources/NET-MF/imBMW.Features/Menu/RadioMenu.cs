@@ -55,51 +55,37 @@ namespace imBMW.Features.Menu
 
         protected override int StatusTextMaxlen { get { return 11; } }
 
-        protected override void ShowPlayerStatus(IAudioPlayer player, bool isPlaying)
+        protected override void ShowPlayerStatus(IAudioPlayer player, AudioPlayerIsPlayingStatusEventArgs args)
         {
-            var s = TextWithIcon(isPlaying ? CharIcons.Play : CharIcons.Pause, player.Name);
-            ShowPlayerStatus(player, s);
+            var status = player.GetPlayingStatusString(args.IsPlaying, StatusTextMaxlen);
+            ShowPlayerStatus(player, status);
+
+            if (CurrentScreen == player.Menu)
+            {
+                args.IsShownOnIKE = true;
+            }
         }
 
-        protected override void ShowPlayerStatus(IAudioPlayer player, string status, PlayerEvent playerEvent)
+        protected override void ShowPlayerStatus(IAudioPlayer player, AudioPlayerStatusEventArgs args)
         {
             if (!IsEnabled)
             {
                 return;
             }
-            bool showAfterWithDelay = false;
-            if (StringHelpers.IsNullOrEmpty(status))
-            {
-                status = player.Name;
-            }
-            switch (playerEvent)
-            {
-                case PlayerEvent.Next:
-                    status = TextWithIcon(CharIcons.Next, status);
-                    showAfterWithDelay = true;
-                    break;
-                case PlayerEvent.Prev:
-                    status = TextWithIcon(CharIcons.Prev, status);
-                    showAfterWithDelay = true;
-                    break;
-                case PlayerEvent.Playing:
-                    status = TextWithIcon(CharIcons.Play, status);
-                    break;
-                case PlayerEvent.Current:
-                    status = TextWithIcon(CharIcons.SelectedArrow, status);
-                    break;
-                case PlayerEvent.Voice:
-                    status = TextWithIcon(CharIcons.Voice, status);
-                    break;
-                case PlayerEvent.Settings:
-                    status = TextWithIcon(CharIcons.Voice, status);
-                    showAfterWithDelay = true;
-                    break;
-            }
+
+            var status = player.GetStatusString(args.Status, args.Event, StatusTextMaxlen);
             ShowPlayerStatus(player, status);
-            if (showAfterWithDelay)
+
+            if (args.Event == PlayerEvent.Next 
+                || args.Event == PlayerEvent.Prev
+                || args.Event == PlayerEvent.Settings)
             {
                 ShowPlayerStatusWithDelay(player);
+            }
+
+            if (CurrentScreen == player.Menu)
+            {
+                args.IsShownOnIKE = true;
             }
         }
 
@@ -194,6 +180,11 @@ namespace imBMW.Features.Menu
 
         private void ProcessMIDToRadioMessage(Message m)
         {
+            if (!IsEnabled)
+            {
+                return;
+            }
+
             if (m.Data.Length == 4 && m.Data[0] == 0x31 && m.Data[1] == 0x00 && m.Data[2] == 0x00)
             {
                 switch (m.Data[3])
@@ -269,6 +260,7 @@ namespace imBMW.Features.Menu
                 {
                     if (m.Data.StartsWith(DataMIDCDC))
                     {
+                        SetIsEnabled(true, false);
                         UpdateScreen(MenuScreenUpdateReason.Refresh);
                         wereMIDButtonsOverriden = false;
                         m.ReceiverDescription = "CD 1-01";
@@ -297,6 +289,7 @@ namespace imBMW.Features.Menu
                 {
                     if (m.Data.Compare(MIDAUX.DataDisplayAUX) || m.Data.Compare(MIDAUX.DataDisplayAUX2))
                     {
+                        SetIsEnabled(true, false);
                         UpdateScreen(MenuScreenUpdateReason.Refresh);
                         wereMIDButtonsOverriden = false;
                         m.ReceiverDescription = "MID: AUX";
@@ -395,10 +388,12 @@ namespace imBMW.Features.Menu
             }
         }
 
+        public bool IsDuplicateOnIKEEnabled { get; set; }
+
         #endregion
 
         #region Drawing members
-        
+
         Timer refreshScreenDelayTimer;
         const int refreshScreenDelay = 1000;
 
@@ -462,13 +457,19 @@ namespace imBMW.Features.Menu
         private void DisplayText(string s, TextAlign align)
         {
             Radio.DisplayText(s, align);
-            // TODO display on IKE
+            if (IsDuplicateOnIKEEnabled)
+            {
+                InstrumentClusterElectronics.ShowText(s, align);
+            }
         }
 
         private void DisplayTextWithDelay(string s, TextAlign align, Message[] messageSendAfter)
         {
             Radio.DisplayTextWithDelay(s, align, messageSendAfter);
-            // TODO display on IKE
+            if (IsDuplicateOnIKEEnabled)
+            {
+                InstrumentClusterElectronics.ShowText(s, align);
+            }
         }
 
         protected override void ScreenWakeup()

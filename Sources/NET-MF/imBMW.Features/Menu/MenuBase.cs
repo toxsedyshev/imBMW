@@ -69,9 +69,9 @@ namespace imBMW.Features.Menu
 
         protected abstract int StatusTextMaxlen { get; }
 
-        protected abstract void ShowPlayerStatus(IAudioPlayer player, string status, PlayerEvent playerEvent);
+        protected abstract void ShowPlayerStatus(IAudioPlayer player, AudioPlayerStatusEventArgs args);
 
-        protected abstract void ShowPlayerStatus(IAudioPlayer player, bool isPlaying);
+        protected abstract void ShowPlayerStatus(IAudioPlayer player, AudioPlayerIsPlayingStatusEventArgs args);
 
         protected void ShowPlayerStatus(IAudioPlayer player)
         {
@@ -79,12 +79,16 @@ namespace imBMW.Features.Menu
             #if !MF_FRAMEWORK_VERSION_V4_1
             if (player is BluetoothWT32 && !((BluetoothWT32)player).IsConnected)
             {
-                ShowPlayerStatus(player, Localization.Current.Disconnected, PlayerEvent.Wireless);
+                ShowPlayerStatus(player, new AudioPlayerStatusEventArgs
+                {
+                    Status = Localization.Current.Disconnected,
+                    Event = PlayerEvent.Wireless
+                });
             }
             else
             #endif
             {
-                ShowPlayerStatus(player, player.IsPlaying);
+                ShowPlayerStatus(player, new AudioPlayerIsPlayingStatusEventArgs { IsPlaying = player.IsPlaying });
             }
         }
 
@@ -116,32 +120,6 @@ namespace imBMW.Features.Menu
             {
                 ShowPlayerStatus(player);
             }, null, displayStatusDelay, 0);
-        }
-
-        protected string TextWithIcon(string icon, string text = null)
-        {
-            if (StringHelpers.IsNullOrEmpty(text))
-            {
-                return icon;
-            }
-            if (icon.Length + text.Length < StatusTextMaxlen)
-            {
-                return icon + " " + text;
-            }
-            return icon + text;
-        }
-
-        protected string TextWithIcon(char icon, string text = null)
-        {
-            if (StringHelpers.IsNullOrEmpty(text))
-            {
-                return icon + "";
-            }
-            if (text.Length + 1 < StatusTextMaxlen)
-            {
-                return icon + " " + text;
-            }
-            return icon + text;
         }
 
         void mediaEmulator_PlayerChanged(IAudioPlayer player)
@@ -196,22 +174,27 @@ namespace imBMW.Features.Menu
         public bool IsEnabled
         {
             get { return isEnabled; }
-            set
+            set { SetIsEnabled(value, true); }
+        }
+
+        protected void SetIsEnabled(bool value, bool updateScreen)
+        {
+            if (isEnabled == value)
             {
-                if (isEnabled == value)
+                return;
+            }
+            isEnabled = value;
+            if (value)
+            {
+                ScreenWakeup();
+                if (updateScreen)
                 {
-                    return;
-                }
-                isEnabled = value;
-                if (value)
-                {
-                    ScreenWakeup();
                     UpdateScreen(MenuScreenUpdateReason.Navigation);
                 }
-                else
-                {
-                    ScreenSuspend();
-                }
+            }
+            else
+            {
+                ScreenSuspend();
             }
         }
 

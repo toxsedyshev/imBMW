@@ -136,7 +136,9 @@ namespace imBMW.iBus.Devices.Real
     public static class InstrumentClusterElectronics
     {
         static IgnitionState currentIgnitionState = IgnitionState.Off;
-        
+
+        public const int DisplayTextMaxLength = 11;
+
         public static ushort CurrentRPM { get; private set; }
         public static ushort CurrentSpeed { get; private set; }
 
@@ -352,6 +354,11 @@ namespace imBMW.iBus.Devices.Real
                 m.ReceiverDescription = "Speed limit turned on";
             }
             // TODO arrive time, arrive distance, timers
+        }
+
+        public static void ShowText(string s, TextAlign align)
+        {
+            // TODO
         }
 
         public static void Gong1()

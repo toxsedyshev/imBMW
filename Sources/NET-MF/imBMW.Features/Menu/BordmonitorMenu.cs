@@ -46,20 +46,21 @@ namespace imBMW.Features.Menu
 
         protected override int StatusTextMaxlen { get { return 11; } }
 
-        protected override void ShowPlayerStatus(IAudioPlayer player, bool isPlaying)
+        protected override void ShowPlayerStatus(IAudioPlayer player, AudioPlayerIsPlayingStatusEventArgs args)
         {
-            string s = isPlaying ? Localization.Current.Playing : Localization.Current.Paused;
+            string s = args.IsPlaying ? Localization.Current.Playing : Localization.Current.Paused;
             ShowPlayerStatus(player, s);
         }
 
-        protected override void ShowPlayerStatus(IAudioPlayer player, string status, PlayerEvent playerEvent)
+        protected override void ShowPlayerStatus(IAudioPlayer player, AudioPlayerStatusEventArgs args)
         {
             if (!IsEnabled)
             {
                 return;
             }
+            var status = args.Status;
             bool showAfterWithDelay = false;
-            switch (playerEvent)
+            switch (args.Event)
             {
                 case PlayerEvent.Next:
                     status = Localization.Current.Next;
@@ -70,16 +71,16 @@ namespace imBMW.Features.Menu
                     showAfterWithDelay = true;
                     break;
                 case PlayerEvent.Playing:
-                    status = TextWithIcon(">", status);
+                    status = status.TextWithIcon(">", StatusTextMaxlen);
                     break;
                 case PlayerEvent.Current:
-                    status = TextWithIcon("\x07", status);
+                    status = status.TextWithIcon("\x07", StatusTextMaxlen);
                     break;
                 case PlayerEvent.Voice:
-                    status = TextWithIcon("*", status);
+                    status = status.TextWithIcon("*", StatusTextMaxlen);
                     break;
                 case PlayerEvent.Settings:
-                    status = TextWithIcon("*", status);
+                    status = status.TextWithIcon("*", StatusTextMaxlen);
                     showAfterWithDelay = true;
                     break;
             }

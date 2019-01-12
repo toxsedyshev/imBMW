@@ -290,19 +290,22 @@ namespace imBMW.Devices.V2
                     emulator = new CDChanger(player);
                 }
                 var menu = RadioMenu.Init(emulator);
+                menu.IsDuplicateOnIKEEnabled = true;
                 menu.TelephoneModeForNavigation = settings.MenuMFLControl;
                 Logger.Info("Radio menu inited" + (Radio.HasMID ? " with MID" : ""));
             }
 
+            player.IsShowStatusOnIKEEnabled = true;
+
             ShieldLED = new OutputPort(Pin.Di10, false);
-            player.IsPlayingChanged += (p, s) =>
+            player.IsPlayingChanged += (p, e) =>
             {
-                ShieldLED.Write(s);
+                ShieldLED.Write(e.IsPlaying);
                 RefreshLEDs();
             };
-            player.StatusChanged += (p, s, e) =>
+            player.StatusChanged += (p, e) =>
             {
-                if (e == PlayerEvent.IncomingCall && !p.IsEnabled)
+                if (e.Event == PlayerEvent.IncomingCall && !p.IsEnabled)
                 {
                     InstrumentClusterElectronics.Gong1();
                 }

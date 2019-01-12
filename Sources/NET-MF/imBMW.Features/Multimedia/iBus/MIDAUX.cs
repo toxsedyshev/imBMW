@@ -27,6 +27,16 @@ namespace imBMW.iBus.Devices.Emulators
             Manager.AddMessageReceiverForSourceDevice(DeviceAddress.Radio, ProcessRadioMessage);
             Manager.AddMessageReceiverForDestinationDevice(DeviceAddress.Radio, ProcessToRadioMessage);
             Manager.AfterMessageSent += Manager_AfterMessageSent;
+            InstrumentClusterElectronics.IgnitionStateChanged += InstrumentClusterElectronics_IgnitionStateChanged;
+        }
+
+        private void InstrumentClusterElectronics_IgnitionStateChanged(IgnitionEventArgs e)
+        {
+            if (e.CurrentIgnitionState == IgnitionState.Off
+                && e.PreviousIgnitionState != IgnitionState.Off)
+            {
+                IsRadioActive = false;
+            }
         }
 
         private void Manager_AfterMessageSent(MessageEventArgs e)
