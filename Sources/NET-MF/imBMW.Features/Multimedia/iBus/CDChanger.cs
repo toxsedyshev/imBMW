@@ -161,9 +161,21 @@ namespace imBMW.iBus.Devices.Emulators
             {
                 //IsEnabled = false;
                 Manager.EnqueueMessage(MessagePausedDisk1Track1);
-                // TODO show "splash" only with bmw business (not with BM)
-                //Radio.DisplayText("imBMW", TextAlign.Center);
                 m.ReceiverDescription = "Pause";
+            }
+            else if (m.Data.Length == 3 && m.Data[0] == 0x38 && m.Data[1] == 0x0A)
+            {
+                switch (m.Data[2])
+                {
+                    case 0x00:
+                        Player.Next();
+                        m.ReceiverDescription = "Next track";
+                        break;
+                    case 0x01:
+                        Player.Prev();
+                        m.ReceiverDescription = "Prev track";
+                        break;
+                }
             }
             /*else if (m.Data[0] == 0x38)
             {

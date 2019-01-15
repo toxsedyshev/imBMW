@@ -31,34 +31,12 @@ namespace imBMW.Features.Menu
             mediaEmulator.PlayerStatusChanged += ShowPlayerStatus;
             mediaEmulator.PlayerChanged += mediaEmulator_PlayerChanged;
             mediaEmulator_PlayerChanged(mediaEmulator.Player);
-
-            Manager.AddMessageReceiverForSourceDevice(DeviceAddress.Radio, ProcessRadioMessage);
         }
 
         #region Radio members
 
         protected virtual void ProcessRadioMessage(Message m)
-        {
-            if (!IsEnabled)
-            {
-                return;
-            }
-
-            if (m.Data.Length == 3 && m.Data[0] == 0x38 && m.Data[1] == 0x0A)
-            {
-                switch (m.Data[2])
-                {
-                    case 0x00:
-                        mediaEmulator.Player.Next();
-                        m.ReceiverDescription = "Next track";
-                        break;
-                    case 0x01:
-                        mediaEmulator.Player.Prev();
-                        m.ReceiverDescription = "Prev track";
-                        break;
-                }
-            }
-        }
+        { }
 
         #endregion
 
@@ -94,11 +72,6 @@ namespace imBMW.Features.Menu
 
         protected void ShowPlayerStatus(IAudioPlayer player, string status)
         {
-            if (!IsEnabled)
-            {
-                //return;
-                Logger.Warning("Why shouldn't I set player status when menu is disabled?!");
-            }
             if (displayStatusDelayTimer != null)
             {
                 displayStatusDelayTimer.Dispose();
