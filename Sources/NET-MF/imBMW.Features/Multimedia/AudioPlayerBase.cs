@@ -264,6 +264,12 @@ namespace imBMW.Multimedia
                 case PlayerEvent.Settings:
                     status = status.TextWithIcon(CharIcons.Voice, maxLength);
                     break;
+                case PlayerEvent.IncomingCall:
+                    if (status.Length > maxLength)
+                    {
+                        status = status.Substring(status.Length - maxLength, maxLength);
+                    }
+                    break;
             }
             return status;
         }
