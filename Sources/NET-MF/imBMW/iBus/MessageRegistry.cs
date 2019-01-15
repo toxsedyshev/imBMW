@@ -304,7 +304,7 @@ namespace imBMW.iBus
             description = message.SourceDevice.ToStringValue() + " > " + message.DestinationDevice.ToStringValue() + ": " + description;
             if (withBytesAsAscii)
             {
-                description += " (" + ASCIIEncoding.GetString(message.Data) + ")";
+                description += " (" + ASCIIEncoding.GetString(message.Data, 0, -1, true) + ")";
             }
             if (withPerformanceInfo)
             {

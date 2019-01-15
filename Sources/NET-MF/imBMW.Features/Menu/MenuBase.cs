@@ -184,6 +184,7 @@ namespace imBMW.Features.Menu
                 return;
             }
             isEnabled = value;
+            Logger.Info("Menu" + (value ? "" : " not") + " enabled");
             if (value)
             {
                 ScreenWakeup();

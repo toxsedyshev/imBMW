@@ -15,7 +15,7 @@ namespace imBMW.iBus.Devices.Real
         public static byte[] DataRadioOn = new byte[] { 0x4A, 0xFF };
         public static byte[] DataRadioOff = new byte[] { 0x4A, 0x00 };
 
-        public const byte DisplayTextMaxLen = 11;
+        public const byte DisplayTextMaxLength = 11;
 
         const int displayTextDelay = 200;
 
@@ -58,7 +58,7 @@ namespace imBMW.iBus.Devices.Real
             }
         }
 
-        static void ClearTimer()
+        static void ClearDisplayTextTimer()
         {
             if (displayTextDelayTimer != null)
             {
@@ -67,28 +67,28 @@ namespace imBMW.iBus.Devices.Real
             }
         }
 
-        public static void DisplayTextWithDelay(string s, TextAlign align = TextAlign.Left, Message[] messageSendAfter = null)
+        public static void DisplayTextWithDelay(string s, TextAlign align = TextAlign.Left, Action callback = null)
         {
-            DisplayTextWithDelay(s, displayTextDelay, align, messageSendAfter);
+            DisplayTextWithDelay(s, displayTextDelay, align, callback);
         }
 
-        public static void DisplayTextWithDelay(string s, int delay, TextAlign align = TextAlign.Left, Message[] messageSendAfter = null)
+        public static void DisplayTextWithDelay(string s, int delay, TextAlign align = TextAlign.Left, Action callback = null)
         {
-            ClearTimer();
+            ClearDisplayTextTimer();
 
             displayTextDelayTimer = new Timer(delegate
             {
                 DisplayText(s, align);
-                if (messageSendAfter != null)
+                if (callback != null)
                 {
-                    Manager.EnqueueMessage(messageSendAfter);
+                    callback();
                 }
             }, null, delay, 0);
         }
 
         public static void DisplayText(string s, TextAlign align = TextAlign.Left)
         {
-            ClearTimer();
+            ClearDisplayTextTimer();
 
             if (HasMID)
             {
@@ -103,16 +103,25 @@ namespace imBMW.iBus.Devices.Real
         private static void DisplayTextMID(string s, TextAlign align)
         {
             byte[] data = new byte[] { 0x23, 0x40, 0x20 };
-            data = data.PadRight(0x20, DisplayTextMaxLen);
-            data.PasteASCII(s.Translit(), 3, DisplayTextMaxLen, align);
+            data = data.PadRight(0x20, DisplayTextMaxLength);
+            data.PasteASCII(s.Translit(), 3, DisplayTextMaxLength, align);
             Manager.EnqueueMessage(new Message(DeviceAddress.Radio, DeviceAddress.MultiInfoDisplay, "Show text \"" + s + "\" on MID", data));
+            
+            // TODO test that
+            //if (duplicateToIKE)
+            //{
+            //    byte[] data = new byte[] { 0x23, 0x00, 0x20, 0x07, 0x20, 0x20, 0x20, 0x20, 0x20, 0x08 };
+            //    data = data.PadRight(0x20, DisplayTextMaxLen);
+            //    data.PasteASCII(s.Translit(), 10, DisplayTextMaxLen, align);
+            //    Manager.EnqueueMessage(new Message(DeviceAddress.Radio, DeviceAddress.Broadcast, "Show text \"" + s + "\" on MID and IKE", data));
+            //}
         }
 
         private static void DisplayTextRadio(string s, TextAlign align)
         {
             byte[] data = new byte[] { 0x23, 0x42, 0x30 };
-            data = data.PadRight(0xFF, DisplayTextMaxLen);
-            data.PasteASCII(s.Translit(), 3, DisplayTextMaxLen, align);
+            data = data.PadRight(0xFF, DisplayTextMaxLength);
+            data.PasteASCII(s.Translit(), 3, DisplayTextMaxLength, align);
             Manager.EnqueueMessage(new Message(DeviceAddress.Telephone, DeviceAddress.InstrumentClusterElectronics, "Show text \"" + s + "\" on the radio", data));
         }
 

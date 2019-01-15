@@ -137,7 +137,9 @@ namespace imBMW.iBus.Devices.Real
     {
         static IgnitionState currentIgnitionState = IgnitionState.Off;
 
-        public const int DisplayTextMaxLength = 11;
+        public const int DisplayTextMaxLength = 20;
+
+        const int displayTextDelay = 200;
 
         public static ushort CurrentRPM { get; private set; }
         public static ushort CurrentSpeed { get; private set; }
@@ -174,8 +176,11 @@ namespace imBMW.iBus.Devices.Real
         private static ManualResetEvent _getDateTimeSync = new ManualResetEvent(false);
         private static DateTimeEventArgs _getDateTimeResult;
 
+        static Timer displayTextDelayTimer;
+
         private static bool _timeIsSet, _dateIsSet;
         private static byte _timeHour, _timeMinute, _dateDay, _dateMonth;
+
         private static ushort _dateYear;
         private static ushort _lastSpeedLimit;
 
@@ -356,9 +361,38 @@ namespace imBMW.iBus.Devices.Real
             // TODO arrive time, arrive distance, timers
         }
 
-        public static void ShowText(string s, TextAlign align)
+        public static void DisplayText(string s, TextAlign align)
         {
-            // TODO
+            ClearDisplayTextTimer();
+
+            byte[] data = new byte[] { 0x23, 0x42, 0x32 };
+            data = data.PadRight(0x20, DisplayTextMaxLength);
+            data.PasteASCII(s.Translit(), 3, DisplayTextMaxLength, align);
+            Manager.EnqueueMessage(new Message(DeviceAddress.Telephone, DeviceAddress.InstrumentClusterElectronics, "Show text \"" + s + "\" on IKE", data));
+        }
+
+        public static void DisplayTextWithDelay(string s, TextAlign align)
+        {
+            DisplayTextWithDelay(s, align, displayTextDelay);
+        }
+
+        public static void DisplayTextWithDelay(string s, TextAlign align, int delay)
+        {
+            ClearDisplayTextTimer();
+
+            displayTextDelayTimer = new Timer(delegate
+            {
+                DisplayText(s, align);
+            }, null, delay, 0);
+        }
+
+        static void ClearDisplayTextTimer()
+        {
+            if (displayTextDelayTimer != null)
+            {
+                displayTextDelayTimer.Dispose();
+                displayTextDelayTimer = null;
+            }
         }
 
         public static void Gong1()

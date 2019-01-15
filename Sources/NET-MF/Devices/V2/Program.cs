@@ -3,6 +3,11 @@
 #define E65SEATS
 #endif
 
+//#define MenuRadioCDC
+//#define MenuBordmonitorAUX
+//#define MenuBordmonitorCDC
+//#define MenuMIDAUX
+
 using GHI.IO;
 using GHI.IO.Storage;
 using imBMW.Devices.V2.Hardware;
@@ -50,25 +55,16 @@ namespace imBMW.Devices.V2
             
             var settings = Settings.Init(sd != null ? sd + @"\imBMW.ini" : null);
             var log = settings.Log || settings.LogToSD;
-
-            Localization.SetCurrent(settings.Language);
-            Features.Comfort.AutoLockDoors = settings.AutoLockDoors;
-            Features.Comfort.AutoUnlockDoors = settings.AutoUnlockDoors;
-            Features.Comfort.AutoCloseWindows = settings.AutoCloseWindows;
-            Features.Comfort.AutoCloseSunroof = settings.AutoCloseSunroof;
-            Logger.Info("Preferences inited");
-
-            #if DEBUG
+#if DEBUG
             log = true;
-            #else
+#else
             // already inited in debug mode
             if (settings.Log)
             {
                 Logger.Logged += Logger_Logged;
                 Logger.Info("Logger inited");
             }
-            #endif
-
+#endif
             if (settings.LogToSD && sd != null)
             {
                 FileLogger.Init(sd + @"\Logs", () =>
@@ -78,6 +74,24 @@ namespace imBMW.Devices.V2
             }
 
             Logger.Info(version);
+
+#if MenuRadioCDC
+            settings.MenuMode = MenuMode.RadioCDC;
+#elif MenuBordmonitorAUX
+            settings.MenuMode = MenuMode.BordmonitorAUX;
+#elif MenuBordmonitorCDC
+            settings.MenuMode = MenuMode.BordmonitorCDC;
+#elif MenuMIDAUX
+            settings.MenuMode = MenuMode.MIDAUX;
+#endif
+
+            Localization.SetCurrent(settings.Language);
+            Features.Comfort.AutoLockDoors = settings.AutoLockDoors;
+            Features.Comfort.AutoUnlockDoors = settings.AutoUnlockDoors;
+            Features.Comfort.AutoCloseWindows = settings.AutoCloseWindows;
+            Features.Comfort.AutoCloseSunroof = settings.AutoCloseSunroof;
+            Logger.Info("Preferences inited");
+
             SettingsScreen.Instance.Status = version.Length > 11 ? version.Replace(" ", "") : version;
 
             #endregion
@@ -123,16 +137,19 @@ namespace imBMW.Devices.V2
                 }
 
                 // Show only messages which are described
-                if (e.Message.Describe() == null) { return; }
+                //if (e.Message.Describe() == null) { return; }
+                
                 // Filter CDC emulator messages echoed by iBus
                 //if (e.Message.SourceDevice == iBus.DeviceAddress.CDChanger) { return; }
-                if (e.Message.SourceDevice != DeviceAddress.Radio
-                    && e.Message.DestinationDevice != DeviceAddress.Radio
-                    && e.Message.SourceDevice != DeviceAddress.GraphicsNavigationDriver
-                    && e.Message.SourceDevice != DeviceAddress.Diagnostic && e.Message.DestinationDevice != DeviceAddress.Diagnostic)
-                {
-                    //return;
-                }
+                
+                //if (e.Message.SourceDevice != DeviceAddress.Radio
+                //    && e.Message.DestinationDevice != DeviceAddress.Radio
+                //    && e.Message.SourceDevice != DeviceAddress.GraphicsNavigationDriver
+                //    && e.Message.SourceDevice != DeviceAddress.Diagnostic && e.Message.DestinationDevice != DeviceAddress.Diagnostic)
+                //{
+                //    return;
+                //}
+
                 var logIco = "< ";
                 if (e.Message.ReceiverDescription == null)
                 {
@@ -147,7 +164,7 @@ namespace imBMW.Devices.V2
                         logIco = "<E";
                     }
                 }
-                if (settings.LogMessageToASCII)
+                if (settings.LogMessageToASCII && e.Message.ReceiverDescription == null)
                 {
                     Logger.Info(e.Message.ToPrettyString(true, true), logIco);
                 }
@@ -198,9 +215,12 @@ namespace imBMW.Devices.V2
             //var canInterrupt = Cpu.Pin.GPIO_NONE;
             //var canInterrupt = Pin.Di2;
             //CanAdapter.Current = new CanMCP2515Adapter(Pin.SPI, Pin.SPI_ChipSelect, canInterrupt, speed, CanMCP2515AdapterSettings.AdapterFrequency.Mhz8);
-            CanAdapter.Current.MessageReceived += Can_MessageReceived;
-            CanAdapter.Current.MessageSent += Can_MessageSent;
-            CanAdapter.Current.Error += Can_ErrorReceived;
+            if (log)
+            {
+                CanAdapter.Current.MessageReceived += Can_MessageReceived;
+                CanAdapter.Current.MessageSent += Can_MessageSent;
+                CanAdapter.Current.Error += Can_ErrorReceived;
+            }
             CanAdapter.Current.IsEnabled = true;
 
             #if E65SEATS

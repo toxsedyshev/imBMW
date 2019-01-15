@@ -47,9 +47,11 @@ namespace imBMW.Features.CanBus.Devices
         {
             ClearItems();
             driverHeater = new MenuItem(i => "Driver Heat: [" + GetLevel(E65Seats.DriverSeat.HeaterLevel) + "]",
-                i => E65Seats.ButtonHeaterDriverPress(), MenuItemType.Button, MenuItemAction.Refresh);
+                i => E65Seats.ButtonHeaterDriverPress(), MenuItemType.Button, MenuItemAction.Refresh)
+            { RadioAbbreviation = "Drv Ht" };
             passengerHeater = new MenuItem(i => "Pass Heat: [" + GetLevel(E65Seats.PassengerSeat.HeaterLevel) + "]",
-                i => E65Seats.ButtonHeaterPassengerPress(), MenuItemType.Button, MenuItemAction.Refresh);
+                i => E65Seats.ButtonHeaterPassengerPress(), MenuItemType.Button, MenuItemAction.Refresh)
+            { RadioAbbreviation = "Pas Ht" };
             AddItem(driverHeater);
             AddItem(passengerHeater);
             AddItem(new MenuItem(i => "Driver Front", i => E65Seats.ButtonFrontDriverPress(), MenuItemType.Button));

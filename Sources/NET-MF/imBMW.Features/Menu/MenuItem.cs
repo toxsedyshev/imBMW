@@ -60,6 +60,8 @@ namespace imBMW.Features.Menu
             Clicked += callback;
         }
 
+        public string RadioAbbreviation { get; set; }
+
         public string Text
         {
             get

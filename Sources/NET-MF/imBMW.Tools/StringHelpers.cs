@@ -306,6 +306,11 @@ namespace imBMW.Tools
             return str == null || str.Length == 0;
         }
 
+        public static bool IsLetterOrNumber(this char c)
+        {
+            return c >= '0' && c <= '9' || c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' || c.IsRussianASCIIChar();
+        }
+
         public static bool IsNumeric(this string str, bool positiveOnly = true, bool integerOnly = true)
         {
             if (IsNullOrEmpty(str))

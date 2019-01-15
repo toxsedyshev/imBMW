@@ -237,7 +237,7 @@ namespace imBMW.Multimedia
 
         private void ShowIKEStatus(string s)
         {
-            InstrumentClusterElectronics.ShowText(s, TextAlign.Left);
+            InstrumentClusterElectronics.DisplayTextWithDelay(s, TextAlign.Left);
         }
 
         public string GetStatusString(string status, PlayerEvent playerEvent, int maxLength)

@@ -14,7 +14,8 @@ namespace imBMW.Features.Menu
     public class RadioMenu : MenuBase
     {
         static RadioMenu instance;
-
+        
+        private readonly byte[] DataMIDAudioButton = new byte[] { 0x20, 0x01, 0xB0, 0x00 };
         private readonly byte[] DataMIDCDC = new byte[] { 0x23, 0xC0, 0x20, 0x43, 0x44, 0x20, 0x31, 0x2D, 0x30, 0x31 };
         private readonly byte[] DataMIDCDCFirstButtons = new byte[] { 0x21, 0x00, 0x00, 0x60, 0x20, 0x31, 0x20, 0x05, 0x20, 0x32, 0x20, 0x05, 0x20, 0x33, 0x20, 0x05, 0x20, 0x34, 0x20, 0x05, 0x20, 0x35, 0x20, 0x05, 0x20, 0x36, 0x20 };
         private readonly byte[] DataMIDAUXFirstButtons = new byte[] { 0x21, 0x00, 0x00, 0x60, 0x20, 0x05, 0x20, 0x05, 0x20, 0x05, 0x20, 0x05, 0x20, 0x05, 0x20 };
@@ -27,6 +28,7 @@ namespace imBMW.Features.Menu
 
         private bool mflModeTelephone;
         private bool wereMIDButtonsOverriden;
+        private bool waitingBatchMIDUpdate;
 
         public bool TelephoneModeForNavigation { get; set; }
 
@@ -133,7 +135,7 @@ namespace imBMW.Features.Menu
                 mflModeTelephone = value;
                 if (IsEnabled)
                 {
-                    DisplayText(CharIcons.SelectedArrow + (value ? "Navigation" : "Playback"), TextAlign.Center);
+                    DisplayText(CharIcons.SelectedArrow + (value ? "Navigation" : "Playback"), TextAlign.Left);
                     RefreshScreenWithDelay(MenuScreenUpdateReason.Scroll);
                 }
             }
@@ -180,6 +182,12 @@ namespace imBMW.Features.Menu
 
         private void ProcessMIDToRadioMessage(Message m)
         {
+            if (m.Data.Compare(DataMIDAudioButton))
+            {
+                IsEnabled = false;
+                m.ReceiverDescription = "MID Audio Button";
+            }
+
             if (!IsEnabled)
             {
                 return;
@@ -212,6 +220,81 @@ namespace imBMW.Features.Menu
         protected override void ProcessRadioMessage(Message m)
         {
             base.ProcessRadioMessage(m);
+
+            if (Radio.HasMID 
+                && (m.DestinationDevice == DeviceAddress.MultiInfoDisplay
+                    || m.DestinationDevice == DeviceAddress.Broadcast))
+            {
+                if (!EmulatorIsMIDAUX) // MID CDC
+                {
+                    if (m.Data.StartsWith(DataMIDCDC))
+                    {
+                        SetIsEnabled(true, false);
+                        wereMIDButtonsOverriden = false;
+                        UpdateScreen(MenuScreenUpdateReason.Refresh);
+                        m.ReceiverDescription = "CD 1-01";
+                    }
+                    else if (m.Data.Compare(DataMIDCDCFirstButtons))
+                    {
+                        if (IsEnabled && !waitingBatchMIDUpdate)
+                        {
+                            wereMIDButtonsOverriden = false;
+                        }
+                        m.ReceiverDescription = "Disk change buttons display";
+                    }
+                    else if (m.Data.Compare(MaskMIDCDCLastButtons, MessageMIDCDCLastButtons.Data))
+                    {
+                        m.ReceiverDescription = MessageMIDCDCLastButtons.ReceiverDescription;
+                        if (IsEnabled)
+                        {
+                            MessageMIDCDCLastButtons = m; // to save statuses of TP, RND and SC flags
+                            if (!wereMIDButtonsOverriden && !waitingBatchMIDUpdate)
+                            {
+                                wereMIDButtonsOverriden = true;
+                                Manager.EnqueueMessage(MessageMIDMenuButtons, m);
+                            }
+                        }
+                    }
+                }
+                else // MID AUX
+                {
+                    if (m.Data.Compare(MIDAUX.DataDisplayAUX) || m.Data.Compare(MIDAUX.DataDisplayAUX2))
+                    {
+                        SetIsEnabled(true, false);
+                        wereMIDButtonsOverriden = false;
+                        UpdateScreen(MenuScreenUpdateReason.Refresh);
+                        m.ReceiverDescription = "MID: AUX";
+                    }
+                    else if (m.Data.Compare(DataMIDAUXFirstButtons))
+                    {
+                        if (IsEnabled && !waitingBatchMIDUpdate)
+                        {
+                            wereMIDButtonsOverriden = false;
+                        }
+                        m.ReceiverDescription = "AUX empty buttons display";
+                    }
+                    else if (m.Data.Compare(MaskMIDAUXLastButtons, MessageMIDAUXLastButtons.Data))
+                    {
+                        m.ReceiverDescription = MessageMIDAUXLastButtons.ReceiverDescription;
+                        if (IsEnabled)
+                        {
+                            MessageMIDAUXLastButtons = m; // to save status of TP flag
+                            if (!wereMIDButtonsOverriden && !waitingBatchMIDUpdate)
+                            {
+                                wereMIDButtonsOverriden = true;
+                                Manager.EnqueueMessage(MessageMIDMenuButtons, m);
+                            }
+                        }
+                    }
+                }
+            }
+            else if (m.Data.Length == 3 && m.Data[0] == 0x38 && m.Data[1] == 0x0A)
+            {
+                if (CurrentScreen != mediaEmulator.Player.Menu)
+                {
+                    UpdateScreen(MenuScreenUpdateReason.Refresh);
+                }
+            }
 
             if (!IsEnabled)
             {
@@ -253,75 +336,6 @@ namespace imBMW.Features.Menu
                 m.ReceiverDescription = "Change CD: " + cdNumber;
             }
             // TODO bind rnd, scan
-
-            if (Radio.HasMID && m.DestinationDevice == DeviceAddress.MultiInfoDisplay)
-            {
-                if (!EmulatorIsMIDAUX) // MID CDC
-                {
-                    if (m.Data.StartsWith(DataMIDCDC))
-                    {
-                        SetIsEnabled(true, false);
-                        UpdateScreen(MenuScreenUpdateReason.Refresh);
-                        wereMIDButtonsOverriden = false;
-                        m.ReceiverDescription = "CD 1-01";
-                    }
-                    else if (m.Data.Compare(DataMIDCDCFirstButtons))
-                    {
-                        wereMIDButtonsOverriden = false;
-                        m.ReceiverDescription = "Disk change buttons display";
-                    }
-                    else if (m.Data.Compare(MaskMIDCDCLastButtons, MessageMIDCDCLastButtons.Data))
-                    {
-                        m.ReceiverDescription = MessageMIDCDCLastButtons.ReceiverDescription;
-                        MessageMIDCDCLastButtons = m; // to save statuses of TP, RND and SC flags
-                        if (!wereMIDButtonsOverriden)
-                        {
-                            Manager.EnqueueMessage(MessageMIDMenuButtons, m);
-                            wereMIDButtonsOverriden = true;
-                        }
-                        else
-                        {
-                            wereMIDButtonsOverriden = false;
-                        }
-                    }
-                }
-                else // MID AUX
-                {
-                    if (m.Data.Compare(MIDAUX.DataDisplayAUX) || m.Data.Compare(MIDAUX.DataDisplayAUX2))
-                    {
-                        SetIsEnabled(true, false);
-                        UpdateScreen(MenuScreenUpdateReason.Refresh);
-                        wereMIDButtonsOverriden = false;
-                        m.ReceiverDescription = "MID: AUX";
-                    }
-                    else if (m.Data.Compare(DataMIDAUXFirstButtons))
-                    {
-                        wereMIDButtonsOverriden = false;
-                        m.ReceiverDescription = "AUX empty buttons display";
-                    }
-                    else if (m.Data.Compare(MaskMIDAUXLastButtons, MessageMIDAUXLastButtons.Data))
-                    {
-                        m.ReceiverDescription = MessageMIDAUXLastButtons.ReceiverDescription;
-                        MessageMIDAUXLastButtons = m; // to save status of TP flag
-                        if (!wereMIDButtonsOverriden)
-                        {
-                            Manager.EnqueueMessage(MessageMIDMenuButtons, m);
-                            wereMIDButtonsOverriden = true;
-                        }
-                        else
-                        {
-                            wereMIDButtonsOverriden = false;
-                        }
-                    }
-                }
-            }
-            else if (m.Data.Length == 3 && m.Data[0] == 0x38 && m.Data[1] == 0x0A)
-            {
-                if (CurrentScreen != mediaEmulator.Player.Menu)
-                {
-                    UpdateScreen(MenuScreenUpdateReason.Refresh);
-                }
-            }
         }
 
         protected void ScrollNext()
@@ -400,17 +414,17 @@ namespace imBMW.Features.Menu
         protected override void DrawScreen(MenuScreenUpdateEventArgs args)
         {
             CancelRefreshScreenWithDelay();
-            string showText;
+            string showText, showTextIKE = null;
             TextAlign align = TextAlign.Left;
             switch (args.Reason)
             {
                 case MenuScreenUpdateReason.Navigation:
                     showText = CurrentScreen.Title;
-                    if (showText.Length < Radio.DisplayTextMaxLen)
+                    if (showText.Length < Radio.DisplayTextMaxLength)
                     {
                         showText = CharIcons.NetRect + showText;
                     }
-                    if (showText.Length < Radio.DisplayTextMaxLen)
+                    if (showText.Length < Radio.DisplayTextMaxLength)
                     {
                         showText += CharIcons.NetRect;
                     }
@@ -429,29 +443,70 @@ namespace imBMW.Features.Menu
                     break;
                 default:
                     showText = GetShownItemString();
-                    var separator = showText.IndexOf(": ");
-                    if (separator >= 0)
+                    if (IsDuplicateOnIKEEnabled)
                     {
-                        if (args.Reason == MenuScreenUpdateReason.Scroll)
-                        {
-                            showText = showText.Substring(0, separator + 1);
-                            RefreshScreenWithDelay();
-                        }
-                        else
-                        {
-                            showText = showText.Substring(separator + 2);
-                        }
+                        showTextIKE = GetItemString(args.Reason, showText, true);
                     }
+                    showText = GetItemString(args.Reason, showText, false);
                     break;
             }
 
-            Message[] midButtons = null;
+            bool sendMIDButtons = false;
             if (Radio.HasMID && !wereMIDButtonsOverriden)
             {
-                midButtons = new Message[] { MessageMIDMenuButtons, EmulatorIsMIDAUX ? MessageMIDAUXLastButtons : MessageMIDCDCLastButtons };
-                wereMIDButtonsOverriden = true;
+                sendMIDButtons = true;
+                waitingBatchMIDUpdate = true;
             }
-            DisplayTextWithDelay(showText, align, midButtons);
+            DisplayTextWithDelay(showText, showTextIKE, align, sendMIDButtons);
+        }
+
+        private string GetItemString(MenuScreenUpdateReason reason, string showText, bool ike)
+        {
+            var maxLength = ike ? InstrumentClusterElectronics.DisplayTextMaxLength : Radio.DisplayTextMaxLength;
+            if (showText.Length <= maxLength)
+            {
+                return showText;
+            }
+
+            var separator = showText.IndexOf(": ");
+            if (separator <= 0 || separator == showText.Length - 2)
+            {
+                return showText;
+            }
+
+            if (showText.Length == maxLength + 1)
+            {
+                return showText.Substring(0, separator + 1) + showText.Substring(separator + 2);
+            }
+
+            if (reason == MenuScreenUpdateReason.Scroll)
+            {
+                if (!ike)
+                {
+                    RefreshScreenWithDelay();
+                }
+                return showText.Substring(0, separator + 1);
+            }
+            else
+            {
+                showText = showText.Substring(separator + 2);
+                if (ShownItem != null && !StringHelpers.IsNullOrEmpty(ShownItem.RadioAbbreviation))
+                {
+                    var len = showText.Length + ShownItem.RadioAbbreviation.Length;
+                    if (len < maxLength)
+                    {
+                        return ShownItem.RadioAbbreviation + " " + showText;
+                    }
+                    else if (len == maxLength
+                        && (ShownItem.RadioAbbreviation[ShownItem.RadioAbbreviation.Length - 1] == ':'
+                            || !showText[0].IsLetterOrNumber()))
+                    {
+                        return ShownItem.RadioAbbreviation + showText;
+                    }
+                }
+            }
+
+            return showText;
         }
 
         private void DisplayText(string s, TextAlign align)
@@ -459,23 +514,30 @@ namespace imBMW.Features.Menu
             Radio.DisplayText(s, align);
             if (IsDuplicateOnIKEEnabled)
             {
-                InstrumentClusterElectronics.ShowText(s, align);
+                InstrumentClusterElectronics.DisplayText(s, align);
             }
         }
 
-        private void DisplayTextWithDelay(string s, TextAlign align, Message[] messageSendAfter)
+        private void DisplayTextWithDelay(string s, string sIKE, TextAlign align, bool sendMIDButtons)
         {
-            Radio.DisplayTextWithDelay(s, align, messageSendAfter);
+            Radio.DisplayTextWithDelay(s, align, () =>
+            {
+                if (sendMIDButtons)
+                {
+                    wereMIDButtonsOverriden = true;
+                    waitingBatchMIDUpdate = false;
+                    var midButtons = new Message[] { MessageMIDMenuButtons, EmulatorIsMIDAUX ? MessageMIDAUXLastButtons : MessageMIDCDCLastButtons };
+                    Manager.EnqueueMessage(midButtons);
+                }
+            });
             if (IsDuplicateOnIKEEnabled)
             {
-                InstrumentClusterElectronics.ShowText(s, align);
+                if (StringHelpers.IsNullOrEmpty(sIKE))
+                {
+                    sIKE = s;
+                }
+                InstrumentClusterElectronics.DisplayTextWithDelay(sIKE, align);
             }
-        }
-
-        protected override void ScreenWakeup()
-        {
-            wereMIDButtonsOverriden = false;
-            base.ScreenWakeup();
         }
 
         protected void CancelRefreshScreenWithDelay()

@@ -16,6 +16,7 @@ namespace imBMW.iBus.Devices.Emulators
 
         static Message MessageDisplayLast;
         
+        public static byte[] DataMIDPowerButton = new byte[] { 0x20, 0x20, 0xB2, 0x00 };
         public static byte[] DataDisplayAUX = new byte[] { 0x23, 0x00, 0x20, (byte)'A', (byte)'U', (byte)'X', 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20 };
         public static byte[] DataDisplayAUX2 = new byte[] { 0x23, 0x00, 0x20, 0x07, 0x20, 0x20, 0x20, 0x20, 0x20, 0x08, 0x41, 0x55, 0x58, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20 };
 
@@ -80,7 +81,10 @@ namespace imBMW.iBus.Devices.Emulators
         {
             if (IsDisplayMessage(m.Data))
             {
-                IsRadioActive = m.Data.Length > 3;
+                if (!IsRadioActive)
+                {
+                    IsRadioActive = m.Data.Length > 3;
+                }
 
                 if (!IsAUXSelected)
                 {
@@ -91,19 +95,25 @@ namespace imBMW.iBus.Devices.Emulators
                 }
                 else
                 {
-                    if (!m.Data.Compare(DataDisplayAUX) 
+                    if (m.Data.Length > 3
+                        && !m.Data.Compare(DataDisplayAUX) 
                         && !m.Data.Compare(DataDisplayAUX2) 
                         && !m.Compare(MessageDisplayLast))
                     {
                         IsAUXSelected = false;
                     }
                 }
-                //m.ReceiverDescription = m.DataDump + ASCIIEncoding.GetString(m.Data, 0, -1, true);
             }
         }
 
         private void ProcessToRadioMessage(Message m)
         {
+            if (m.Data.Compare(DataMIDPowerButton))
+            {
+                IsRadioActive = false;
+                m.ReceiverDescription = "MID Power Button";
+            }
+
             if (!IsEnabled)
             {
                 return;
