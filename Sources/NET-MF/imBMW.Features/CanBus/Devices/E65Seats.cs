@@ -58,6 +58,10 @@ namespace imBMW.Features.CanBus.Devices
             AddItem(new MenuItem(i => "Driver Back", i => E65Seats.ButtonBackDriverPress(), MenuItemType.Button));
             AddItem(new MenuItem(i => "Memory", i => E65Seats.ButtonMDriverPress(), MenuItemType.Button));
             AddItem(new MenuItem(i => "Memory 1", i => E65Seats.ButtonM1DriverPress(), MenuItemType.Button));
+            AddItem(new MenuItem(i => "Auto Heat", i => E65Seats.AutoHeater = i.IsChecked, MenuItemType.Checkbox)
+            {
+                IsChecked = E65Seats.AutoHeater
+            });
             AddItem(new MenuItem(i => "Activated", i => E65Seats.EmulatorPaused = !i.IsChecked, MenuItemType.Checkbox)
             {
                 IsChecked = !E65Seats.EmulatorPaused
@@ -181,6 +185,8 @@ namespace imBMW.Features.CanBus.Devices
 
         public static bool EmulatorPaused { get; set; }
 
+        public static bool AutoHeater { get; set; }
+
         //static CanMessage canEmulationSeatFront = new CanMessage(0x0DA, new byte[] { 0x01, 0x00, 0xC0, 0xFF });
         //static CanMessage canEmulationEngineStop = new CanMessage(0x5A9, new byte[] { 0x30, 0x06, 0x00, 0x70, 0x17, 0xF1, 0x62, 0x03 });
         //static CanMessage canEmulationEngineStart = new CanMessage(0x38E, new byte[] { 0xF4, 0x01 });
@@ -214,12 +220,31 @@ namespace imBMW.Features.CanBus.Devices
 
             queueWorker = new QueueThreadWorker(ProcessQueue);
         }
-        
+
         public static void Init()
         {
             CanAdapter.Current.MessageReceived += Can_MessageReceived;
 
             Manager.AfterMessageReceived += IBusManager_AfterMessageReceived;
+
+            InstrumentClusterElectronics.EngineStarted += InstrumentClusterElectronics_EngineStarted;
+        }
+
+        private static void InstrumentClusterElectronics_EngineStarted()
+        {
+            if (AutoHeater
+                && InstrumentClusterElectronics.TemperatureOutside < 10
+                && InstrumentClusterElectronics.TemperatureCoolant < 80)
+            {
+                if (DriverSeat.HeaterLevel == 0)
+                {
+                    ButtonHeaterDriverPress();
+                }
+                if (PassengerSeat.HeaterLevel == 0)
+                {
+                    ButtonHeaterPassengerPress();
+                }
+            }
         }
 
         private static void Can_MessageReceived(CanAdapter can, CanMessage message)
