@@ -206,6 +206,14 @@ namespace imBMW.Devices.V2
 
             #endregion
 
+            #region Features
+
+#if DEBUG
+            InstrumentClusterElectronics.RequestDateTimeAndSetLocal(false);
+#endif
+
+            #endregion
+
             #region CAN BUS
 
             #if CANBUS

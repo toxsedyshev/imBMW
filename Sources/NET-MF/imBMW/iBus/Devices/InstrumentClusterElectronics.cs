@@ -1,6 +1,7 @@
 using System;
 using imBMW.Tools;
 using System.Threading;
+using Microsoft.SPOT.Hardware;
 
 namespace imBMW.iBus.Devices.Real
 {
@@ -173,7 +174,8 @@ namespace imBMW.iBus.Devices.Real
 
         private const int _getDateTimeTimeout = 1000;
 
-        private static ManualResetEvent _getDateTimeSync = new ManualResetEvent(false);
+        private static Thread _getDateTimeThread;
+        private static ManualResetEvent _getDateTimeSync;
         private static DateTimeEventArgs _getDateTimeResult;
 
         static Timer displayTextDelayTimer;
@@ -487,6 +489,33 @@ namespace imBMW.iBus.Devices.Real
             Manager.EnqueueMessage(MessageRequestDate, MessageRequestTime);
         }
 
+        public static void RequestDateTimeAndSetLocal(bool separateThread = true)
+        {
+            if (separateThread)
+            {
+                _getDateTimeThread = new Thread(() =>
+                {
+                    RequestDateTimeAndSetLocal(false);
+                    _getDateTimeThread = null;
+                });
+                _getDateTimeThread.Start();
+            }
+            else
+            {
+                var dateTime = GetDateTime();
+                if (dateTime != null)
+                {
+                    Logger.Info("Set Date and Time: " + dateTime.Value.ToString("yy-MM-dd HH:mm:ss"));
+                    Utility.SetLocalTime(dateTime.Value);
+                    Logger.Info("Done Set Date and Time");
+                }
+                else
+                {
+                    Logger.Warning("Date and Time wasn't received");
+                }
+            }
+        }
+
         public static DateTimeEventArgs GetDateTime()
         {
             return GetDateTime(_getDateTimeTimeout);
@@ -494,17 +523,22 @@ namespace imBMW.iBus.Devices.Real
 
         public static DateTimeEventArgs GetDateTime(int timeout)
         {
-            _getDateTimeSync.Reset();
-            _getDateTimeResult = null;
-            DateTimeChanged += GetDateTimeCallback;
-            RequestDateTime();
+            lock (_getDateTimeResult)
+            {
+                _getDateTimeSync = new ManualResetEvent(false);
+                _getDateTimeSync.Reset();
+                _getDateTimeResult = null;
+                DateTimeChanged += GetDateTimeCallback;
+                RequestDateTime();
 #if NETMF
-            _getDateTimeSync.WaitOne(timeout, true);
+                _getDateTimeSync.WaitOne(timeout, true);
 #else
-            _getDateTimeSync.WaitOne(timeout);
+                _getDateTimeSync.WaitOne(timeout);
 #endif
-            DateTimeChanged -= GetDateTimeCallback;
-            return _getDateTimeResult;
+                DateTimeChanged -= GetDateTimeCallback;
+                _getDateTimeSync = null;
+                return _getDateTimeResult;
+            }
         }
 
         private static void GetDateTimeCallback(DateTimeEventArgs e)
