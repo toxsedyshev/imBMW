@@ -295,7 +295,7 @@ namespace imBMW.iBus.Devices.Real
                         }
                         break;
                     case 0x03:
-                        if (m.Data.Length == 8)
+                        if (m.Data.Length >= 8)
                         {
                             float temperature;
                             if (m.Data.ParseFloat(out temperature, 3, 5))
@@ -316,7 +316,7 @@ namespace imBMW.iBus.Devices.Real
                         }
                         break;
                     case 0x06:
-                        if (m.Data.Length == 7)
+                        if (m.Data.Length >= 7)
                         {
                             int range;
                             if (m.Data.ParseInt(out range, 3, 4))
@@ -327,7 +327,7 @@ namespace imBMW.iBus.Devices.Real
                         }
                         break;
                     case 0x09:
-                        if (m.Data.Length == 7)
+                        if (m.Data.Length >= 7)
                         {
                             int speedLimit;
                             if (m.Data.ParseInt(out speedLimit, 3, 3))
