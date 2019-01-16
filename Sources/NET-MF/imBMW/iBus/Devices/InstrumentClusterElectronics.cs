@@ -186,6 +186,8 @@ namespace imBMW.iBus.Devices.Real
         private static ushort _dateYear;
         private static ushort _lastSpeedLimit;
 
+        private static Timer engineStartedTimer;
+
         static InstrumentClusterElectronics()
         {
             TemperatureOutside = sbyte.MinValue;
@@ -595,6 +597,7 @@ namespace imBMW.iBus.Devices.Real
             {
                 return;
             }
+            var oldRPM = CurrentRPM;
             CurrentSpeed = speed;
             CurrentRPM = rpm;
             var e = SpeedRPMChanged;
@@ -602,6 +605,29 @@ namespace imBMW.iBus.Devices.Real
             {
                 e(new SpeedRPMEventArgs(CurrentSpeed, CurrentRPM));
             }
+            if (oldRPM == 0 && rpm > 0)
+            {
+                RunEngineStartedTimer();
+            }
+        }
+
+        private static void RunEngineStartedTimer()
+        {
+            if (engineStartedTimer != null)
+            {
+                engineStartedTimer.Dispose();
+                engineStartedTimer = null;
+            }
+
+            engineStartedTimer = new Timer(delegate
+            {
+                if (CurrentIgnitionState == IgnitionState.Ign 
+                    && CurrentRPM > 0
+                    && EngineStarted != null)
+                {
+                    EngineStarted.Invoke();
+                }
+            }, null, 2000, 0);
         }
 
         private static void OnVinChanged(string vin)
@@ -756,6 +782,11 @@ namespace imBMW.iBus.Devices.Real
         }
 
         public static event IgnitionEventHandler IgnitionStateChanged;
+
+        /// <summary>
+        /// Fired after 2-4 (depending on IKE message timing) after RPM become greater than 0
+        /// </summary>
+        public static event Action EngineStarted;
 
         /// <summary>
         /// IKE sends speed and RPM every 2 sec
