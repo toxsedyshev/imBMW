@@ -57,6 +57,7 @@ namespace imBMW.Devices.V2
             var log = settings.Log || settings.LogToSD;
 #if DEBUG
             log = true;
+            settings.LogMessageToASCII = true;
 #else
             // already inited in debug mode
             if (settings.Log)
@@ -149,6 +150,15 @@ namespace imBMW.Devices.V2
                 //{
                 //    return;
                 //}
+
+                if (e.Message.SourceDevice != DeviceAddress.Radio
+                    && e.Message.DestinationDevice != DeviceAddress.Radio
+                    && e.Message.SourceDevice != DeviceAddress.CDChanger
+                    && e.Message.DestinationDevice != DeviceAddress.CDChanger 
+                    && e.Message.DestinationDevice != DeviceAddress.Broadcast)
+                {
+                    return;
+                }
 
                 var logIco = "< ";
                 if (e.Message.ReceiverDescription == null)
