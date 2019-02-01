@@ -57,6 +57,7 @@ namespace imBMW.Devices.V2
             var log = settings.Log || settings.LogToSD;
 #if DEBUG
             log = true;
+            settings.LogMessageToASCII = true;
 #else
             // already inited in debug mode
             if (settings.Log)
@@ -216,7 +217,7 @@ namespace imBMW.Devices.V2
 
             #region CAN BUS
 
-            #if CANBUS
+#if CANBUS
 
             var speed = CanAdapterSettings.CanSpeed.Kbps100;
             CanAdapter.Current = new CanNativeAdapter(Pin.CAN, speed);
@@ -240,7 +241,7 @@ namespace imBMW.Devices.V2
 
             Logger.Info("CAN BUS inited");
 
-            #endif
+#endif
 
             #endregion
 
