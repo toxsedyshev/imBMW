@@ -5,7 +5,7 @@
 
 //#define MenuRadioCDC
 //#define MenuBordmonitorAUX
-//#define MenuBordmonitorCDC
+#define MenuBordmonitorCDC
 //#define MenuMIDAUX
 
 using GHI.IO;
@@ -219,7 +219,7 @@ namespace imBMW.Devices.V2
             #region Features
 
 #if DEBUG
-            InstrumentClusterElectronics.RequestDateTimeAndSetLocal(false);
+            //InstrumentClusterElectronics.RequestDateTimeAndSetLocal(false);
 #endif
 
             #endregion
