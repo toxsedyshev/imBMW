@@ -17,12 +17,13 @@ namespace imBMW.iBus.Devices.Emulators
 
         #region Messages
 
+        Message MessagePlayingDisk1Track1;
+        Message MessageStoppedDisk1Track1;
+        Message MessagePausedDisk1Track1;
+
         static Message MessagePollResponse = new Message(DeviceAddress.CDChanger, DeviceAddress.Broadcast, 0x02, 0x00);
         static Message MessageAnnounce = new Message(DeviceAddress.CDChanger, DeviceAddress.Broadcast, 0x02, 0x01);
-        static Message MessagePlayingDisk1Track1 = new Message(DeviceAddress.CDChanger, DeviceAddress.Radio, "Playing D1 T1", 0x39, 0x02, 0x09, 0x00, 0x3F, 0x00, 0x01, 0x01);
-        static Message MessageStoppedDisk1Track1 = new Message(DeviceAddress.CDChanger, DeviceAddress.Radio, "Stopped D1 T1", 0x39, 0x00, 0x0C, 0x00, 0x3F, 0x00, 0x01, 0x01);
-        static Message MessagePausedDisk1Track1  = new Message(DeviceAddress.CDChanger, DeviceAddress.Radio, "Paused D1 T1",  0x39, 0x01, 0x0C, 0x00, 0x3F, 0x00, 0x01, 0x01);
-
+        
         static byte[] DataCurrentDiskTrackRequest = new byte[] { 0x38, 0x00, 0x00 };
         static byte[] DataStop  = new byte[] { 0x38, 0x01, 0x00 };
         static byte[] DataPause = new byte[] { 0x38, 0x02, 0x00 };
@@ -31,9 +32,14 @@ namespace imBMW.iBus.Devices.Emulators
 
         #endregion
 
-        public CDChanger(IAudioPlayer player)
+        public CDChanger(IAudioPlayer player, bool oneDisk = false)
             : base(player)
         {
+            var disks = oneDisk ? 0x01 : 0x3F;
+            MessagePlayingDisk1Track1 = new Message(DeviceAddress.CDChanger, DeviceAddress.Radio, "Playing D1 T1", 0x39, 0x02, 0x09, 0x00, disks, 0x00, 0x01, 0x01);
+            MessageStoppedDisk1Track1 = new Message(DeviceAddress.CDChanger, DeviceAddress.Radio, "Stopped D1 T1", 0x39, 0x00, 0x0C, 0x00, disks, 0x00, 0x01, 0x01);
+            MessagePausedDisk1Track1  = new Message(DeviceAddress.CDChanger, DeviceAddress.Radio, "Paused D1 T1",  0x39, 0x01, 0x0C, 0x00, disks, 0x00, 0x01, 0x01);
+        
             Manager.AddMessageReceiverForDestinationDevice(DeviceAddress.CDChanger, ProcessCDCMessage);
 
             announceThread = new Thread(announce);
