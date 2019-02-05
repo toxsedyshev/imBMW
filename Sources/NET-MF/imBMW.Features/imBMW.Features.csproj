@@ -52,6 +52,7 @@
     <Compile Include="Menu\MenuHelpers.cs" />
     <Compile Include="Menu\MenuItem.cs" />
     <Compile Include="Menu\MenuScreen.cs" />
+    <Compile Include="Menu\OneRowMenuBase.cs" />
     <Compile Include="Menu\RadioMenu.cs" />
     <Compile Include="Menu\Screens\BordcomputerScreen.cs" />
     <Compile Include="Menu\Screens\HomeScreen.cs" />

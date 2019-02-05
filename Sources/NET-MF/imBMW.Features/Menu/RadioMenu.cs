@@ -11,7 +11,7 @@ using imBMW.Features.Menu.Screens;
 
 namespace imBMW.Features.Menu
 {
-    public class RadioMenu : MenuBase
+    public class RadioMenu : OneRowMenuBase
     {
         static RadioMenu instance;
         
@@ -26,7 +26,6 @@ namespace imBMW.Features.Menu
         private readonly int[] MaskMIDCDCLastButtons = new int[] { 12, 14, 21 };
         private readonly int[] MaskMIDAUXLastButtons = new int[] { 12 };
 
-        private bool mflModeTelephone;
         private bool wereMIDButtonsOverriden;
         private bool waitingBatchMIDUpdate;
 
@@ -35,7 +34,6 @@ namespace imBMW.Features.Menu
         private RadioMenu(MediaEmulator mediaEmulator)
             : base(mediaEmulator)
         {
-            MultiFunctionSteeringWheel.ButtonPressed += MultiFunctionSteeringWheel_ButtonPressed;
             if (Radio.HasMID)
             {
                 Manager.AddMessageReceiverForSourceAndDestinationDevice(DeviceAddress.MultiInfoDisplay, DeviceAddress.Radio, ProcessMIDToRadioMessage);
@@ -53,130 +51,19 @@ namespace imBMW.Features.Menu
             return instance;
         }
 
-        #region Player items
-
-        protected override int StatusTextMaxlen { get { return 11; } }
-
-        protected override void ShowPlayerStatus(IAudioPlayer player, AudioPlayerIsPlayingStatusEventArgs args)
-        {
-            var status = player.GetPlayingStatusString(args.IsPlaying, StatusTextMaxlen);
-            ShowPlayerStatus(player, status);
-
-            if (CurrentScreen == player.Menu)
-            {
-                args.IsShownOnIKE = true;
-            }
-        }
-
-        protected override void ShowPlayerStatus(IAudioPlayer player, AudioPlayerStatusEventArgs args)
-        {
-            if (!IsEnabled)
-            {
-                return;
-            }
-
-            var status = player.GetStatusString(args.Status, args.Event, StatusTextMaxlen);
-            ShowPlayerStatus(player, status);
-
-            if (args.Event == PlayerEvent.Next 
-                || args.Event == PlayerEvent.Prev
-                || args.Event == PlayerEvent.Settings)
-            {
-                ShowPlayerStatusWithDelay(player);
-            }
-
-            if (CurrentScreen == player.Menu)
-            {
-                args.IsShownOnIKE = true;
-            }
-        }
-
-        #endregion
-
         #region Menu control
 
-        int shownItemIndex;
-
-        public int ShownItemIndex
+        protected override bool GetTelephoneModeForNavigation()
         {
-            get
-            {
-                if (shownItemIndex < 0 || shownItemIndex >= CurrentScreen.ItemsCount)
-                {
-                    shownItemIndex = 0;
-                }
-                var item = CurrentScreen.GetItem(shownItemIndex);
-                if (CurrentScreen.ItemsCount > 1 && (item == null || item.Action == MenuItemAction.GoBackScreen))
-                {
-                    shownItemIndex++;
-                    return ShownItemIndex;
-                }
-                return shownItemIndex;
-            }
-            set { shownItemIndex = value; }
+            return TelephoneModeForNavigation;
         }
 
-        public MenuItem ShownItem
+        protected override void OnMFLModeChanged(bool isPhone)
         {
-            get
+            if (IsEnabled)
             {
-                return CurrentScreen.GetItem(ShownItemIndex);
-            }
-        }
-
-        private bool MflModeTelephone
-        {
-            set
-            {
-                if (mflModeTelephone == value)
-                {
-                    return;
-                }
-                mflModeTelephone = value;
-                if (IsEnabled)
-                {
-                    DisplayText(CharIcons.SelectedArrow + (value ? "Navigation" : "Playback"), TextAlign.Left);
-                    RefreshScreenWithDelay(MenuScreenUpdateReason.Scroll);
-                }
-            }
-            get
-            {
-                return mflModeTelephone;
-            }
-        }
-
-        void MultiFunctionSteeringWheel_ButtonPressed(MFLButton button)
-        {
-            if (!TelephoneModeForNavigation)
-            {
-                return;
-            }
-            switch (button)
-            {
-                case MFLButton.ModeRadio:
-                    MflModeTelephone = false;
-                    return;
-                case MFLButton.ModeTelephone:
-                    MflModeTelephone = true;
-                    return;
-            }
-            if (IsEnabled && MflModeTelephone)
-            {
-                switch (button)
-                {
-                    case MFLButton.Next:
-                        ScrollNext();
-                        break;
-                    case MFLButton.Prev:
-                        ScrollPrev();
-                        break;
-                    case MFLButton.Dial:
-                        PressedSelect();
-                        break;
-                    case MFLButton.DialLong:
-                        PressedBack();
-                        break;
-                }
+                DisplayText(CharIcons.SelectedArrow + (isPhone ? "Navigation" : "Playback"), TextAlign.Left);
+                RefreshScreenWithDelay(MenuScreenUpdateReason.Scroll);
             }
         }
 
@@ -338,62 +225,6 @@ namespace imBMW.Features.Menu
             // TODO bind rnd, scan
         }
 
-        protected void ScrollNext()
-        {
-            ShownItemIndex++;
-            UpdateScreen(MenuScreenUpdateReason.Scroll);
-        }
-
-        protected void ScrollPrev()
-        {
-            ShownItemIndex--;
-            UpdateScreen(MenuScreenUpdateReason.Scroll);
-        }
-
-        protected void PressedSelect()
-        {
-            UpdateScreen(MenuScreenUpdateReason.Refresh);
-            var item = ShownItem;
-            if (item != null)
-            {
-                item.Click();
-            }
-        }
-
-        protected void PressedBack()
-        {
-            if (CurrentScreen == HomeScreen.Instance)
-            {
-                UpdateScreen(MenuScreenUpdateReason.Refresh);
-            }
-            else
-            {
-                NavigateBack();
-            }
-        }
-
-        private void PressedHome()
-        {
-            if (CurrentScreen == HomeScreen.Instance)
-            {
-                UpdateScreen(MenuScreenUpdateReason.Refresh);
-            }
-            else
-            {
-                NavigateHome();
-            }
-        }
-
-        protected override void ScreenNavigatedTo(MenuScreen screen, bool fromAnotherScreen)
-        {
-            if (fromAnotherScreen)
-            {
-                ShownItemIndex = 0;
-            }
-
-            base.ScreenNavigatedTo(screen, fromAnotherScreen);
-        }
-
         public bool EmulatorIsMIDAUX
         {
             get
@@ -411,136 +242,7 @@ namespace imBMW.Features.Menu
         Timer refreshScreenDelayTimer;
         const int refreshScreenDelay = 1000;
 
-        protected override void DrawScreen(MenuScreenUpdateEventArgs args)
-        {
-            CancelRefreshScreenWithDelay();
-            string showText, showTextIKE = null;
-            TextAlign align = TextAlign.Left;
-            switch (args.Reason)
-            {
-                case MenuScreenUpdateReason.Navigation:
-                    showText = CurrentScreen.Title;
-                    if (showText.Length < Radio.DisplayTextMaxLength)
-                    {
-                        showText = CharIcons.NetRect + showText;
-                    }
-                    if (showText.Length < Radio.DisplayTextMaxLength)
-                    {
-                        showText += CharIcons.NetRect;
-                    }
-                    align = TextAlign.Center;
-                    RefreshScreenWithDelay(MenuScreenUpdateReason.Scroll);
-                    break;
-                case MenuScreenUpdateReason.StatusChanged:
-                    if (CurrentScreen.Status == String.Empty)
-                    {
-                        UpdateScreen(MenuScreenUpdateReason.Refresh);
-                        return;
-                    }
-                    showText = CurrentScreen.Status;
-                    align = TextAlign.Center;
-                    RefreshScreenWithDelay();
-                    break;
-                default:
-                    showText = GetShownItemString();
-                    if (IsDuplicateOnIKEEnabled)
-                    {
-                        showTextIKE = GetItemString(args.Reason, showText, true);
-                    }
-                    showText = GetItemString(args.Reason, showText, false);
-                    break;
-            }
-
-            bool sendMIDButtons = false;
-            if (Radio.HasMID && !wereMIDButtonsOverriden)
-            {
-                sendMIDButtons = true;
-                waitingBatchMIDUpdate = true;
-            }
-            DisplayTextWithDelay(showText, showTextIKE, align, sendMIDButtons);
-        }
-
-        private string GetItemString(MenuScreenUpdateReason reason, string showText, bool ike)
-        {
-            var maxLength = ike ? InstrumentClusterElectronics.DisplayTextMaxLength : Radio.DisplayTextMaxLength;
-            if (showText.Length <= maxLength)
-            {
-                return showText;
-            }
-
-            var separator = showText.IndexOf(": ");
-            if (separator <= 0 || separator == showText.Length - 2)
-            {
-                return showText;
-            }
-
-            if (showText.Length == maxLength + 1)
-            {
-                return showText.Substring(0, separator + 1) + showText.Substring(separator + 2);
-            }
-
-            if (reason == MenuScreenUpdateReason.Scroll)
-            {
-                if (!ike)
-                {
-                    RefreshScreenWithDelay();
-                }
-                return showText.Substring(0, separator + 1);
-            }
-            else
-            {
-                showText = showText.Substring(separator + 2);
-                if (ShownItem != null && !StringHelpers.IsNullOrEmpty(ShownItem.RadioAbbreviation))
-                {
-                    var len = showText.Length + ShownItem.RadioAbbreviation.Length;
-                    if (len < maxLength)
-                    {
-                        return ShownItem.RadioAbbreviation + " " + showText;
-                    }
-                    else if (len == maxLength
-                        && (ShownItem.RadioAbbreviation[ShownItem.RadioAbbreviation.Length - 1] == ':'
-                            || !showText[0].IsLetterOrNumber()))
-                    {
-                        return ShownItem.RadioAbbreviation + showText;
-                    }
-                }
-            }
-
-            return showText;
-        }
-
-        private void DisplayText(string s, TextAlign align)
-        {
-            Radio.DisplayText(s, align);
-            if (IsDuplicateOnIKEEnabled)
-            {
-                InstrumentClusterElectronics.DisplayText(s, align);
-            }
-        }
-
-        private void DisplayTextWithDelay(string s, string sIKE, TextAlign align, bool sendMIDButtons)
-        {
-            Radio.DisplayTextWithDelay(s, align, () =>
-            {
-                if (sendMIDButtons)
-                {
-                    wereMIDButtonsOverriden = true;
-                    waitingBatchMIDUpdate = false;
-                    var midButtons = new Message[] { MessageMIDMenuButtons, EmulatorIsMIDAUX ? MessageMIDAUXLastButtons : MessageMIDCDCLastButtons };
-                    Manager.EnqueueMessage(midButtons);
-                }
-            });
-            if (IsDuplicateOnIKEEnabled)
-            {
-                if (StringHelpers.IsNullOrEmpty(sIKE))
-                {
-                    sIKE = s;
-                }
-                InstrumentClusterElectronics.DisplayTextWithDelay(sIKE, align);
-            }
-        }
-
-        protected void CancelRefreshScreenWithDelay()
+        private void CancelRefreshScreenWithDelay()
         {
             if (refreshScreenDelayTimer != null)
             {
@@ -549,7 +251,7 @@ namespace imBMW.Features.Menu
             }
         }
 
-        protected void RefreshScreenWithDelay(MenuScreenUpdateReason reason = MenuScreenUpdateReason.Refresh)
+        private void RefreshScreenWithDelay(MenuScreenUpdateReason reason = MenuScreenUpdateReason.Refresh)
         {
             CancelRefreshScreenWithDelay();
             refreshScreenDelayTimer = new Timer(delegate
@@ -558,19 +260,48 @@ namespace imBMW.Features.Menu
             }, null, refreshScreenDelay, 0);
         }
 
-        protected string GetShownItemString()
+        protected override void DrawScreen(MenuScreenUpdateEventArgs args)
         {
-            var item = ShownItem;
-            if (item == null)
+            CancelRefreshScreenWithDelay();
+            DrawScreen(args, Radio.DisplayTextMaxLength, (text, align) =>
             {
-                return CurrentScreen.Title;
-            }
-            var s = item.Text;
-            if (item.Type == MenuItemType.Checkbox)
+                bool sendMIDButtons = false;
+                if (Radio.HasMID && !wereMIDButtonsOverriden)
+                {
+                    sendMIDButtons = true;
+                    waitingBatchMIDUpdate = true;
+                }
+                Radio.DisplayTextWithDelay(text, align, () =>
+                {
+                    if (sendMIDButtons)
+                    {
+                        wereMIDButtonsOverriden = true;
+                        waitingBatchMIDUpdate = false;
+                        var midButtons = new Message[] { MessageMIDMenuButtons, EmulatorIsMIDAUX ? MessageMIDAUXLastButtons : MessageMIDCDCLastButtons };
+                        Manager.EnqueueMessage(midButtons);
+                    }
+                });
+            }, reason =>
             {
-                s = (item.IsChecked ? '*' : CharIcons.Bull) + s;
+                RefreshScreenWithDelay(reason);
+            });
+
+            if (IsDuplicateOnIKEEnabled)
+            {
+                DrawScreen(args, InstrumentClusterElectronics.DisplayTextMaxLength, (text, align) =>
+                {
+                    InstrumentClusterElectronics.DisplayTextWithDelay(text, align);
+                });
             }
-            return s;
+        }
+        
+        protected override void DisplayText(string s, TextAlign align)
+        {
+            Radio.DisplayText(s, align);
+            if (IsDuplicateOnIKEEnabled)
+            {
+                InstrumentClusterElectronics.DisplayText(s, align);
+            }
         }
 
         #endregion
