@@ -35,7 +35,7 @@ namespace imBMW.iBus.Devices.Emulators
         public CDChanger(IAudioPlayer player, bool oneDisk = false)
             : base(player)
         {
-            var disks = oneDisk ? 0x01 : 0x3F;
+            var disks = (byte)(oneDisk ? 0x01 : 0x3F);
             MessagePlayingDisk1Track1 = new Message(DeviceAddress.CDChanger, DeviceAddress.Radio, "Playing D1 T1", 0x39, 0x02, 0x09, 0x00, disks, 0x00, 0x01, 0x01);
             MessageStoppedDisk1Track1 = new Message(DeviceAddress.CDChanger, DeviceAddress.Radio, "Stopped D1 T1", 0x39, 0x00, 0x0C, 0x00, disks, 0x00, 0x01, 0x01);
             MessagePausedDisk1Track1  = new Message(DeviceAddress.CDChanger, DeviceAddress.Radio, "Paused D1 T1",  0x39, 0x01, 0x0C, 0x00, disks, 0x00, 0x01, 0x01);
