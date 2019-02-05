@@ -177,6 +177,7 @@ namespace imBMW.iBus.Devices.Real
         private static Thread _getDateTimeThread;
         private static ManualResetEvent _getDateTimeSync;
         private static DateTimeEventArgs _getDateTimeResult;
+        private static object _getDateTimeLock = new object();
 
         static Timer displayTextDelayTimer;
 
@@ -525,7 +526,7 @@ namespace imBMW.iBus.Devices.Real
 
         public static DateTimeEventArgs GetDateTime(int timeout)
         {
-            lock (_getDateTimeResult)
+            lock (_getDateTimeLock)
             {
                 _getDateTimeSync = new ManualResetEvent(false);
                 _getDateTimeSync.Reset();
