@@ -286,7 +286,7 @@ namespace imBMW.Devices.V2
                 }
                 if (settings.MenuMode == MenuMode.BordmonitorCDC)
                 {
-                    emulator = new CDChanger(player);
+                    emulator = new CDChanger(player, true);
                     if (settings.NaviVersion == NaviVersion.MK2)
                     {
                         Localization.Current = new RadioLocalization();
