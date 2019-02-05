@@ -27,7 +27,8 @@ namespace imBMW.Features.Menu.Screens
 
         public override bool OnNavigatedTo(MenuBase menu)
         {
-            if (base.OnNavigatedTo(menu))
+            var navigatedTo = base.OnNavigatedTo(menu);
+            if (navigatedTo && !IsNavigatedOnMultipleMenus)
             {
                 BodyModule.BatteryVoltageChanged += BodyModule_BatteryVoltageChanged;
                 InstrumentClusterElectronics.SpeedRPMChanged += InstrumentClusterElectronics_SpeedRPMChanged;
@@ -39,14 +40,14 @@ namespace imBMW.Features.Menu.Screens
                 InstrumentClusterElectronics.SpeedLimitChanged += InstrumentClusterElectronics_SpeedLimitChanged;
 
                 UpdateVoltage();
-                return true;
             }
-            return false;
+            return navigatedTo;
         }
 
         public override bool OnNavigatedFrom(MenuBase menu)
         {
-            if (base.OnNavigatedFrom(menu))
+            var navigatedFrom = base.OnNavigatedFrom(menu);
+            if (navigatedFrom && !IsNavigated)
             {
                 BodyModule.BatteryVoltageChanged -= BodyModule_BatteryVoltageChanged;
                 InstrumentClusterElectronics.SpeedRPMChanged -= InstrumentClusterElectronics_SpeedRPMChanged;
@@ -56,9 +57,8 @@ namespace imBMW.Features.Menu.Screens
                 InstrumentClusterElectronics.Consumption2Changed -= InstrumentClusterElectronics_Consumption2Changed;
                 InstrumentClusterElectronics.RangeChanged -= InstrumentClusterElectronics_RangeChanged;
                 InstrumentClusterElectronics.SpeedLimitChanged -= InstrumentClusterElectronics_SpeedLimitChanged;
-                return true;
             }
-            return false;
+            return navigatedFrom;
         }
 
         private void InstrumentClusterElectronics_SpeedLimitChanged(SpeedLimitEventArgs e)

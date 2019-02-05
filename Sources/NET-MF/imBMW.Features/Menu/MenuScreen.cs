@@ -40,7 +40,7 @@ namespace imBMW.Features.Menu
         string title;
         string status;
         bool updateSuspended;
-        MenuBase parentMenu;
+        ArrayList parentMenuList = new ArrayList();
 
         public MenuScreen(string title = null)
             : this()
@@ -172,15 +172,12 @@ namespace imBMW.Features.Menu
 
         public virtual bool OnNavigatedTo(MenuBase menu)
         {
-            if (parentMenu == menu)
+            if (parentMenuList.Contains(menu))
             {
                 return false;
             }
-            if (parentMenu != null)
-            {
-                throw new Exception("Already navigated to screen " + this + " in another menu " + parentMenu + ". Can't navigate in " + menu);
-            }
-            parentMenu = menu;
+
+            parentMenuList.Add(menu);
 
             var e = NavigatedTo;
             if (e != null)
@@ -193,9 +190,9 @@ namespace imBMW.Features.Menu
 
         public virtual bool OnNavigatedFrom(MenuBase menu)
         {
-            if (parentMenu == menu)
+            if (parentMenuList.Contains(menu))
             {
-                parentMenu = null;
+                parentMenuList.Remove(menu);
 
                 var e = NavigatedFrom;
                 if (e != null)
@@ -204,10 +201,6 @@ namespace imBMW.Features.Menu
                 }
 
                 return true;
-            }
-            if (parentMenu != null)
-            {
-                throw new Exception("Navigated to screen " + this + " in another menu " + parentMenu + ". Can't navigate from in " + menu);
             }
             return false;
         }
@@ -230,13 +223,24 @@ namespace imBMW.Features.Menu
         }
 
         /// <summary>
-        /// Menu navigated to this screen and screen is not suspended (screen, but not screen update).
+        /// Any menu navigated to this screen and screen is not suspended (screen, but not screen update).
         /// </summary>
         public bool IsNavigated
         {
             get
             {
-                return parentMenu != null;
+                return parentMenuList.Count > 0;
+            }
+        }
+
+        /// <summary>
+        /// Multiple menus navigated to this screen and screen is not suspended on that menus.
+        /// </summary>
+        public bool IsNavigatedOnMultipleMenus
+        {
+            get
+            {
+                return parentMenuList.Count > 1;
             }
         }
 

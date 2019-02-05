@@ -252,6 +252,7 @@ namespace imBMW.Multimedia
                     var contact = (PhoneContact)c;
                     contactsScreen.AddItem(new MenuItem(contact.Name, it => CallPhone(contact.Phones)), i++); // TODO show phones
                 }
+                // TODO clear empty items (if any)
             }
             contactsScreen.IsUpdateSuspended = false;
             contactsScreen.Refresh();
