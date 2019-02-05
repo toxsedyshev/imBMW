@@ -41,6 +41,7 @@
     <Compile Include="Comfort.cs" />
     <Compile Include="FeaturesEnumConverter.cs" />
     <Compile Include="InternalCommunications.cs" />
+    <Compile Include="Launcher.cs" />
     <Compile Include="Light.cs" />
     <Compile Include="Localizations\EnglishLocalization.cs" />
     <Compile Include="Localizations\Localization.cs" />
@@ -73,6 +74,7 @@
   <ItemGroup>
     <Reference Include="GHI.Hardware, Version=4.3.8.1, Culture=neutral, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.SPOT.Hardware" />
+    <Reference Include="Microsoft.SPOT.IO" />
     <Reference Include="Microsoft.SPOT.Native" />
     <Reference Include="System.IO" />
   </ItemGroup>
