@@ -21,15 +21,15 @@ namespace imBMW.Devices.V2
         {
             var launcher = new Launcher(new LauncherSettings
             {
-                LEDPin = Pin.LED,
-                iBusPort = Serial.COM3,
-                iBusBusyPin = Pin.TH3122SENSTA,
-                MediaShieldLED = Pin.Di10,
-                MediaSheildPort = Serial.COM2,
-                SDInterface = SDCard.SDInterface.MCI,
                 HWVersion = "HW2",
+                LEDPin = Pin.LED,
+                iBusPort = Pin.TH3122Port,
+                iBusBusyPin = Pin.TH3122SENSTA,
+                MediaSheildPort = Serial.COM2,
+                MediaShieldLED = Pin.Di10,
+                SDInterface = Pin.SDInterface,
 #if CANBUS
-                CanBus = GHI.IO.ControllerAreaNetwork.Channel.One,
+                CanBus = Pin.CAN,
 #endif
 #if E65SEATS
                 E65Seats = true,

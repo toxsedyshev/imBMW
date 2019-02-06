@@ -23,20 +23,20 @@ namespace imBMW
 {
     public class LauncherSettings
     {
+        public string HWVersion { get; set; }
+
         public Cpu.Pin LEDPin { get; set; }
 
         public string iBusPort { get; set; }
 
         public Cpu.Pin iBusBusyPin { get; set; }
 
-        public Cpu.Pin MediaShieldLED { get; set; }
-
         public string MediaSheildPort { get; set; }
 
+        public Cpu.Pin MediaShieldLED { get; set; }
+
         public SDCard.SDInterface SDInterface { get; set; }
-
-        public string HWVersion { get; set; }
-
+        
         public ControllerAreaNetwork.Channel CanBus { get; set; }
 
         public bool E65Seats { get; set; }

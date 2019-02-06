@@ -3,6 +3,8 @@ using Microsoft.SPOT;
 using Microsoft.SPOT.Hardware;
 using GHI.Pins;
 using GHI.IO;
+using System.IO.Ports;
+using GHI.IO.Storage;
 
 namespace imBMW.Devices.V2.Hardware
 {
@@ -167,8 +169,18 @@ namespace imBMW.Devices.V2.Hardware
         public static Cpu.Pin SPI_ChipSelect = Di3;
 
         /// <summary>
+        /// TH3122 iBus port.
+        /// </summary>
+        public static string TH3122Port = Serial.COM3;
+
+        /// <summary>
         /// CAN BUS port.
         /// </summary>
         public static ControllerAreaNetwork.Channel CAN = (ControllerAreaNetwork.Channel)FEZCerb40II.CanBus.Can1;
+
+        /// <summary>
+        /// SD card interface.
+        /// </summary>
+        public static SDCard.SDInterface SDInterface = SDCard.SDInterface.MCI;
     }
 }
