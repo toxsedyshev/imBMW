@@ -31,7 +31,7 @@ namespace imBMW
 
         public Cpu.Pin iBusBusyPin { get; set; }
 
-        public string MediaSheildPort { get; set; }
+        public string MediaShieldPort { get; set; }
 
         public Cpu.Pin MediaShieldLED { get; set; }
 
@@ -251,7 +251,7 @@ namespace imBMW
             BluetoothWT32 wt32;
             if (settings.MediaShield == "WT32")
             {
-                wt32 = new BluetoothWT32(launcherSettings.MediaSheildPort, Settings.Instance.BluetoothPin);
+                wt32 = new BluetoothWT32(launcherSettings.MediaShieldPort, Settings.Instance.BluetoothPin);
                 player = wt32;
                 InternalCommunications.Register(wt32);
 
@@ -260,7 +260,7 @@ namespace imBMW
             }
             else
             {
-                player = new BluetoothOVC3860(launcherSettings.MediaSheildPort, sd != null ? sd + @"\contacts.vcf" : null);
+                player = new BluetoothOVC3860(launcherSettings.MediaShieldPort, sd != null ? sd + @"\contacts.vcf" : null);
             }
             
             MediaEmulator emulator;

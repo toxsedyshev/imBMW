@@ -25,7 +25,7 @@ namespace imBMW.Devices.V2
                 LEDPin = Pin.LED,
                 iBusPort = Pin.TH3122Port,
                 iBusBusyPin = Pin.TH3122SENSTA,
-                MediaSheildPort = Serial.COM2,
+                MediaShieldPort = Serial.COM2,
                 MediaShieldLED = Pin.Di10,
                 SDInterface = Pin.SDInterface,
 #if CANBUS
