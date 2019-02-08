@@ -8,7 +8,6 @@
 //#define MenuBordmonitorCDC
 //#define MenuMIDAUX
 
-using GHI.IO.Storage;
 using imBMW.Devices.V2.Hardware;
 using System.IO.Ports;
 using imBMW.Tools;
