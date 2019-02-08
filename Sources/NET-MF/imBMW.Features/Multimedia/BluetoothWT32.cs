@@ -265,7 +265,7 @@ namespace imBMW.Multimedia
                 var len = bytes.Length;
                 if (len > 1023)
                 {
-                    throw new Exception("WT32 command length limit is 10 bytes. Can't send: " + cmd.Command);
+                    throw new Exception("WT32 command length limit is 10 bits. Can't send: " + cmd.Command);
                 }
                 var buf = new byte[len + 5];
 
