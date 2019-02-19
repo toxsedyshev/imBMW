@@ -11,8 +11,7 @@ namespace imBMW.iBus.Devices.Emulators
     public class CDChanger : MediaEmulator
     {
         const int StopDelayMilliseconds = 1000;
-
-        Thread announceThread;
+        
         Timer stopDelay;
 
         #region Messages
@@ -22,8 +21,7 @@ namespace imBMW.iBus.Devices.Emulators
         Message MessagePausedDisk1Track1;
 
         static Message MessagePollResponse = new Message(DeviceAddress.CDChanger, DeviceAddress.Broadcast, 0x02, 0x00);
-        static Message MessageAnnounce = new Message(DeviceAddress.CDChanger, DeviceAddress.Broadcast, 0x02, 0x01);
-
+        
         static byte[] DataCurrentDiskTrackRequest = new byte[] { 0x38, 0x00, 0x00 };
         static byte[] DataStop  = new byte[] { 0x38, 0x01, 0x00 };
         static byte[] DataPause = new byte[] { 0x38, 0x02, 0x00 };
@@ -41,9 +39,6 @@ namespace imBMW.iBus.Devices.Emulators
             MessagePausedDisk1Track1 = new Message(DeviceAddress.CDChanger, DeviceAddress.Radio, "Paused D1 T1", 0x39, 0x01, 0x0C, 0x00, disks, 0x00, 0x01, 0x01);
 
             Manager.AddMessageReceiverForDestinationDevice(DeviceAddress.CDChanger, ProcessCDCMessage);
-
-            announceThread = new Thread(announce);
-            announceThread.Start();
         }
 
         #region Player control
@@ -93,11 +88,6 @@ namespace imBMW.iBus.Devices.Emulators
                 {
                     Play();
                 }
-
-                if (announceThread.ThreadState != ThreadState.Suspended)
-                {
-                    announceThread.Suspend();
-                }
             }
 
             base.OnIsEnabledChanged(isEnabled, isEnabled); // fire only if enabled
@@ -110,11 +100,6 @@ namespace imBMW.iBus.Devices.Emulators
                 {
                     FireIsEnabledChanged();
                     Pause();
-
-                    if (announceThread.ThreadState == ThreadState.Suspended)
-                    {
-                        announceThread.Resume();
-                    }
                 }, null, StopDelayMilliseconds, 0);
             }
         }
@@ -189,15 +174,6 @@ namespace imBMW.iBus.Devices.Emulators
                 // TODO remove
                 Logger.Warning("Need response!!!");
             }*/
-        }
-
-        static void announce()
-        {
-            while (true)
-            {
-                Manager.EnqueueMessage(MessageAnnounce, MessagePollResponse);
-                Thread.Sleep(30000);
-            }
         }
 
         #endregion
