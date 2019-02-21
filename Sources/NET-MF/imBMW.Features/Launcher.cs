@@ -257,10 +257,13 @@ namespace imBMW
 
                 //byte gain = 0;
                 //HardwareButton.OnPress(Pin.Di14, () => wt32.SetMicGain((byte)(++gain % 16)));
+
+                Logger.Info("BluetoothWT32 Media Shield inited");
             }
             else
             {
                 player = new BluetoothOVC3860(launcherSettings.MediaShieldPort, sd != null ? sd + @"\contacts.vcf" : null);
+                Logger.Info("BluetoothOVC3860 Media Shield inited");
             }
             
             MediaEmulator emulator;
