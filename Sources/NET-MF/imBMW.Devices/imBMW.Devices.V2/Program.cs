@@ -9,7 +9,6 @@
 //#define MenuMIDAUX
 
 using imBMW.Devices.V2.Hardware;
-using System.IO.Ports;
 using imBMW.Tools;
 
 namespace imBMW.Devices.V2
@@ -24,11 +23,11 @@ namespace imBMW.Devices.V2
                 LEDPin = Pin.LED,
                 iBusPort = Pin.TH3122Port,
                 iBusBusyPin = Pin.TH3122SENSTA,
-                MediaShieldPort = Serial.COM2,
+                MediaShieldPort = Pin.Com2,
                 MediaShieldLED = Pin.Di10,
                 SDInterface = Pin.SDInterface,
 #if CANBUS
-                CanBus = Pin.CAN,
+                CanBus = Pin.CAN1,
 #endif
 #if E65SEATS
                 E65Seats = true,
