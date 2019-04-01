@@ -30,7 +30,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="3rdparty\MCP2515.cs" />
     <Compile Include="CanBus\Adapters\CanAdapter.cs" />
     <Compile Include="CanBus\Adapters\CanAdapterSettings.cs" />
     <Compile Include="CanBus\Adapters\CanMCP2515Adapter.cs" />
@@ -88,6 +87,9 @@
       <Project>{1809C7F6-0A9F-412B-A45E-E667996E86A3}</Project>
       <Name>imBMW</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="3rdparty\" />
   </ItemGroup>
   <Import Condition="EXISTS('$(NetMfTargetsBaseDir)$(TargetFrameworkVersion)\CSharp.Targets')" Project="$(NetMfTargetsBaseDir)$(TargetFrameworkVersion)\CSharp.Targets" />
   <Import Condition="!EXISTS('$(NetMfTargetsBaseDir)$(TargetFrameworkVersion)\CSharp.Targets')" Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

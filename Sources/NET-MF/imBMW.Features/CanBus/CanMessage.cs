@@ -23,21 +23,21 @@ namespace imBMW.Features.CanBus
             this.message = message;
         }
 
-        public CanMessage(MCP2515.CANMSG message)
-            : this(message, DateTime.Now)
-        { }
+        //public CanMessage(MCP2515.CANMSG message)
+        //    : this(message, DateTime.Now)
+        //{ }
 
-        public CanMessage(MCP2515.CANMSG message, DateTime time)
-            : this(new ControllerAreaNetwork.Message
-            {
-                ArbitrationId = message.CANID,
-                Data = message.data,
-                IsRemoteTransmissionRequest = message.IsRemote,
-                IsExtendedId = message.IsExtended,
-                TimeStamp = time,
-                Length = message.data.Length
-            })
-        { }
+        //public CanMessage(MCP2515.CANMSG message, DateTime time)
+        //    : this(new ControllerAreaNetwork.Message
+        //    {
+        //        ArbitrationId = message.CANID,
+        //        Data = message.data,
+        //        IsRemoteTransmissionRequest = message.IsRemote,
+        //        IsExtendedId = message.IsExtended,
+        //        TimeStamp = time,
+        //        Length = message.data.Length
+        //    })
+        //{ }
 
         public override string ToString()
         {
@@ -153,17 +153,17 @@ namespace imBMW.Features.CanBus
             }
         }
 
-        public MCP2515.CANMSG MCP2515Message
-        {
-            get
-            {
-                return new MCP2515.CANMSG
-                {
-                    CANID = ArbitrationId,
-                    data = Data,
-                    IsRemote = IsRemoteTransmissionRequest
-                };
-            }
-        }
+        //public MCP2515.CANMSG MCP2515Message
+        //{
+        //    get
+        //    {
+        //        return new MCP2515.CANMSG
+        //        {
+        //            CANID = ArbitrationId,
+        //            data = Data,
+        //            IsRemote = IsRemoteTransmissionRequest
+        //        };
+        //    }
+        //}
     }
 }
