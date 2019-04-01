@@ -3,7 +3,7 @@ using Microsoft.SPOT;
 
 namespace imBMW.Tools
 {
-    public static class Math
+    public static class MathEx
     {
         public static byte Min(byte one, byte two)
         {

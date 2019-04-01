@@ -374,7 +374,7 @@ namespace imBMW.Features.CanBus.Devices
                     messageEngineRunning.Data[4] = counter;
                     can.SendMessage(messageEngineRunning);
 
-                    var dimmer = imBMW.Tools.Math.Min(LightControlModule.DimmerRaw, 0xFD);
+                    var dimmer = imBMW.Tools.MathEx.Min(LightControlModule.DimmerRaw, 0xFD);
                     if (InstrumentClusterElectronics.CurrentIgnitionState == IgnitionState.Off)
                     {
                         dimmer = 0xFE;
