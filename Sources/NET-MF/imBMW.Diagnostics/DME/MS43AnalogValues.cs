@@ -24,13 +24,18 @@ namespace imBMW.Diagnostics.DME
         {
             return message.SourceDevice == DeviceAddress.DME
                 && message.DestinationDevice == DeviceAddress.Diagnostic
-                && message.Data.Length == 42 
+                && message.Data.Length >= 42 
                 && message.Data[0] == 0xA0;
+        }
+
+        protected virtual bool IsValidMessage(Message message)
+        {
+            return CanParse(message);
         }
 
         public virtual void Parse(Message message)
         {
-            if (!CanParse(message))
+            if (!IsValidMessage(message))
             {
                 throw new Exception("Not MS43 analog values message");
             }
@@ -77,12 +82,19 @@ namespace imBMW.Diagnostics.DME
             s.Append(AFR.ToString("F3")); s.Append(";");
             s.Append(WideBandLambda.ToString("F5")); s.Append(";");
             s.Append(IntakePressure); s.Append(";");
+            s.Append(FuelPressure); s.Append(";");
+            s.Append(OilPressure); s.Append(";");
+            s.Append(IsMethanolInjecting ? 1 : 0); s.Append(";");
+            s.Append(IsMethanolFailsafe ? 1 : 0); s.Append(";");
             s.Append(AirMass.ToString("F2")); s.Append(";");
             s.Append(AirMassPerStroke.ToString("F4")); s.Append(";");
             s.Append(IgnitionAngle.ToString("F3")); s.Append(";");
             s.Append(InjectionTime.ToString("F5")); s.Append(";");
             s.Append(OilTemp.ToString("F2")); s.Append(";");
             s.Append(IntakeTemp.ToString("F2")); s.Append(";");
+            s.Append(IntakeTempAfterCooler.ToString("F2")); s.Append(";");
+            s.Append(CoolerInTemp.ToString("F2")); s.Append(";");
+            s.Append(CoolerOutTemp.ToString("F2")); s.Append(";");
             s.Append(CoolantTemp.ToString("F2")); s.Append(";");
             s.Append(CoolantRadiatorTemp.ToString("F2")); s.Append(";");
             s.Append(ElectricFanSpeed.ToString("F1")); s.Append(";");
@@ -115,12 +127,19 @@ namespace imBMW.Diagnostics.DME
             s.Append("AFR;");
             s.Append("WideBandLambda;");
             s.Append("IntakePressure;");
+            s.Append("FuelPressure;");
+            s.Append("OilPressure;");
+            s.Append("IsMethanolInjecting;");
+            s.Append("IsMethanolFailsafe;");
             s.Append("AirMass;");
             s.Append("AirMassPerStroke;");
             s.Append("IgnitionAngle;");
             s.Append("InjectionTime;");
             s.Append("OilTemp;");
             s.Append("IntakeTemp;");
+            s.Append("IntakeTempAfterCooler;");
+            s.Append("CoolerInTemp;");
+            s.Append("CoolerOutTemp;");
             s.Append("CoolantTemp;");
             s.Append("CoolantRadiatorTemp;");
             s.Append("ElectricFanSpeed;");

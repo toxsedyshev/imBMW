@@ -178,9 +178,50 @@ namespace imBMW.Diagnostics.DME
         public int IntakePressure { get; set; }
 
         /// <summary>
+        /// hPa = bar*1000
+        /// </summary>
+        public int FuelPressure { get; set; }
+
+        /// <summary>
+        /// hPa = bar*1000
+        /// </summary>
+        public int OilPressure { get; set; }
+
+        /// <summary>
+        /// Celsius
+        /// </summary>
+        public double IntakeTempAfterCooler { get; set; }
+
+        /// <summary>
+        /// Celsius
+        /// </summary>
+        public double CoolerInTemp { get; set; }
+
+        /// <summary>
+        /// Celsius
+        /// </summary>
+        public double CoolerOutTemp { get; set; }
+
+        /// <summary>
         /// Air/Fuel
         /// </summary>
-        public double AFR { get; set; }
+        public double AFR
+        {
+            get
+            {
+                return WideBandLambda * 14.7;
+            }
+        }
+
+        /// <summary>
+        /// State of methanol injection.
+        /// </summary>
+        public bool IsMethanolInjecting { get; set; }
+
+        /// <summary>
+        /// Methanol system failsafe state.
+        /// </summary>
+        public bool IsMethanolFailsafe { get; set; }
 
         /// <summary>
         /// Number
