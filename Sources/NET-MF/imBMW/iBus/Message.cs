@@ -141,18 +141,19 @@ namespace imBMW.iBus
             {
                 length = packet.Length;
             }
+
+            int packetLength = packetLengthCallback(packet);
+            if (packetLength > -1 && packetLength < PacketLengthMin)
+            {
+                return false;
+            }
+
             if (length < PacketLengthMin)
             {
                 return true;
             }
 
-            int packetLength = packetLengthCallback(packet);
-            if (packetLength < PacketLengthMin)
-            {
-                return false;
-            }
-
-            if (length >= packetLength && !IsValid(packet, length))
+            if (length >= packetLength && !IsValid(packet, packetLengthCallback, length))
             {
                 return false;
             }
@@ -162,6 +163,10 @@ namespace imBMW.iBus
 
         protected static int ParsePacketLength(byte[] packet)
         {
+            if (packet.Length < 2)
+            {
+                return -1;
+            }
             return packet[1] + 2;
         }
 

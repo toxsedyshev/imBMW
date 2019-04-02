@@ -136,14 +136,18 @@ namespace imBMW.Diagnostics
 
             return new DBusMessage((DeviceAddress)packet[0], packet.SkipAndTake(2, ParseDataLength(packet)));
         }
-
-        public static bool IsValid(byte[] packet)
+        
+        public static new bool IsValid(byte[] packet, int length = -1)
         {
-            return IsValid(packet, (byte)packet.Length);
+            return IsValid(packet, ParsePacketLength, length);
         }
 
-        public static new bool IsValid(byte[] packet, int length)
+        protected static new bool IsValid(byte[] packet, IntFromByteArray packetLengthCallback, int length = -1)
         {
+            if (length < 0)
+            {
+                length = packet.Length;
+            }
             if (length < PacketLengthMin)
             {
                 return false;
@@ -175,18 +179,18 @@ namespace imBMW.Diagnostics
                 length = packet.Length;
             }
 
+            var packetLength = packetLengthCallback(packet);
+            if (packetLength > -1 && packetLength < PacketLengthMin)
+            {
+                return false;
+            }
+
             if (length < PacketLengthMin)
             {
                 return true;
             }
 
-            byte packetLength = (byte)(packet[1] + 2);
-            if (packetLength < PacketLengthMin)
-            {
-                return false;
-            }
-
-            if (length >= packetLength && !IsValid(packet, length))
+            if (length >= packetLength && !IsValid(packet, packetLengthCallback, length))
             {
                 return false;
             }
@@ -196,19 +200,15 @@ namespace imBMW.Diagnostics
 
         protected static new int ParsePacketLength(byte[] packet)
         {
-            if (packet.Length < PacketLengthMin)
+            if (packet.Length < 2)
             {
-                return 0;
+                return -1;
             }
             return packet[1];
         }
 
         protected static new int ParseDataLength(byte[] packet)
         {
-            if (packet.Length < PacketLengthMin)
-            {
-                return 0;
-            }
             return ParsePacketLength(packet) - 3;
         }
     }

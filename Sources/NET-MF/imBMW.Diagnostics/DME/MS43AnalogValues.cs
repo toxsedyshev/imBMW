@@ -27,15 +27,10 @@ namespace imBMW.Diagnostics.DME
                 && message.Data.Length >= 42 
                 && message.Data[0] == 0xA0;
         }
-
-        protected virtual bool IsValidMessage(Message message)
-        {
-            return CanParse(message);
-        }
-
+        
         public virtual void Parse(Message message)
         {
-            if (!IsValidMessage(message))
+            if (!CanParse(message))
             {
                 throw new Exception("Not MS43 analog values message");
             }

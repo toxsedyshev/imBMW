@@ -102,6 +102,10 @@ namespace imBMW.iBus
 
         protected static new int ParsePacketLength(byte[] packet)
         {
+            if (packet.Length < 3)
+            {
+                return -1;
+            }
             return (packet[2] << 8) + packet[1] + 2;
         }
 

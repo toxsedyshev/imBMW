@@ -28,6 +28,10 @@ namespace imBMW.iBus
 
         public void Parse(byte[] data)
         {
+            if (data.Length == 0)
+            {
+                return;
+            }
             if (buffer == null)
             {
                 buffer = data;
@@ -36,19 +40,26 @@ namespace imBMW.iBus
             {
                 buffer = buffer.Combine(data);
             }
-            if (!CanStartWith(buffer))
+            var tmp = buffer;
+            var skipped = 0;
+            while (!CanStartWith(buffer))
             {
-                if (CanStartWith(data))
+                if (buffer.Length > data.Length)
                 {
-                    buffer = data;
+                    skipped++;
+                    buffer = buffer.Skip(1);
                 }
                 else
                 {
-                    var tmp = buffer;
                     buffer = null;
                     throw new Exception("Wrong data: " + tmp.ToHex(' '));
                 }
             }
+            if (skipped > 0)
+            {
+                Logger.Error($"Incoming message data skipped: " + tmp.SkipAndTake(0, skipped).ToHex(' '));
+            }
+            tmp = null;
             Message m;
             while (buffer != null && (m = TryCreate(buffer)) != null)
             {

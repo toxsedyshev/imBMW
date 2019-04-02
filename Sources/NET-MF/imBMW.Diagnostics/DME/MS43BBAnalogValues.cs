@@ -24,16 +24,15 @@ namespace imBMW.Diagnostics.DME
                 && message.Data.Length == 51
                 && message.Data[0] == 0xA0;
         }
-
-        protected override bool IsValidMessage(Message message)
-        {
-            return CanParse(message);
-        }
-
+        
         public override void Parse(Message message)
         {
             base.Parse(message);
             var d = message.Data;
+            if (d.Length < 51)
+            {
+                return;
+            }
             WideBandLambda = (double)d[42] / 255 + 0.5; // AFR=7.35..22.05 with 0.057 step
             IntakePressure = d[43] * 10; // 0..2550 hPa = 0..2.55bar with 0.01bars step
             FuelPressure = d[44] * 40; // 0..10.2bar with 0.04bars step VV
@@ -47,7 +46,11 @@ namespace imBMW.Diagnostics.DME
 
         public static DBusMessage ModifyMS43Message(DMEAnalogValues av, Message message)
         {
-            var data = message.Data.PadRight(0x00, 9);
+            var data = message.Data;
+            if (data.Length < 51)
+            {
+                data = data.PadRight(0x00, 51 - data.Length);
+            }
             data[42] = ToByte((av.WideBandLambda - 0.5) * 255);
             data[43] = ToByte(av.IntakePressure / 10);
             data[44] = ToByte(av.FuelPressure / 40);
