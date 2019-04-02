@@ -1,11 +1,13 @@
 using System;
 using imBMW.Tools;
 using System.Threading;
+#if NETMF
 using Microsoft.SPOT.Hardware;
+#endif
 
 namespace imBMW.iBus.Devices.Real
 {
-    #region Enums, delegales and event args
+#region Enums, delegales and event args
 
     public enum IgnitionState
     {
@@ -131,7 +133,7 @@ namespace imBMW.iBus.Devices.Real
 
     public delegate void DateTimeEventHandler(DateTimeEventArgs e);
 
-    #endregion
+#endregion
 
 
     public static class InstrumentClusterElectronics
@@ -174,7 +176,9 @@ namespace imBMW.iBus.Devices.Real
 
         private const int _getDateTimeTimeout = 1000;
 
+#if NETMF
         private static Thread _getDateTimeThread;
+#endif
         private static ManualResetEvent _getDateTimeSync;
         private static DateTimeEventArgs _getDateTimeResult;
         private static object _getDateTimeLock = new object();
@@ -491,6 +495,8 @@ namespace imBMW.iBus.Devices.Real
         {
             Manager.EnqueueMessage(MessageRequestDate, MessageRequestTime);
         }
+        
+#if NETMF
 
         public static void RequestDateTimeAndSetLocal(bool separateThread = true)
         {
@@ -518,6 +524,8 @@ namespace imBMW.iBus.Devices.Real
                 }
             }
         }
+
+#endif
 
         public static DateTimeEventArgs GetDateTime()
         {

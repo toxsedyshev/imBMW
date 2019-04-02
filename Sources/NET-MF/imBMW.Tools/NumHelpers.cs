@@ -6,9 +6,13 @@ namespace imBMW.Tools
     {
         const string hexChars = "0123456789ABCDEF";
 
-        public static String ToHex(this byte b)
+        public static string ToHex(this byte b)
         {
+#if NETMF
             return hexChars[b >> 4].ToString() + hexChars[b & 0x0F].ToString();
+#else
+            return b.ToString("X");
+#endif
         }
 
         public static byte Invert(this byte b)

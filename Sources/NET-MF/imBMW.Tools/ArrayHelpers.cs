@@ -104,7 +104,7 @@ namespace imBMW.Tools
             return true;
         }
 
-        public static String ToHex(this byte[] data)
+        public static string ToHex(this byte[] data)
         {
             if (data.Length == 0)
             {
@@ -122,7 +122,7 @@ namespace imBMW.Tools
             }
             return sb.ToString();
 #else
-            String s = "";
+            string s = "";
             foreach (byte b in data)
             {
                 s += b.ToHex();
@@ -131,7 +131,7 @@ namespace imBMW.Tools
 #endif
         }
 
-        public static String ToHex(this byte[] data, String spacer)
+        public static string ToHex(this byte[] data, string spacer)
         {
             if (data.Length == 0)
             {
@@ -153,7 +153,7 @@ namespace imBMW.Tools
             }
             return sb.ToString();
 #else
-            String s = "";
+            string s = "";
             foreach (byte b in data)
             {
                 if (s.Length > 0)
@@ -166,7 +166,7 @@ namespace imBMW.Tools
 #endif
         }
 
-        public static String ToHex(this byte[] data, Char spacer)
+        public static string ToHex(this byte[] data, Char spacer)
         {
             if (data.Length == 0)
             {
@@ -188,7 +188,7 @@ namespace imBMW.Tools
             }
             return sb.ToString();
 #else
-            String s = "";
+            string s = "";
             foreach (byte b in data)
             {
                 if (s.Length > 0)
