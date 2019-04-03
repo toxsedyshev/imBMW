@@ -21,7 +21,7 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="30*"/>
                 </Grid.RowDefinitions>
-                <TextBlock Grid.Row="0" Text="{Binding Settings.Dimention}" FontSize="10" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,-3"/>
+                <TextBlock Grid.Row="0" Text="{Binding Settings.Dimension}" FontSize="10" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,-3"/>
                 <TextBlock Grid.Row="1" Text="{Binding StringValue}" FontSize="40" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,-6,0,-6"/>
                 <TextBlock Grid.Row="2" Text="{Binding Settings.Name}" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Top"/>
             </Grid>

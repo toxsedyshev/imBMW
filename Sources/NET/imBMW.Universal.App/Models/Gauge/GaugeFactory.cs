@@ -37,12 +37,14 @@ namespace imBMW.Universal.App.Models
 
         public GaugeSettings Create(GaugeType type)
         {
-            var s = new GaugeSettings { GaugeType = type };
             switch (type)
             {
-                
+                case GaugeType.IntakePressure:
+                    return new GaugeSettings { Name = "Boost", GetDMEValue = av => av.IntakePressure, Format = "F2", Dimension = "Bar", MinValue = -1, MaxValue = 1, MinYellow = -0.01, MaxYellow = 0.5, MaxRed = 0.8, AddToValue = -1000, MultiplyValue = 0.001, GaugeType = type };
+                default:
+                    return new GaugeSettings { GaugeType = type };
+                    //throw new Exception("Not supported gauge type.");
             }
-            return s;
         }
     }
 }

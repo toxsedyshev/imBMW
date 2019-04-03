@@ -37,6 +37,16 @@ namespace imBMW
     {
         public static event Action<LogItem> Logged;
 
+        public static void Error(string message)
+        {
+            OnLogged(new LogItem
+            {
+                Priority = LogPriority.Error,
+                PriorityLabel = "ERR",
+                Message = message
+            });
+        }
+
         public static void Error(Exception ex, string message)
         {
             OnLogged(new LogItem
@@ -57,7 +67,21 @@ namespace imBMW
             OnLogged(new LogItem
             {
                 Priority = LogPriority.Info,
-                PriorityLabel = "i",
+                PriorityLabel = priority,
+                Message = message
+            });
+        }
+
+        public static void Warning(string message, string priority = null)
+        {
+            if (priority == null)
+            {
+                priority = "!!!";
+            }
+            OnLogged(new LogItem
+            {
+                Priority = LogPriority.Warning,
+                PriorityLabel = priority,
                 Message = message
             });
         }

@@ -21,21 +21,34 @@ namespace imBMW.Clients
 
         public async Task Connect()
         {
-            var deviceList = await DeviceInformation.FindAllAsync(RfcommDeviceService.GetDeviceSelector(RfcommServiceId.SerialPort));
+            State = ConnectionState.Connecting;
 
-            var device = deviceList.FirstOrDefault(d => d.Name.Contains("imBMWBlackBox"));
-            if (device == null)
+            var selector = RfcommDeviceService.GetDeviceSelector(RfcommServiceId.SerialPort);
+            var deviceList = await DeviceInformation.FindAllAsync(selector);
+            var serviceList = new List<RfcommDeviceService>();
+            foreach (var device in deviceList)
             {
-                device = deviceList.FirstOrDefault(d => d.Name.Contains("imBMW"));
-            }
-            if (device == null)
-            {
-                throw new Exception("imBMW Bluetooth device not found");
+                serviceList.Add(await RfcommDeviceService.FromIdAsync(device.Id));
             }
 
-            var sppService = await RfcommDeviceService.FromIdAsync(device.Id);
+            var sppService = serviceList.FirstOrDefault(s => s.Device.Name.Contains("imBMW") && s.Device.Name.Contains("BlackBox"));
+            if (sppService == null)
+            {
+                sppService = serviceList.FirstOrDefault(s => s.Device.Name.Contains("imBMW"));
+            }
+            if (sppService == null)
+            {
+                throw new Exception("imBMW Bluetooth device not found.");
+            }
 
-            await Connect(new SocketConnectionSettings(sppService.ConnectionHostName, sppService.ConnectionServiceName));
+            try
+            {
+                await Connect(new SocketConnectionSettings(sppService.ConnectionHostName, sppService.ConnectionServiceName));
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Can't connect to {sppService.Device.Name} Bluetooth device. Check that it's paired and online.", ex);
+            }
         }
 
         public static BluetoothClient Instance

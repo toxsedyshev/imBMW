@@ -38,7 +38,7 @@ namespace imBMW.Universal.App.Views
             {
                 if (gauges == null)
                 {
-                    gauges = GaugeWatcher.FromSettingsList(Settings.Instance.Gauges);
+                    gauges = GaugeFactory.Current.CreateWatchers(Settings.Instance.Gauges);
                 }
                 return gauges;
             }
@@ -61,7 +61,7 @@ namespace imBMW.Universal.App.Views
             if (e.PropertyName == "Gauges")
             {
                 AreGaugesEnabled = false;
-                Gauges = GaugeWatcher.FromSettingsList(Settings.Instance.Gauges);
+                Gauges = GaugeFactory.Current.CreateWatchers(Settings.Instance.Gauges);
             }
         }
 
@@ -190,47 +190,53 @@ namespace imBMW.Universal.App.Views
         {
             if (MS43AnalogValues.CanParse(e.Message))
             {
-                var av = new MS43JMGAnalogValues();
+                var av = new MS43BBAnalogValues();
                 av.Parse(e.Message);
                 Gauges.ForEach(g => g.Update(av));
             }
         }
-        
+
+        private void UpdateGauge(GaugeType type, double value)
+        {
+            // TODO use SubscribeToUpdates
+            Gauges.ForEach(g => g.Update(type, value));
+        }
+
         private void InstrumentClusterElectronics_TemperatureChanged(TemperatureEventArgs e)
         {
-            UpdateIKEGauge(GaugeType.CoolantTemperatureBC, e.Coolant);
-            UpdateIKEGauge(GaugeType.OutsideTemperature, e.Outside);
+            UpdateGauge(GaugeType.CoolantTemperatureBC, e.Coolant);
+            UpdateGauge(GaugeType.OutsideTemperature, e.Outside);
         }
 
         private void InstrumentClusterElectronics_SpeedRPMChanged(SpeedRPMEventArgs e)
         {
-            UpdateIKEGauge(GaugeType.SpeedBC, e.Speed);
-            UpdateIKEGauge(GaugeType.RPMBC, e.RPM);
+            UpdateGauge(GaugeType.SpeedBC, e.Speed);
+            UpdateGauge(GaugeType.RPMBC, e.RPM);
         }
 
         private void InstrumentClusterElectronics_SpeedLimitChanged(SpeedLimitEventArgs e)
         {
-            UpdateIKEGauge(GaugeType.SpeedLimit, e.Value);
+            UpdateGauge(GaugeType.SpeedLimit, e.Value);
         }
 
         private void InstrumentClusterElectronics_RangeChanged(RangeEventArgs e)
         {
-            UpdateIKEGauge(GaugeType.Range, e.Value);
+            UpdateGauge(GaugeType.Range, e.Value);
         }
 
         private void InstrumentClusterElectronics_Consumption2Changed(ConsumptionEventArgs e)
         {
-            UpdateIKEGauge(GaugeType.Consumption2, e.Value);
+            UpdateGauge(GaugeType.Consumption2, e.Value);
         }
 
         private void InstrumentClusterElectronics_Consumption1Changed(ConsumptionEventArgs e)
         {
-            UpdateIKEGauge(GaugeType.Consumption1, e.Value);
+            UpdateGauge(GaugeType.Consumption1, e.Value);
         }
 
         private void InstrumentClusterElectronics_AverageSpeedChanged(AverageSpeedEventArgs e)
         {
-            UpdateIKEGauge(GaugeType.AverageSpeed, e.Value);
+            UpdateGauge(GaugeType.AverageSpeed, e.Value);
         }
     }
 }

@@ -16,8 +16,24 @@ namespace imBMW.Universal.App.Models
     public class GaugeSettings : ObservableObject
     {
         private GaugeSettings secondaryGauge;
+
+        private string name;
         
-        public string Name { get; set; }
+        public string Name
+        {
+            get
+            {
+                if (name != null)
+                {
+                    return name;
+                }
+                return GaugeType.ToString();
+            }
+            set
+            {
+                name = value;
+            }
+        }
 
         public string Dimension { get; set; }
 

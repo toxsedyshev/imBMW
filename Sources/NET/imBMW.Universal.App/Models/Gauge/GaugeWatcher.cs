@@ -32,6 +32,8 @@ namespace imBMW.Universal.App.Models
 
             Settings.PropertyChanged += Settings_PropertyChanged;
 
+            SubscribeToUpdates();
+
             InitSecondaryWatcher();
         }
 
@@ -188,6 +190,10 @@ namespace imBMW.Universal.App.Models
 
         private void InitSecondaryWatcher()
         {
+            if (SecondaryWatcher != null)
+            {
+                SecondaryWatcher.IsEnabled = false;
+            }
             if (Settings.SecondaryGauge == null)
             {
                 SecondaryWatcher = null;
@@ -198,15 +204,15 @@ namespace imBMW.Universal.App.Models
             }
         }
 
-        //public void Update(GaugeType field, double rawValue)
-        //{
-        //    SecondaryWatcher?.Update(field, rawValue);
-        //    
-        //    if (Settings.GaugeType == field)
-        //    {
-        //        RawValue = rawValue;
-        //    }
-        //}
+        public void Update(GaugeType field, double rawValue)
+        {
+            SecondaryWatcher?.Update(field, rawValue);
+
+            if (Settings.GaugeType == field)
+            {
+                RawValue = rawValue;
+            }
+        }
 
         public void Update(DMEAnalogValues av)
         {
@@ -237,14 +243,14 @@ namespace imBMW.Universal.App.Models
                 });
             }
 
-            SecondaryWatcher.SubscribeToUpdates();
+            SecondaryWatcher?.SubscribeToUpdates();
         }
 
-        public void Init()
-        {
-            SecondaryWatcher?.Init();
+        //public void Init()
+        //{
+        //    SecondaryWatcher?.Init();
 
-            Percentage = 0;
-        }
+        //    Percentage = 0;
+        //}
     }
 }
