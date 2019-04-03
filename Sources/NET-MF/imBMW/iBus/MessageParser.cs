@@ -57,7 +57,7 @@ namespace imBMW.iBus
             }
             if (skipped > 0)
             {
-                Logger.Error($"Incoming message data skipped: " + tmp.SkipAndTake(0, skipped).ToHex(' '));
+                Logger.Error("Incoming message data skipped: " + tmp.SkipAndTake(0, skipped).ToHex(' '));
             }
             tmp = null;
             Message m;
