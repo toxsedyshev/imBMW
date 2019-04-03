@@ -55,7 +55,19 @@ namespace imBMW.Universal.App.Models
 
         void FormatValue(double value)
         {
-            StringValue = value.ToString(Settings.Format) + Settings.Suffix;
+            if (Settings.Format.Contains("/"))
+            {
+                var parts = Settings.Format.Split('/');
+                StringValue = value == 0 ? parts[0] : parts[1];
+            }
+            else
+            {
+                if (Settings.ZeroValue != 0 && Math.Abs(value) <= Settings.ZeroValue)
+                {
+                    value = 0;
+                }
+                StringValue = value.ToString(Settings.Format) + Settings.Suffix;
+            }
         }
 
         public double Percentage

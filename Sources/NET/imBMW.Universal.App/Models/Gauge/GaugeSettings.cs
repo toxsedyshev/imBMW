@@ -18,7 +18,12 @@ namespace imBMW.Universal.App.Models
         private GaugeSettings secondaryGauge;
 
         private string name;
-        
+
+        public GaugeSettings(GaugeType type)
+        {
+            GaugeType = type;
+        }
+
         public string Name
         {
             get
@@ -46,6 +51,8 @@ namespace imBMW.Universal.App.Models
         public double MinValue { get; set; } = 0;
 
         public double MaxValue { get; set; } = 100;
+
+        public double ZeroValue { get; set; } = 0;
 
         public double MinRed { get; set; } = double.MinValue;
         

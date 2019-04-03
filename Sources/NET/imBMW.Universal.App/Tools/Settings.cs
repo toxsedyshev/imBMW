@@ -44,6 +44,17 @@ namespace imBMW.Universal.App.Tools
             {
                 return new List<GaugeSlot>
                 {
+                    new GaugeSlot(GaugeType.RPM),
+                    new GaugeSlot(GaugeType.AFR),
+                    new GaugeSlot(GaugeType.IntakePressure, GaugeType.IntakeTemperatureAfterCooler),
+                    new GaugeSlot(GaugeType.FuelPressure, GaugeType.OilPressure),
+                    new GaugeSlot(GaugeType.CoolerInTemperature, GaugeType.CoolerOutTemperature),
+                    new GaugeSlot(GaugeType.OilTemperature, GaugeType.CoolantTemperature),
+                    new GaugeSlot(GaugeType.IgnitionAngle, GaugeType.InjectionTime),
+                    new GaugeSlot(GaugeType.IsMethanolInjecting, GaugeType.IsMethanolFailsafe),
+                };
+                /*return new List<GaugeSlot>
+                {
                     new GaugeSlot(GaugeType.CoolantTemperature, GaugeType.CoolantTemperature),
                     new GaugeSlot(GaugeType.CoolantRadiatorTemperature, GaugeType.ElectricFanSpeed),
                     new GaugeSlot(GaugeType.AFR),
@@ -52,30 +63,6 @@ namespace imBMW.Universal.App.Tools
                     new GaugeSlot(GaugeType.Throttle, GaugeType.AirMass),
                     new GaugeSlot(GaugeType.Consumption1, GaugeType.Consumption2),
                     new GaugeSlot(GaugeType.SpeedLimit, GaugeType.Range)
-                };
-                /*return new List<GaugeSettings>
-                {
-                    new GaugeSettings { Name = "Coolant", GaugeType = GaugeType.CoolantTemperature, Format = "N0", Suffix = "°", MinValue = 0, MaxValue = 150, MinYellow = 75, MaxYellow = 95, MaxRed = 105,
-                        SecondaryGauge = new GaugeSettings { Name = "Oil", GaugeType = GaugeType.CoolantTemperature, Format = "N0", Suffix = "°", MinValue = 0, MaxValue = 150, MinYellow = 75, MaxYellow = 95, MaxRed = 105}},
-
-                    new GaugeSettings { Name = "Radiator", GaugeType = GaugeType.CoolantRadiatorTemperature, Format = "N0", Suffix = "°", MinValue = 0, MaxValue = 150, MinYellow = 75, MaxYellow = 95, MaxRed = 105,
-                        SecondaryGauge = new GaugeSettings { Name = "Fan", GaugeType = GaugeType.ElectricFanSpeed, Suffix = "%", Format = "N0", MaxYellow = 70}},
-
-                    new GaugeSettings { Name = "Lambda", GaugeType = GaugeType.AFR, Format = "F1", Dimension = "Air/Fuel", MinValue = 7.5, MaxValue = 22.5, MinRed = 10, MinYellow = 11, MaxYellow = 14.7, MaxRed = 15.5 },
-
-                    new GaugeSettings { Name = "Boost", GaugeType = GaugeType.IntakePressure, Format = "F2", Dimension = "Bar", MinValue = -1, MaxValue = 1, MinYellow = 0, MaxYellow = 0.5, MaxRed = 0.8, AddToValue = -1000, MultiplyValue = 0.001},
-
-                    new GaugeSettings { Name = "Intake", GaugeType = GaugeType.IntakeTemperature, Format = "N0", Suffix = "°", MinValue = -30, MaxValue = 100, MaxYellow = 30, MaxRed = 60,
-                        SecondaryGauge = new GaugeSettings { Name = "Voltage", GaugeType = GaugeType.VoltageBattery, Format = "F1", Suffix = " V", MinValue = 9, MaxValue = 16, MinRed = 13.3, MinYellow = 13.6, MaxYellow = 14.1, MaxRed = 14.5}},
-
-                    new GaugeSettings { Name = "Throttle", GaugeType = GaugeType.Throttle, Format = "N0", Suffix = "%", MinValue = 0, MaxValue = 100, MinYellow = 79,
-                        SecondaryGauge = new GaugeSettings { Name = "Air Mass", GaugeType = GaugeType.AirMass, Format = "N0", MinValue = 0, MaxValue = 1500, MinYellow = 500}},
-
-                    new GaugeSettings { Name = "Cons 1", GaugeType = GaugeType.Consumption1, Format = "F1", MinValue = 0, MaxValue = 40,
-                        SecondaryGauge = new GaugeSettings { Name = "Cons 2", GaugeType = GaugeType.Consumption2, Format = "F1", MinValue = 0, MaxValue = 40}},
-
-                    new GaugeSettings { Name = "Limit", GaugeType = GaugeType.SpeedLimit, Format = "N0", MinValue = 0, MaxValue = 300, MaxYellow = 80,
-                        SecondaryGauge = new GaugeSettings { Name = "Range", GaugeType = GaugeType.Range, Format = "N0", MinValue = 0, MaxValue = 100}},
                 };*/
             }
         }
