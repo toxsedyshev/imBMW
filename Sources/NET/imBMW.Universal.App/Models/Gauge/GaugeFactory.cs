@@ -150,7 +150,7 @@ namespace imBMW.Universal.App.Models
                         GetDMEValue = av => av.IsMethanolFailsafe ? 1 : 0,
                         MinValue = 0,
                         MaxValue = 1,
-                        MaxRed = 1
+                        MaxRed = 0.9
                     };
                 case GaugeType.IsMethanolInjecting:
                     return new GaugeSettings(type)
