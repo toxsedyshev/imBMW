@@ -142,11 +142,11 @@ namespace imBMW.Universal.App.Models
                 if (Set(ref numValue, value))
                 {
                     FormatValue(NumValue);
-                    OnPropertyChanged("Percentage");
-                    OnPropertyChanged("Angle");
-                    OnPropertyChanged("GrayAngleStart");
-                    OnPropertyChanged("GrayAngle");
-                    OnPropertyChanged("Foreground");
+                    OnPropertyChanged(nameof(Percentage));
+                    OnPropertyChanged(nameof(Angle));
+                    OnPropertyChanged(nameof(GrayAngleStart));
+                    OnPropertyChanged(nameof(GrayAngle));
+                    OnPropertyChanged(nameof(Foreground));
                 }
             }
         }
@@ -164,6 +164,18 @@ namespace imBMW.Universal.App.Models
             }
         }
 
+        public string BothWatchersDimension
+        {
+            get
+            {
+                if (!string.IsNullOrWhiteSpace(Settings.Dimension) && SecondaryWatcher?.Settings.Dimension == Settings.Dimension)
+                {
+                    return Settings.Dimension;
+                }
+                return null;
+            }
+        }
+
         public GaugeWatcher SecondaryWatcher
         {
             get
@@ -173,7 +185,14 @@ namespace imBMW.Universal.App.Models
 
             protected set
             {
-                Set(ref secondaryWatcher, value);
+                if (Set(ref secondaryWatcher, value))
+                {
+                    if (value != null)
+                    {
+                        value.IsEnabled = IsEnabled;
+                    }
+                    OnPropertyChanged(nameof(BothWatchersDimension));
+                }
             }
         }
 
@@ -186,15 +205,31 @@ namespace imBMW.Universal.App.Models
 
             protected set
             {
-                Set(ref settings, value);
+                if (Set(ref settings, value))
+                {
+                    OnPropertyChanged(nameof(BothWatchersDimension));
+                }
             }
         }
 
-        public bool IsEnabled { get => isEnabled; set => Set(ref isEnabled, value); }
+        public bool IsEnabled
+        {
+            get => isEnabled;
+            set
+            {
+                if (Set(ref isEnabled, value))
+                {
+                    if (SecondaryWatcher != null)
+                    {
+                        SecondaryWatcher.IsEnabled = value;
+                    }
+                }
+            }
+        }
 
         private void Settings_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == "SecondaryGauge")
+            if (e.PropertyName == nameof(Settings.SecondaryGauge))
             {
                 InitSecondaryWatcher();
             }

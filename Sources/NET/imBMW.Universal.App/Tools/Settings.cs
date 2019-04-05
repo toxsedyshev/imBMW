@@ -44,7 +44,7 @@ namespace imBMW.Universal.App.Tools
             {
                 return new List<GaugeSlot>
                 {
-                    new GaugeSlot(GaugeType.RPM),
+                    new GaugeSlot(GaugeType.RPM, GaugeType.AirMassPerStroke),
                     new GaugeSlot(GaugeType.AFR),
                     new GaugeSlot(GaugeType.IntakePressure, GaugeType.IntakeTemperatureAfterCooler),
                     new GaugeSlot(GaugeType.FuelPressure, GaugeType.OilPressure),

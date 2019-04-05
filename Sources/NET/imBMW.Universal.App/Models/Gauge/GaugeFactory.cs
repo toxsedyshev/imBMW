@@ -144,8 +144,8 @@ namespace imBMW.Universal.App.Models
                 case GaugeType.IsMethanolFailsafe:
                     return new GaugeSettings(type)
                     {
-                        Name = "Methanol",
-                        Dimension = "Status",
+                        Name = "Status",
+                        Dimension = "Methanol",
                         Format = "OK/Fail",
                         GetDMEValue = av => av.IsMethanolFailsafe ? 1 : 0,
                         MinValue = 0,
@@ -156,7 +156,7 @@ namespace imBMW.Universal.App.Models
                     return new GaugeSettings(type)
                     {
                         Name = "Injection",
-                        Dimension = "State",
+                        Dimension = "Methanol",
                         Format = "Idle/Active",
                         GetDMEValue = av => av.IsMethanolInjecting ? 1 : 0,
                         MinValue = 0,
@@ -209,7 +209,7 @@ namespace imBMW.Universal.App.Models
                         Name = "Oil",
                         GetDMEValue = av => av.OilTemp,
                         Format = "N0",
-                        Suffix = "°",
+                        Suffix = "°C",
                         Dimension = "Temperature",
                         MinValue = 0,
                         MaxValue = 150,
@@ -220,10 +220,10 @@ namespace imBMW.Universal.App.Models
                 case GaugeType.IntakeTemperature:
                     return new GaugeSettings(type)
                     {
-                        Name = "Intake",
+                        Name = "IAT",
                         GetDMEValue = av => av.IntakeTemp,
                         Format = "N0",
-                        Suffix = "°",
+                        Suffix = "°C",
                         Dimension = "Before Cooler",
                         MinValue = -30,
                         MaxValue = 100,
@@ -233,10 +233,10 @@ namespace imBMW.Universal.App.Models
                 case GaugeType.IntakeTemperatureAfterCooler:
                     return new GaugeSettings(type)
                     {
-                        Name = "Intake",
+                        Name = "IAT",
                         GetDMEValue = av => av.IntakeTempAfterCooler,
                         Format = "N0",
-                        Suffix = "°",
+                        Suffix = "°C",
                         Dimension = "After Cooler",
                         MinValue = 0,
                         MaxValue = 100,
@@ -246,11 +246,11 @@ namespace imBMW.Universal.App.Models
                 case GaugeType.CoolerInTemperature:
                     return new GaugeSettings(type)
                     {
-                        Name = "Air-Water",
+                        Name = "Inlet",
                         GetDMEValue = av => av.CoolerInTemp,
                         Format = "N0",
-                        Suffix = "°",
-                        Dimension = "Inlet",
+                        Suffix = "°C",
+                        Dimension = "Liquid Intercooler",
                         MinValue = 0,
                         MaxValue = 100,
                         MaxYellow = 30,
@@ -259,11 +259,11 @@ namespace imBMW.Universal.App.Models
                 case GaugeType.CoolerOutTemperature:
                     return new GaugeSettings(type)
                     {
-                        Name = "Cooler",
+                        Name = "Outlet",
                         GetDMEValue = av => av.CoolerOutTemp,
                         Format = "N0",
-                        Suffix = "°",
-                        Dimension = "Outlet",
+                        Suffix = "°C",
+                        Dimension = "Liquid Intercooler",
                         MinValue = 0,
                         MaxValue = 100,
                         MaxYellow = 30,
@@ -275,7 +275,7 @@ namespace imBMW.Universal.App.Models
                         Name = "Coolant",
                         GetDMEValue = av => av.CoolantTemp,
                         Format = "N0",
-                        Suffix = "°",
+                        Suffix = "°C",
                         MinValue = 0,
                         MaxValue = 150,
                         MinYellow = 75,
@@ -288,7 +288,7 @@ namespace imBMW.Universal.App.Models
                         Name = "Radiator",
                         GetDMEValue = av => av.CoolantRadiatorTemp,
                         Format = "N0",
-                        Suffix = "°",
+                        Suffix = "°C",
                         MinValue = 0,
                         MaxValue = 150,
                         MinYellow = 75,
