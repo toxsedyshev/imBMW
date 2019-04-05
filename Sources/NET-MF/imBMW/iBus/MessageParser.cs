@@ -10,6 +10,8 @@ namespace imBMW.iBus
         public event MessageReceiver MessageReceived;
 
         byte[] buffer = null;
+
+        object parserLock = new object();
         
         protected virtual bool CanStartWith(byte[] data)
         {
@@ -28,61 +30,84 @@ namespace imBMW.iBus
 
         public void Parse(byte[] data)
         {
-            if (data.Length == 0)
+            lock (parserLock)
             {
-                return;
-            }
-            if (buffer == null)
-            {
-                buffer = data;
-            }
-            else
-            {
-                buffer = buffer.Combine(data);
-            }
-            var tmp = buffer;
-            var skipped = 0;
-            while (!CanStartWith(buffer))
-            {
-                if (buffer.Length > data.Length)
+                if (data != null && data.Length > 0)
                 {
-                    skipped++;
-                    buffer = buffer.Skip(1);
-                }
-                else
-                {
-                    buffer = null;
-                    throw new Exception("Wrong data: " + tmp.ToHex(' '));
-                }
-            }
-            if (skipped > 0)
-            {
-                Logger.Error("Incoming message data skipped: " + tmp.SkipAndTake(0, skipped).ToHex(' '));
-            }
-            tmp = null;
-            Message m;
-            while (buffer != null && (m = TryCreate(buffer)) != null)
-            {
-                if (GetPacketLength(m) == buffer.Length)
-                {
-                    buffer = null;
-                }
-                else
-                {
-                    buffer = buffer.Skip(GetPacketLength(m));
-                }
-                try
-                {
-                    var e = MessageReceived;
-                    if (e != null)
+                    if (buffer == null)
                     {
-                        e(m);
+                        buffer = data;
+                    }
+                    else
+                    {
+                        buffer = buffer.Combine(data);
                     }
                 }
-                catch (Exception ex)
+                if (buffer == null)
                 {
-                    Logger.Error(ex, "processing message by MessageParser");
+                    return;
                 }
+                var tmp = buffer;
+                var skipped = 0;
+                while (!CanStartWith(buffer))
+                {
+                    if (buffer.Length > 1)
+                    {
+                        skipped++;
+                        buffer = buffer.Skip(1);
+                    }
+                    else
+                    {
+                        buffer = null;
+                        throw new Exception("Wrong data: " + tmp.ToHex(' '));
+                    }
+                }
+                if (skipped > 0)
+                {
+                    Logger.Error("Incoming message data skipped: " + tmp.SkipAndTake(0, skipped).ToHex(' '));
+                }
+                tmp = null;
+                Message m;
+                while (buffer != null)
+                {
+                    m = TryCreate(buffer);
+                    if (m == null)
+                    {
+                        if (skipped > 0 || data != null)
+                        {
+                            Parse(null);
+                        }
+                        return;
+                    }
+                    if (GetPacketLength(m) == buffer.Length)
+                    {
+                        buffer = null;
+                    }
+                    else
+                    {
+                        buffer = buffer.Skip(GetPacketLength(m));
+                    }
+                    try
+                    {
+                        var e = MessageReceived;
+                        if (e != null)
+                        {
+                            e(m);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Error(ex, "processing message by MessageParser");
+                    }
+                }
+                //if (buffer != null)
+                //{
+                //    Logger.Info("Buffer size = " + buffer.Length);
+                //}
+                //else
+                //{
+                //    Logger.Info("Buffer empty");
+                //}
             }
         }
     }

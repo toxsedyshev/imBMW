@@ -84,76 +84,105 @@ namespace imBMW.iBus
             CRC = check;
         }
 
-        public static Message TryCreate(byte[] packet, int length = -1)
+        public static Message TryCreate(byte[] buffer, int bufferLength = -1)
         {
-            if (length < 0)
+            if (bufferLength < 0)
             {
-                length = packet.Length;
+                bufferLength = buffer.Length;
             }
-            if (!IsValid(packet, length))
+            if (!IsValid(buffer, bufferLength))
             {
                 return null;
             }
 
-            return new Message(packet[0], packet[2], packet.SkipAndTake(3, ParseDataLength(packet)));
+            return new Message(buffer[0], buffer[2], buffer.SkipAndTake(3, ParseDataLength(buffer, bufferLength)));
         }
 
-        protected delegate int IntFromByteArray(byte[] packet);
+        protected delegate int PacketLengthHandler(byte[] buffer, int bufferLength);
 
-        public static bool IsValid(byte[] packet, int length = -1)
+        public static bool IsValid(byte[] buffer, int bufferLength = -1)
         {
-            return IsValid(packet, ParsePacketLength, length);
+            return IsValid(buffer, ParsePacketLength, bufferLength) && CheckDeviceAddresses(buffer, bufferLength);
         }
 
-        protected static bool IsValid(byte[] packet, IntFromByteArray packetLengthCallback, int length = -1)
+        protected static bool IsValid(byte[] buffer, PacketLengthHandler packetLengthCallback, int bufferLength = -1)
         {
-            if (length < 0)
+            if (bufferLength < 0)
             {
-                length = packet.Length;
+                bufferLength = buffer.Length;
             }
-            if (length < PacketLengthMin)
+            if (bufferLength < PacketLengthMin)
             {
                 return false;
             }
 
-            int packetLength = packetLengthCallback(packet);
-            if (length < packetLength || packetLength < PacketLengthMin)
+            int packetLength = packetLengthCallback(buffer, bufferLength);
+            if (bufferLength < packetLength || packetLength < PacketLengthMin)
             {
                 return false;
             }
 
+            var packetCheck = buffer[packetLength - 1];
+            if (packetCheck == 0x00 && packetLength > 8)
+            {
+                // find corrupted packet as a part of current packet
+                for (int i = packetLength / 2; i < packetLength - 1; i++)
+                {
+                    var theSame = true;
+                    for (int ic = i, io = 0; ic < packetLength - 1 && io < i; ic++, io++)
+                    {
+                        if (buffer[ic] != buffer[io])
+                        {
+                            theSame = false;
+                            break;
+                        }
+                    }
+                    if (theSame)
+                    {
+                        return false;
+                    }
+                }
+            }
             byte check = 0x00;
             for (int i = 0; i < packetLength - 1; i++)
             {
-                check ^= packet[i];
+                check ^= buffer[i];
             }
-            return check == packet[packetLength - 1];
+            return check == packetCheck;
         }
 
-        public static bool CanStartWith(byte[] packet, int length = -1)
+        public static bool CanStartWith(byte[] buffer, int bufferLength = -1)
         {
-            return CanStartWith(packet, ParsePacketLength, length);
-        }
-
-        protected static bool CanStartWith(byte[] packet, IntFromByteArray packetLengthCallback, int length = -1)
-        {
-            if (length < 0)
+            if (!CanStartWith(buffer, ParsePacketLength, bufferLength))
             {
-                length = packet.Length;
+                return false;
+            }
+            if (!CheckDeviceAddresses(buffer, bufferLength))
+            {
+                return false;
+            }
+            return true;
+        }
+
+        protected static bool CanStartWith(byte[] buffer, PacketLengthHandler packetLengthCallback, int bufferLength = -1)
+        {
+            if (bufferLength < 0)
+            {
+                bufferLength = buffer.Length;
             }
 
-            int packetLength = packetLengthCallback(packet);
+            int packetLength = packetLengthCallback(buffer, bufferLength);
             if (packetLength > -1 && packetLength < PacketLengthMin)
             {
                 return false;
             }
 
-            if (length < PacketLengthMin)
+            if (bufferLength < PacketLengthMin)
             {
                 return true;
             }
 
-            if (length >= packetLength && !IsValid(packet, packetLengthCallback, length))
+            if (bufferLength >= packetLength && !IsValid(buffer, packetLengthCallback, bufferLength))
             {
                 return false;
             }
@@ -161,18 +190,53 @@ namespace imBMW.iBus
             return true;
         }
 
-        protected static int ParsePacketLength(byte[] packet)
+        protected static bool CheckDeviceAddresses(byte[] buffer, int bufferLength = -1)
         {
-            if (packet.Length < 2)
+            if (bufferLength < 0)
+            {
+                bufferLength = buffer.Length;
+            }
+            if (bufferLength >= 1 && !CheckSourceDeviceAddress(buffer[0]))
+            {
+                return false;
+            }
+            if (bufferLength >= 3 && !CheckDestinationDeviceAddress(buffer[2]))
+            {
+                return false;
+            }
+            return true;
+        }
+
+        protected static bool CheckSourceDeviceAddress(byte address)
+        {
+            return address != (byte)DeviceAddress.Broadcast && CheckDestinationDeviceAddress(address);
+        }
+
+        protected static bool CheckDestinationDeviceAddress(byte address)
+        {
+#if NETMF
+            return ((DeviceAddress)address).ToStringValue(true) != null;
+#else
+            return Enum.IsDefined(typeof(DeviceAddress), (short)address);
+#endif
+        }
+
+        protected static int ParsePacketLength(byte[] buffer, int bufferLength)
+        {
+            if (bufferLength < 0)
+            {
+                bufferLength = buffer.Length;
+            }
+            if (bufferLength < 2)
             {
                 return -1;
             }
-            return packet[1] + 2;
+            return buffer[1] + 2;
         }
 
-        protected static int ParseDataLength(byte[] packet)
+        protected static int ParseDataLength(byte[] buffer, int bufferLength)
         {
-            return ParsePacketLength(packet) - 4;
+            return ParsePacketLength(buffer, bufferLength) - 4;
         }
 
         public byte CRC

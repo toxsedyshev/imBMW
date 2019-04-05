@@ -12,54 +12,73 @@ namespace imBMW.Clients
 {
     public class BluetoothClient : SocketClient
     {
-        static BluetoothClient instance;
+        static BluetoothClient current;
+
+        public string DeviceName { get; private set; }
 
         protected BluetoothClient()
         {
-
         }
 
-        public async Task Connect()
+        public override async Task Connect()
         {
-            State = ConnectionState.Connecting;
-
-            var selector = RfcommDeviceService.GetDeviceSelector(RfcommServiceId.SerialPort);
-            var deviceList = await DeviceInformation.FindAllAsync(selector);
-            var serviceList = new List<RfcommDeviceService>();
-            foreach (var device in deviceList)
-            {
-                serviceList.Add(await RfcommDeviceService.FromIdAsync(device.Id));
-            }
-
-            var sppService = serviceList.FirstOrDefault(s => s.Device.Name.Contains("imBMW") && s.Device.Name.Contains("BlackBox"));
-            if (sppService == null)
-            {
-                sppService = serviceList.FirstOrDefault(s => s.Device.Name.Contains("imBMW"));
-            }
-            if (sppService == null)
-            {
-                throw new Exception("imBMW Bluetooth device not found.");
-            }
-
+            CheckAlreadyConnected();
             try
             {
-                await Connect(new SocketConnectionSettings(sppService.ConnectionHostName, sppService.ConnectionServiceName));
+                State = ConnectionState.Connecting;
+                DeviceName = null;
+
+                var selector = RfcommDeviceService.GetDeviceSelector(RfcommServiceId.SerialPort);
+                var deviceList = await DeviceInformation.FindAllAsync(selector);
+                var serviceList = new List<RfcommDeviceService>();
+                foreach (var device in deviceList)
+                {
+                    serviceList.Add(await RfcommDeviceService.FromIdAsync(device.Id));
+                }
+
+                var sppService = serviceList.FirstOrDefault(s => s.Device.Name.Contains("imBMW") && s.Device.Name.Contains("BlackBox"));
+                if (sppService == null)
+                {
+                    sppService = serviceList.FirstOrDefault(s => s.Device.Name.Contains("imBMW"));
+                }
+                if (sppService == null)
+                {
+                    throw new Exception("imBMW Bluetooth device not found.");
+                }
+                DeviceName = sppService.Device.Name;
+
+                try
+                {
+                    await Connect(new SocketConnectionSettings(sppService.ConnectionHostName, sppService.ConnectionServiceName));
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception($"Can't connect to {sppService.Device.Name} Bluetooth device. Check that it's paired and online. " + ex.Message, ex);
+                }
             }
-            catch (Exception ex)
+            catch
             {
-                throw new Exception($"Can't connect to {sppService.Device.Name} Bluetooth device. Check that it's paired and online.", ex);
+                Disconnect();
+                throw;
             }
         }
 
-        public static BluetoothClient Instance
+        protected override void OnDisconnected()
+        {
+            base.OnDisconnected();
+
+            DeviceName = null;
+        }
+
+        public static BluetoothClient Current
         {
             get
             {
-                if (instance == null)
+                if (current == null)
                 {
-                    instance = new BluetoothClient();
+                    current = new BluetoothClient();
                 }
-                return instance;
+                return current;
             }
         }
     }

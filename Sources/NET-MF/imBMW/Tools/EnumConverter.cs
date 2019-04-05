@@ -47,7 +47,7 @@ namespace imBMW.Tools
             return "NotSpecified(" + e.ToString() + ")";
         }
 
-        public static string ToStringValue(this DeviceAddress e)
+        public static string ToStringValue(this DeviceAddress e, bool defaultAsNull = false)
         {
             switch (e)
             {
@@ -99,6 +99,10 @@ namespace imBMW.Tools
                 
                 case DeviceAddress.Unset: return "Unset";
                 case DeviceAddress.Unknown: return "Unknown";
+            }
+            if (defaultAsNull)
+            {
+                return null;
             }
             return "NotSpecified(" + e.ToString() + ")";
         }

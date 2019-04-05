@@ -11,7 +11,7 @@ namespace imBMW.Tools
 #if NETMF
             return hexChars[b >> 4].ToString() + hexChars[b & 0x0F].ToString();
 #else
-            return b.ToString("X");
+            return b.ToString("X2");
 #endif
         }
 

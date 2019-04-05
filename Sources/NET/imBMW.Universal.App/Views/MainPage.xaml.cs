@@ -1,4 +1,5 @@
-﻿using System;
+﻿using imBMW.Clients;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -35,6 +36,30 @@ namespace imBMW.Universal.App.Views
         private void ToolsButton_Click(object sender, RoutedEventArgs e)
         {
             Frame.Navigate(typeof(ToolsPage));
+        }
+
+        private async void ConnectButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                await BluetoothClient.Current.Connect();
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(ex, "imBMW Connect");
+            }
+        }
+
+        private void DisconnectButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                BluetoothClient.Current.Disconnect();
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(ex, "imBMW Disconnect");
+            }
         }
     }
 }

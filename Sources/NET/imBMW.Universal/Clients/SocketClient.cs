@@ -23,23 +23,32 @@ namespace imBMW.Clients
             Connected
         }
 
-        public ConnectionState State { get; protected set; } = ConnectionState.Disconnected;
+        public event Action Connecting;
+
+        public event Action Connected;
+
+        public event Action Disconnected;
 
         public delegate void InternalMessageReceivedHandler(SocketClient sender, InternalMessage message);
 
         public event InternalMessageReceivedHandler InternalMessageReceived;
 
-        public StreamSocket Socket { get; protected set; }
+        protected StreamSocket Socket { get; set; }
+
+        private ConnectionState state = ConnectionState.Disconnected;
 
         public SocketConnectionSettings Settings { get; protected set; }
 
-        public bool AutoReconnect { get; set; }
+        public bool AutoReconnect { get; set; } = true;
 
         DataWriter dataWriter;
 
         public SocketClient()
+        { }
+
+        public SocketClient(SocketConnectionSettings settings)
         {
-            AutoReconnect = true;
+            Settings = settings;
         }
 
         public bool IsConnected
@@ -47,6 +56,35 @@ namespace imBMW.Clients
             get
             {
                 return State == ConnectionState.Connected;
+            }
+        }
+
+        public ConnectionState State
+        {
+            get => state;
+            protected set
+            {
+                if (state == value)
+                {
+                    return;
+                }
+                state = value;
+                try
+                {
+                    switch (value)
+                    {
+                        case ConnectionState.Connecting:
+                            Connecting?.Invoke();
+                            break;
+                        case ConnectionState.Connected:
+                            Connected?.Invoke();
+                            break;
+                        case ConnectionState.Disconnected:
+                            Disconnected?.Invoke();
+                            break;
+                    }
+                }
+                catch { }
             }
         }
 
@@ -65,46 +103,91 @@ namespace imBMW.Clients
         {
             lock (this)
             {
-                if (State != ConnectionState.Disconnected)
+                if (State == ConnectionState.Disconnected)
                 {
                     return;
                 }
-                Logger.Info("imBMW client disconnected");
                 Manager.MessageEnqueued -= Manager_MessageEnqueued;
 
-                if (dataWriter != null)
+                try
                 {
-                    dataWriter.DetachStream();
-                    dataWriter = null;
-                }
+                    if (dataWriter != null)
+                    {
+                        dataWriter.DetachStream();
+                        dataWriter = null;
+                    }
 
-                if (Socket != null)
+                    if (Socket != null)
+                    {
+                        Socket.Dispose();
+                        Socket = null;
+                    }
+                }
+                catch
                 {
-                    Socket.Dispose();
+                    dataWriter = null;
                     Socket = null;
                 }
-                State = ConnectionState.Disconnected;
+                OnDisconnected();
             }
         }
 
-        public virtual async Task Connect(SocketConnectionSettings settings)
+        protected virtual void OnDisconnected()
         {
-            Disconnect();
-            lock (this)
+            State = ConnectionState.Disconnected;
+        }
+
+        public virtual async Task Connect()
+        {
+            if (Settings == null)
             {
-                State = ConnectionState.Connecting;
-                Socket = new StreamSocket();
+                throw new Exception("Settings are not set.");
             }
+            await Connect(Settings);
+        }
 
-            await Socket.ConnectAsync(settings.HostName, settings.ServiceName);
+        public async Task Connect(SocketConnectionSettings settings)
+        { 
+            try
+            {
+                lock (this)
+                {
+                    if (!(this is BluetoothClient))
+                    {
+                        CheckAlreadyConnected();
+                    }
+                    State = ConnectionState.Connecting;
+                    Socket = new StreamSocket();
+                }
 
-            OnConnected();
+                await Socket.ConnectAsync(settings.HostName, settings.ServiceName);
+
+                lock (this)
+                {
+                    Settings = settings;
+                    OnConnected();
+                }
+            }
+            catch
+            {
+                Disconnect();
+                throw;
+            }
+        }
+
+        protected void CheckAlreadyConnected()
+        {
+            if (State != ConnectionState.Disconnected)
+            {
+                throw new Exception("Client is already connected or connecting.");
+            }
         }
 
         protected void OnConnected()
         {
             dataWriter = new DataWriter(Socket.OutputStream);
 
+            Manager.MessageEnqueued -= Manager_MessageEnqueued;
             Manager.MessageEnqueued += Manager_MessageEnqueued;
 
             var dataReader = new DataReader(Socket.InputStream);
@@ -117,12 +200,16 @@ namespace imBMW.Clients
         {
             try
             {
-                Logger.Info("imBMW client connected");
                 var parser = new MessageParser();
                 parser.MessageReceived += parser_MessageReceived;
                 while (IsConnected)
                 {
                     var size = await dataReader.LoadAsync(1028);
+                    if (size == 0)
+                    {
+                        OnBeforeDisconnect();
+                        return;
+                    }
                     var data = new byte[size];
                     if (!IsConnected)
                     {
@@ -136,7 +223,7 @@ namespace imBMW.Clients
                     }
                     catch (Exception ex)
                     {
-                        Logger.Error(ex, "Parsing message by client.");
+                        Logger.Error(ex, "Parsing message by client");
                     }
                 }
             }
@@ -171,21 +258,18 @@ namespace imBMW.Clients
 
         async void OnBeforeDisconnect()
         {
+            Disconnect();
             if (AutoReconnect)
             {
                 try
                 {
                     Logger.Info("imBMW client reconnecting..");
-                    await Connect(Settings);
+                    await Connect();
                 }
                 catch (Exception ex)
                 {
                     Logger.Error(ex, "imBMW client reconnecting");
                 }
-            }
-            else
-            {
-                Disconnect();
             }
         } 
 

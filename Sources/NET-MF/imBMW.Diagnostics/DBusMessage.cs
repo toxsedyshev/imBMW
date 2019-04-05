@@ -123,38 +123,38 @@ namespace imBMW.Diagnostics
             return new Message(SourceDevice, DestinationDevice, ReceiverDescription, Data);
         }
 
-        public static new Message TryCreate(byte[] packet, int length = -1)
+        public static new Message TryCreate(byte[] buffer, int bufferLength = -1)
         {
-            if (length < 0)
+            if (bufferLength < 0)
             {
-                length = packet.Length;
+                bufferLength = buffer.Length;
             }
-            if (!IsValid(packet))
+            if (!IsValid(buffer))
             {
                 return null;
             }
 
-            return new DBusMessage((DeviceAddress)packet[0], packet.SkipAndTake(2, ParseDataLength(packet)));
+            return new DBusMessage((DeviceAddress)buffer[0], buffer.SkipAndTake(2, ParseDataLength(buffer, bufferLength)));
         }
         
-        public static new bool IsValid(byte[] packet, int length = -1)
+        public static new bool IsValid(byte[] buffer, int bufferLength = -1)
         {
-            return IsValid(packet, ParsePacketLength, length);
+            return IsValid(buffer, ParsePacketLength, bufferLength);
         }
 
-        protected static new bool IsValid(byte[] packet, IntFromByteArray packetLengthCallback, int length = -1)
+        protected static new bool IsValid(byte[] buffer, PacketLengthHandler packetLengthCallback, int bufferLength = -1)
         {
-            if (length < 0)
+            if (bufferLength < 0)
             {
-                length = packet.Length;
+                bufferLength = buffer.Length;
             }
-            if (length < PacketLengthMin)
+            if (bufferLength < PacketLengthMin)
             {
                 return false;
             }
 
-            byte packetLength = (byte)ParsePacketLength(packet);
-            if (length < packetLength || packetLength < PacketLengthMin)
+            byte packetLength = (byte)ParsePacketLength(buffer, bufferLength);
+            if (bufferLength < packetLength || packetLength < PacketLengthMin)
             {
                 return false;
             }
@@ -162,35 +162,35 @@ namespace imBMW.Diagnostics
             byte check = 0x00;
             for (byte i = 0; i < packetLength - 1; i++)
             {
-                check ^= packet[i];
+                check ^= buffer[i];
             }
-            return check == packet[packetLength - 1];
+            return check == buffer[packetLength - 1];
         }
 
-        public static new bool CanStartWith(byte[] packet, int length = -1)
+        public static new bool CanStartWith(byte[] buffer, int bufferLength = -1)
         {
-            return CanStartWith(packet, ParsePacketLength, length);
+            return CanStartWith(buffer, ParsePacketLength, bufferLength);
         }
 
-        protected static new bool CanStartWith(byte[] packet, IntFromByteArray packetLengthCallback, int length = -1)
+        protected static new bool CanStartWith(byte[] buffer, PacketLengthHandler packetLengthCallback, int bufferLength = -1)
         {
-            if (length < 0)
+            if (bufferLength < 0)
             {
-                length = packet.Length;
+                bufferLength = buffer.Length;
             }
 
-            var packetLength = packetLengthCallback(packet);
+            var packetLength = packetLengthCallback(buffer, bufferLength);
             if (packetLength > -1 && packetLength < PacketLengthMin)
             {
                 return false;
             }
 
-            if (length < PacketLengthMin)
+            if (bufferLength < PacketLengthMin)
             {
                 return true;
             }
 
-            if (length >= packetLength && !IsValid(packet, packetLengthCallback, length))
+            if (bufferLength >= packetLength && !IsValid(buffer, packetLengthCallback, bufferLength))
             {
                 return false;
             }
@@ -198,18 +198,22 @@ namespace imBMW.Diagnostics
             return true;
         }
 
-        protected static new int ParsePacketLength(byte[] packet)
+        protected static new int ParsePacketLength(byte[] buffer, int bufferLength)
         {
-            if (packet.Length < 2)
+            if (bufferLength < 0)
+            {
+                bufferLength = buffer.Length;
+            }
+            if (bufferLength < 2)
             {
                 return -1;
             }
-            return packet[1];
+            return buffer[1];
         }
 
-        protected static new int ParseDataLength(byte[] packet)
+        protected static new int ParseDataLength(byte[] buffer, int bufferLength)
         {
-            return ParsePacketLength(packet) - 3;
+            return ParsePacketLength(buffer, bufferLength) - 3;
         }
     }
 }

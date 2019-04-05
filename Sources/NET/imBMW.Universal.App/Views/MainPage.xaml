@@ -11,6 +11,8 @@
         <StackPanel Orientation="Vertical">
             <Button Content="Dashboard" Click="DashboardButton_Click" Margin="5"/>
             <Button Content="Tools" Click="ToolsButton_Click" Margin="5"/>
+            <Button Content="Connect" Click="ConnectButton_Click" Margin="5"/>
+            <Button Content="Disconnect" Click="DisconnectButton_Click" Margin="5"/>
         </StackPanel>
     </Grid>
 </Page>

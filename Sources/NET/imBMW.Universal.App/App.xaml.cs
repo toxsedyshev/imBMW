@@ -21,6 +21,7 @@ using Windows.UI.Xaml.Navigation;
 using imBMW.Universal.App.Views;
 using Windows.UI.Core;
 using Windows.Foundation.Metadata;
+using System.Threading.Tasks;
 
 namespace imBMW.Universal.App
 {
@@ -35,7 +36,7 @@ namespace imBMW.Universal.App
         /// </summary>
         public App()
         {
-            BluetoothClient.Instance.InternalMessageReceived += BluetoothClient_InternalMessageReceived;
+            BluetoothClient.Current.InternalMessageReceived += BluetoothClient_InternalMessageReceived;
 
             Logger.Logged += Logger_Logged;
 
@@ -48,8 +49,9 @@ namespace imBMW.Universal.App
             //    Microsoft.ApplicationInsights.WindowsCollectors.Session);
             this.InitializeComponent();
             this.Suspending += OnSuspending;
+            this.Resuming += OnResuming;
         }
-
+        
         void Logger_Logged(LogItem log)
         {
             try
@@ -62,16 +64,7 @@ namespace imBMW.Universal.App
                 Debug.WriteLine(s);
                 if (log.Priority == LogPriority.Error)
                 {
-
-                    var toastTemplate = ToastTemplateType.ToastText02;
-                    var toastXml = ToastNotificationManager.GetTemplateContent(toastTemplate);
-                    toastXml.GetElementsByTagName("text")[0].AppendChild(toastXml.CreateTextNode(log.Message));
-                    toastXml.GetElementsByTagName("text")[1].AppendChild(toastXml.CreateTextNode(log.Exception != null ? log.Exception.Message : ""));
-                    var toast = new ToastNotification(toastXml);
-
-                    //var toastNode = toastXml.SelectSingleNode("/toast");
-                    //((XmlElement)toastNode).SetAttribute("launch", "{\"type\":\"toast\",\"param1\":\"12345\",\"param2\":\"67890\"}");
-                    ToastNotificationManager.CreateToastNotifier().Show(toast);
+                    ShowToast(log.Message, log.Exception != null ? log.Exception.Message : "");
 
                     /*Window.Current.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
                     {
@@ -168,27 +161,47 @@ namespace imBMW.Universal.App
             // Ensure the current window is active
             Window.Current.Activate();
 
+            if (e.PreviousExecutionState != ApplicationExecutionState.Running)
+            {
+                await Connect();
+            }
+        }
+
+        private void BluetoothClient_Disconnected()
+        {
+            Logger.Info("BT Disconnected");
+            ShowToast("imBMW Client Disconnected");
+        }
+
+        private void BluetoothClient_Connecting()
+        {
+            Logger.Info("BT Connecting...");
+        }
+
+        private void BluetoothClient_Connected()
+        {
+            Logger.Info("BT Connected");
+            ShowToast("imBMW Client Connected", "Bluetooth Device: " + BluetoothClient.Current.DeviceName);
+        }
+
+        private static void ShowToast(string title, string description = null)
+        {
             try
             {
-                await BluetoothClient.Instance.Connect();
-                //new MessageDialog("Connected").ShowAsync();
-                Logger.Info("BT Connected");
-
-                try
+                var toastTemplate = ToastTemplateType.ToastText02;
+                var toastXml = ToastNotificationManager.GetTemplateContent(toastTemplate);
+                toastXml.GetElementsByTagName("text")[0].AppendChild(toastXml.CreateTextNode(title));
+                if (!string.IsNullOrWhiteSpace(description))
                 {
-                    var toastTemplate = ToastTemplateType.ToastText02;
-                    var toastXml = ToastNotificationManager.GetTemplateContent(toastTemplate);
-                    toastXml.GetElementsByTagName("text")[0].AppendChild(toastXml.CreateTextNode("BT Connected"));
-                    var toast = new ToastNotification(toastXml);
-                    ToastNotificationManager.CreateToastNotifier().Show(toast);
+                    toastXml.GetElementsByTagName("text")[1].AppendChild(toastXml.CreateTextNode(description));
                 }
-                catch { }
+                var toast = new ToastNotification(toastXml);
+
+                //var toastNode = toastXml.SelectSingleNode("/toast");
+                //((XmlElement)toastNode).SetAttribute("launch", "{\"type\":\"toast\",\"param1\":\"12345\",\"param2\":\"67890\"}");
+                ToastNotificationManager.CreateToastNotifier().Show(toast);
             }
-            catch (Exception ex)
-            {
-                //new MessageDialog("Not Connected").ShowAsync();
-                Logger.Error(ex, "BT Not Connected");
-            }
+            catch { }
         }
 
         /// <summary>
@@ -199,6 +212,28 @@ namespace imBMW.Universal.App
         void OnNavigationFailed(object sender, NavigationFailedEventArgs e)
         {
             throw new Exception("Failed to load Page " + e.SourcePageType.FullName);
+        }
+
+        private async void OnResuming(object sender, object e)
+        {
+            await Connect();
+        }
+
+        private async Task Connect()
+        {
+            try
+            {
+                await BluetoothClient.Current.Connect();
+                BluetoothClient_Connected();
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(ex, "BT Not Connected");
+            }
+
+            BluetoothClient.Current.Connected += BluetoothClient_Connected;
+            BluetoothClient.Current.Connecting += BluetoothClient_Connecting;
+            BluetoothClient.Current.Disconnected += BluetoothClient_Disconnected;
         }
 
         /// <summary>
@@ -212,12 +247,15 @@ namespace imBMW.Universal.App
         {
             try
             {
-                BluetoothClient.Instance.Disconnect();
+                BluetoothClient.Current.Disconnect();
             }
             catch (Exception ex)
             {
                 Logger.Error(ex, "BT Disconnecting");
             }
+            BluetoothClient.Current.Connected -= BluetoothClient_Connected;
+            BluetoothClient.Current.Connecting -= BluetoothClient_Connecting;
+            BluetoothClient.Current.Disconnected -= BluetoothClient_Disconnected;
 
             var deferral = e.SuspendingOperation.GetDeferral();
             //TODO: Save application state and stop any background activity

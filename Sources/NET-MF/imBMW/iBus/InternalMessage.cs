@@ -8,6 +8,8 @@ namespace imBMW.iBus
 {
     public class InternalMessage : Message
     {
+        public new const int PacketLengthMax = 1028;
+
         string dataString;
 
         public InternalMessage(DeviceAddress device, string data)
@@ -29,10 +31,10 @@ namespace imBMW.iBus
             {
                 throw new Exception("Internal messages are for internal devices only.");
             }
-            
-            if (PacketLength > 1024) // TODO try up to 0xFFFF length
+
+            if (PacketLength > PacketLengthMax)
             {
-                throw new Exception("Message packet length exceeds 1024 bytes.");
+                throw new Exception("Message packet length exceeds " + PacketLengthMax + " bytes.");
             }
         }
 
@@ -76,42 +78,93 @@ namespace imBMW.iBus
             return SourceDevice == message.SourceDevice && Data.Compare(message.Data);
         }
 
-        public static new Message TryCreate(byte[] packet, int length = -1)
+        public static new Message TryCreate(byte[] buffer, int bufferLength = -1)
         {
-            if (length < 0)
+            if (bufferLength < 0)
             {
-                length = packet.Length;
+                bufferLength = buffer.Length;
             }
-            if (!IsValid(packet))
+            if (!IsValid(buffer))
             {
-                return Message.TryCreate(packet, length);
+                return Message.TryCreate(buffer, bufferLength);
             }
 
-            return new InternalMessage((DeviceAddress)packet[0], packet.SkipAndTake(3, ParseDataLength(packet)));
+            return new InternalMessage((DeviceAddress)buffer[0], buffer.SkipAndTake(3, ParseDataLength(buffer, bufferLength)));
         }
 
-        public static new bool IsValid(byte[] packet, int length = -1)
+        public static new bool IsValid(byte[] buffer, int bufferLength = -1)
         {
-            return IsValid(packet, ParsePacketLength, length) && packet[0].IsInternal();
+            if (bufferLength < 0)
+            {
+                bufferLength = buffer.Length;
+            }
+            return bufferLength > 0 && buffer[0].IsInternal()
+                && ParsePacketLength(buffer, bufferLength) <= PacketLengthMax
+                && IsValid(buffer, ParsePacketLength, bufferLength)
+                && CheckDeviceAddresses(buffer);
         }
 
-        public static new bool CanStartWith(byte[] packet, int length = -1)
+        public static new bool CanStartWith(byte[] buffer, int bufferLength = -1)
         {
-            return CanStartWith(packet, ParsePacketLength, length);
+            var packetLength = ParsePacketLength(buffer, bufferLength);
+            if (packetLength > PacketLengthMax)
+            {
+                return false;
+            }
+            if (!CanStartWith(buffer, ParsePacketLength, bufferLength))
+            {
+                return false;
+            }
+            if (!CheckDeviceAddresses(buffer, bufferLength))
+            {
+                return false;
+            }
+            return true;
         }
 
-        protected static new int ParsePacketLength(byte[] packet)
+        protected static new bool CheckDeviceAddresses(byte[] buffer, int bufferLength = -1)
         {
-            if (packet.Length < 3)
+            if (bufferLength < 0)
+            {
+                bufferLength = buffer.Length;
+            }
+            if (bufferLength >= 1)
+            {
+                if (!buffer[0].IsInternal() && !Message.CheckDeviceAddresses(buffer, bufferLength))
+                {
+                    return false;
+                }
+                if (!CheckSourceDeviceAddress(buffer[0]))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        protected static new int ParsePacketLength(byte[] buffer, int bufferLength)
+        {
+            if (bufferLength < 0)
+            {
+                bufferLength = buffer.Length;
+            }
+            if (bufferLength < 3)
             {
                 return -1;
             }
-            return (packet[2] << 8) + packet[1] + 2;
+            if (buffer[0].IsInternal())
+            {
+                return (buffer[2] << 8) + buffer[1] + 2;
+            }
+            else
+            {
+                return buffer[1] + 2;
+            }
         }
 
-        protected static new int ParseDataLength(byte[] packet)
+        protected static new int ParseDataLength(byte[] buffer, int bufferLength)
         {
-            return ParsePacketLength(packet) - 4;
+            return ParsePacketLength(buffer, bufferLength) - 4;
         }
     }
 }
