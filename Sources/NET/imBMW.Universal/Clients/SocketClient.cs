@@ -11,6 +11,7 @@ using Windows.Networking;
 using Windows.Networking.Sockets;
 using Windows.Storage.Streams;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading;
 
 namespace imBMW.Clients
 {
@@ -41,7 +42,10 @@ namespace imBMW.Clients
 
         public bool AutoReconnect { get; set; } = true;
 
-        DataWriter dataWriter;
+        private DataWriter dataWriter;
+        private DataReader dataReader;
+        private CancellationTokenSource cancellationToken;
+        private Task readingLoopTask;
 
         public SocketClient()
         { }
@@ -55,7 +59,9 @@ namespace imBMW.Clients
         {
             get
             {
-                return State == ConnectionState.Connected;
+                return State == ConnectionState.Connected 
+                    && cancellationToken != null
+                    && !cancellationToken.IsCancellationRequested;
             }
         }
 
@@ -122,11 +128,18 @@ namespace imBMW.Clients
                         Socket.Dispose();
                         Socket = null;
                     }
+
+                    if (cancellationToken != null)
+                    {
+                        cancellationToken.Cancel();
+                        cancellationToken = null;
+                    }
                 }
                 catch
                 {
                     dataWriter = null;
                     Socket = null;
+                    cancellationToken = null;
                 }
                 OnDisconnected();
             }
@@ -190,13 +203,14 @@ namespace imBMW.Clients
             Manager.MessageEnqueued -= Manager_MessageEnqueued;
             Manager.MessageEnqueued += Manager_MessageEnqueued;
 
-            var dataReader = new DataReader(Socket.InputStream);
+            dataReader = new DataReader(Socket.InputStream);
             dataReader.InputStreamOptions = InputStreamOptions.Partial;
             State = ConnectionState.Connected;
-            ReadingLoop(dataReader);
+            cancellationToken = new CancellationTokenSource();
+            readingLoopTask = Task.Factory.StartNew(ReadingLoop, cancellationToken.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
         }
 
-        private async void ReadingLoop(DataReader dataReader)
+        private async void ReadingLoop()
         {
             try
             {
@@ -241,6 +255,10 @@ namespace imBMW.Clients
                         OnBeforeDisconnect();
                     }
                 }
+            }
+            finally
+            {
+                Logger.Info("imBMW client reading loop ended");
             }
         }
 

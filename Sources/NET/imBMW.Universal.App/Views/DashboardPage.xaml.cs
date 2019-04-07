@@ -186,13 +186,16 @@ namespace imBMW.Universal.App.Views
             }
         }
 
-        private void Manager_AfterMessageReceived(MessageEventArgs e)
+        private async void Manager_AfterMessageReceived(MessageEventArgs e)
         {
             if (MS43AnalogValues.CanParse(e.Message))
             {
                 var av = new MS43BBAnalogValues();
                 av.Parse(e.Message);
-                Gauges.ForEach(g => g.Update(av));
+                await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                {
+                    Gauges.ForEach(g => g.Update(av));
+                });
             }
         }
 
