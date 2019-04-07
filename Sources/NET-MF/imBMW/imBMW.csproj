@@ -42,6 +42,7 @@
     <Compile Include="iBus\Devices\InstrumentClusterElectronics.cs" />
     <Compile Include="iBus\Devices\LightControlModule.cs" />
     <Compile Include="iBus\Devices\MultiFunctionSteeringWheel.cs" />
+    <Compile Include="iBus\Devices\Navigation.cs" />
     <Compile Include="iBus\Devices\Radio.cs" />
     <Compile Include="iBus\InternalMessage.cs" />
     <Compile Include="iBus\ManagerTools.cs" />

@@ -14,5 +14,10 @@ namespace imBMW.Tools
         {
             return one > two ? one : two;
         }
+
+        public static double ToRadians(double val)
+        {
+            return val * (System.Math.PI / 180);
+        }
     }
 }
