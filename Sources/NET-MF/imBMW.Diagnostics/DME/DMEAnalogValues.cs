@@ -228,6 +228,41 @@ namespace imBMW.Diagnostics.DME
         /// </summary>
         public double WideBandLambda { get; set; }
 
+        /// <summary>
+        /// From GPS. Typ -90 and +90 with 0.000001 precision
+        /// </summary>
+        public double Latitude { get; set; }
+
+        /// <summary>
+        /// From GPS. Typ -180 and +180 with 0.000001 precision
+        /// </summary>
+        public double Longitude { get; set; }
+
+        /// <summary>
+        /// From GPS. Meters.
+        /// </summary>
+        public double Altitude { get; set; }
+
+        /// <summary>
+        /// km/h
+        /// </summary>
+        public double SpeedGPS { get; set; }
+
+        /// <summary>
+        /// km/h
+        /// </summary>
+        public double SpeedCalculated { get; set; }
+
+        /// <summary>
+        /// Gear number
+        /// </summary>
+        public byte Gear { get; set; }
+
+        /// <summary>
+        /// Celsius
+        /// </summary>
+        public double OutsideTemp { get; set; }
+
         public virtual string GenerateLogString()
         {
             throw new NotImplementedException();

@@ -86,6 +86,7 @@ namespace imBMW.Diagnostics.DME
             s.Append(IgnitionAngle.ToString("F3")); s.Append(";");
             s.Append(InjectionTime.ToString("F5")); s.Append(";");
             s.Append(OilTemp.ToString("F2")); s.Append(";");
+            s.Append(OutsideTemp.ToString("F1")); s.Append(";");
             s.Append(IntakeTemp.ToString("F2")); s.Append(";");
             s.Append(IntakeTempAfterCooler.ToString("F2")); s.Append(";");
             s.Append(CoolerInTemp.ToString("F2")); s.Append(";");
@@ -107,7 +108,14 @@ namespace imBMW.Diagnostics.DME
             s.Append(VanosPositionIntake.ToString("F3")); s.Append(";");
             s.Append(AtmosphericPressure); s.Append(";");
             s.Append(VoltageBattery.ToString("F2")); s.Append(";");
-            s.Append(VoltageKL15.ToString("F2")); s.Append(";\n");
+            s.Append(VoltageKL15.ToString("F2")); s.Append(";");
+            s.Append(Latitude.ToString("F6")); s.Append(";");
+            s.Append(Longitude.ToString("F6")); s.Append(";");
+            s.Append(Altitude.ToString("F1")); s.Append(";");
+            //s.Append(SpeedGPS.ToString("F1")); s.Append(";");
+            //s.Append(SpeedCalculated.ToString("F1")); s.Append(";");
+            //s.Append(Gear.ToString("F1")); s.Append(";");
+            s.Append("\n");
             return s.ToString();
         }
 
@@ -131,6 +139,7 @@ namespace imBMW.Diagnostics.DME
             s.Append("IgnitionAngle;");
             s.Append("InjectionTime;");
             s.Append("OilTemp;");
+            s.Append("OutsideTemp;");
             s.Append("IntakeTemp;");
             s.Append("IntakeTempAfterCooler;");
             s.Append("CoolerInTemp;");
@@ -152,7 +161,14 @@ namespace imBMW.Diagnostics.DME
             s.Append("VanosPositionIntake;");
             s.Append("AtmosphericPressure;");
             s.Append("VoltageBattery;");
-            s.Append("VoltageKL15;\n");
+            s.Append("VoltageKL15;");
+            s.Append("Latitude;");
+            s.Append("Longitude;");
+            s.Append("Altitude;");
+            //s.Append("SpeedGPS;");
+            //s.Append("SpeedCalculated;");
+            //s.Append("Gear;");
+            s.Append("\n");
             return s.ToString();
         }
     }
