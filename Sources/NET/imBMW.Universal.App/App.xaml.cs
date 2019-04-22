@@ -22,6 +22,8 @@ using imBMW.Universal.App.Views;
 using Windows.UI.Core;
 using Windows.Foundation.Metadata;
 using System.Threading.Tasks;
+using Windows.System.Display;
+using Windows.ApplicationModel.Core;
 
 namespace imBMW.Universal.App
 {
@@ -30,6 +32,20 @@ namespace imBMW.Universal.App
     /// </summary>
     sealed partial class App : Application
     {
+        private DisplayRequest displayRequest;
+
+        public DisplayRequest DisplayRequest
+        {
+            get
+            {
+                if (displayRequest == null)
+                {
+                    displayRequest = new DisplayRequest();
+                }
+                return displayRequest;
+            }
+        }
+
         /// <summary>
         /// Initializes the singleton application object.  This is the first line of authored code
         /// executed, and as such is the logical equivalent of main() or WinMain().
@@ -167,10 +183,21 @@ namespace imBMW.Universal.App
             }
         }
 
-        private void BluetoothClient_Disconnected()
+        private async void BluetoothClient_Disconnected()
         {
             Logger.Info("BT Disconnected");
             ShowToast("imBMW Client Disconnected");
+            await CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+            {
+                try
+                {
+                    DisplayRequest.RequestRelease();
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error(ex, "Sleep mode enable error.");
+                }
+            });
         }
 
         private void BluetoothClient_Connecting()
@@ -178,10 +205,21 @@ namespace imBMW.Universal.App
             Logger.Info("BT Connecting...");
         }
 
-        private void BluetoothClient_Connected()
+        private async void BluetoothClient_Connected()
         {
             Logger.Info("BT Connected");
             ShowToast("imBMW Client Connected", "Bluetooth Device: " + BluetoothClient.Current.DeviceName);
+            await CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+            {
+                try
+                {
+                    DisplayRequest.RequestActive();
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error(ex, "Sleep mode disable error.");
+                }
+            });
         }
 
         private static void ShowToast(string title, string description = null)
