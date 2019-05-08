@@ -11,11 +11,44 @@ namespace imBMW.Features.CanBus.Devices
 {
     #region Seats menu screen
 
+    public class E65SeatsMoveScreen : MenuScreen
+    {
+        public bool IsDriverSide { get; private set; }
+
+        public E65SeatsMoveScreen(bool driver)
+        {
+            IsDriverSide = driver;
+
+            TitleCallback = s => "Seats";
+
+            SetItems();
+        }
+
+        protected virtual void SetItems()
+        {
+            ClearItems();
+
+
+            AddItem(new MenuItem(i => "Front", i => E65Seats.MoveFrontPress(IsDriverSide), MenuItemType.Button));
+            AddItem(new MenuItem(i => "Back", i => E65Seats.MoveBackPress(IsDriverSide), MenuItemType.Button));
+            AddItem(new MenuItem(i => "Up", i => E65Seats.MoveUpPress(IsDriverSide), MenuItemType.Button));
+            AddItem(new MenuItem(i => "Down", i => E65Seats.MoveDownPress(IsDriverSide), MenuItemType.Button));
+            AddItem(new MenuItem(i => "Tilt Front", i => E65Seats.TiltFrontPress(IsDriverSide), MenuItemType.Button));
+            AddItem(new MenuItem(i => "Tilt Back", i => E65Seats.TiltBackPress(IsDriverSide), MenuItemType.Button));
+            AddItem(new MenuItem(i => "Memory", i => E65Seats.ButtonM(IsDriverSide), MenuItemType.Button));
+            AddItem(new MenuItem(i => "Memory 1", i => E65Seats.ButtonM1(IsDriverSide), MenuItemType.Button));
+            this.AddBackButton();
+        }
+    }
+
     public class E65SeatsScreen : MenuScreen
     {
         protected static E65SeatsScreen instance;
 
         MenuItem driverHeater, passengerHeater;
+
+        E65SeatsMoveScreen driverMoveScreen = new E65SeatsMoveScreen(true);
+        E65SeatsMoveScreen passengerMoveScreen = new E65SeatsMoveScreen(false);
 
         protected E65SeatsScreen()
         {
@@ -47,25 +80,28 @@ namespace imBMW.Features.CanBus.Devices
         {
             ClearItems();
             driverHeater = new MenuItem(i => "Driver Heat: [" + GetLevel(E65Seats.DriverSeat.HeaterLevel) + "]",
-                i => E65Seats.ButtonHeaterDriverPress(), MenuItemType.Button, MenuItemAction.Refresh)
+                i => E65Seats.ButtonHeaterDriver(), MenuItemType.Button, MenuItemAction.Refresh)
             { RadioAbbreviation = "Drv Ht" };
             passengerHeater = new MenuItem(i => "Pass Heat: [" + GetLevel(E65Seats.PassengerSeat.HeaterLevel) + "]",
-                i => E65Seats.ButtonHeaterPassengerPress(), MenuItemType.Button, MenuItemAction.Refresh)
+                i => E65Seats.ButtonHeaterPassenger(), MenuItemType.Button, MenuItemAction.Refresh)
             { RadioAbbreviation = "Pas Ht" };
             AddItem(driverHeater);
             AddItem(passengerHeater);
-            AddItem(new MenuItem(i => "Driver Front", i => E65Seats.ButtonFrontDriverPress(), MenuItemType.Button));
-            AddItem(new MenuItem(i => "Driver Back", i => E65Seats.ButtonBackDriverPress(), MenuItemType.Button));
-            AddItem(new MenuItem(i => "Memory", i => E65Seats.ButtonMDriverPress(), MenuItemType.Button));
-            AddItem(new MenuItem(i => "Memory 1", i => E65Seats.ButtonM1DriverPress(), MenuItemType.Button));
-            AddItem(new MenuItem(i => "Auto Heat", i => E65Seats.AutoHeater = i.IsChecked, MenuItemType.Checkbox)
-            {
-                IsChecked = E65Seats.AutoHeater
-            });
-            AddItem(new MenuItem(i => "Activated", i => E65Seats.EmulatorPaused = !i.IsChecked, MenuItemType.Checkbox)
-            {
-                IsChecked = !E65Seats.EmulatorPaused
-            });
+            AddItem(new MenuItem(i => "Driver Vent", i => E65Seats.ButtonVentilationDriver(), MenuItemType.Button));
+            AddItem(new MenuItem(i => "Pass Vent", i => E65Seats.ButtonVentilationPassenger(), MenuItemType.Button));
+            AddItem(new MenuItem(i => "Driver Massage", i => E65Seats.ButtonMassageDriver(), MenuItemType.Button) { RadioAbbreviation = "Driver Masg" });
+            AddItem(new MenuItem(i => "Pass Massage", i => E65Seats.ButtonMassagePassenger(), MenuItemType.Button) { RadioAbbreviation = "Pass Masg" });
+            AddItem(new MenuItem(i => "Driver Move", MenuItemType.Button, MenuItemAction.GoToScreen) { GoToScreen = driverMoveScreen });
+            AddItem(new MenuItem(i => "Passenger Move", MenuItemType.Button, MenuItemAction.GoToScreen) { GoToScreen = passengerMoveScreen, RadioAbbreviation = "Pass. Move" });
+            // TODO move to settings
+            //AddItem(new MenuItem(i => "Auto Heat", i => E65Seats.AutoHeater = i.IsChecked, MenuItemType.Checkbox)
+            //{
+            //    IsChecked = E65Seats.AutoHeater
+            //});
+            //AddItem(new MenuItem(i => "Activated", i => E65Seats.EmulatorPaused = !i.IsChecked, MenuItemType.Checkbox)
+            //{
+            //    IsChecked = !E65Seats.EmulatorPaused
+            //});
             this.AddBackButton();
         }
 
@@ -168,8 +204,14 @@ namespace imBMW.Features.CanBus.Devices
         {
             ButtonHeaterDriver,
             ButtonHeaterPassenger,
+            ButtonVentilationDriver,
+            ButtonVentilationPassenger,
+            ButtonMassageDriver,
+            ButtonMassagePassenger,
             ButtonMDriver,
-            ButtonM1Driver
+            ButtonM1Driver,
+            ButtonMPassenger,
+            ButtonM1Passenger
         }
 
         static QueueThreadWorker queueWorker;
@@ -202,16 +244,30 @@ namespace imBMW.Features.CanBus.Devices
         static CanMessage messageLightDimmer = new CanMessage(0x202, new byte[] { 0xFD, 0xFF }); // 00FF=min, FDFF=max, FEFF=off?
         static CanMessage messageEmulationUnknown5 = new CanMessage(0x2CC, new byte[] { 0x80, 0x80, 0xF6 });
 
-        static CanMessage messageButtonHeaterDriverPress = new CanMessage(0x1E7, new byte[] { 0xF1, 0xFF });
-        static CanMessage messageButtonHeaterDriverRelease = new CanMessage(0x1E7, new byte[] { 0xF0, 0xFF });
-        static CanMessage messageButtonHeaterPassengerPress = new CanMessage(0x1E8, new byte[] { 0xF1, 0xFF });
-        static CanMessage messageButtonHeaterPassengerRelease = new CanMessage(0x1E8, new byte[] { 0xF0, 0xFF });
+        static uint buttonClimateDriver = 0x1E7;
+        static uint buttonClimatePassenger = 0x1E8;
+        static uint buttonMassageDriver = 0x1EB;
+        static uint buttonMassagePassenger = 0x1EC;
+        static byte[] dataButtonHeaterPress = new byte[] { 0xF1, 0xFF };
+        static byte[] dataButtonVentilationPress = new byte[] { 0xF4, 0xFF };
+        static byte[] dataButtonClimateRelease = new byte[] { 0xF0, 0xFF };
+        static byte[] dataButtonMassagePress = new byte[] { 0xFD, 0xFF };
+        static byte[] dataButtonMassageRelease = new byte[] { 0xFC, 0xFF };
 
-        static CanMessage messageButtonDriverSeatMoveFront = new CanMessage(0xDA, new byte[] { 0x01, 0x00, 0xC0, 0xFF });
-        static CanMessage messageButtonDriverSeatMoveRear = new CanMessage(0xDA, new byte[] { 0x02, 0x00, 0xC0, 0xFF });
-        static CanMessage messageButtonDriverMPress = new CanMessage(0x1F3, new byte[] { 0xFC, 0xFF });
-        static CanMessage messageButtonDriverMRelease = new CanMessage(0x1F3, new byte[] { 0xF8, 0xFF });
-        static CanMessage messageButtonDriverM1Press = new CanMessage(0x1F3, new byte[] { 0xF9, 0xFF });
+        static uint buttonMoveDriver = 0xDA;
+        static uint buttonMovePassenger = 0xD2;
+        static byte[] dataMoveFront = new byte[] { 0x01, 0x00, 0xC0, 0xFF };
+        static byte[] dataMoveBack = new byte[] { 0x02, 0x00, 0xC0, 0xFF };
+        static byte[] dataMoveUp = new byte[] { 0x04, 0x00, 0xC0, 0xFF };
+        static byte[] dataMoveDown = new byte[] { 0x08, 0x00, 0xC0, 0xFF };
+        static byte[] dataTiltBack = new byte[] { 0x20, 0x00, 0xC0, 0xFF };
+        static byte[] dataTiltFront = new byte[] { 0x10, 0x00, 0xC0, 0xFF };
+
+        static uint buttonMemoryDriver = 0x1F3;
+        static uint buttonMemoryPassenger = 0x1F2;
+        static byte[] dataButtonMPress = new byte[] { 0xFC, 0xFF };
+        static byte[] dataButtonMRelease = new byte[] { 0xF8, 0xFF };
+        static byte[] dataButtonM1Press = new byte[] { 0xF9, 0xFF };
 
         static E65Seats()
         {
@@ -238,11 +294,11 @@ namespace imBMW.Features.CanBus.Devices
             {
                 if (DriverSeat.HeaterLevel == 0)
                 {
-                    ButtonHeaterDriverPress();
+                    ButtonHeaterDriver();
                 }
                 if (PassengerSeat.HeaterLevel == 0)
                 {
-                    ButtonHeaterPassengerPress();
+                    ButtonHeaterPassenger();
                 }
             }
         }
@@ -265,64 +321,141 @@ namespace imBMW.Features.CanBus.Devices
             switch ((QueueCommand)item)
             {
                 case QueueCommand.ButtonHeaterDriver:
-                    CanAdapter.Current.SendMessage(messageButtonHeaterDriverPress);
+                    CanAdapter.Current.SendMessage(new CanMessage(buttonClimateDriver, dataButtonHeaterPress));
                     Thread.Sleep(100);
-                    //CanAdapter.Current.SendMessage(messageButtonHeaterDriverPress);
-                    //Thread.Sleep(200);
-                    CanAdapter.Current.SendMessage(messageButtonHeaterDriverRelease);
+                    CanAdapter.Current.SendMessage(new CanMessage(buttonClimateDriver, dataButtonClimateRelease));
                     Thread.Sleep(100);
                     break;
                 case QueueCommand.ButtonHeaterPassenger:
-                    CanAdapter.Current.SendMessage(messageButtonHeaterPassengerPress);
+                    CanAdapter.Current.SendMessage(new CanMessage(buttonClimatePassenger, dataButtonHeaterPress));
                     Thread.Sleep(100);
-                    //CanAdapter.Current.SendMessage(messageButtonHeaterPassengerPress);
-                    //Thread.Sleep(200);
-                    CanAdapter.Current.SendMessage(messageButtonHeaterPassengerRelease);
+                    CanAdapter.Current.SendMessage(new CanMessage(buttonClimatePassenger, dataButtonClimateRelease));
+                    Thread.Sleep(100);
+                    break;
+                case QueueCommand.ButtonVentilationDriver:
+                    CanAdapter.Current.SendMessage(new CanMessage(buttonClimateDriver, dataButtonVentilationPress));
+                    Thread.Sleep(100);
+                    CanAdapter.Current.SendMessage(new CanMessage(buttonClimateDriver, dataButtonClimateRelease));
+                    Thread.Sleep(100);
+                    break;
+                case QueueCommand.ButtonVentilationPassenger:
+                    CanAdapter.Current.SendMessage(new CanMessage(buttonClimatePassenger, dataButtonVentilationPress));
+                    Thread.Sleep(100);
+                    CanAdapter.Current.SendMessage(new CanMessage(buttonClimatePassenger, dataButtonClimateRelease));
+                    Thread.Sleep(100);
+                    break;
+                case QueueCommand.ButtonMassageDriver:
+                    CanAdapter.Current.SendMessage(new CanMessage(buttonMassageDriver, dataButtonMassagePress));
+                    Thread.Sleep(100);
+                    CanAdapter.Current.SendMessage(new CanMessage(buttonMassageDriver, dataButtonMassageRelease));
+                    Thread.Sleep(100);
+                    break;
+                case QueueCommand.ButtonMassagePassenger:
+                    CanAdapter.Current.SendMessage(new CanMessage(buttonMassagePassenger, dataButtonMassagePress));
+                    Thread.Sleep(100);
+                    CanAdapter.Current.SendMessage(new CanMessage(buttonMassagePassenger, dataButtonMassageRelease));
                     Thread.Sleep(100);
                     break;
                 case QueueCommand.ButtonMDriver:
-                    CanAdapter.Current.SendMessage(messageButtonDriverMPress);
+                    CanAdapter.Current.SendMessage(new CanMessage(buttonMemoryDriver, dataButtonMPress));
                     Thread.Sleep(100);
-                    CanAdapter.Current.SendMessage(messageButtonDriverMRelease);
+                    CanAdapter.Current.SendMessage(new CanMessage(buttonMemoryDriver, dataButtonMRelease));
                     Thread.Sleep(100);
                     break;
                 case QueueCommand.ButtonM1Driver:
-                    CanAdapter.Current.SendMessage(messageButtonDriverM1Press);
+                    CanAdapter.Current.SendMessage(new CanMessage(buttonMemoryDriver, dataButtonM1Press));
                     Thread.Sleep(100);
-                    CanAdapter.Current.SendMessage(messageButtonDriverMRelease);
+                    CanAdapter.Current.SendMessage(new CanMessage(buttonMemoryDriver, dataButtonMRelease));
+                    Thread.Sleep(100);
+                    break;
+                case QueueCommand.ButtonMPassenger:
+                    CanAdapter.Current.SendMessage(new CanMessage(buttonMemoryPassenger, dataButtonMPress));
+                    Thread.Sleep(100);
+                    CanAdapter.Current.SendMessage(new CanMessage(buttonMemoryPassenger, dataButtonMRelease));
+                    Thread.Sleep(100);
+                    break;
+                case QueueCommand.ButtonM1Passenger:
+                    CanAdapter.Current.SendMessage(new CanMessage(buttonMemoryPassenger, dataButtonM1Press));
+                    Thread.Sleep(100);
+                    CanAdapter.Current.SendMessage(new CanMessage(buttonMemoryPassenger, dataButtonMRelease));
                     Thread.Sleep(100);
                     break;
             }
         }
 
-        public static void ButtonHeaterDriverPress()
+        public static void ButtonHeaterDriver()
         {
             queueWorker.Enqueue(QueueCommand.ButtonHeaterDriver);
         }
 
-        public static void ButtonHeaterPassengerPress()
+        public static void ButtonHeaterPassenger()
         {
             queueWorker.Enqueue(QueueCommand.ButtonHeaterPassenger);
         }
 
-        public static void ButtonFrontDriverPress()
+        public static void ButtonVentilationDriver()
         {
-            CanAdapter.Current.SendMessage(messageButtonDriverSeatMoveFront);
+            queueWorker.Enqueue(QueueCommand.ButtonVentilationDriver);
         }
 
-        public static void ButtonBackDriverPress()
+        public static void ButtonVentilationPassenger()
         {
-            CanAdapter.Current.SendMessage(messageButtonDriverSeatMoveRear);
-        }
-        
-        public static void ButtonMDriverPress()
-        {
-            queueWorker.Enqueue(QueueCommand.ButtonMDriver);
+            queueWorker.Enqueue(QueueCommand.ButtonVentilationPassenger);
         }
 
-        public static void ButtonM1DriverPress()
+        public static void ButtonMassageDriver()
         {
-            queueWorker.Enqueue(QueueCommand.ButtonM1Driver);
+            queueWorker.Enqueue(QueueCommand.ButtonMassageDriver);
+        }
+
+        public static void ButtonMassagePassenger()
+        {
+            queueWorker.Enqueue(QueueCommand.ButtonMassagePassenger);
+        }
+
+        static uint GetMoveArbId(bool driver)
+        {
+            return driver ? buttonMoveDriver : buttonMovePassenger;
+        }
+
+        public static void MoveFrontPress(bool driver)
+        {
+            CanAdapter.Current.SendMessage(new CanMessage(GetMoveArbId(driver), dataMoveFront));
+        }
+
+        public static void MoveBackPress(bool driver)
+        {
+            CanAdapter.Current.SendMessage(new CanMessage(GetMoveArbId(driver), dataMoveBack));
+        }
+
+        public static void MoveUpPress(bool driver)
+        {
+            CanAdapter.Current.SendMessage(new CanMessage(GetMoveArbId(driver), dataMoveUp));
+        }
+
+        public static void MoveDownPress(bool driver)
+        {
+            CanAdapter.Current.SendMessage(new CanMessage(GetMoveArbId(driver), dataMoveDown));
+        }
+
+        public static void TiltBackPress(bool driver)
+        {
+            CanAdapter.Current.SendMessage(new CanMessage(GetMoveArbId(driver), dataTiltBack));
+        }
+
+        public static void TiltFrontPress(bool driver)
+        {
+            CanAdapter.Current.SendMessage(new CanMessage(GetMoveArbId(driver), dataTiltFront));
+        }
+
+        public static void ButtonM(bool driver)
+        {
+            queueWorker.Enqueue(driver ? QueueCommand.ButtonMDriver : QueueCommand.ButtonMPassenger);
+        }
+
+        public static void ButtonM1(bool driver)
+        {
+            queueWorker.Enqueue(driver ? QueueCommand.ButtonM1Driver : QueueCommand.ButtonM1Passenger);
         }
 
         private static void IBusManager_AfterMessageReceived(MessageEventArgs e)
