@@ -31,6 +31,8 @@ namespace imBMW.Features.Menu
             mediaEmulator.PlayerStatusChanged += ShowPlayerStatus;
             mediaEmulator.PlayerChanged += mediaEmulator_PlayerChanged;
             mediaEmulator_PlayerChanged(mediaEmulator.Player);
+
+            Manager.AddMessageReceiverForSourceDevice(DeviceAddress.Radio, ProcessRadioMessage);
         }
 
         #region Radio members

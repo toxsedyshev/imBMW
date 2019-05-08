@@ -262,7 +262,7 @@ namespace imBMW.Features.Menu
 
         private string GetItemString(MenuScreenUpdateReason reason, int maxLength, RefreshHandler refreshCallback)
         {
-            var showText = GetShownItemString();
+            var showText = GetShownItemString(maxLength, false);
 
             if (showText.Length <= maxLength)
             {
@@ -272,7 +272,7 @@ namespace imBMW.Features.Menu
             var separator = showText.IndexOf(": ");
             if (separator <= 0 || separator == showText.Length - 2)
             {
-                return showText;
+                return GetShownItemString(maxLength, true);
             }
 
             if (showText.Length == maxLength + 1)
@@ -310,7 +310,7 @@ namespace imBMW.Features.Menu
             return showText;
         }
 
-        private string GetShownItemString()
+        private string GetShownItemString(int maxLength, bool useAbbr)
         {
             var item = ShownItem;
             if (item == null)
@@ -318,6 +318,12 @@ namespace imBMW.Features.Menu
                 return CurrentScreen.Title;
             }
             var s = item.Text;
+            if (useAbbr && !StringHelpers.IsNullOrEmpty(item.RadioAbbreviation)
+                && (s.Length > maxLength 
+                    || item.Type == MenuItemType.Checkbox && s.Length + 1 > maxLength))
+            {
+                s = item.RadioAbbreviation;
+            }
             if (item.Type == MenuItemType.Checkbox)
             {
                 s = (item.IsChecked ? '*' : CharIcons.Bull) + s;
