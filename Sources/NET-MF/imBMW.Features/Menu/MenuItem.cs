@@ -9,7 +9,8 @@ namespace imBMW.Features.Menu
         GoToScreen,
         GoBackScreen,
         GoHomeScreen,
-        Refresh
+        Refresh,
+        PassiveCheckbox
     }
 
     public enum MenuItemType
@@ -32,11 +33,6 @@ namespace imBMW.Features.Menu
 
         public MenuItem(string text, MenuItemType type = MenuItemType.Text, MenuItemAction action = MenuItemAction.None)
         {
-            if (type == MenuItemType.Checkbox && action == MenuItemAction.Refresh)
-            {
-                action = MenuItemAction.Refresh;
-            }
-
             Text = text;
             Type = type;
             Action = action;
@@ -49,7 +45,7 @@ namespace imBMW.Features.Menu
         }
 
         public MenuItem(GetTextHandler getTextCallback, MenuItemType type = MenuItemType.Text, MenuItemAction action = MenuItemAction.None)
-            : this(String.Empty, type, action)
+            : this(string.Empty, type, action)
         {
             this.getTextCallback = getTextCallback;
         }
@@ -144,7 +140,10 @@ namespace imBMW.Features.Menu
             switch (Type)
             {
                 case MenuItemType.Checkbox:
-                    IsChecked = !IsChecked;
+                    if (Action != MenuItemAction.PassiveCheckbox)
+                    {
+                        IsChecked = !IsChecked;
+                    }
                     break;
             }
 

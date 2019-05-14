@@ -19,7 +19,7 @@ namespace imBMW.Features.CanBus.Devices
         {
             IsDriverSide = driver;
 
-            TitleCallback = s => "Seats";
+            TitleCallback = s => (IsDriverSide ? "Driver" : "Pass") + " Seat";
 
             SetItems();
         }
@@ -41,14 +41,41 @@ namespace imBMW.Features.CanBus.Devices
         }
     }
 
+    public class E65SeatsSettingsScreen : MenuScreen
+    {
+        public E65SeatsSettingsScreen()
+        {
+            TitleCallback = s => "Settings";
+
+            SetItems();
+        }
+
+        protected virtual void SetItems()
+        {
+            ClearItems();
+
+            AddItem(new MenuItem(i => "Auto Heat", i => E65Seats.AutoHeater = i.IsChecked, MenuItemType.Checkbox)
+            {
+                IsChecked = E65Seats.AutoHeater
+            });
+            AddItem(new MenuItem(i => "Activated", i => E65Seats.EmulatorPaused = !i.IsChecked, MenuItemType.Checkbox)
+            {
+                IsChecked = !E65Seats.EmulatorPaused
+            });
+            this.AddBackButton();
+        }
+    }
+
     public class E65SeatsScreen : MenuScreen
     {
         protected static E65SeatsScreen instance;
 
-        MenuItem driverHeater, passengerHeater;
+        MenuItem driverHeater, driverVentilation, driverMassage,
+            passengerHeater, passengerVentilation, passengerMassage;
 
         E65SeatsMoveScreen driverMoveScreen = new E65SeatsMoveScreen(true);
         E65SeatsMoveScreen passengerMoveScreen = new E65SeatsMoveScreen(false);
+        E65SeatsSettingsScreen settingsScreen = new E65SeatsSettingsScreen();
 
         protected E65SeatsScreen()
         {
@@ -62,46 +89,53 @@ namespace imBMW.Features.CanBus.Devices
 
         private void DriverSeat_Changed()
         {
-            if (driverHeater != null)
-            {
-                driverHeater.Refresh();
-            }
+            driverMassage.IsChecked = E65Seats.DriverSeat.IsMassageActive;
+
+            driverHeater.Refresh();
+            driverVentilation.Refresh();
+            driverMassage.Refresh();
         }
 
         private void PassengerSeat_Changed()
         {
-            if (passengerHeater != null)
-            {
-                passengerHeater.Refresh();
-            }
+            passengerMassage.IsChecked = E65Seats.PassengerSeat.IsMassageActive;
+
+            passengerHeater.Refresh();
+            passengerVentilation.Refresh();
+            passengerMassage.Refresh();
         }
 
         protected virtual void SetItems()
         {
             ClearItems();
+
             driverHeater = new MenuItem(i => "Driver Heat: [" + GetLevel(E65Seats.DriverSeat.HeaterLevel) + "]",
-                i => E65Seats.ButtonHeaterDriver(), MenuItemType.Button, MenuItemAction.Refresh)
-            { RadioAbbreviation = "Drv Ht" };
+                i => E65Seats.ButtonHeaterDriver(), MenuItemType.Button) { RadioAbbreviation = "Drv Ht" };
+
             passengerHeater = new MenuItem(i => "Pass Heat: [" + GetLevel(E65Seats.PassengerSeat.HeaterLevel) + "]",
-                i => E65Seats.ButtonHeaterPassenger(), MenuItemType.Button, MenuItemAction.Refresh)
-            { RadioAbbreviation = "Pas Ht" };
+                i => E65Seats.ButtonHeaterPassenger(), MenuItemType.Button) { RadioAbbreviation = "Pas Ht" };
+
+            driverVentilation = new MenuItem(i => "Driver Vent: [" + GetLevel(E65Seats.DriverSeat.VentilationSpeed) + "]",
+                i => E65Seats.ButtonVentilationDriver(), MenuItemType.Button) { RadioAbbreviation = "Drv Vt" };
+
+            passengerVentilation = new MenuItem(i => "Pass Vent: [" + GetLevel(E65Seats.PassengerSeat.VentilationSpeed) + "]",
+                i => E65Seats.ButtonVentilationPassenger(), MenuItemType.Button) { RadioAbbreviation = "Pas Vt" };
+
+            driverMassage = new MenuItem(i => "Driver Massage", i => E65Seats.ButtonMassageDriver(), MenuItemType.Checkbox, MenuItemAction.PassiveCheckbox)
+            { RadioAbbreviation = "Drv Masg", IsChecked = E65Seats.DriverSeat.IsMassageActive };
+
+            passengerMassage = new MenuItem(i => "Pass Massage", i => E65Seats.ButtonMassagePassenger(), MenuItemType.Checkbox, MenuItemAction.PassiveCheckbox)
+            { RadioAbbreviation = "Pass Masg", IsChecked = E65Seats.PassengerSeat.IsMassageActive };
+
             AddItem(driverHeater);
             AddItem(passengerHeater);
-            AddItem(new MenuItem(i => "Driver Vent", i => E65Seats.ButtonVentilationDriver(), MenuItemType.Button));
-            AddItem(new MenuItem(i => "Pass Vent", i => E65Seats.ButtonVentilationPassenger(), MenuItemType.Button));
-            AddItem(new MenuItem(i => "Driver Massage", i => E65Seats.ButtonMassageDriver(), MenuItemType.Button) { RadioAbbreviation = "Driver Masg" });
-            AddItem(new MenuItem(i => "Pass Massage", i => E65Seats.ButtonMassagePassenger(), MenuItemType.Button) { RadioAbbreviation = "Pass Masg" });
+            AddItem(driverVentilation);
+            AddItem(passengerVentilation);
+            AddItem(driverMassage);
+            AddItem(passengerMassage);
             AddItem(new MenuItem(i => "Driver Move", MenuItemType.Button, MenuItemAction.GoToScreen) { GoToScreen = driverMoveScreen });
             AddItem(new MenuItem(i => "Passenger Move", MenuItemType.Button, MenuItemAction.GoToScreen) { GoToScreen = passengerMoveScreen, RadioAbbreviation = "Pass. Move" });
-            // TODO move to settings
-            //AddItem(new MenuItem(i => "Auto Heat", i => E65Seats.AutoHeater = i.IsChecked, MenuItemType.Checkbox)
-            //{
-            //    IsChecked = E65Seats.AutoHeater
-            //});
-            //AddItem(new MenuItem(i => "Activated", i => E65Seats.EmulatorPaused = !i.IsChecked, MenuItemType.Checkbox)
-            //{
-            //    IsChecked = !E65Seats.EmulatorPaused
-            //});
+            AddItem(new MenuItem(i => "Settings", MenuItemType.Button, MenuItemAction.GoToScreen) { GoToScreen = settingsScreen });
             this.AddBackButton();
         }
 
@@ -144,6 +178,18 @@ namespace imBMW.Features.CanBus.Devices
         private byte heaterLevel;
         private byte ventilationSpeed;
         private bool isMassageActive;
+
+        public void SetValues(byte heater, byte ventilation, bool massage)
+        {
+            if (heater == HeaterLevel && ventilation == VentilationSpeed && massage == IsMassageActive)
+            {
+                return;
+            }
+            heaterLevel = heater;
+            ventilationSpeed = ventilation;
+            isMassageActive = massage;
+            OnChanged();
+        }
 
         public byte HeaterLevel
         {
@@ -193,6 +239,14 @@ namespace imBMW.Features.CanBus.Devices
             {
                 Changed();
             }
+        }
+
+        public void ParseStatusMessage(CanMessage message)
+        {
+            var heater = (byte)(message.Data[0] >> 4);
+            var ventilation = (byte)(message.Data[1] & 0xF);
+            var massage = (message.Data[0] & 0xF) == 1;
+            SetValues(heater, ventilation, massage);
         }
     }
 
@@ -308,10 +362,10 @@ namespace imBMW.Features.CanBus.Devices
             switch (message.ArbitrationId)
             {
                 case 0x232:
-                    DriverSeat.HeaterLevel = (byte)(message.Data[0] >> 4);
+                    DriverSeat.ParseStatusMessage(message);
                     break;
                 case 0x22A:
-                    PassengerSeat.HeaterLevel = (byte)(message.Data[0] >> 4);
+                    PassengerSeat.ParseStatusMessage(message);
                     break;
             }
         }
@@ -507,7 +561,7 @@ namespace imBMW.Features.CanBus.Devices
                     messageEngineRunning.Data[4] = counter;
                     can.SendMessage(messageEngineRunning);
 
-                    var dimmer = imBMW.Tools.MathEx.Min(LightControlModule.DimmerRaw, 0xFD);
+                    var dimmer = MathEx.Min(LightControlModule.DimmerRaw, 0xFD);
                     if (InstrumentClusterElectronics.CurrentIgnitionState == IgnitionState.Off)
                     {
                         dimmer = 0xFE;
