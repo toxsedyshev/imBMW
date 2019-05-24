@@ -238,6 +238,7 @@ namespace imBMW
                     //HardwareButton.Toggle(Pin.Di2, pressed => { if (pressed) E65Seats.EmulatorPaused = true; else E65Seats.EmulatorPaused = false; });
                     E65Seats.Init();
                     E65Seats.AutoHeater = true;
+                    E65Seats.AutoVentilation = true;
                     HomeScreen.Instance.SeatsScreen = E65SeatsScreen.Instance;
                 }
 

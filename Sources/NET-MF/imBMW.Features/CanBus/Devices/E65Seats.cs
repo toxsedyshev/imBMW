@@ -54,9 +54,15 @@ namespace imBMW.Features.CanBus.Devices
         {
             ClearItems();
 
-            AddItem(new MenuItem(i => "Auto Heat", i => E65Seats.AutoHeater = i.IsChecked, MenuItemType.Checkbox)
+            AddItem(new MenuItem(i => "Auto Heating", i => E65Seats.AutoHeater = i.IsChecked, MenuItemType.Checkbox)
             {
-                IsChecked = E65Seats.AutoHeater
+                IsChecked = E65Seats.AutoHeater,
+                RadioAbbreviation = "Auto Heat"
+            });
+            AddItem(new MenuItem(i => "Auto Ventilation", i => E65Seats.AutoVentilation = i.IsChecked, MenuItemType.Checkbox)
+            {
+                IsChecked = E65Seats.AutoVentilation,
+                RadioAbbreviation = "Auto Vent"
             });
             AddItem(new MenuItem(i => "Activated", i => E65Seats.EmulatorPaused = !i.IsChecked, MenuItemType.Checkbox)
             {
@@ -283,6 +289,8 @@ namespace imBMW.Features.CanBus.Devices
 
         public static bool AutoHeater { get; set; }
 
+        public static bool AutoVentilation { get; set; }
+
         //static CanMessage canEmulationSeatFront = new CanMessage(0x0DA, new byte[] { 0x01, 0x00, 0xC0, 0xFF });
         //static CanMessage canEmulationEngineStop = new CanMessage(0x5A9, new byte[] { 0x30, 0x06, 0x00, 0x70, 0x17, 0xF1, 0x62, 0x03 });
         //static CanMessage canEmulationEngineStart = new CanMessage(0x38E, new byte[] { 0xF4, 0x01 });
@@ -353,6 +361,18 @@ namespace imBMW.Features.CanBus.Devices
                 if (PassengerSeat.HeaterLevel == 0)
                 {
                     ButtonHeaterPassenger();
+                }
+            }
+            if (AutoVentilation
+                && InstrumentClusterElectronics.TemperatureOutside >= 20)
+            {
+                if (DriverSeat.VentilationSpeed == 0)
+                {
+                    ButtonVentilationDriver();
+                }
+                if (PassengerSeat.VentilationSpeed == 0)
+                {
+                    ButtonVentilationPassenger();
                 }
             }
         }
