@@ -45,6 +45,7 @@ namespace imBMW.iBus
         RainLightSensor = 0xE8,
         Television = 0xED,
         OnBoardMonitor = 0xF0,
+        CSU = 0xF5, // what is it??
         Broadcast = 0xFF,
 
         imBMWMenu = 0xFC,

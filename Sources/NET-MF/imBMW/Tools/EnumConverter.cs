@@ -91,6 +91,7 @@ namespace imBMW.Tools
                 case DeviceAddress.RainLightSensor: return "RainLightSensor";
                 case DeviceAddress.Television: return "Television";
                 case DeviceAddress.OnBoardMonitor: return "OnBoardMonitor";
+                case DeviceAddress.CSU: return "CSU";
                 case DeviceAddress.Broadcast: return "Broadcast";
                                 
                 case DeviceAddress.imBMWMenu: return "imBMWMenu";
