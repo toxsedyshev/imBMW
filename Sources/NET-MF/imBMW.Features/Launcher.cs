@@ -46,7 +46,7 @@ namespace imBMW
 
     public class Launcher
     {
-        string version = "FW1.0.12";
+        string version = "FW1.1.13";
 
         LauncherSettings launcherSettings;
         SettingsOverrideDelegate settingsOverride;
