@@ -48,10 +48,10 @@ namespace imBMW.Universal.App.Tools
                     new GaugeSlot(GaugeType.AFR),
                     new GaugeSlot(GaugeType.IntakePressure, GaugeType.IntakeTemperatureAfterCooler),
                     new GaugeSlot(GaugeType.FuelPressure, GaugeType.OilPressure),
-                    new GaugeSlot(GaugeType.CoolerInTemperature, GaugeType.CoolerOutTemperature),
-                    new GaugeSlot(GaugeType.OilTemperature, GaugeType.CoolantTemperature),
                     new GaugeSlot(GaugeType.IgnitionAngle, GaugeType.InjectionTime),
                     new GaugeSlot(GaugeType.IsMethanolInjecting, GaugeType.IsMethanolFailsafe),
+                    new GaugeSlot(GaugeType.CoolerInTemperature, GaugeType.CoolerOutTemperature),
+                    new GaugeSlot(GaugeType.OilTemperature, GaugeType.CoolantTemperature),
                 };
                 /*return new List<GaugeSlot>
                 {
