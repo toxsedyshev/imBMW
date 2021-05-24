@@ -1,6 +1,5 @@
-using System;
-using Microsoft.SPOT;
 using GHI.IO;
+using CanMessage = GHI.IO.ControllerAreaNetwork.Message;
 
 namespace imBMW.Features.CanBus.Adapters
 {
@@ -8,12 +7,12 @@ namespace imBMW.Features.CanBus.Adapters
     {
         ControllerAreaNetwork can;
 
-        public CanNativeAdapter(ControllerAreaNetwork.Channel canPort, CanAdapterSettings.CanSpeed speed)
-            : this(new CanNativeAdapterSettings(canPort, speed))
+        public CanNativeAdapter(ControllerAreaNetwork.Channel canPort, CanAdapterSettings.CanSpeed speed, bool useReadQueue = false)
+            : this(new CanNativeAdapterSettings(canPort, speed, useReadQueue))
         { }
 
-        public CanNativeAdapter(ControllerAreaNetwork.Channel canPort, ControllerAreaNetwork.Timings timings)
-            : this(new CanNativeAdapterSettings(canPort, 0), timings)
+        public CanNativeAdapter(ControllerAreaNetwork.Channel canPort, ControllerAreaNetwork.Timings timings, bool useReadQueue = false)
+            : this(new CanNativeAdapterSettings(canPort, 0, useReadQueue), timings)
         { }
 
         protected CanNativeAdapter(CanNativeAdapterSettings settings, ControllerAreaNetwork.Timings timings = null)
@@ -47,12 +46,33 @@ namespace imBMW.Features.CanBus.Adapters
             set { can.Enabled = value; }
         }
 
+        //protected override void ReadQueue(object message)
+        //{
+        //    OnMessageReceived((CanMessage)message);
+        //}
+
+        protected override void ProcessReceivedMessage(CanMessage message)
+        {
+            if (Settings.UseReadQueue)
+            {
+                throw new CanException("ProcessReceivedMessage called with UseReadQueue setting.");
+            }
+            base.ProcessReceivedMessage(message);
+        }
+        
         private void Can_MessageAvailable(ControllerAreaNetwork sender, ControllerAreaNetwork.MessageAvailableEventArgs e)
         {
             var messages = sender.ReadMessages();
-            foreach (var message in messages)
+            if (Settings.UseReadQueue)
             {
-                OnMessageReceived(new CanMessage(message));
+                ReadQueueWorker.EnqueueArray(messages);
+            }
+            else
+            {
+                foreach (var message in messages)
+                {
+                    ProcessReceivedMessage(message);
+                }
             }
         }
 
@@ -89,7 +109,7 @@ namespace imBMW.Features.CanBus.Adapters
             {
                 throw new CanException("CAN adapter is not allowed to send the message now.");
             }
-            var sent = can.SendMessage(message.NativeMessage);
+            var sent = can.SendMessage(message);
             OnMessageSent(message, sent);
             return sent;
         }

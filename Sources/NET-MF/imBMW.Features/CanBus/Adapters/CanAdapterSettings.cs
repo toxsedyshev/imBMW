@@ -18,9 +18,12 @@ namespace imBMW.Features.CanBus.Adapters
 
         public CanSpeed Speed { get; protected set; }
 
-        public CanAdapterSettings(CanSpeed speed)
+        public bool UseReadQueue { get; protected set; }
+
+        public CanAdapterSettings(CanSpeed speed, bool useReadQueue)
         {
             Speed = speed;
+            UseReadQueue = useReadQueue;
         }
     }
 
@@ -28,8 +31,8 @@ namespace imBMW.Features.CanBus.Adapters
     {
         public ControllerAreaNetwork.Channel CanPort { get; private set; }
 
-        public CanNativeAdapterSettings(ControllerAreaNetwork.Channel canPort, CanSpeed speed)
-            : base (speed)
+        public CanNativeAdapterSettings(ControllerAreaNetwork.Channel canPort, CanSpeed speed, bool useReadQueue = false)
+            : base (speed, useReadQueue)
         {
             CanPort = canPort;
         }
@@ -51,8 +54,8 @@ namespace imBMW.Features.CanBus.Adapters
 
         public Cpu.Pin Interrupt { get; private set; }
 
-        public CanMCP2515AdapterSettings(SPI.SPI_module spi, Cpu.Pin chipSelect, Cpu.Pin interrupt, CanSpeed speed, AdapterFrequency frequency)
-            : base(speed)
+        public CanMCP2515AdapterSettings(SPI.SPI_module spi, Cpu.Pin chipSelect, Cpu.Pin interrupt, CanSpeed speed, AdapterFrequency frequency, bool useReadQueue = false)
+            : base(speed, useReadQueue)
         {
             SPI = spi;
             ChipSelect = chipSelect;

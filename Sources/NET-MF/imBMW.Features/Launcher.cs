@@ -1,7 +1,6 @@
 using GHI.IO;
 using GHI.IO.Storage;
 using imBMW.Features;
-using imBMW.Features.CanBus;
 using imBMW.Features.CanBus.Adapters;
 using imBMW.Features.CanBus.Devices;
 using imBMW.Features.Localizations;
@@ -18,6 +17,7 @@ using Microsoft.SPOT.IO;
 using System;
 using System.IO.Ports;
 using System.Threading;
+using CanMessage = GHI.IO.ControllerAreaNetwork.Message;
 
 namespace imBMW
 {

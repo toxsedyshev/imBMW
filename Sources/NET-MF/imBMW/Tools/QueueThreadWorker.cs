@@ -9,9 +9,12 @@ namespace imBMW.Tools
     {
         public delegate void ProcessItem(object item);
 
+        public int MaxSleepBeforeSuspend = 0;
+
         Thread queueThread;
         ProcessItem processItem;
         object lockObj = new object();
+        ulong added, processed, suspended, resumed;
 
         public QueueThreadWorker(ProcessItem processItem)
         {
@@ -27,28 +30,38 @@ namespace imBMW.Tools
 
         void queueWorker()
         {
-            object m;
+            object m = null;
+            int sleep = 0;
+
             while (true)
             {
-                lock (lockObj)
+                //lock (lockObj)
+                //{
+                if (Count > 0)
                 {
-                    if (Count > 0)
-                    {
-                        m = Dequeue();
-                    }
-                    else
-                    {
-                        m = null;
-                    }
+                    m = Dequeue();
                 }
-                if (m == null)
+                else
                 {
+                    //m = null;
+                //}
+                //}
+                //if (m == null)
+                //{
+                    if (sleep < MaxSleepBeforeSuspend)
+                    {
+                        Thread.Sleep(++sleep);
+                        continue;
+                    }
+                    sleep = 0;
+                    suspended++;
                     Thread.CurrentThread.Suspend();
                     continue;
                 }
                 try
                 {
                     processItem(m);
+                    processed++;
                 }
                 catch (Exception ex)
                 {
@@ -66,6 +79,7 @@ namespace imBMW.Tools
             lock (lockObj)
             {
                 base.Enqueue(item);
+                added++;
                 CheckRunning();
             }
         }
@@ -85,6 +99,7 @@ namespace imBMW.Tools
                         continue;
                     }
                     base.Enqueue(item);
+                    added++;
                 }
                 CheckRunning();
             }
@@ -100,6 +115,7 @@ namespace imBMW.Tools
             if (queueThread.ThreadState == ThreadState.Suspended || queueThread.ThreadState == ThreadState.SuspendRequested)
             {
                 queueThread.Resume();
+                resumed++;
             }
         }
     }

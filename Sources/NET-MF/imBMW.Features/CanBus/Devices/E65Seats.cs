@@ -1,11 +1,11 @@
 using System;
-using Microsoft.SPOT;
 using System.Threading;
 using imBMW.Features.CanBus.Adapters;
 using imBMW.Tools;
 using imBMW.iBus.Devices.Real;
 using imBMW.iBus;
 using imBMW.Features.Menu;
+using CanMessage = GHI.IO.ControllerAreaNetwork.Message;
 
 namespace imBMW.Features.CanBus.Devices
 {
