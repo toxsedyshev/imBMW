@@ -116,6 +116,13 @@ namespace imBMW.Features.CanBus.Adapters
             }
             packet[5] = (byte)message.Length;
             Array.Copy(message.Data, 0, packet, 6, message.Data.Length);
+            if (message.Length < 8)
+            {
+                for (var i = message.Length; i < 8; i++)
+                {
+                    packet[6 + i] = 0x00;
+                }
+            }
             byte crc = 0;
             for (var i = 1; i < packet.Length - 1; i++) // without starting 0xFF byte
             {
