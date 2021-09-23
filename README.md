@@ -3,17 +3,14 @@
 
 [imBMW]: http://imBMW.net "imBMW"
 [toxs]: http://toxs.ru "toxs"
-[iBus]: http://web.archive.org/web/20041204074622/www.openbmw.org/bus/ "iBus"
 
 ![imBMW Splash](./Images/splash.png)
 
-[imBMW] is .NET Micro Framework and hardware project. 
-It was started to add custom features to cars with [iBus] interface 
-such as '91-'10 BMWs and some models of Mini, Land Rover, Rover, MG and Rolls Royce. 
+[imBMW] is .NET Micro Framework and hardware project. It was started to add custom features to cars with **iBus** interface such as '91-'10 BMWs and some models of Mini, Land Rover, Rover, MG and Rolls Royce. Then **CAN BUS** support was added to integrate with newer F,I,G-series BMWs.
 
-The imBMW V1 device, that uses FEZ Mini, connects iPod via headset cable to BMW audio system.
+The Original **imBMW V1** device uses **FEZ Mini**, connects with iPod/iPhone via headset cable to be controlled by BMW audio system.
 
-The imBMW V2 device, that uses FEZ Cerb40 II, is a *duino iBus-ready board. It could be used with any shield, for example with imBMW Bluetooth OVC3860 or Bluetooth Pro WT32 Shields for wireless stereo audio connection to BMW audio system, handsfree calls and even for forwarding iBus via Bluetooth to smartphones and tablets - imBMW already has a library for Windows Phone and Windows 8 devices.
+The Next Gen **imBMW V2** device, that uses **STM32F405** based **FEZ Cerb40 II**, is a *duino-compatible iBus-ready board. It could be used with any shield, for example with **imBMW Bluetooth OVC3860** or **Bluetooth Pro Bluegiga WT32 Shields** for wireless stereo audio connection to BMW audio system, handsfree calls and even for forwarding iBus via Bluetooth to smartphones, tablets and PCs - imBMW already has a library for **Universal Windows Platform (UWP)**. There is also **Diagnostic Bus DS2** support using regular OBD II to USB adapter, that allows Engine Control Unit plus additional sensors logging and wireless Bluetooth dashboard. Furthermore, **CAN BUS** support was added for sniffing and integrating with CAN modules of all BMWs since the end 90's till latest BMW models including i-series EVs.
 
 CD-changer emulator and Bordmonitor AUX interface were implemented to connect radio with iPod/iPhone/iPad or with other players, phones and tablets like Windows Phone, Android etc. 
 Also imBMW allows communicating with instrument cluster, immobilizer, GM, ZKE, navigation and other modules to receive notifications and control doors, windows, lights, etc.
