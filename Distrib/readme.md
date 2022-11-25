@@ -1,1 +1,0 @@
-.NET MF and GHI SDKs are downloaded from https://docs.ghielectronics.com/software/netmf/downloads.html
