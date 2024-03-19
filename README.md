@@ -10,17 +10,26 @@
 
 The Original **imBMW V1** device uses **FEZ Mini**, connects with iPod/iPhone via headset cable to be controlled by BMW audio system.
 
-The Next Gen **imBMW V2** device, that uses **STM32F405** based **FEZ Cerb40 II**, is a *duino-compatible iBus-ready board. It could be used with any shield, for example with **imBMW Bluetooth OVC3860** or **Bluetooth Pro Bluegiga WT32 Shields** for wireless stereo audio connection to BMW audio system, handsfree calls and even for forwarding iBus via Bluetooth to smartphones, tablets and PCs - imBMW already has a library for **Universal Windows Platform (UWP)**. There is also **Diagnostic Bus DS2** support using regular OBD II to USB adapter, that allows Engine Control Unit plus additional sensors logging and wireless Bluetooth dashboard. Furthermore, **CAN BUS** support was added for sniffing and integrating with CAN modules of all BMWs since the end 90's till latest BMW models including i-series EVs.
+The Next Gen **imBMW V2** device, that uses **STM32F405** based **FEZ Cerb40 II**, is a *duino-compatible iBus-ready board. It could be used with any shield, for example with **imBMW Bluetooth OVC3860** or **Bluetooth Pro Bluegiga WT32 Shields** for wireless stereo audio connection to BMW audio system, handsfree calls and even for forwarding iBus via Bluetooth to smartphones, tablets and PCs - imBMW already has a library for **Universal Windows Platform (UWP)**. There is also **Diagnostic Bus DS2** support using regular OBD II to USB adapter, that allows Engine Control Unit plus additional sensors logging and wireless Bluetooth dashboard. Furthermore, **CAN BUS** support was added for sniffing and integrating with CAN modules of all BMWs since the end 90's till latest BMW models including i-series EVs — for example, CAN BUS integration allowed to [integrate BMW E65 full comfort seats into older BMW E53](https://www.youtube.com/watch?v=P0yJuep_bd4&list=PLDuwqawzvazj9iFQQ9aeggeXeUPphfv94&index=5&pp=gAQBiAQB).
 
 CD-changer emulator and Bordmonitor AUX interface were implemented to connect radio with iPod/iPhone/iPad or with other players, phones and tablets like Windows Phone, Android etc. 
 Also imBMW allows communicating with instrument cluster, immobilizer, GM, ZKE, navigation and other modules to receive notifications and control doors, windows, lights, etc.
 
-You could [order imBMW boards](http://oshpark.com/profiles/toxsedyshev) from OSH Park.  
-Also you could order assembled imBMW V2 + Bluetooth, details by email: [imbmw@toxs.ru](mailto:imbmw@toxs.ru).  
-Visit [imBMW YouTube playlist](http://www.youtube.com/playlist?list=PLDuwqawzvazj9iFQQ9aeggeXeUPphfv94) on my channel.  
-Stay in touch with [imBMW in vk.com](http://vk.com/imbmw) social network.  
-Photos, videos and creation process of imBMW V1 and V2 devices are located on [e46club.ru forum](http://bmwfanatics.ru/forumvb/viewtopic.php?f=32&t=92399) (for now, only in Russian).
+How to buy imBMW
+------------------
+**Please note: I used to manufacture and sell imBMW devices but I DON'T sell them anymore.**
 
+You can DIY the project for your personal use as many community members did, some [examples of the device forks are shown here](https://vk.com/album-67915700_260588402).
+
+Social networks
+-----------------
+* Visit [imBMW YouTube playlist](http://www.youtube.com/playlist?list=PLDuwqawzvazj9iFQQ9aeggeXeUPphfv94) on my channel.
+* Official group: [imBMW on vk.com](http://vk.com/imbmw).
+* Stay in touch via [imbmw@toxs.ru](mailto:imbmw@toxs.ru), but please remember: I don't sell devices anymore. 
+* Photos, videos and creation process of imBMW V1 and V2 devices are located on [e46club.ru forum](http://bmwfanatics.ru/forumvb/viewtopic.php?f=32&t=92399) (for now, only in Russian).
+
+Photos
+-
 ![imBMW V2 + Bluetooth first batch](./Images/v2_some_items.jpg "imBMW V2 + Bluetooth first batch")
 
 Some screens for example. Playing Bluetooth music, custom bordcomputer, additional features, english and russian UI:  
